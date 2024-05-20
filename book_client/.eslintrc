@@ -1,0 +1,16 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "semi": "error",
+    "max-len": [2, 120, 2],
+    "no-console": "off",
+    "react/jsx-props-no-spreading": "off",
+    "prefer-promise-reject-errors": "off",
+    "camelcase": "error",
+    "no-unused-vars": "error",
+    "no-unexpected-multiline": "error",
+    "no-unreachable": "error",
+    "no-use-before-define": "error",
+    "valid-typeof": "error"
+  }
+}
