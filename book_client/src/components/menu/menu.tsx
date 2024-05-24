@@ -1,14 +1,41 @@
 import './style.scss';
 
-function Menu() {
+function Menu(): JSX.Element {
   return (
-    <ul className="menu">
-      <li className="menu-item">
-        <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
-        book
-      </li>
-      <li></li>
-    </ul>
+    <section className="menu-wrapper">
+      <ul className="menu">
+        <li className="menu-item">
+          <div className="menu-icon">
+            <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
+          </div>
+          book
+        </li>
+        <li className="menu-item">
+          <div className="menu-icon">
+            <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
+          </div>
+          book
+        </li>
+        <li className="menu-item">
+          <div className="menu-icon">
+            <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
+          </div>
+          book
+        </li>
+        <li className="menu-item">
+          <div className="menu-icon">
+            <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
+          </div>
+          book
+        </li>
+        <li className="menu-item">
+          <div className="menu-icon">
+            <img src={require("images/book.png")} alt="menu-icon" width="30" height="30"/>
+          </div>
+          book
+        </li>
+      </ul>
+    </section>
   );
 }
 

@@ -5,14 +5,14 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 const { DefinePlugin } = require('webpack');
 const path = require('path');
 const { getResolvePath, getAssetPath } = require('./utils.js');
-const { OUTPUT_DIR, PUBLIC } = require('./config.js');
-console.log(getResolvePath('../src/static/scss/_colors.scss'));
+const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
 
 module.exports = {
   entry: getResolvePath('../src/index.tsx'),
   output: {
     filename: 'js/[name].bundle.js',
     path: path.join(__dirname, OUTPUT_DIR),
+    publicPath: PUBLIC_PATH,
     clean: true
   },
   plugins: [
@@ -34,9 +34,10 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
-      'utils': path.resolve(__dirname, '../src/utils'),
-      'components': path.resolve(__dirname, '../src/components'),
-      'images': getResolvePath('../src/static/images')
+      'utils': getResolvePath('../src/utils'),
+      'components': getResolvePath('../src/components'),
+      'images': getResolvePath('../src/static/images'),
+      'views': getResolvePath('../src/views'),
     }
   },
   module: {

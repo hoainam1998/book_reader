@@ -1,0 +1,23 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: $primary-color;
+  color: $white-color;
+  padding: 8px 20px;
+  margin-bottom: 7px;
+
+  .personal-information-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .button-avatar {
+      padding: 5px;
+      height: 40px;
+      width: 40px;
+      border-radius: 3px;
+      background: $avatar-button-color;
+    }
+  }
+}

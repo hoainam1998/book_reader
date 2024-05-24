@@ -20,6 +20,7 @@
     "paths": {
       "utils": ["src/utils"],
       "components/*": ["src/components/*"],
+      "views/*": ["src/views/*"],
       "images/*": ["src/static/images/*"]
     }
   },

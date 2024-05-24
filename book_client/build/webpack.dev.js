@@ -12,7 +12,8 @@ const devConfig = merge(common, {
     static: OUTPUT_DIR,
     open: true,
     hot: true,
-    port: 3000
+    port: 3000,
+    historyApiFallback: true,
   },
   optimization: {
     runtimeChunk: 'single'

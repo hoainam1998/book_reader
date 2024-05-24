@@ -1,9 +1,40 @@
-.menu {
-  background: $primary-color;
+.menu-wrapper {
+  position: relative;
+  width: 50px;
 
-  &-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .menu {
+    position: absolute;
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    background: $primary-color;
+    width: 50px;
+    height: calc(100vh - 63px);
+    transition: ease 0.5s;
+    box-sizing: border-box;
+
+    &:hover {
+      width: 200px;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      color: $white-color;
+      text-transform: capitalize;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $menu-hover-color;
+      }
+
+      .menu-icon {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+      }
+    }
   }
 }
