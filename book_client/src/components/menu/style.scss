@@ -16,11 +16,18 @@
     }
 
     &-item {
-      display: flex;
-      align-items: center;
-      color: $white-color;
-      text-transform: capitalize;
-      cursor: pointer;
+      a {
+        display: flex;
+        align-items: center;
+        color: $white-color;
+        text-transform: capitalize;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      &:has(.active) {
+        background-color: $menu-hover-color;
+      }
 
       &:hover {
         background-color: $menu-hover-color;

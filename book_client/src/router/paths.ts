@@ -3,5 +3,6 @@ export default Object.freeze({
   HOME: '/home',
   LOGIN: '/login',
   CATEGORY: 'category',
-  ID: ':id'
+  ID: ':id',
+  BOOK: 'book'
 });

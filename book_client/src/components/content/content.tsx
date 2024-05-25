@@ -4,6 +4,7 @@ import './style.scss';
 function Content(): JSX.Element {
   return (
     <main className="main">
+      <nav></nav>
       <Outlet />
     </main>
   );

@@ -1,5 +1,10 @@
-const test = () => console.log('test utils');
+const clsx = (objectClass: { [key: string]: boolean }): string => Object.keys(objectClass).reduce((classes, key) => {
+  if (objectClass[key]) {
+    classes += `${key} `;
+  }
+  return classes;
+}, '').trim();
 
 export {
-  test
+  clsx
 };
