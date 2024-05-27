@@ -4,12 +4,13 @@
 
   .menu {
     position: absolute;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     background: $primary-color;
     width: 50px;
     height: calc(100vh - 63px);
     transition: ease 0.5s;
     box-sizing: border-box;
+    overflow-x: hidden;
 
     &:hover {
       width: 200px;

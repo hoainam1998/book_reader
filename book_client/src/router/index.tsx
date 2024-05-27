@@ -5,6 +5,7 @@ import {
   Link,
   createBrowserRouter,
   createRoutesFromElements,
+  UIMatch,
 } from 'react-router-dom';
 import Home from 'views/home/home';
 import CategoryList from 'views/category-group/category-list/category-list';
@@ -18,13 +19,14 @@ const router = createBrowserRouter(
     <>
       <Route path={path.ROOT} element={<Navigate replace to={path.HOME} />} />
       <Route path={path.HOME} element={<Home />}
-        handle={{ crumb: () => <Link to="/home">Home</Link> }}>
-      <Route index element={<Navigate replace to={path.CATEGORY} />} />
+        handle={{ crumb: (match: UIMatch<any, any>) => <Link key={match.pathname} to={match.pathname}>Home</Link> }}>
+        <Route index element={<Navigate replace to={path.CATEGORY} />} />
         <Route path={path.CATEGORY} element={<Outlet />}
-        handle={{ crumb: () => <Link to="/category">Categories</Link> }}>
+          handle={{ crumb: (match: UIMatch<any, any>) =>
+            <Link key={match.pathname} to={match.pathname}>Categories</Link> }}>
           <Route index element={<CategoryList />} />
           <Route path={path.ID} element={<CategoryDetail />}
-            handle={{ crumb: (data: any) => data }} />
+            handle={{ crumb: (match: UIMatch<any, any>) => <span key={match.pathname}>{match.params.id}</span> }} />
         </Route>
         <Route path={path.BOOK} element={<Outlet />}>
           <Route index element={<BookList />} />

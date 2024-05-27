@@ -1,0 +1,33 @@
+.table {
+  width: 100%;
+  margin: 7px 0;
+
+  thead {
+    background-color: $primary-color;
+    color: $white-color;
+
+    tr {
+      th {
+        vertical-align: middle;
+        padding: 5px 10px;
+        text-transform: capitalize;
+        text-align: start;
+      }
+    }
+  }
+
+  tbody {
+    td {
+      padding: 5px 10px;
+    }
+
+    tr:nth-child(even) {
+      background: $table-row-even-color;
+    }
+  }
+}
+
+table, th, td {
+  border: none;
+  border-collapse: collapse;
+}

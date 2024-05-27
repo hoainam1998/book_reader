@@ -1,11 +1,39 @@
-import { useMatches } from 'react-router-dom';
+import Table from 'components/table/table';
 import './style.scss';
 
 function CategoryList(): JSX.Element {
-  const matches = useMatches();
-  console.log(matches);
+  const fields = [
+    {
+      key: 'avatar',
+    },
+    {
+      key: 'name'
+    }
+  ];
+
+  const data = [
+    {
+      avatar: 'avatar',
+      name: 'name1'
+    },
+    {
+      name: 'name2'
+    }
+  ];
+
   return (
-    <>CategoryList</>
+    <>
+      <Table fields={fields}>
+        {
+          data.map((item, index) => (
+            <tr key={index}>
+              <td>{item.avatar}</td>
+              <td>{item.name}</td>
+            </tr>
+          ))
+        }
+      </Table>
+    </>
   );
 }
 
