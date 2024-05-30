@@ -1,6 +1,6 @@
-import { CSSProperties, ReactNode } from 'react';
+import { CSSProperties, Children, Fragment, ReactElement, ReactNode } from 'react';
 import Select from 'components/select/select';
-import Slot from 'components/slot/slot';
+import { isSlot } from 'components/slot/slot';
 import './style.scss';
 
 type Field = {
@@ -10,10 +10,25 @@ type Field = {
 
 type TableProps = {
   fields: Field[];
-  children: ReactNode;
+  children?: ReactNode;
+  data: { [key: string]: any }[];
 };
 
-function Table({ fields, children }: TableProps): JSX.Element {
+type TableCellProps = {
+  cells: React.ReactElement[];
+  fields: Field[];
+  item: { [key: string]: any };
+};
+
+function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
+  const childrenList = fields.map(field => {
+    const slot: ReactElement | undefined = cells.find(cell => isSlot(field.key, cell));
+    return slot ? slot.props.render(item) : <td>{item[field.key]}</td>;
+  });
+  return <>{childrenList.map((children, index) => <Fragment key={index}>{children}</Fragment>)}</>;
+}
+
+function Table({ fields, children, data }: TableProps): JSX.Element {
   const options = [
     {
       value: 'volvo',
@@ -37,13 +52,14 @@ function Table({ fields, children }: TableProps): JSX.Element {
           </tr>
         </thead>
         <tbody>
-        {children}
+          {
+            data.map((item, index) => (
+              <TableCell key={index} item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
+            ))
+          }
         </tbody>
       </table>
-      <Select options={options}>
-        <Slot name="default" render={(prop) =>
-        <option value={prop.value} style={{color: 'red'}}>{prop.label}</option>} />
-      </Select>
+      <Select options={options} name="page-size" />
     </section>
   );
 }

@@ -7,7 +7,7 @@ const FriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugi
 
 const devConfig = merge(common, {
   mode: 'development',
-  devtool: "inline-source-map",
+  devtool: 'inline-source-map',
   devServer: {
     static: OUTPUT_DIR,
     open: true,

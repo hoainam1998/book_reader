@@ -23,15 +23,7 @@ function CategoryList(): JSX.Element {
 
   return (
     <>
-      <Table fields={fields}>
-        {
-          data.map((item, index) => (
-            <tr key={index}>
-              <td>{item.avatar}</td>
-              <td>{item.name}</td>
-            </tr>
-          ))
-        }
+      <Table fields={fields} data={data}>
       </Table>
     </>
   );

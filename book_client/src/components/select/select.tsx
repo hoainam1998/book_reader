@@ -1,20 +1,38 @@
 import { Children } from 'react';
+import { isSlot } from 'components/slot/slot';
 import './style.scss';
 
 type SelectProps = {
-  options: { label: string | number, value: string }[];
-  children: React.ReactElement;
+  options: { label: string, value: string | number, class?: string }[];
+  children?: React.ReactElement;
+  name: string;
+  label?: {
+    class?: string;
+    text: string;
+  }
 };
 
-function Select({ options, children }: SelectProps): JSX.Element {
-  const optionSlot: React.ReactElement = Children.only(children);
-  console.log(optionSlot);
+function Select({ options, children, name, label }: SelectProps): JSX.Element {
+  const hasChildren: boolean = Children.count(children) > 0;
+  let optionSlot : React.ReactElement | undefined;
+
+  if (hasChildren) {
+    optionSlot = Children.only(children);
+  }
+
   return (
     <>
-      <label htmlFor="cars">Choose a car:</label>
-      <select name="cars" id="cars">
+      {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
+      <select className="select" name={name} id={name}>
         {
-          options.map(option => optionSlot.props.render(option))
+          options.map((option, index) =>
+            <option key={index} value={option.value} className={option.class}>
+              {
+                Boolean(hasChildren && isSlot('default', optionSlot))
+                ? optionSlot!.props.render(option)
+                : option.label
+              }
+            </option>)
         }
       </select>
     </>

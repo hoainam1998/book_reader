@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import './style.scss';
+import { clsx } from 'utils';
 import path from '../../router/paths';
 
 function Menu(): JSX.Element {
@@ -7,7 +8,7 @@ function Menu(): JSX.Element {
     <section className="menu-wrapper">
       <ul className="menu">
         <li className="menu-item">
-          <NavLink to={path.CATEGORY} className={({ isActive }) => isActive ? 'active': '' }>
+          <NavLink to={path.CATEGORY} className={({ isActive }) => clsx({'active': isActive}) }>
             <div className="menu-icon">
               <img src={require('images/application.png')} alt="menu-icon" width="30" height="30"/>
             </div>

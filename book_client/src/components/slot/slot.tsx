@@ -1,6 +1,6 @@
 import React from 'react';
 
-type SlotProps = {
+export type SlotProps = {
   name: string;
   slotProps?: any;
   // eslint-disable-next-line no-unused-vars

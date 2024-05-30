@@ -6,6 +6,7 @@ const { DefinePlugin } = require('webpack');
 const path = require('path');
 const { getResolvePath, getAssetPath } = require('./utils.js');
 const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
+const { dev } = require('../config');
 
 module.exports = {
   entry: getResolvePath('../src/index.tsx'),
@@ -22,9 +23,7 @@ module.exports = {
       template: getAssetPath(PUBLIC, 'index.html')
     }),
     new DefinePlugin({
-      'process.env': JSON.stringify({
-        url: 'base url'
-      })
+      'process.env': JSON.stringify(dev)
     }),
     new MiniCssExtractPlugin({
       filename: 'css/[name].css'
@@ -38,6 +37,7 @@ module.exports = {
       'components': getResolvePath('../src/components'),
       'images': getResolvePath('../src/static/images'),
       'views': getResolvePath('../src/views'),
+      'interfaces': getResolvePath('../src/interfaces'),
     }
   },
   module: {
