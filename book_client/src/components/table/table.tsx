@@ -23,7 +23,7 @@ type TableCellProps = {
 function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
   const childrenList = fields.map(field => {
     const slot: ReactElement | undefined = cells.find(cell => isSlot(field.key, cell));
-    return slot ? slot.props.render(item) : <td>{item[field.key]}</td>;
+    return slot ? <td>{slot.props.render(item)}</td> : <td>{item[field.key]}</td>;
   });
   return <>{childrenList.map((children, index) => <Fragment key={index}>{children}</Fragment>)}</>;
 }
@@ -32,7 +32,7 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
   const options = [
     {
       value: 'volvo',
-      label: 'Volvo'
+      label: 'Volvoggggggggggggggggggggggggg'
     },
     {
       value: 'mercedes',
@@ -54,12 +54,14 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
         <tbody>
           {
             data.map((item, index) => (
-              <TableCell key={index} item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
+              <tr key={index}>
+                <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
+              </tr>
             ))
           }
         </tbody>
       </table>
-      <Select options={options} name="page-size" />
+      <Select options={options} name="page-size" classes="page-size" />
     </section>
   );
 }

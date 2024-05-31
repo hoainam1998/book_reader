@@ -4,8 +4,27 @@
   padding: 0 5px;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url('images/icons/arrow-down.svg');
-  background-repeat: no-repeat;
-  background-position-x: 90%;
-  background-position-y: 7px;
+  outline: none;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 2px;
+    display: block;
+    height: 20px;
+    width: 28px;
+    background-color: $white-color;
+    z-index: 1;
+    pointer-events: auto;
+    background-image: url("images/icons/arrow-down.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+  }
 }

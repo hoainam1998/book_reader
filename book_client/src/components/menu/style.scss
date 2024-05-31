@@ -11,6 +11,7 @@
     transition: ease 0.5s;
     box-sizing: border-box;
     overflow-x: hidden;
+    z-index: 1000;
 
     &:hover {
       width: 200px;

@@ -9,10 +9,11 @@ type SelectProps = {
   label?: {
     class?: string;
     text: string;
-  }
+  },
+  classes?: string;
 };
 
-function Select({ options, children, name, label }: SelectProps): JSX.Element {
+function Select({ options, children, name, label, classes }: SelectProps): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
   let optionSlot : React.ReactElement | undefined;
 
@@ -23,18 +24,20 @@ function Select({ options, children, name, label }: SelectProps): JSX.Element {
   return (
     <>
       {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
-      <select className="select" name={name} id={name}>
-        {
-          options.map((option, index) =>
-            <option key={index} value={option.value} className={option.class}>
-              {
-                Boolean(hasChildren && isSlot('default', optionSlot))
-                ? optionSlot!.props.render(option)
-                : option.label
-              }
-            </option>)
-        }
-      </select>
+      <div className="select-wrapper">
+        <select className={`select ${classes}`} name={name} id={name}>
+          {
+            options.map((option, index) =>
+              <option key={index} value={option.value} className={option.class}>
+                {
+                  Boolean(hasChildren && isSlot('default', optionSlot))
+                  ? optionSlot!.props.render(option)
+                  : option.label
+                }
+              </option>)
+          }
+        </select>
+      </div>
     </>
   );
 }

@@ -1,4 +1,5 @@
 import Table from 'components/table/table';
+import Slot from 'components/slot/slot';
 import './style.scss';
 
 function CategoryList(): JSX.Element {
@@ -24,6 +25,7 @@ function CategoryList(): JSX.Element {
   return (
     <>
       <Table fields={fields} data={data}>
+        <Slot name="avatar" render={(slotProp) => <span style={{ color: 'red' }}>{slotProp.avatar}</span>} />
       </Table>
     </>
   );
