@@ -22,6 +22,7 @@
       "views/*": ["src/views/*"],
       "images/*": ["src/static/images/*"],
       "interfaces": ["src/interfaces"],
+      "hooks/*": ["src/hooks/*"]
     }
   },
   "include": ["src", "declaration.d.ts"]

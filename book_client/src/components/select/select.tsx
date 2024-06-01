@@ -9,7 +9,7 @@ type SelectProps = {
   label?: {
     class?: string;
     text: string;
-  },
+  };
   classes?: string;
 };
 
@@ -25,7 +25,7 @@ function Select({ options, children, name, label, classes }: SelectProps): JSX.E
     <>
       {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
       <div className="select-wrapper">
-        <select className={`select ${classes}`} name={name} id={name}>
+        <select className={`select custom-input ${classes}`} name={name} id={name}>
           {
             options.map((option, index) =>
               <option key={index} value={option.value} className={option.class}>
