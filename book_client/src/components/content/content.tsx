@@ -15,7 +15,9 @@ function Content(): JSX.Element {
             .map((match: UIMatch<any, unknown>) => (match.handle as Handle).crumb!(match))
         }
       </nav>
-      <Outlet />
+      <section className="content-box">
+        <Outlet />
+      </section>
     </main>
   );
 }

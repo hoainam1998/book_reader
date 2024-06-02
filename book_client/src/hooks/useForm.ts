@@ -5,13 +5,13 @@ type StateType = { [key: string]: any };
 
 export default (state: StateType, rules: any) => {
   const formControlProps: { [key: string]: any } = {};
-  const [value, setValue] = useState<typeof state.key>('');
+  const [value, setValue] = useState<typeof state>(state);
 
   Object.keys(state).forEach((key: keyof StateType) => {
     formControlProps[key] = {
-      value,
+      value: value[key],
       onChange: <T>(event: ChangeEvent<T | any>) => {
-        setValue(event.currentTarget.value);
+        setValue({ ...value, [key]: event.currentTarget.value });
         state.key = event.currentTarget.value;
       }
     };
