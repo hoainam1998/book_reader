@@ -1,5 +1,6 @@
 import { CSSProperties, Children, Fragment, ReactElement, ReactNode } from 'react';
 import Select from 'components/select/select';
+import Pagination from 'components/pagination/pagination';
 import { isSlot } from 'components/slot/slot';
 import './style.scss';
 
@@ -61,7 +62,10 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
           }
         </tbody>
       </table>
-      <Select options={options} name="page-size" classes="page-size" />
+      <div className="table-footer">
+        <Select options={options} name="page-size" classes="page-size" />
+        <Pagination />
+      </div>
     </section>
   );
 }

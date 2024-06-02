@@ -1,15 +1,17 @@
-class ListNode {
+class ListNode<T> {
   private data: any;
-  private next: ListNode | null;
+  private next: ListNode<T> | null;
+  private previous: ListNode<T> | null;
 
-  constructor(data: any) {
+  constructor(data: T) {
     this.data = data;
     this.next = null;
+    this.previous = null;
   }
 }
 
-class LinkedList {
-  private head: ListNode | null;
+class LinkedList<T> {
+  private head: ListNode<T> | null;
 
   constructor(head = null) {
     this.head = head;

@@ -1,0 +1,16 @@
+.pagination {
+  display: flex;
+  gap: 5px;
+
+  &-button {
+    padding: 5px;
+    border-radius: 3px;
+    height: 25px;
+    width: 25px;
+    vertical-align: middle;
+  }
+
+  .dots {
+    font-weight: bold;
+  }
+}
