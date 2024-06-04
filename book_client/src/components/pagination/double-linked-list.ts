@@ -1,7 +1,7 @@
-class ListNode<T> {
-  private data: any;
-  private next: ListNode<T> | null;
-  private previous: ListNode<T> | null;
+export class Node<T> {
+  data: T;
+  next: Node<T> | null;
+  previous: Node<T> | null;
 
   constructor(data: T) {
     this.data = data;
@@ -11,10 +11,43 @@ class ListNode<T> {
 }
 
 class LinkedList<T> {
-  private head: ListNode<T> | null;
+  // private head: ListNode<T> | null;
+  private static array: unknown[];
+  private static nodes: Node<unknown>[] = [];
 
-  constructor(head = null) {
-    this.head = head;
+
+  static insertToArray<T>(node: Node<T>): void {
+    LinkedList.nodes.push(node);
+  }
+
+  static createdFromArray<T>(array: T[]): void {
+    this.array = array;
+    this.nodes = [];
+    this.createNodes();
+  }
+
+  static get Nodes(): Node<unknown>[] {
+    return LinkedList.nodes;
+  }
+
+  private static createNodes(): void {
+    const createNode = (index = 0, previousNode: Node<unknown> | null = null) => {
+      const node = new Node<unknown>(this.array[index]);
+      node.previous = previousNode;
+      node.next = null;
+
+      if (previousNode) {
+        previousNode!.next = node;
+      }
+
+      LinkedList.insertToArray(node);
+
+      index = index + 1;
+      if (index < this.array.length) {
+        createNode(index, node as Node<unknown>);
+      }
+    };
+    createNode();
   }
 }
 

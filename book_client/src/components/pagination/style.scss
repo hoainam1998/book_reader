@@ -10,6 +10,15 @@
     vertical-align: middle;
   }
 
+  .direction {
+    line-height: 15px;
+  }
+
+  .active {
+    background-color: $white-color;
+    border: 1px solid $border-input-color;
+  }
+
   .dots {
     font-weight: bold;
   }
