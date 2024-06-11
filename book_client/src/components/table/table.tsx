@@ -64,7 +64,7 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
       </table>
       <div className="table-footer">
         <Select options={options} name="page-size" classes="page-size" />
-        <Pagination />
+        <Pagination pageNumber={21}/>
       </div>
     </section>
   );
