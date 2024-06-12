@@ -1,4 +1,5 @@
 import { Outlet, UIMatch, useMatches } from 'react-router-dom';
+import Footer from 'components/footer/footer';
 import './style.scss';
 
 // eslint-disable-next-line no-unused-vars
@@ -18,6 +19,7 @@ function Content(): JSX.Element {
       <section className="content-box">
         <Outlet />
       </section>
+      <Footer />
     </main>
   );
 }
