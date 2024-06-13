@@ -11,10 +11,8 @@ export class Node<T> {
 }
 
 class LinkedList<T> {
-  // private head: ListNode<T> | null;
   private static array: unknown[];
   private static nodes: Node<unknown>[] = [];
-
 
   static insertToArray<T>(node: Node<T>): void {
     LinkedList.nodes.push(node);

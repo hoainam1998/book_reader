@@ -1,5 +1,6 @@
-import { useCallback, useReducer, useMemo, useState } from 'react';
+import { useCallback, useReducer, useMemo } from 'react';
 import LinkedList, { Node } from './double-linked-list';
+import { clsx } from 'utils';
 import './style.scss';
 
 type PaginationProps = {
@@ -144,8 +145,9 @@ function Pagination({ pageNumber }: PaginationProps): JSX.Element {
   const [pageList, dispatch] = useReducer(paginationHandleReducer(pages), renderPagination(pages[0], pages));
 
   const pageClick = useCallback((page: Node<PageButton> | DotPageButton) => {
-    if (page && !(page as DotPageButton).dots) {
-      dispatch({ page: page as Node<PageButton> });
+    if (page && !(page as DotPageButton).dots
+      && previousSelectedPage?.data.page !== (page as Node<PageButton>).data.page) {
+        dispatch({ page: page as Node<PageButton> });
     }
   }, [pageList]);
 
@@ -166,7 +168,7 @@ function Pagination({ pageNumber }: PaginationProps): JSX.Element {
       {
         pageList.map((page: any, index: number) => (
           <li key={index}>
-            <button className={`pagination-button ${page.data?.active ? 'active': page.dots ? 'dots': ''}`} onClick={() => pageClick(page)}>
+            <button className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })} onClick={() => pageClick(page)}>
               {page.data?.page || '...'}
             </button>
           </li>
