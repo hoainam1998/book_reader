@@ -1,3 +1,4 @@
+import validate, { required } from './validate';
 /**
  * Return class text from array.
  *
@@ -24,5 +25,7 @@ const clsx = (...classes: any[]): string => {
 }
 
 export {
-  clsx
+  clsx,
+  validate,
+  required,
 };

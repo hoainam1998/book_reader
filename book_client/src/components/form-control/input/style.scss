@@ -1,3 +1,7 @@
-.input {
-  border: 1px solid $border-input-color;
+.fieldset {
+  border: none;
+
+  .input {
+    border: 1px solid $border-input-color;
+  }
 }

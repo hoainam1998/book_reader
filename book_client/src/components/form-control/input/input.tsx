@@ -15,11 +15,11 @@ type InputProps = {
 
 function Input({ type, label, name, value, onChange }: InputProps): JSX.Element {
   return (
-    <>
+    <fieldset className="fieldset">
       {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
-      <input className="input custom-input" defaultValue={value}
-        type={type} name={name} onChange={onChange<HTMLInputElement>} />
-    </>
+      <input name={name} className="input custom-input" defaultValue={value}
+        type={type} onChange={onChange<HTMLInputElement>} />
+    </fieldset>
   );
 }
 
