@@ -1,4 +1,6 @@
 import { ChangeEvent } from 'react';
+import FormControl from '../form-control';
+import { clsx } from 'utils';
 import './style.scss';
 
 type InputProps = {
@@ -9,17 +11,19 @@ type InputProps = {
   };
   name: string;
   value: string;
+  errors: string[];
+  error: boolean;
   // eslint-disable-next-line no-unused-vars
-  onChange: <T>(event: ChangeEvent<T>) => void
+  onChange: <T>(event: ChangeEvent<T>) => void;
+  onFocus: () => void;
 };
 
-function Input({ type, label, name, value, onChange }: InputProps): JSX.Element {
+function Input({ type, label, name, value, errors, error, onChange, onFocus }: InputProps): JSX.Element {
   return (
-    <fieldset className="fieldset">
-      {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
-      <input name={name} className="input custom-input" defaultValue={value}
-        type={type} onChange={onChange<HTMLInputElement>} />
-    </fieldset>
+    <FormControl name={name} label={label} errors={errors}>
+      <input name={name} className={clsx('input custom-input', { 'error': error })} defaultValue={value}
+        type={type} onChange={onChange<HTMLInputElement>} onFocus={onFocus} />
+    </FormControl>
   );
 }
 

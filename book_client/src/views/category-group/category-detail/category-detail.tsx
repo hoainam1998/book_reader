@@ -1,20 +1,27 @@
 import Input from 'components/form-control/input/input';
 import useForm from 'hooks/useForm';
-import { required } from 'utils';
+import { required, ValidateFunction, ValidateProcess } from 'utils';
+
+type RuleTypeCompact = {
+  [key: string]: {
+    [key: string]: ValidateFunction | ValidateProcess;
+  }
+};
+
+type RuleType = RuleTypeCompact & ArrayLike<RuleTypeCompact>;
 
 const state = {
   categoryName: '',
   avatar: '',
 };
 
-const rules = {
-  categoryName: { required },
+const rules: RuleTypeCompact = {
+  categoryName: { required: required('fff') },
   avatar: { required },
 };
 
 function CategoryDetail(): JSX.Element {
-  const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules);
-  console.log(validate);
+  const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
 
   return (
     <>

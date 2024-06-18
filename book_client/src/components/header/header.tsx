@@ -1,3 +1,4 @@
+import Button from 'components/button/button';
 import './style.scss';
 
 function Header(): JSX.Element {
@@ -5,9 +6,9 @@ function Header(): JSX.Element {
     <header className="header">
       <img src={require('images/book.png')} alt="logo" width="40" height="40" />
       <div className="personal-information-group">
-        <button className="button-avatar">
+        <Button className="button-avatar" onClick={() => {}}>
           <img src={require('images/book.png')} alt="logo" width="30" height="30" />
-        </button>
+        </Button>
         <span>username</span>
       </div>
     </header>

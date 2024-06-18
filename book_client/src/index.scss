@@ -36,3 +36,7 @@ button {
   outline: none;
   height: 30px;
 }
+
+.error {
+  border-color: $error-color !important;
+}

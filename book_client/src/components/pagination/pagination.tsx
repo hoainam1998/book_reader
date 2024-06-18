@@ -1,4 +1,5 @@
 import { useCallback, useReducer, useMemo } from 'react';
+import Button from 'components/button/button';
 import LinkedList, { Node } from './double-linked-list';
 import { clsx } from 'utils';
 import './style.scss';
@@ -154,37 +155,37 @@ function Pagination({ pageNumber }: PaginationProps): JSX.Element {
   return (
     <ul className="pagination">
       <li>
-        <button className="pagination-button direction"
+        <Button className="pagination-button direction"
           onClick={() => pageClick(pages[0])}>
           &#11244;
-        </button>
+        </Button>
       </li>
       <li>
-        <button className="pagination-button direction"
+        <Button className="pagination-button direction"
           onClick={() => pageClick(previousSelectedPage?.previous as Node<PageButton>)}>
           &#11164;
-      </button>
+      </Button>
       </li>
       {
         pageList.map((page: any, index: number) => (
           <li key={index}>
-            <button className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })} onClick={() => pageClick(page)}>
+            <Button className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })} onClick={() => pageClick(page)}>
               {page.data?.page || '...'}
-            </button>
+            </Button>
           </li>
         ))
       }
       <li>
-        <button className="pagination-button direction"
+        <Button className="pagination-button direction"
           onClick={() => pageClick(previousSelectedPage?.next as Node<PageButton>)}>
           &#11166;
-        </button>
+        </Button>
       </li>
       <li>
-        <button className="pagination-button direction"
+        <Button className="pagination-button direction"
           onClick={() => pageClick(pages[pages.length - 1])}>
           &#11246;
-        </button>
+        </Button>
       </li>
     </ul>
   );

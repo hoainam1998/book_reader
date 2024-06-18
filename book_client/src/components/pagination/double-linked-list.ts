@@ -10,7 +10,7 @@ export class Node<T> {
   }
 }
 
-class LinkedList<T> {
+class LinkedList {
   private static array: unknown[];
   private static nodes: Node<unknown>[] = [];
 

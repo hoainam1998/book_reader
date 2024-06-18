@@ -1,0 +1,9 @@
+.fieldset {
+  border: none;
+
+  .error-feedback {
+    color: $error-color;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
