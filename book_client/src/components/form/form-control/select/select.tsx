@@ -15,11 +15,7 @@ type SelectProps = {
 
 function Select({ options, children, name, label, classes }: SelectProps): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
-  let optionSlot : React.ReactElement | undefined;
-
-  if (hasChildren) {
-    optionSlot = Children.only(children);
-  }
+  const optionSlot : React.ReactElement | undefined | null = hasChildren ? Children.only(children) : null;
 
   return (
     <>

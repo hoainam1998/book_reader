@@ -1,4 +1,4 @@
-import Input from 'components/form-control/input/input';
+import Input from 'components/form/form-control/input/input';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
 
@@ -26,7 +26,7 @@ function CategoryDetail(): JSX.Element {
   return (
     <>
       <Input name="category_name" type="text" {...categoryName} />
-      <Input name="avatar" type="text" {...avatar} />
+      <Input name="avatar" type="file" {...avatar} />
       <button onClick={handleSubmit}>submit</button>
     </>
   );

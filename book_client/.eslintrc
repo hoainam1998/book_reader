@@ -11,6 +11,8 @@
     "no-unexpected-multiline": "error",
     "no-unreachable": "error",
     "no-use-before-define": "error",
-    "valid-typeof": "error"
+    "valid-typeof": "error",
+    "quotes": ["error", "single"],
+    "@typescript-eslint/explicit-member-accessibility": "explicit"
   }
 }

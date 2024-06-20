@@ -76,7 +76,9 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              additionalData: '@import "src/static/scss/_colors.scss";',
+              additionalData: `
+              @import "src/static/scss/_colors.scss";
+              @import "src/static/scss/_responsive.scss";`,
             },
           }
         ]

@@ -1,5 +1,5 @@
 import { CSSProperties, Children, Fragment, ReactElement, ReactNode } from 'react';
-import Select from 'components/select/select';
+import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
 import { isSlot } from 'components/slot/slot';
 import './style.scss';

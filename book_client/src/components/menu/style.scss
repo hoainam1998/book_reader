@@ -6,7 +6,7 @@
     position: absolute;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     background: $primary-color;
-    width: 50px;
+    width: inherit;
     height: calc(100vh - 63px);
     transition: ease 0.5s;
     box-sizing: border-box;
@@ -42,7 +42,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0;
+        margin: 0 5px;
       }
     }
   }
