@@ -19,10 +19,14 @@ $maximum-grid-column: 12;
       }
     }
 
-    .col-#{$i} {
+    .col-#{$size}-#{$i} {
       grid-column: #{span $i} !important;
     }
   }
+}
+
+@include mobile {
+  @include grid-col('sm');
 }
 
 @include tablet {

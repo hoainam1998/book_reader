@@ -11,10 +11,7 @@ const clsx = (...classes: any[]): string => {
     switch (typeof cls) {
       case 'object':
         const classText = Object.keys(cls).reduce((classTextEmpty, key) => {
-          if (cls[key]) {
-            classTextEmpty += `${key} `;
-          }
-          return classTextEmpty;
+          return cls[key] ? classTextEmpty += `${key} ` : classTextEmpty;
         }, '').trim();
         return classText;
       case 'string':
@@ -22,7 +19,7 @@ const clsx = (...classes: any[]): string => {
       default: return '';
     }
   });
-  return classList.join(' ');
+  return classList.join(' ').trim();
 }
 
 export {
