@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { ChangeEvent, useState, } from 'react';
 import { validateHelper, ValidateFunction, ValidateProcess } from 'utils';
 
@@ -11,19 +10,22 @@ type RuleType = {
 
 export default (state: StateType, rules: RuleType & ArrayLike<RuleType>) => {
   const validateObject = validateHelper<StateType, RuleType>(state, rules);
+  const [value, setValue] = useState<typeof state>(state);
+  const [dirty, setDirty] = useState<boolean>(false);
 
   const formControlProps: { [key: string]: any } = {
     validate: validateObject,
     handleSubmit: () => {
       if (!formControlProps.validate.dirty) {
         formControlProps.validate.dirty = true;
-        formControlProps.validate.validate();
-      } else {
-        // return 'value';
       }
+      setDirty(true);
+      formControlProps.validate.validate();
+      Object.keys(formControlProps).forEach(key => {
+        formControlProps[key] = Object.assign(formControlProps[key], validateObject[key]);
+      });
     }
   };
-  const [value, setValue] = useState<typeof state>(state);
 
   Object.keys(state).forEach((key: keyof StateType) => {
     formControlProps[key] = {
@@ -34,7 +36,8 @@ export default (state: StateType, rules: RuleType & ArrayLike<RuleType>) => {
         validateObject[key].validate();
       },
       onFocus: () => validateObject[key].dirty = true,
-      ...validateObject[key]
+      ...validateObject[key],
+      dirty,
     };
   });
 

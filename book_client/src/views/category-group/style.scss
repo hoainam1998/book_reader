@@ -1,0 +1,7 @@
+.category-form {
+  margin: 0 20px;
+
+  .category-form-control:not(*:last-of-type) {
+    margin-bottom: 7px;
+  }
+}

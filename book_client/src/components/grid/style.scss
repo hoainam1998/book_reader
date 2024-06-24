@@ -4,11 +4,6 @@ $maximum-grid-column: 12;
   display: grid;
   grid-template-columns: repeat($maximum-grid-column, 1fr);
   gap: 7px;
-
-  div {
-    background-color: pink;
-    height: 50px;
-  }
 }
 
 @mixin grid-col($size) {

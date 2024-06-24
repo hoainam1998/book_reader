@@ -6,11 +6,12 @@ type ButtonProps = {
   onClick: MouseEventHandler<HTMLButtonElement>;
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
 };
 
-function Button({ children, className, onClick }: ButtonProps): JSX.Element {
+function Button({ children, className, onClick, disabled }: ButtonProps): JSX.Element {
   return (
-    <button className={clsx('button', className)} onClick={onClick}>{children}</button>
+    <button className={clsx('button', className)} onClick={onClick} disabled={disabled}>{children}</button>
   );
 }
 

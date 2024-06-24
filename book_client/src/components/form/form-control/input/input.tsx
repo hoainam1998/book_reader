@@ -5,10 +5,10 @@ import './style.scss';
 
 type InputProps = {
   type: string;
-  label?: {
-    class?: string;
-    text: string;
-  };
+  label: string;
+  className?: string;
+  labelClass?: string;
+  inputClass?: string;
   name: string;
   value: string;
   errors: string[];
@@ -18,9 +18,9 @@ type InputProps = {
   onFocus: () => void;
 };
 
-function Input({ type, label, name, value, errors, error, onChange, onFocus }: InputProps): JSX.Element {
+function Input({ type, label, name, value, errors, error, className, labelClass, onChange, onFocus }: InputProps): JSX.Element {
   return (
-    <FormControl name={name} label={label} errors={errors}>
+    <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <input name={name} className={clsx('input custom-input', { 'error': error })} defaultValue={value}
         type={type} onChange={onChange<HTMLInputElement>} onFocus={onFocus} />
     </FormControl>

@@ -1,19 +1,19 @@
+import { clsx } from 'utils';
 import './style.scss';
 
 type FormControl = {
   children?: React.ReactElement;
   name: string;
-  label?: {
-    class?: string;
-    text: string;
-  };
+  label: string;
+  className?: string;
+  labelClass?: string;
   errors: string[];
 };
 
-function FormControl({ label, name, children, errors }: FormControl): JSX.Element {
+function FormControl({ label, name, children, errors, className, labelClass }: FormControl): JSX.Element {
   return (
-    <fieldset className="fieldset">
-      {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
+    <fieldset className={clsx('fieldset', className)}>
+      {label && <label htmlFor={name} className={labelClass}>{label}</label>}
       {children}
       <div className="error-feedback">
         { errors.map((error, index) => <span key={index}>{error}</span>) }
