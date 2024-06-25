@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Table from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
@@ -26,7 +27,9 @@ const rules: RuleTypeCompact = {
 };
 
 function Category(): JSX.Element {
-  const { categoryName, avatar, handleSubmit } = useForm(state, rules as RuleType);
+  const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
+  const [previewImage, setPreviewImage] = useState<string[]>([]);
+
   const fields = [
     {
       key: 'avatar',
@@ -46,6 +49,23 @@ function Category(): JSX.Element {
     }
   ];
 
+  const fileChange = (event: Event) => {
+    const files = (event.target as HTMLInputElement).files;
+    if (files) {
+      const images = Array.from((event.target as HTMLInputElement).files!).map(file => URL.createObjectURL(file));
+      setPreviewImage(images);
+    }
+  };
+
+  const onSubmit = (formData: FormData) => {
+    handleSubmit();
+    if (validate.error) {
+      console.log('error');
+    } else {
+      console.log(formData);
+    }
+  }
+
   return (
     <Grid>
       <GridItem lg={9}>
@@ -54,9 +74,14 @@ function Category(): JSX.Element {
         </Table>
       </GridItem>
       <GridItem lg={3}>
-        <Form id="category-form" className="category-form" submitLabel="Save" submit={handleSubmit}>
+        <Form className="category-form" submitLabel="Save" onSubmit={onSubmit}>
           <Input label="Category name" className="category-form-control" name="category_name" type="text" {...categoryName} />
-          <Input label="Avatar" className="category-form-control" name="avatar" type="file" {...avatar} />
+          <Input label="Avatar" className="category-form-control" name="avatar" onInput={fileChange} type="file" {...avatar} />
+          <div className="image-preview">
+            {
+              previewImage.map((image, index) => <img key={index} src={image} alt="preview"/>)
+            }
+          </div>
         </Form>
       </GridItem>
     </Grid>

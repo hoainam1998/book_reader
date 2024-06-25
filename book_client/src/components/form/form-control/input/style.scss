@@ -4,6 +4,7 @@
   .input {
     border: 1px solid $border-input-color;
     padding: 0 5px;
+    width: 100%;
 
     &[type="file"]::file-selector-button {
       background-color: $primary-color;

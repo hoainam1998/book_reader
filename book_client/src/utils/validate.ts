@@ -35,16 +35,15 @@ let objectValidate: ErrorInfo = {
 let alreadyCreate = false;
 
 const validateHelper = <T, R>(state: T, rules: R & ArrayLike<unknown>): ErrorInfo => {
-  const validateProcess = (field: string, validateName: string, validateResult: ErrorFieldInfo): void => {
+  const validateProcess = (field: string, validateName: string, validateResult: ErrorFieldInfo): boolean => {
     objectValidate[field][validateName].error = validateResult.error;
-    objectValidate[field].error = validateResult.error;
-    objectValidate.error = validateResult.error;
     if (validateResult.error) {
       objectValidate[field].errors.push(validateResult.message);
     } else {
       objectValidate[field].errors
         = objectValidate[field].errors.filter((message: string) => message != validateResult.message);
     }
+    return validateResult.error;
   };
 
   if (!alreadyCreate) {
@@ -67,22 +66,24 @@ const validateHelper = <T, R>(state: T, rules: R & ArrayLike<unknown>): ErrorInf
 
   const validateFuncs = Object.entries(rules).map(([key, validateRule]) => {
     const validate = (): void => {
-      for (const [validateName, validateFunc] of Object.entries(validateRule as any)) {
+      objectValidate[key].error = Object.entries(validateRule as any).every(([validateName, validateFunc]) => {
+        let validateResult: boolean = false;
         if (objectValidate.dirty || objectValidate[key].dirty) {
           try {
-            validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
+            validateResult = validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
           } catch {
-            validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
+            validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
           }
         }
-      }
+        return validateResult;
+      });
+      objectValidate.error = Object.keys(rules).some(key => objectValidate[key].error);
     };
     objectValidate[key].validate = validate;
     return validate;
   });
 
   objectValidate.validate = validateCompact(validateFuncs);
-
   return objectValidate;
 };
 

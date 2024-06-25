@@ -3,30 +3,28 @@ import { clsx } from 'utils';
 import './style.scss';
 
 type FormProps = {
-  id: string;
   className?: string;
   children: React.ReactElement[] | React.ReactElement;
   submitLabel: string;
   disableSubmitButton?: boolean;
-  submit: () => void;
+  onSubmit: (formData: FormData) => void;
 };
 
 function Form({
   children,
-  id,
   className,
   submitLabel = 'Submit',
   disableSubmitButton = false,
-  submit
+  onSubmit
 }: FormProps): JSX.Element {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    submit();
+    onSubmit(new FormData(event.target.form));
   };
 
   return (
-    <form id={id} className={clsx('form', className)}>
+    <form className={clsx('form', className)}>
       {children}
       <Button className="btn-submit" onClick={handleSubmit} disabled={disableSubmitButton}>{submitLabel}</Button>
     </form>
