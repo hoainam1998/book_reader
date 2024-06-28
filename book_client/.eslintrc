@@ -1,5 +1,30 @@
 {
   "parser": "@typescript-eslint/parser",
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "plugins": [
+    "react",
+    "@typescript-eslint/eslint-plugin"
+  ],
   "rules": {
     "semi": "error",
     "max-len": [2, 120, 2],
@@ -13,6 +38,6 @@
     "no-use-before-define": "error",
     "valid-typeof": "error",
     "quotes": ["error", "single"],
-    "@typescript-eslint/explicit-member-accessibility": "explicit"
+    "@typescript-eslint/explicit-member-accessibility": "off"
   }
 }

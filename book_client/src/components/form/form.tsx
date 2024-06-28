@@ -1,3 +1,4 @@
+import React, { JSX } from 'react';
 import Button from 'components/button/button';
 import { clsx } from 'utils';
 import './style.scss';
@@ -7,6 +8,7 @@ type FormProps = {
   children: React.ReactElement[] | React.ReactElement;
   submitLabel: string;
   disableSubmitButton?: boolean;
+  // eslint-disable-next-line no-unused-vars
   onSubmit: (formData: FormData) => void;
 };
 
@@ -24,7 +26,7 @@ function Form({
   };
 
   return (
-    <form className={clsx('form', className)}>
+    <form className={clsx('form', className)} encType="multipart/form-data">
       {children}
       <Button className="btn-submit" onClick={handleSubmit} disabled={disableSubmitButton}>{submitLabel}</Button>
     </form>

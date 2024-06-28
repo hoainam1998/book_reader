@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, JSX } from 'react';
 import Table from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
@@ -11,19 +11,19 @@ import './style.scss';
 type RuleTypeCompact = {
   [key: string]: {
     [key: string]: ValidateFunction | ValidateProcess;
-  }
+  };
 };
 
 type RuleType = RuleTypeCompact & ArrayLike<RuleTypeCompact>;
 
 const state = {
   categoryName: '',
-  avatar: '',
+  avatar: ''
 };
 
 const rules: RuleTypeCompact = {
   categoryName: { required: required('fff') },
-  avatar: { required },
+  avatar: { required }
 };
 
 function Category(): JSX.Element {
@@ -32,7 +32,7 @@ function Category(): JSX.Element {
 
   const fields = [
     {
-      key: 'avatar',
+      key: 'avatar'
     },
     {
       key: 'name'
@@ -52,7 +52,9 @@ function Category(): JSX.Element {
   const fileChange = (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
     if (files) {
-      const images = Array.from((event.target as HTMLInputElement).files!).map(file => URL.createObjectURL(file));
+      const images = Array.from((event.target as HTMLInputElement).files!).map((file) =>
+        URL.createObjectURL(file)
+      );
       setPreviewImage(images);
     }
   };
@@ -64,23 +66,39 @@ function Category(): JSX.Element {
     } else {
       console.log(formData);
     }
-  }
+  };
 
   return (
     <Grid>
       <GridItem lg={9}>
         <Table fields={fields} data={data}>
-          <Slot name="avatar" render={(slotProp) => <span style={{ color: 'red' }}>{slotProp.avatar}</span>} />
+          <Slot
+            name="avatar"
+            render={(slotProp) => <span style={{ color: 'red' }}>{slotProp.avatar}</span>}
+          />
         </Table>
       </GridItem>
       <GridItem lg={3}>
         <Form className="category-form" submitLabel="Save" onSubmit={onSubmit}>
-          <Input label="Category name" className="category-form-control" name="category_name" type="text" {...categoryName} />
-          <Input label="Avatar" className="category-form-control" name="avatar" onInput={fileChange} type="file" {...avatar} />
+          <Input
+            label="Category name"
+            className="category-form-control"
+            name="category_name"
+            type="text"
+            {...categoryName}
+          />
+          <Input
+            label="Avatar"
+            className="category-form-control"
+            name="avatar"
+            onInput={fileChange}
+            type="file"
+            {...avatar}
+          />
           <div className="image-preview">
-            {
-              previewImage.map((image, index) => <img key={index} src={image} alt="preview"/>)
-            }
+            {previewImage.map((image, index) => (
+              <img key={index} src={image} alt="preview" />
+            ))}
           </div>
         </Form>
       </GridItem>
