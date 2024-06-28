@@ -1,8 +1,8 @@
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common');
+const { OUTPUT_DIR } = require('./config.js');
 const portfinder = require('portfinder');
 const notifier = require('node-notifier');
-const { OUTPUT_DIR } = require('./config.js');
 const FriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin');
 
 const devConfig = merge(common, {

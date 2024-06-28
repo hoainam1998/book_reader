@@ -11,6 +11,7 @@
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "axios": "^1.7.2",
     "eslint": "^8.57.0",
     "mini-svg-data-uri": "^1.4.4",
     "node-notifier": "^10.0.1",
