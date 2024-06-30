@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 export class Node<T> {
   data: T;
   next: Node<T> | null;

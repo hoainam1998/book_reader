@@ -6,6 +6,7 @@ import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
+import { CategoryService } from 'services';
 import './style.scss';
 
 type RuleTypeCompact = {
@@ -61,10 +62,10 @@ function Category(): JSX.Element {
 
   const onSubmit = (formData: FormData) => {
     handleSubmit();
-    if (validate.error) {
-      console.log('error');
-    } else {
-      console.log(formData);
+    if (!validate.error) {
+      formData.append('query',
+        'mutation CreateCategory($category: CategoryInput) { category { create (category:$category) { message } } }');
+      CategoryService.graphql('create', formData).then(res => console.log(res)).catch(err => console.log(err));
     }
   };
 
@@ -83,7 +84,7 @@ function Category(): JSX.Element {
           <Input
             label="Category name"
             className="category-form-control"
-            name="category_name"
+            name="name"
             type="text"
             {...categoryName}
           />

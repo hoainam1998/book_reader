@@ -1,0 +1,63 @@
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
+.pop-up {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  width: 200px;
+  overflow: hidden;
+
+  &:after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    display: block;
+    height: 5px;
+    width: 100%;
+    background-image: linear-gradient(to right, $button-cancel-pop-up-color, $title-pop-up-color);
+  }
+
+  .btn-cancel-wrapper {
+    height: 100%;
+    width: 40px;
+    @extend .flex-align-center;
+    justify-content: center;
+
+    .btn-cancel {
+      font-weight: bold;
+      font-size: 16px;
+      background: $button-cancel-pop-up-color;
+      border-radius: 50%;
+      color: $white-color;
+      width: 25px;
+      height: 25px;
+      padding: 3px 0 0 1px;
+    }
+  }
+
+  .title {
+    padding: 3px 10px;
+    color: $white-color;
+    background-color: $title-pop-up-color;
+    font-size: 15px;
+  }
+
+  .body {
+    @extend .flex-align-center;
+    margin-top: auto;
+    margin-bottom: 5px;
+
+    .content {
+      @extend .flex-align-center;
+      min-height: 50px;
+      padding-left: 5px;
+      text-transform: capitalize;
+    }
+  }
+}

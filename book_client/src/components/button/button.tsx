@@ -1,10 +1,10 @@
-import { MouseEventHandler } from 'react';
+import { MouseEventHandler, JSX, ReactNode } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
 type ButtonProps = {
   onClick: MouseEventHandler<HTMLButtonElement>;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   disabled?: boolean;
 };

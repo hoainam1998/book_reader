@@ -10,16 +10,18 @@ type ErrorInfo = {
   [key: string]: any;
 };
 
-
+// eslint-disable-next-line no-unused-vars
 export type ValidateProcess = <T>(state: T, field: string) => ErrorFieldInfo;
 
+// eslint-disable-next-line no-unused-vars
 export type ValidateFunction = (message?: string) => ValidateProcess;
 
-export const required: ValidateFunction = (message: string | null = null) => <T>(state: T, field: string): ErrorFieldInfo => {
-  return {
-    error: !(state[field as keyof T] as string).trim(),
-    message: message ?? `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
-  };
+export const required: ValidateFunction =
+  (message: string | null = null) => <T>(state: T, field: string): ErrorFieldInfo => {
+    return {
+      error: !(state[field as keyof T] as string).trim(),
+      message: message ?? `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
+    };
 };
 
 const validateCompact = (validates: (() => void)[]): () => void => {
@@ -34,7 +36,8 @@ let objectValidate: ErrorInfo = {
 
 let alreadyCreate = false;
 
-const validateHelper = <T, R>(state: T, rules: R & ArrayLike<unknown>): ErrorInfo => {
+const validateHelper =
+  <T, R>(state: T, rules: R & ArrayLike<R>): ErrorInfo => {
   const validateProcess = (field: string, validateName: string, validateResult: ErrorFieldInfo): boolean => {
     objectValidate[field][validateName].error = validateResult.error;
     if (validateResult.error) {
@@ -47,14 +50,14 @@ const validateHelper = <T, R>(state: T, rules: R & ArrayLike<unknown>): ErrorInf
   };
 
   if (!alreadyCreate) {
-    Object.entries(rules).forEach(([key, validateRule]) => {
+    Object.entries(rules).forEach(([key, validateRule]: [string, R]) => {
       const field: ErrorInfo = {
         validate: () => {},
         errors: [],
         dirty: false,
         error: false
       };
-      Object.keys(validateRule as any).forEach(validateName => {
+      Object.keys(validateRule as ArrayLike<R>).forEach(validateName => {
         field[validateName] = {
           error: false
         };
@@ -64,18 +67,20 @@ const validateHelper = <T, R>(state: T, rules: R & ArrayLike<unknown>): ErrorInf
     alreadyCreate = true;
   }
 
-  const validateFuncs = Object.entries(rules).map(([key, validateRule]) => {
+  const validateFuncs = Object.entries(rules).map(([key, validateRule]: [string, R]) => {
     const validate = (): void => {
-      objectValidate[key].error = Object.entries(validateRule as any).every(([validateName, validateFunc]) => {
-        let validateResult: boolean = false;
-        if (objectValidate.dirty || objectValidate[key].dirty) {
-          try {
-            validateResult = validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
-          } catch {
-            validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
+      objectValidate[key].error = Object.entries(validateRule as ArrayLike<R>)
+        .every(([validateName, validateFunc]:[string, R]) => {
+          let validateResult: boolean = false;
+          if (objectValidate.dirty || objectValidate[key].dirty) {
+            try {
+              validateResult =
+              validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
+            } catch {
+              validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
+            }
           }
-        }
-        return validateResult;
+          return validateResult;
       });
       objectValidate.error = Object.keys(rules).some(key => objectValidate[key].error);
     };

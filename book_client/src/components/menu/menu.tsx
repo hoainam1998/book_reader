@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import { NavLink } from 'react-router-dom';
 import './style.scss';
 import { clsx } from 'utils';

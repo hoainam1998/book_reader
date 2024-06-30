@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import Button from 'components/button/button';
 import './style.scss';
 

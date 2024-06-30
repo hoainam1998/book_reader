@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import Grid, { GridItem } from 'components/grid/grid';
 import './style.scss';
 

@@ -1,4 +1,4 @@
-import { useCallback, useReducer, useMemo } from 'react';
+import { useCallback, useReducer, useMemo, JSX } from 'react';
 import Button from 'components/button/button';
 import LinkedList, { Node } from './double-linked-list';
 import { clsx } from 'utils';
@@ -48,7 +48,8 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
     pageActive = pages[3];
   }
 
-  // because last page and nearest last page already selected, so if user selected those page, real page active will come before them
+  // because last page and nearest last page already selected,
+  // so if user selected those page, real page active will come before them
   if (pageActive.data.page >= nearestLastPage) {
     pageActive = pages[lastPageAdded - 1];
   }
@@ -169,8 +170,10 @@ function Pagination({ pageNumber }: PaginationProps): JSX.Element {
       {
         pageList.map((page: any, index: number) => (
           <li key={index}>
-            <Button className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })} onClick={() => pageClick(page)}>
-              {page.data?.page || '...'}
+            <Button
+              className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })}
+              onClick={() => pageClick(page)}>
+                {page.data?.page || '...'}
             </Button>
           </li>
         ))

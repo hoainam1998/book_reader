@@ -1,4 +1,4 @@
-import { Children } from 'react';
+import { Children, JSX, ReactNode } from 'react';
 import './style.scss';
 import { clsx } from 'utils';
 
@@ -9,7 +9,7 @@ type ColSize = {
 };
 
 type GridProps = ColSize & {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 };
 

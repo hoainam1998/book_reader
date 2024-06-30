@@ -1,10 +1,10 @@
-import { Children } from 'react';
+import { Children, ReactElement, JSX } from 'react';
 import { isSlot } from 'components/slot/slot';
 import './style.scss';
 
 type SelectProps = {
   options: { label: string, value: string | number, class?: string }[];
-  children?: React.ReactElement;
+  children?: ReactElement;
   name: string;
   label?: {
     class?: string;
@@ -15,7 +15,7 @@ type SelectProps = {
 
 function Select({ options, children, name, label, classes }: SelectProps): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
-  const optionSlot : React.ReactElement | undefined | null = hasChildren ? Children.only(children) : null;
+  const optionSlot : ReactElement | undefined | null = hasChildren ? Children.only(children) : null;
 
   return (
     <>
@@ -26,7 +26,7 @@ function Select({ options, children, name, label, classes }: SelectProps): JSX.E
             options.map((option, index) =>
               <option key={index} value={option.value} className={option.class}>
                 {
-                  Boolean(hasChildren && isSlot('default', optionSlot))
+                  hasChildren && isSlot('default', optionSlot)
                   ? optionSlot!.props.render(option)
                   : option.label
                 }

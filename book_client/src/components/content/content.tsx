@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import { Outlet, UIMatch, useMatches } from 'react-router-dom';
 import Footer from 'components/footer/footer';
 import './style.scss';

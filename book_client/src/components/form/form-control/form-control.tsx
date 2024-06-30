@@ -1,8 +1,9 @@
+import { JSX, ReactElement } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
-type FormControl = {
-  children?: React.ReactElement;
+type FormControlProps = {
+  children?: ReactElement;
   name: string;
   label: string;
   className?: string;
@@ -10,7 +11,7 @@ type FormControl = {
   errors: string[];
 };
 
-function FormControl({ label, name, children, errors, className, labelClass }: FormControl): JSX.Element {
+function FormControl({ label, name, children, errors, className, labelClass }: FormControlProps): JSX.Element {
   return (
     <fieldset className={clsx('fieldset', className)}>
       {label && <label htmlFor={name} className={labelClass}>{label}</label>}

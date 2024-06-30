@@ -10,17 +10,16 @@ const clsx = (...classes: any[]): string => {
   const classList: string[] = classes.map(cls => {
     switch (typeof cls) {
       case 'object':
-        const classText = Object.keys(cls).reduce((classTextEmpty, key) => {
+        return  Object.keys(cls).reduce((classTextEmpty, key) => {
           return cls[key] ? classTextEmpty += `${key} ` : classTextEmpty;
         }, '').trim();
-        return classText;
       case 'string':
         return cls;
       default: return '';
     }
   });
   return classList.join(' ').trim();
-}
+};
 
 export {
   clsx,

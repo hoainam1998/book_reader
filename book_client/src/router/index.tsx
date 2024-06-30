@@ -11,6 +11,7 @@ import Home from 'views/home/home';
 import BookList from 'views/book-group/book-list/book-list';
 import BookDetail from 'views/book-group/book-detail/book-detail';
 import Category from 'views/category-group/category';
+import PopUp from 'components/pop-up/pop-up';
 import path from './paths';
 
 const router = createBrowserRouter(
@@ -34,7 +35,7 @@ const router = createBrowserRouter(
           <Route path={path.ID} element={<BookDetail />} />
         </Route>
       </Route>
-      <Route path={path.LOGIN} element={<div>login</div>} />
+      <Route path={path.LOGIN} element={<PopUp />} />
     </>
   )
 );

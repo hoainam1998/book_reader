@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEventHandler } from 'react';
+import { ChangeEvent, FormEventHandler, JSX } from 'react';
 import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
@@ -19,7 +19,19 @@ type InputProps = {
   onFocus: () => void;
 };
 
-function Input({ type, label, name, value, errors, error, className, labelClass, onChange, onInput, onFocus }: InputProps): JSX.Element {
+function Input({
+  type,
+  label,
+  name,
+  value,
+  errors,
+  error,
+  className,
+  labelClass,
+  onChange,
+  onInput,
+  onFocus
+}: InputProps): JSX.Element {
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <input name={name} className={clsx('input custom-input', { 'error': error })} defaultValue={value}
