@@ -55,7 +55,7 @@ const validateResultExecute = (httpCode) => {
             const status = resultClone.errors[0].extensions.http.status;
             response.status(status).json({ message });
           } else {
-            response.status(httpCode).json(resultClone);
+            response.status(httpCode).json(resultClone.data);
           }
         });
       } catch (error) {

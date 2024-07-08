@@ -41,7 +41,7 @@ class CategoryRouter extends Router {
   @validateQuery
   _update(req, res, next, schema) {
     const variables = {
-      category_id: req.body.cate,
+      category_id: req.body.category_id,
       name: req.body.name,
       avatar: req.body.avatar
     };

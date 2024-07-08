@@ -7,7 +7,7 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 100000,
+    fileSize: 1000000,
     files: 10
   },
   fileFilter: (_, file, cb) => {
@@ -44,7 +44,7 @@ module.exports = (mode, fields, maxCount) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
-          res.status(400).json({ message: err.message });
+          response.status(400).json({ message: err.message });
         } else {
           switch (mode) {
             case UPLOAD_MODE.SINGLE:
