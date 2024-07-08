@@ -1,4 +1,5 @@
 import React, { JSX } from 'react';
+import { FetcherWithComponents, useFetcher } from 'react-router-dom';
 import Button from 'components/button/button';
 import { clsx } from 'utils';
 import './style.scss';
@@ -8,8 +9,9 @@ type FormProps = {
   children: React.ReactElement[] | React.ReactElement;
   submitLabel: string;
   disableSubmitButton?: boolean;
-  // eslint-disable-next-line no-unused-vars
-  onSubmit: (formData: FormData) => void;
+  method: 'post' | 'put';
+    // eslint-disable-next-line no-unused-vars,
+  onSubmit: (fetcher: FetcherWithComponents<any>) => void;
 };
 
 function Form({
@@ -17,19 +19,20 @@ function Form({
   className,
   submitLabel = 'Submit',
   disableSubmitButton = false,
+  method,
   onSubmit
 }: FormProps): JSX.Element {
+  const fetcher = useFetcher();
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    onSubmit(new FormData(event.target.form));
-  };
+  const handleSubmit = () => onSubmit(fetcher);
 
   return (
-    <form className={clsx('form', className)} encType="multipart/form-data">
+    <fetcher.Form method={method}
+      className={clsx('form', className)}
+      encType="multipart/form-data">
       {children}
       <Button className="btn-submit" onClick={handleSubmit} disabled={disableSubmitButton}>{submitLabel}</Button>
-    </form>
+    </fetcher.Form>
   );
 }
 

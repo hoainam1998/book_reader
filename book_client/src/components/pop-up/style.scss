@@ -4,15 +4,6 @@
 }
 
 .pop-up {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 3px;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-  width: 200px;
-  overflow: hidden;
-
   &:after {
     content: '';
     position: fixed;
@@ -57,7 +48,7 @@
       @extend .flex-align-center;
       min-height: 50px;
       padding-left: 5px;
-      text-transform: capitalize;
+      padding-right: 3px;
     }
   }
 }

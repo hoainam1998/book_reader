@@ -1,4 +1,5 @@
 import { useState, JSX } from 'react';
+import { FetcherWithComponents } from 'react-router-dom';
 import Table from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
@@ -6,7 +7,6 @@ import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
-import { CategoryService } from 'services';
 import './style.scss';
 
 type RuleTypeCompact = {
@@ -60,12 +60,10 @@ function Category(): JSX.Element {
     }
   };
 
-  const onSubmit = (formData: FormData) => {
+  const onSubmit = (fetcher: FetcherWithComponents<any>) => {
     handleSubmit();
     if (!validate.error) {
-      formData.append('query',
-        'mutation CreateCategory($category: CategoryInput) { category { create (category:$category) { message } } }');
-      CategoryService.graphql('create', formData).then(res => console.log(res)).catch(err => console.log(err));
+      fetcher.submit(fetcher.formData!);
     }
   };
 
@@ -80,7 +78,7 @@ function Category(): JSX.Element {
         </Table>
       </GridItem>
       <GridItem lg={3}>
-        <Form className="category-form" submitLabel="Save" onSubmit={onSubmit}>
+        <Form method="post" className="category-form" submitLabel="Save" onSubmit={onSubmit}>
           <Input
             label="Category name"
             className="category-form-control"
