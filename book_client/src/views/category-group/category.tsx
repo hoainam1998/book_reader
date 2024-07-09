@@ -1,5 +1,5 @@
 import { useState, JSX } from 'react';
-import { FetcherWithComponents } from 'react-router-dom';
+import { useSubmit } from 'react-router-dom';
 import Table from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
@@ -30,6 +30,7 @@ const rules: RuleTypeCompact = {
 function Category(): JSX.Element {
   const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
+  const submit = useSubmit();
 
   const fields = [
     {
@@ -60,10 +61,13 @@ function Category(): JSX.Element {
     }
   };
 
-  const onSubmit = (fetcher: FetcherWithComponents<any>) => {
+  const onSubmit = (formData: FormData) => {
     handleSubmit();
     if (!validate.error) {
-      fetcher.submit(fetcher.formData!);
+      submit(formData, {
+        method: 'post',
+        encType: 'multipart/form-data'
+      });
     }
   };
 

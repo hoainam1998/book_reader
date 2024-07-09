@@ -27,7 +27,10 @@ const router = createBrowserRouter(
         <Route path={path.CATEGORY} element={<Category />}
           handle={{ crumb: (match: UIMatch<any, any>) => <span key={match.pathname}>Categories</span> }}
           action={categoryAction}
-          loader={categoryLoader}>
+          loader={categoryLoader}
+          shouldRevalidate={(arg) => {
+            console.log(arg); return true;
+          }}>
         </Route>
         <Route path={path.BOOK} element={<Outlet />}>
           <Route index element={<BookList />} />
