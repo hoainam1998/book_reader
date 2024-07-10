@@ -1,4 +1,4 @@
-const { validate, parse, execute } = require('graphql');
+const { validate, parse } = require('graphql');
 const upload = require('./upload.js');
 
 /**

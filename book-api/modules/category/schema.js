@@ -4,7 +4,8 @@ const {
   GraphQLInputObjectType,
   GraphQLList,
   GraphQLID,
-  GraphQLError
+  GraphQLError,
+  GraphQLInt
 } = require('graphql');
 
 const graphqlErrorOption = {
@@ -110,6 +111,24 @@ const query = new GraphQLObjectType({
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       },
+    },
+    pagination: {
+      type: new GraphQLList(CategoryType),
+      args: {
+        page_number: {
+          type: GraphQLInt
+        },
+        page_size: {
+          type: GraphQLInt
+        }
+      },
+      resolve: async (category, { page_number, page_size }) => {
+        try {
+          return await category.pagination(page_size, page_number);
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
     },
     detail: {
       type: CategoryType,

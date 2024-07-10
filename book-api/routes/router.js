@@ -1,5 +1,3 @@
-const bodyParser = require('body-parser');
-
 class Router {
   _express = null;
   _router = null;

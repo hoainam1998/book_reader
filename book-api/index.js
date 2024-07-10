@@ -9,7 +9,7 @@ const connectDataBase = require('./config.js');
 const FactoryRouter = require('./routes/factory.js');
 
 const corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: process.env.ORIGIN_CORS,
 };
 
 const app = express();
@@ -19,6 +19,7 @@ app.use(cors(corsOptions));
 
 connectDataBase().then(querySql => {
   const category = startCategory(querySql);
+
   const query = new GraphQLObjectType({
     name: 'Query',
     fields: {
@@ -34,7 +35,7 @@ connectDataBase().then(querySql => {
   });
 
   const schema = new GraphQLSchema({ query, mutation });
-  FactoryRouter.getRoutes(express, schema).forEach(route => app.use('/category', route.Router));
+  FactoryRouter.getRoutes(express, schema).forEach(({ route, path }) => app.use(path, route.Router));
 });
 
 app.listen(PORT, () => console.log(`GraphQl started at ${PORT}!`));

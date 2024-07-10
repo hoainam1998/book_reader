@@ -14,6 +14,7 @@ class Query {
           resolve(JSON.parse(JSON.stringify(result)));
         }
       };
+
       if (values) {
         this._db.query(sql, values, callback);
       } else {

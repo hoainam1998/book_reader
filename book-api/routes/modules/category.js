@@ -12,6 +12,7 @@ class CategoryRouter extends Router {
     this.post('/update', this._update);
     this.post('/detail', this._getDetail);
     this.post('/delete', this._delete);
+    this.post('/pagination', this._pagination);
   }
 
   get Router() {
@@ -22,6 +23,17 @@ class CategoryRouter extends Router {
   @validateQuery
   _getAll(req, res, next, schema) {
     return execute({ schema, document: req.body.query });
+  }
+
+  @validateResultExecute(200)
+  @validateQuery
+  _pagination(req, res, next, schema) {
+    return execute({ schema, document: req.body.query, variableValues:
+      {
+        page_number: req.body.page_number,
+        page_size: req.body.page_size
+      }
+    });
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
