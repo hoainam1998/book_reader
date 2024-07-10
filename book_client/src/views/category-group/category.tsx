@@ -7,6 +7,7 @@ import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
+import { action, loader } from './fetcher';
 import './style.scss';
 
 type RuleTypeCompact = {
@@ -110,3 +111,5 @@ function Category(): JSX.Element {
 }
 
 export default Category;
+
+export { action, loader };
