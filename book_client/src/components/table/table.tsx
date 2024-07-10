@@ -32,13 +32,17 @@ function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
 function Table({ fields, children, data }: TableProps): JSX.Element {
   const options = [
     {
-      value: 'volvo',
-      label: 'Volvoggggggggggggggggggggggggg'
+      value: 10,
+      label: '10'
     },
     {
-      value: 'mercedes',
-      label: 'Mercedes'
-    }
+      value: 30,
+      label: '30'
+    },
+    {
+      value: 50,
+      label: '50'
+    },
   ];
 
   return (
