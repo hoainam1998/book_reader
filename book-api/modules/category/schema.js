@@ -35,7 +35,7 @@ const CategoryType = new GraphQLObjectType({
     name: {
       type: GraphQLString
     },
-    name: {
+    avatar: {
       type: GraphQLString
     },
   }
@@ -115,16 +115,16 @@ const query = new GraphQLObjectType({
     pagination: {
       type: new GraphQLList(CategoryType),
       args: {
-        page_number: {
+        pageNumber: {
           type: GraphQLInt
         },
-        page_size: {
+        pageSize: {
           type: GraphQLInt
         }
       },
-      resolve: async (category, { page_number, page_size }) => {
+      resolve: async (category, { pageNumber, pageSize }) => {
         try {
-          return await category.pagination(page_size, page_number);
+          return await category.pagination(pageSize, pageNumber);
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -133,13 +133,13 @@ const query = new GraphQLObjectType({
     detail: {
       type: CategoryType,
       args: {
-        category_id: {
+        categoryId: {
           type: GraphQLID
         }
       },
-      resolve: async (category, { category_id }) => {
+      resolve: async (category, { categoryId }) => {
         try {
-          const categoryFound = await category.detail(category_id);
+          const categoryFound = await category.detail(categoryId);
           return categoryFound[0];
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
@@ -149,13 +149,13 @@ const query = new GraphQLObjectType({
     delete: {
       type: ResponseType,
       args: {
-        category_id: {
+        categoryId: {
           type: GraphQLID
         }
       },
-      resolve: async (category, { category_id }) => {
+      resolve: async (category, { categoryId }) => {
         try {
-          const result = await category.delete(category_id);
+          const result = await category.delete(categoryId);
           if (result.affectedRows > 0) {
             return { message: 'Delete category success!' };
           }

@@ -30,8 +30,8 @@ class CategoryRouter extends Router {
   _pagination(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues:
       {
-        page_number: req.body.page_number,
-        page_size: req.body.page_size
+        pageNumber: req.body.pageNumber,
+        pageSize: req.body.pageSize
       }
     });
   }
@@ -41,7 +41,7 @@ class CategoryRouter extends Router {
   @validateQuery
   _create(req, res, next, schema) {
     const variables = {
-      category_id: Date.now(),
+      categoryId: Date.now(),
       name: req.body.name,
       avatar: req.body.avatar
     };
@@ -53,7 +53,7 @@ class CategoryRouter extends Router {
   @validateQuery
   _update(req, res, next, schema) {
     const variables = {
-      category_id: req.body.category_id,
+      categoryId: req.body.categoryId,
       name: req.body.name,
       avatar: req.body.avatar
     };
@@ -63,13 +63,13 @@ class CategoryRouter extends Router {
   @validateResultExecute(200)
   @validateQuery
   _getDetail(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: { category_id: req.body.category_id } });
+    return execute({ schema, document: req.body.query, variableValues: { categoryId: req.body.categoryId } });
   }
 
   @validateResultExecute(201)
   @validateQuery
   _delete(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: { category_id: req.body.category_id } });
+    return execute({ schema, document: req.body.query, variableValues: { categoryId: req.body.categoryId } });
   }
 }
 

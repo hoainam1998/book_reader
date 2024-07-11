@@ -7,7 +7,7 @@ class CategoryService {
 
   create(category) {
     return this._sql.query('INSERT INTO CATEGORY (category_id, name, avatar) VALUES (?)',
-      [[category.category_id, category.name, category.avatar]]);
+      [[category.categoryId, category.name, category.avatar]]);
   }
 
   all() {
@@ -25,10 +25,10 @@ class CategoryService {
   update(category) {
     if (category.avatar) {
       return this._sql.query('UPDATE CATEGORY SET NAME = ?, AVATAR = ? WHERE CATEGORY_ID = ?',
-        [category.name, category.avatar, category.category_id]);
+        [category.name, category.avatar, category.categoryId]);
     } else {
       return this._sql.query('UPDATE CATEGORY SET NAME = ? WHERE CATEGORY_ID = ?',
-        [category.name, category.category_id]);
+        [category.name, category.categoryId]);
     }
   }
 
