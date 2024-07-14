@@ -1,5 +1,6 @@
 import { useState, JSX } from 'react';
-import { useSubmit } from 'react-router-dom';
+import { AxiosResponse } from 'axios';
+import { useSubmit, useFetcher, useLoaderData } from 'react-router-dom';
 import Table from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
@@ -32,6 +33,8 @@ function Category(): JSX.Element {
   const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const submit = useSubmit();
+  const fetcher = useFetcher();
+  const loaderData: unknown = fetcher.data || useLoaderData();
 
   const fields = [
     {
@@ -42,15 +45,8 @@ function Category(): JSX.Element {
     }
   ];
 
-  const data = [
-    {
-      avatar: 'avatar',
-      name: 'name1'
-    },
-    {
-      name: 'name2'
-    }
-  ];
+  const data = (loaderData as AxiosResponse)?.data?.category.pagination.list || [];
+  const total = (loaderData as AxiosResponse)?.data?.category.pagination.total || 0;
 
   const fileChange = (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
@@ -72,13 +68,20 @@ function Category(): JSX.Element {
     }
   };
 
+  const fetchCategory = (pageSize: number, pageNumber: number) => {
+    fetcher.submit({ pageSize, pageNumber },
+    {
+      method: 'get',
+    });
+  };
+
   return (
     <Grid>
       <GridItem lg={9}>
-        <Table fields={fields} data={data}>
+        <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
           <Slot
             name="avatar"
-            render={(slotProp) => <span style={{ color: 'red' }}>{slotProp.avatar}</span>}
+            render={(slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>}
           />
         </Table>
       </GridItem>

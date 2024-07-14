@@ -28,14 +28,14 @@ const router = createBrowserRouter(
           handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>Categories</span> }}
           action={categoryAction}
           loader={categoryLoader}
-          shouldRevalidate={(arg) => {
-            console.log(arg); return true;
+          shouldRevalidate={() => {
+            return true;
           }}>
         </Route>
-        <Route path={path.BOOK} element={<Outlet />} 
+        <Route path={path.BOOK} element={<Outlet />}
           handle={{ crumb: (match: UIMatch) => <Link key={match.pathname} to={match.pathname}>Book</Link> }}>
           <Route index element={<BookList />} />
-          <Route path={path.ID} element={<BookDetail />} 
+          <Route path={path.ID} element={<BookDetail />}
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>
         </Route>
       </Route>

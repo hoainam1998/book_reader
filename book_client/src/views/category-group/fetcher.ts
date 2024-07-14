@@ -47,16 +47,23 @@ export const loader = async (args: LoaderFunctionArgs<any>) => {
     case 'DELETE':
       return true;
     default:
+      const url = new URL(request.url);
+      const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
+      const pageNumber = parseInt(url.searchParams.get('pageNumber') || '1');
       const body = {
-        query: `query CategoryPagination($pageSize: Int, $pageNumber: Int) { 
-          category { 
-            pagination (pageSize: $pageSize, pageNumber: $pageNumber) { 
-              name, avatar 
-            } 
-          } 
+        query: `query CategoryPagination($pageSize: Int, $pageNumber: Int) {
+          category {
+            pagination (pageSize: $pageSize, pageNumber: $pageNumber) {
+              list {
+                name,
+                avatar
+              },
+              total
+            }
+          }
         }`,
-        pageSize: 10,
-        pageNumber: 1
+        pageSize,
+        pageNumber
       };
       return handlePromise(CategoryService.graphql('pagination', body));
   }

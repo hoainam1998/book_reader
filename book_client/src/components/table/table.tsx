@@ -1,4 +1,12 @@
-import { CSSProperties, Children, Fragment, ReactElement, ReactNode, JSX } from 'react';
+import {
+  CSSProperties,
+  Children,
+  Fragment,
+  ReactElement,
+  ReactNode,
+  JSX,
+  useMemo,
+} from 'react';
 import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
 import { isSlot } from 'components/slot/slot';
@@ -12,7 +20,9 @@ type Field = {
 type TableProps = {
   fields: Field[];
   children?: ReactNode;
+  total: number;
   data: { [key: string]: any }[];
+  onLoad: (pageSize: number, pageNumber: number) => void;
 };
 
 type TableCellProps = {
@@ -29,7 +39,10 @@ function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
   return <>{childrenList.map((children, index) => <Fragment key={index}>{children}</Fragment>)}</>;
 }
 
-function Table({ fields, children, data }: TableProps): JSX.Element {
+let pageSize = 10;
+let pageNumber = 1;
+
+function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Element {
   const options = [
     {
       value: 10,
@@ -44,6 +57,21 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
       label: '50'
     },
   ];
+
+  const totalPageNumber = useMemo(() => {
+    const pages = total / pageSize;
+    return Number.isInteger(pages) ? pages : Math.floor(pages) + 1;
+  }, [total, pageSize]);
+
+  const pageSizeChange = (currentPageSize: number) => {
+    pageSize = currentPageSize;
+    onLoad(pageSize, pageNumber);
+  };
+
+  const pageNumberChange = (currentPageNumber: number) => {
+    pageNumber = currentPageNumber;
+    onLoad(pageSize, pageNumber);
+  };
 
   return (
     <section>
@@ -67,8 +95,8 @@ function Table({ fields, children, data }: TableProps): JSX.Element {
         </tbody>
       </table>
       <div className="table-footer">
-        <Select options={options} name="page-size" classes="page-size" />
-        <Pagination pageNumber={21}/>
+        <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" classes="page-size" />
+        <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
       </div>
     </section>
   );
