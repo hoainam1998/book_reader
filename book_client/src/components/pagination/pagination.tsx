@@ -2,8 +2,8 @@ import {
   useCallback,
   useMemo,
   useState,
+  useEffect,
   JSX,
-  forwardRef,
 } from 'react';
 import Button from 'components/button/button';
 import LinkedList, { Node } from './double-linked-list';
@@ -24,10 +24,6 @@ type DotPageButton = {
   dots: boolean;
 };
 
-type PaginationAction = {
-  page?: Node<PageButton>;
-};
-
 let previousSelectedPage: Node<PageButton> | null = null;
 
 const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[]):
@@ -35,7 +31,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
   // number pages showed
   const numberPageShowed = 10;
 
-  if (previousSelectedPage) {
+  if (previousSelectedPage && previousSelectedPage.data.page <= pages.length) {
     previousSelectedPage.data.active = false;
   }
 
@@ -95,8 +91,9 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
     };
 
     // adding page selected
-    if (pageActive.data.page > firstPageAdded - 1 && pageActive.data.page < nearestLastPage) {
-      array.push(pageActive);
+    if (pageActive.data.page > firstPageAdded - 1
+      && pageActive.data.page < nearestLastPage) {
+        array.push(pageActive);
     }
 
     // add previous page
@@ -136,12 +133,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
   }
 };
 
-const paginationHandleReducer = (pages: Node<PageButton>[]) =>
-  (_: (Node<PageButton> | DotPageButton)[], action: PaginationAction): (Node<PageButton> | DotPageButton)[] => {
-    return renderPagination(action.page as Node<PageButton>, pages);
-};
-
-function Pagination({ pageNumber, onChange }: PaginationProps, ref: any): JSX.Element {
+function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
   const pages = useMemo(() => {
     const paginationArray: PageButton[] = [];
 
@@ -155,9 +147,10 @@ function Pagination({ pageNumber, onChange }: PaginationProps, ref: any): JSX.El
     LinkedList.createdFromArray(paginationArray);
     return LinkedList.Nodes as Node<PageButton>[];
   }, [pageNumber]);
+
   const [page, setPage] = useState<Node<PageButton>>(pages[0]);
 
-  const pageList = useMemo(() => renderPagination(page, pages), [page]);
+  const pageList = useMemo(() => renderPagination(page, pages), [page, pageNumber]);
 
   const { disablePrevious, disableNext } = useMemo(() => {
     return {
@@ -166,7 +159,6 @@ function Pagination({ pageNumber, onChange }: PaginationProps, ref: any): JSX.El
     };
   }, [previousSelectedPage]);
 
-
   const pageClick = useCallback((page: Node<PageButton> | DotPageButton) => {
     if (page && !(page as DotPageButton).dots
       && previousSelectedPage?.data.page !== (page as Node<PageButton>).data.page) {
@@ -174,6 +166,11 @@ function Pagination({ pageNumber, onChange }: PaginationProps, ref: any): JSX.El
         onChange((page as Node<PageButton>).data.page);
     }
   }, [pageList]);
+
+  useEffect(() => {
+    (pageList[0] as Node<PageButton>).data.active = true;
+    previousSelectedPage = (pageList[0] as Node<PageButton>);
+  }, [pageNumber]);
 
   return (
     <ul className="pagination">
@@ -220,4 +217,4 @@ function Pagination({ pageNumber, onChange }: PaginationProps, ref: any): JSX.El
   );
 }
 
-export default forwardRef(Pagination);
+export default Pagination;
