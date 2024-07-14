@@ -113,7 +113,17 @@ const query = new GraphQLObjectType({
       },
     },
     pagination: {
-      type: new GraphQLList(CategoryType),
+      type: new GraphQLObjectType({
+        name: 'CategoryPagination',
+        fields: {
+          list: {
+            type: new GraphQLList(CategoryType)
+          },
+          total: {
+            type: GraphQLInt
+          }
+        }
+      }),
       args: {
         pageNumber: {
           type: GraphQLInt
@@ -124,7 +134,11 @@ const query = new GraphQLObjectType({
       },
       resolve: async (category, { pageNumber, pageSize }) => {
         try {
-          return await category.pagination(pageSize, pageNumber);
+          const result = await category.pagination(pageSize, pageNumber);
+          return {
+            list: result[0],
+            total: result[1][0].TOTAL
+          };
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }

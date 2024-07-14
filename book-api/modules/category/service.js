@@ -15,7 +15,10 @@ class CategoryService {
   }
 
   pagination(pageSize, pageNumber) {
-    return this._sql.query('SELECT * FROM CATEGORY LIMIT ? OFFSET ?', [pageSize, (pageNumber - 1) * pageSize]);
+    return this._sql.query(
+    `SELECT * FROM CATEGORY LIMIT ? OFFSET ?;
+    SELECT COUNT(*) AS TOTAL FROM CATEGORY;`,
+    [pageSize, (pageNumber - 1) * pageSize]);
   }
 
   detail(id) {

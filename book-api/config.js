@@ -4,7 +4,8 @@ const Query = require('./query.js');
 const connectionInstance = createConnection({
   host: process.env.HOST,
   user: process.env.USER,
-  database: 'books'
+  database: 'books',
+  multipleStatements: true
 });
 
 function connectDataBase() {
