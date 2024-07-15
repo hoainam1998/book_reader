@@ -51,9 +51,8 @@ function Category(): JSX.Element {
   const fileChange = (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
     if (files) {
-      const images = Array.from((event.target as HTMLInputElement).files!).map((file) =>
-        URL.createObjectURL(file)
-      );
+      const images = Array.from(files)
+        .map((file) => URL.createObjectURL(file));
       setPreviewImage(images);
     }
   };
@@ -79,9 +78,9 @@ function Category(): JSX.Element {
     <Grid>
       <GridItem lg={9}>
         <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
-          <Slot
-            name="avatar"
-            render={(slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>}
+          <Slot name="avatar" render={
+            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+          }
           />
         </Table>
       </GridItem>

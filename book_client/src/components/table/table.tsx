@@ -65,6 +65,7 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
 
   const pageSizeChange = (currentPageSize: number) => {
     pageSize = currentPageSize;
+    pageNumber = 1;
     onLoad(pageSize, pageNumber);
   };
 
