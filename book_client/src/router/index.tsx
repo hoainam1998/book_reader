@@ -14,7 +14,7 @@ import Category, {
   action as categoryAction,
   loader as categoryLoader
 } from 'views/category-group/category';
-import NotFound from 'components/not-found/not-found';
+import ApiError from 'components/error/api-error/api-error';
 import path from './paths';
 
 const router = createBrowserRouter(
@@ -28,6 +28,7 @@ const router = createBrowserRouter(
           handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>Categories</span> }}
           action={categoryAction}
           loader={categoryLoader}
+          errorElement={<ApiError />}
           shouldRevalidate={() => {
             return true;
           }}>
@@ -39,7 +40,6 @@ const router = createBrowserRouter(
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>
         </Route>
       </Route>
-      <Route path="not-found" element={<NotFound name="Category" />}></Route>
     </>
   )
 );

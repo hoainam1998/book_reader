@@ -9,10 +9,7 @@ const handlePromise = (promise: Promise<AxiosResponse>) => {
         res.data?.category?.create?.message && showToast('Category', res.data.category.create.message);
         resolve(res);
       })
-      .catch((err) => {
-        console.log(err);
-        reject(err);
-      });
+      .catch((err) => reject(err));
   });
 };
 
