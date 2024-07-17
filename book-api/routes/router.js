@@ -7,6 +7,13 @@ class Router {
     this._express = express;
     this._schema = schema;
     this._router = express.Router();
+    this._router.post('*', (req, res, next) => {
+      if (this._schema) {
+        next();
+      } else {
+        res.status(500).json({ msg: 'Server error. Please contact my admin!' });
+      }
+    });
   }
 
   post(path, handle) {

@@ -1,7 +1,7 @@
-const { createConnection } = require('mysql');
+const { createPool } = require('mysql');
 const Query = require('./query.js');
 
-const connectionInstance = createConnection({
+const pool = createPool({
   host: process.env.HOST,
   user: process.env.USER,
   database: 'books',
@@ -10,13 +10,16 @@ const connectionInstance = createConnection({
 
 function connectDataBase() {
   return new Promise((resolve, reject) => {
-    connectionInstance.connect((err) => {
+    pool.getConnection((err, connection) => {
       if (err) {
         console.log('Connect to database fail!');
+        pool.end(() => {
+          console.log('Force disconnect success!');
+        });
         reject(err);
       } else {
         console.log('Connect to database success!');
-        resolve(new Query(connectionInstance));
+        resolve(new Query(connection));
       }
     });
   });
