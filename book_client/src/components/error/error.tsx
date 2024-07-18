@@ -1,18 +1,13 @@
 import { JSX, useMemo } from 'react';
 import './style.scss';
 
-type ErrorProps = {
+type ErrorProps<T> = {
   message: string;
-  image: 'empty' | 'server-error';
+  image: T;
 };
 
-function Error({ message, image }: ErrorProps): JSX.Element {
-  const imagName = useMemo(() => {
-    switch(image) {
-      case 'empty': return 'folder.png';
-      default: return 'server.png';
-    }
-  }, [image]);
+function Error<T>({ message, image }: ErrorProps<T>): JSX.Element {
+  const imagName: string = useMemo(() => `${image}.png`, [image]);
 
   return (
     <section className="error">

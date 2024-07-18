@@ -12,7 +12,7 @@ import Pagination from 'components/pagination/pagination';
 import { isSlot } from 'components/slot/slot';
 import './style.scss';
 
-type Field = {
+export type Field = {
   key: string;
   style?: CSSProperties;
 };

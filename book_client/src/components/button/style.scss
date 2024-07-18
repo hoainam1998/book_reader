@@ -10,3 +10,13 @@
     pointer-events: none;
   }
 }
+
+.btn-success {
+  background-color: $button-cancel-pop-up-color;
+  color: $white-color;
+}
+
+.btn-dangerous {
+  background-color: $error-color;
+  color: $white-color;
+}

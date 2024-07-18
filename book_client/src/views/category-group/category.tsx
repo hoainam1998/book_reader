@@ -2,10 +2,12 @@ import { useState, JSX } from 'react';
 import { AxiosResponse } from 'axios';
 import { useSubmit, useFetcher, useLoaderData } from 'react-router-dom';
 import Table from 'components/table/table';
+import type { Field } from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
+import Button from 'components/button/button';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
 import { action, loader } from './fetcher';
@@ -18,6 +20,12 @@ type RuleTypeCompact = {
 };
 
 type RuleType = RuleTypeCompact & ArrayLike<RuleTypeCompact>;
+
+type CategoryType = {
+  category_id: string;
+  name: string;
+  avatar: string;
+};
 
 const state = {
   categoryName: '',
@@ -36,17 +44,23 @@ function Category(): JSX.Element {
   const fetcher = useFetcher();
   const loaderData: unknown = fetcher.data || useLoaderData();
 
-  const fields = [
+  const fields: Field[] = [
     {
-      key: 'avatar'
+      key: 'avatar',
     },
     {
-      key: 'name'
+      key: 'name',
+    },
+    {
+      key: 'operation',
+      style: {
+        width: 150
+      }
     }
   ];
 
-  const data = (loaderData as AxiosResponse)?.data?.category.pagination.list || [];
-  const total = (loaderData as AxiosResponse)?.data?.category.pagination.total || 0;
+  const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination.list || [];
+  const total: number = (loaderData as AxiosResponse)?.data?.category.pagination.total || 0;
 
   const fileChange = (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
@@ -74,14 +88,25 @@ function Category(): JSX.Element {
     });
   };
 
+  const operationSlot = (slotProp: CategoryType) => {
+    const { category_id } = slotProp;
+    return (
+      <>
+        <Button variant='success' onClick={() => console.log(category_id)}>Update</Button>
+          &nbsp;&nbsp;
+        <Button variant='dangerous' onClick={() => console.log(category_id)}>Delete</Button>
+      </>
+    );
+  };
+
   return (
     <Grid>
       <GridItem lg={9}>
         <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
           <Slot name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
-          }
-          />
+          } />
+          <Slot name="operation" render={operationSlot} />
         </Table>
       </GridItem>
       <GridItem lg={3}>

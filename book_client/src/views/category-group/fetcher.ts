@@ -6,10 +6,10 @@ import { showToast } from 'utils';
 const handlePromise = (promise: Promise<AxiosResponse>) => {
   return new Promise((resolve, reject) => {
     promise.then((res) => {
-        res.data?.category?.create?.message && showToast('Category', res.data.category.create.message);
-        resolve(res);
-      })
-      .catch((err) => reject(err));
+      res.data?.category?.create?.message && showToast('Category', res.data.category.create.message);
+      resolve(res);
+    })
+    .catch((err) => reject(err));
   });
 };
 
@@ -53,7 +53,8 @@ export const loader = async (args: LoaderFunctionArgs<any>) => {
             pagination (pageSize: $pageSize, pageNumber: $pageNumber) {
               list {
                 name,
-                avatar
+                avatar,
+                category_id
               },
               total
             }
