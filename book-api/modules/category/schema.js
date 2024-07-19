@@ -48,7 +48,7 @@ const CategoryType = new GraphQLObjectType({
 const CategoryInputType = new GraphQLInputObjectType({
   name: 'CategoryInput',
   fields: {
-    category_id: {
+    categoryId: {
       type: GraphQLID
     },
     name: {

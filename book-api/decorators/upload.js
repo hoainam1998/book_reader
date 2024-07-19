@@ -48,7 +48,9 @@ module.exports = (mode, fields, maxCount) => {
         } else {
           switch (mode) {
             case UPLOAD_MODE.SINGLE:
-              args[0].body[fields] = request.file ? `data:${request.file.mimetype};base64,${request.file.buffer.toString('base64')}` : null;
+              args[0].body[fields] = request.file ?
+                `data:${request.file.mimetype};base64,${request.file.buffer.toString('base64')}`
+                : request.body[fields];
               break;
             case UPLOAD_MODE.ARRAY:
               args[0].body[fields] = request.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
