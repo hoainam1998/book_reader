@@ -5,11 +5,15 @@ import { showToast } from 'utils';
 
 const handlePromise = (promise: Promise<AxiosResponse>) => {
   return new Promise((resolve, reject) => {
-    promise.then((res) => {
-      res.data?.category?.create?.message && showToast('Category', res.data.category.create.message);
-      resolve(res);
-    })
-    .catch((err) => reject(err));
+    promise
+      .then((res) => {
+        res.data?.category?.create?.message &&
+          showToast('Category', res.data.category.create.message);
+        res.data?.category.delete?.message &&
+          showToast('Category', res.data?.category.delete?.message);
+        resolve(res);
+      })
+      .catch(err => reject(err));
   });
 };
 
@@ -28,17 +32,24 @@ export const action = async (args: ActionFunctionArgs) => {
     case 'PUT':
       return true;
     case 'DELETE':
-      return true;
+      const formData = await request.formData();
+      const categoryId = formData.get('categoryId');
+      const body = {
+        query: 'query DeleteCategory($categoryId: ID) { category { delete (categoryId: $categoryId) { message } } }',
+        categoryId
+      };
+      return handlePromise(CategoryService.graphql('delete', body));
     default:
       return true;
   }
-}
+};
 
-export const loader = async (args: LoaderFunctionArgs<any>) => {
+export const loader = (args: LoaderFunctionArgs<any>) => {
   const { request } = args;
 
   switch (request.method) {
-    case 'POST': return true;
+    case 'POST':
+      return true;
     case 'PUT':
       return true;
     case 'DELETE':
@@ -54,7 +65,8 @@ export const loader = async (args: LoaderFunctionArgs<any>) => {
               list {
                 name,
                 avatar,
-                category_id
+                category_id,
+                disabled
               },
               total
             }
@@ -63,6 +75,6 @@ export const loader = async (args: LoaderFunctionArgs<any>) => {
         pageSize,
         pageNumber
       };
-      return handlePromise(CategoryService.graphql('pagination', body));
+      return CategoryService.graphql('pagination', body);
   }
 };

@@ -25,6 +25,7 @@ type CategoryType = {
   category_id: string;
   name: string;
   avatar: string;
+  disabled: boolean;
 };
 
 const state = {
@@ -42,7 +43,7 @@ function Category(): JSX.Element {
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const submit = useSubmit();
   const fetcher = useFetcher();
-  const loaderData: unknown = fetcher.data || useLoaderData();
+  const loaderData: unknown = useLoaderData() || fetcher.data;
 
   const fields: Field[] = [
     {
@@ -59,8 +60,8 @@ function Category(): JSX.Element {
     }
   ];
 
-  const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination.list || [];
-  const total: number = (loaderData as AxiosResponse)?.data?.category.pagination.total || 0;
+  const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination?.list || [];
+  const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
 
   const fileChange = (event: Event) => {
     const files = (event.target as HTMLInputElement).files;
@@ -82,19 +83,20 @@ function Category(): JSX.Element {
   };
 
   const fetchCategory = (pageSize: number, pageNumber: number) => {
-    fetcher.submit({ pageSize, pageNumber },
-    {
-      method: 'get',
-    });
+    fetcher.submit({ pageSize, pageNumber }, { method: 'get' });
+  };
+
+  const deleteCategory = (categoryId: string) => {
+    fetcher.submit({ categoryId }, { method: 'delete' });
   };
 
   const operationSlot = (slotProp: CategoryType) => {
-    const { category_id } = slotProp;
+    const { category_id, disabled } = slotProp;
     return (
       <>
         <Button variant='success' onClick={() => console.log(category_id)}>Update</Button>
           &nbsp;&nbsp;
-        <Button variant='dangerous' onClick={() => console.log(category_id)}>Delete</Button>
+        {!disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
       </>
     );
   };

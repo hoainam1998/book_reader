@@ -168,8 +168,10 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
   }, [pageList]);
 
   useEffect(() => {
-    (pageList[0] as Node<PageButton>).data.active = true;
-    previousSelectedPage = (pageList[0] as Node<PageButton>);
+    if (pageList.length > 0 && (pageList[0] as Node<PageButton>)?.data) {
+      (pageList[0] as Node<PageButton>).data.active = true;
+      previousSelectedPage = (pageList[0] as Node<PageButton>);
+    }
   }, [pageNumber]);
 
   return (
