@@ -5,7 +5,8 @@ const {
   GraphQLList,
   GraphQLID,
   GraphQLError,
-  GraphQLInt
+  GraphQLInt,
+  GraphQLBoolean
 } = require('graphql');
 
 const graphqlErrorOption = {
@@ -38,6 +39,9 @@ const CategoryType = new GraphQLObjectType({
     avatar: {
       type: GraphQLString
     },
+    disabled: {
+      type: GraphQLBoolean
+    }
   }
 });
 
@@ -137,7 +141,7 @@ const query = new GraphQLObjectType({
           const result = await category.pagination(pageSize, pageNumber);
           return {
             list: result[0],
-            total: result[1][0].TOTAL
+            total: result[1][0].total
           };
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);

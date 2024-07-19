@@ -5,7 +5,14 @@ const pool = createPool({
   host: process.env.HOST,
   user: process.env.USER,
   database: 'books',
-  multipleStatements: true
+  multipleStatements: true,
+  typeCast: function (field, next) {
+    if (field.type === 'TINY' && field.length === 1) {
+      return (field.string() === '1');
+    } else {
+      return next();
+    }
+  }
 });
 
 function connectDataBase() {

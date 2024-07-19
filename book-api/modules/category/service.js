@@ -16,8 +16,8 @@ class CategoryService {
 
   pagination(pageSize, pageNumber) {
     return this._sql.query(
-    `SELECT * FROM CATEGORY LIMIT ? OFFSET ?;
-    SELECT COUNT(*) AS TOTAL FROM CATEGORY;`,
+    `SELECT *, IF((SELECT COUNT(*) FROM book AS bo WHERE ca.category_id LIKE bo.category_id > 0), true, false) AS disabled FROM category as ca LIMIT ? OFFSET ?;
+    SELECT COUNT(*) AS total FROM CATEGORY;`,
     [pageSize, (pageNumber - 1) * pageSize]);
   }
 
