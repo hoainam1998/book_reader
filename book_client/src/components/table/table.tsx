@@ -95,10 +95,12 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
           }
         </tbody>
       </table>
-      <div className="table-footer">
-        <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" classes="page-size" />
-        <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
-      </div>
+      { totalPageNumber > 0 &&
+        <div className="table-footer">
+          <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" classes="page-size" />
+          <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
+        </div>
+      }
     </section>
   );
 }

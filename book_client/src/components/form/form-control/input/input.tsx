@@ -34,7 +34,7 @@ function Input({
 }: InputProps): JSX.Element {
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
-      <input id={name} name={name} className={clsx('input custom-input', { 'error': error })}
+      <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
         type={type} autoComplete="off" defaultValue={value}
         onChange={onChange<HTMLInputElement>} onInput={onInput} onFocus={onFocus} />
     </FormControl>

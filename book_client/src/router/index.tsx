@@ -12,7 +12,8 @@ import BookList from 'views/book-group/book-list/book-list';
 import BookDetail from 'views/book-group/book-detail/book-detail';
 import Category, {
   action as categoryAction,
-  loader as categoryLoader
+  loader as categoryLoader,
+  shouldRevalidate as shouldRevalidateCategoryLoader
 } from 'views/category-group/category';
 import ApiError from 'components/error/api-error/api-error';
 import path from './paths';
@@ -29,9 +30,7 @@ const router = createBrowserRouter(
           action={categoryAction}
           loader={categoryLoader}
           errorElement={<ApiError />}
-          shouldRevalidate={() => {
-            return true;
-          }}>
+          shouldRevalidate={shouldRevalidateCategoryLoader}>
         </Route>
         <Route path={path.BOOK} element={<Outlet />}
           handle={{ crumb: (match: UIMatch) => <Link key={match.pathname} to={match.pathname}>Book</Link> }}>
