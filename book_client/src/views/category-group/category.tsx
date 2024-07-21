@@ -1,6 +1,6 @@
-import { useState, useEffect, JSX } from 'react';
+import { useState, useCallback, JSX } from 'react';
 import { AxiosResponse } from 'axios';
-import { useSubmit, useFetcher, useLoaderData } from 'react-router-dom';
+import { useFetcher, useLoaderData, useRevalidator } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
 import Slot from 'components/slot/slot';
@@ -10,7 +10,13 @@ import Form from 'components/form/form';
 import Button from 'components/button/button';
 import useForm from 'hooks/useForm';
 import { required, ValidateFunction, ValidateProcess } from 'utils';
-import { action, loader, shouldRevalidate } from './fetcher';
+import {
+  loadInitCategory,
+  getCategoryDetail,
+  createCategory,
+  updateCategory,
+  deleteCategory as _deleteCategory
+} from './fetcher';
 import './style.scss';
 
 type RuleTypeCompact = {
@@ -21,32 +27,31 @@ type RuleTypeCompact = {
 
 type RuleType = RuleTypeCompact & ArrayLike<RuleTypeCompact>;
 
+type CategoryDetail = { name: string; avatar: string };
+
 type CategoryType = {
   category_id: string;
-  name: string;
-  avatar: string;
   disabled: boolean;
-};
+} & CategoryDetail;
 
 const state = {
   categoryName: '',
   avatar: ''
 };
 
+let currentCategoryId: string = '';
+
 const rules: RuleTypeCompact = {
   categoryName: { required: required('fff') },
-  avatar: { required }
+  avatar: { required: required(() => !currentCategoryId) }
 };
-
-let categoryAction: string = 'add';
-let currentCategoryId: string = '';
 
 function Category(): JSX.Element {
   const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
-  const submit = useSubmit();
   const fetcher = useFetcher();
-  const loaderData: unknown = useLoaderData() || fetcher.data;
+  const revalidator = useRevalidator();
+  const loaderData: unknown = fetcher.data || useLoaderData();
 
   const fields: Field[] = [
     {
@@ -65,46 +70,54 @@ function Category(): JSX.Element {
 
   const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination?.list || [];
   const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
-  const categoryDetail: { name: string; avatar: string } = fetcher.data?.data?.category.detail;
 
-  const fileChange = (event: Event) => {
+  const fileChange = useCallback((event: Event): void => {
     const files = (event.target as HTMLInputElement).files;
+
     if (files) {
       const images = Array.from(files)
         .map((file) => URL.createObjectURL(file));
       setPreviewImage(images);
     }
-  };
+  }, []);
 
-  const onSubmit = (formData: FormData) => {
+  const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): void => {
+    promise.then(revalidator.revalidate);
+  }, []);
+
+  const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
-    formData.append('action', categoryAction);
-    if (categoryAction = 'update') {
-      formData.append('categoryId', currentCategoryId);
-    }
+
     if (!validate.error) {
-      submit(formData, {
-        method: 'post',
-        encType: 'multipart/form-data'
-      });
+      if (currentCategoryId) {
+        formData.append('categoryId', currentCategoryId);
+        reFetchCategory(updateCategory(formData));
+      } else {
+        reFetchCategory(createCategory(formData));
+      }
     }
-  };
+  }, []);
 
-  const fetchCategory = (pageSize: number, pageNumber: number) => {
-    fetcher.submit({ pageSize, pageNumber, action: 'fetch-category' }, { method: 'get' });
-  };
+  const fetchCategory = useCallback((pageSize: number, pageNumber: number): void => {
+    fetcher.submit({ pageSize, pageNumber });
+  }, []);
 
-  const fetchCategoryDetail = (categoryId: string) => {
+  const fetchCategoryDetail = useCallback((categoryId: string): void => {
     currentCategoryId = categoryId;
-    fetcher.submit({ categoryId, action: 'fetch-category-detail' }, { method: 'get' });
-  };
+    getCategoryDetail(categoryId)
+      .then(res => {
+        state.categoryName = res.data.category.detail.name;
+        setPreviewImage([res.data.category.detail.avatar]);
+      });
+  }, []);
 
-  const deleteCategory = (categoryId: string) => {
-    fetcher.submit({ categoryId }, { method: 'delete' });
-  };
+  const deleteCategory = useCallback((categoryId: string): void => {
+    reFetchCategory(_deleteCategory(categoryId));
+  }, []);
 
-  const operationSlot = (slotProp: CategoryType) => {
+  const operationSlot = useCallback((slotProp: CategoryType): JSX.Element => {
     const { category_id, disabled } = slotProp;
+
     return (
       <>
         <Button variant='success' onClick={() => fetchCategoryDetail(category_id)}>Update</Button>
@@ -112,15 +125,7 @@ function Category(): JSX.Element {
         {!disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
       </>
     );
-  };
-
-  useEffect(() => {
-    if (categoryDetail) {
-      state.categoryName = categoryDetail.name;
-      categoryAction = 'update';
-      setPreviewImage([categoryDetail.avatar]);
-    }
-  }, [categoryDetail]);
+  }, []);
 
   return (
     <Grid>
@@ -161,4 +166,4 @@ function Category(): JSX.Element {
 }
 
 export default Category;
-export { action, loader, shouldRevalidate };
+export { loadInitCategory };

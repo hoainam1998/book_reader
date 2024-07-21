@@ -10,18 +10,33 @@ type ErrorInfo = {
   [key: string]: any;
 };
 
-// eslint-disable-next-line no-unused-vars
 export type ValidateProcess = <T>(state: T, field: string) => ErrorFieldInfo;
 
-// eslint-disable-next-line no-unused-vars
-export type ValidateFunction = (message?: string) => ValidateProcess;
+export type ValidateFunction = (...args: (string | (<T>(state: T) => boolean))[]) => ValidateProcess;
 
-export const required: ValidateFunction =
-  (message: string | null = null) => <T>(state: T, field: string): ErrorFieldInfo => {
-    return {
-      error: !(state[field as keyof T] as string).trim(),
-      message: message ?? `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
-    };
+export const required: ValidateFunction = (...args) => <T>(state: T, field: string) => {
+  let message: string = '';
+  let requiredIf: (<T>(state: T) => boolean) | undefined = undefined;
+
+  if (args.length === 1) {
+    if (typeof args[0] === 'string') {
+      message = args[0];
+    }
+  } else if (args.length === 2) {
+    message = args[0] as string;
+    requiredIf = args[1] as (<T>(state: T) => boolean);
+  }
+
+  const errorObj: ErrorFieldInfo = {
+    error: !(state[field as keyof T] as string).trim(),
+    message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
+  };
+
+  if (requiredIf) {
+    errorObj.error = requiredIf(state) ? errorObj.error : false;
+  }
+
+  return errorObj;
 };
 
 const validateCompact = (validates: (() => void)[]): () => void => {

@@ -22,7 +22,7 @@ function ApiError(): JSX.Element {
       case 500: image = 'server-error'; break;
       default: image = 'empty'; break;
     }
-    message = (error.response?.data as AxiosErrorResponse).msg;
+    message = (error.response?.data as AxiosErrorResponse)?.msg || '';
   }
 
   return (<Error<ImageError> image={image} message={message} />);

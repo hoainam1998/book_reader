@@ -11,9 +11,7 @@ import Home from 'views/home/home';
 import BookList from 'views/book-group/book-list/book-list';
 import BookDetail from 'views/book-group/book-detail/book-detail';
 import Category, {
-  action as categoryAction,
-  loader as categoryLoader,
-  shouldRevalidate as shouldRevalidateCategoryLoader
+  loadInitCategory,
 } from 'views/category-group/category';
 import ApiError from 'components/error/api-error/api-error';
 import path from './paths';
@@ -27,10 +25,8 @@ const router = createBrowserRouter(
         <Route index element={<Navigate replace to={path.CATEGORY} />} />
         <Route path={path.CATEGORY} element={<Category />}
           handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>Categories</span> }}
-          action={categoryAction}
-          loader={categoryLoader}
-          errorElement={<ApiError />}
-          shouldRevalidate={shouldRevalidateCategoryLoader}>
+          loader={loadInitCategory}
+          errorElement={<ApiError />} >
         </Route>
         <Route path={path.BOOK} element={<Outlet />}
           handle={{ crumb: (match: UIMatch) => <Link key={match.pathname} to={match.pathname}>Book</Link> }}>
