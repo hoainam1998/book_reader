@@ -62,8 +62,10 @@ function Category(): JSX.Element {
     },
     {
       key: 'operation',
+      width: 150,
       style: {
-        width: 150
+        color: 'transparent',
+        userSelect: 'none',
       }
     }
   ];
@@ -130,12 +132,12 @@ function Category(): JSX.Element {
   return (
     <Grid>
       <GridItem lg={9}>
-        <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
-          <Slot name="avatar" render={
-            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
-          } />
-          <Slot name="operation" render={operationSlot} />
-        </Table>
+          <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
+            <Slot name="avatar" render={
+              (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+            } />
+            <Slot name="operation" render={operationSlot} />
+          </Table>
       </GridItem>
       <GridItem lg={3}>
         <Form method="post" className="category-form" submitLabel="Save" onSubmit={onSubmit}>
@@ -155,9 +157,7 @@ function Category(): JSX.Element {
             {...avatar}
           />
           <div className="image-preview">
-            {previewImage.map((image, index) => (
-              <img key={index} src={image} alt="preview" />
-            ))}
+            {previewImage.map((image, index) => <img key={index} src={image} alt="preview" />)}
           </div>
         </Form>
       </GridItem>

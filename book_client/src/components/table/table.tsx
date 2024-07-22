@@ -14,6 +14,7 @@ import './style.scss';
 
 export type Field = {
   key: string;
+  width?: number;
   style?: CSSProperties;
 };
 
@@ -76,25 +77,27 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
 
   return (
     <section>
-      <table className="table">
-        <colgroup>
-          { fields.map((field, index) => (<col key={index} style={field.style}/>)) }
-        </colgroup>
-        <thead>
-          <tr>
-            { fields.map((field, index) => (<th key={index}>{field.key}</th>)) }
-          </tr>
-        </thead>
-        <tbody>
-          {
-            data.map((item, index) => (
-              <tr key={index}>
-                <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
+      <div className="category-table">
+        <table className="table">
+          <colgroup>
+            { fields.map((field, index) => (<col key={index} width={field.width}/>)) }
+          </colgroup>
+          <thead>
+            <tr>
+              { fields.map((field, index) => (<th key={index} style={field.style}>{field.key}</th>)) }
+            </tr>
+          </thead>
+          <tbody>
+            {
+              data.map((item, index) => (
+                <tr key={index}>
+                  <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
       { totalPageNumber > 0 &&
         <div className="table-footer">
           <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" classes="page-size" />
