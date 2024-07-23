@@ -9,7 +9,7 @@ import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Button from 'components/button/button';
 import useForm from 'hooks/useForm';
-import { required, ValidateFunction, ValidateProcess } from 'utils';
+import { required, ValidateFunction, ValidateProcess } from 'hooks/useValidate';
 import {
   loadInitCategory,
   getCategoryDetail,
@@ -36,10 +36,11 @@ type CategoryType = {
 
 const state = {
   categoryName: '',
-  avatar: ''
+  avatar: null
 };
 
 let currentCategoryId: string = '';
+const formId = 'category-form';
 
 const rules: RuleTypeCompact = {
   categoryName: { required: required('fff') },
@@ -47,7 +48,7 @@ const rules: RuleTypeCompact = {
 };
 
 function Category(): JSX.Element {
-  const { categoryName, avatar, handleSubmit, validate } = useForm(state, rules as RuleType);
+  const { categoryName, avatar, handleSubmit, validate, reset } = useForm(state, rules as RuleType, formId);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -83,8 +84,19 @@ function Category(): JSX.Element {
     }
   }, []);
 
-  const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): void => {
-    promise.then(revalidator.revalidate);
+  const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
+    return promise.then(res => {
+      revalidator.revalidate();
+      return Promise.resolve(res);
+    }).catch(err => Promise.reject(err));
+  }, []);
+
+  const resetState = useCallback((): void => {
+    categoryName.watch('');
+    avatar.watch(null);
+    currentCategoryId = '';
+    setPreviewImage([]);
+    reset();
   }, []);
 
   const onSubmit = useCallback((formData: FormData): void => {
@@ -93,9 +105,9 @@ function Category(): JSX.Element {
     if (!validate.error) {
       if (currentCategoryId) {
         formData.append('categoryId', currentCategoryId);
-        reFetchCategory(updateCategory(formData));
+        reFetchCategory(updateCategory(formData)).then(resetState);
       } else {
-        reFetchCategory(createCategory(formData));
+        reFetchCategory(createCategory(formData)).then(resetState);
       }
     }
   }, []);
@@ -108,7 +120,7 @@ function Category(): JSX.Element {
     currentCategoryId = categoryId;
     getCategoryDetail(categoryId)
       .then(res => {
-        state.categoryName = res.data.category.detail.name;
+        categoryName.watch(res.data.category.detail.name);
         setPreviewImage([res.data.category.detail.avatar]);
       });
   }, []);
@@ -132,15 +144,15 @@ function Category(): JSX.Element {
   return (
     <Grid>
       <GridItem lg={9}>
-          <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
-            <Slot name="avatar" render={
-              (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
-            } />
-            <Slot name="operation" render={operationSlot} />
-          </Table>
+        <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
+          <Slot name="avatar" render={
+            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+          } />
+          <Slot name="operation" render={operationSlot} />
+        </Table>
       </GridItem>
       <GridItem lg={3}>
-        <Form method="post" className="category-form" submitLabel="Save" onSubmit={onSubmit}>
+        <Form id={formId} className="category-form" submitLabel="Save" onSubmit={onSubmit}>
           <Input
             label="Category name"
             className="category-form-control"

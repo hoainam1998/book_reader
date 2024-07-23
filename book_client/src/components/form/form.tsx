@@ -5,21 +5,21 @@ import { clsx } from 'utils';
 import './style.scss';
 
 type FormProps = {
+  id: string;
   className?: string;
   children: React.ReactElement[] | React.ReactElement;
   submitLabel: string;
   disableSubmitButton?: boolean;
-  method: 'post' | 'put';
   // eslint-disable-next-line no-unused-vars,
   onSubmit: (formData: FormData) => void;
 };
 
 function Form({
   children,
+  id,
   className,
   submitLabel = 'Submit',
   disableSubmitButton = false,
-  method,
   onSubmit
 }: FormProps): JSX.Element {
 
@@ -29,9 +29,7 @@ function Form({
   };
 
   return (
-    <form method={method}
-      className={clsx('form', className)}
-      encType="multipart/form-data">
+    <form id={id} className={clsx('form', className)} encType="multipart/form-data">
       {children}
       <Button className="btn-submit" onClick={handleSubmit} disabled={disableSubmitButton}>{submitLabel}</Button>
     </form>

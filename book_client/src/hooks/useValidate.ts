@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 type ErrorFieldInfo = {
   error: boolean;
   message: string;
@@ -15,12 +17,15 @@ export type ValidateProcess = <T>(state: T, field: string) => ErrorFieldInfo;
 export type ValidateFunction = (...args: (string | (<T>(state: T) => boolean))[]) => ValidateProcess;
 
 export const required: ValidateFunction = (...args) => <T>(state: T, field: string) => {
+  const value = state[field as keyof T];
   let message: string = '';
   let requiredIf: (<T>(state: T) => boolean) | undefined = undefined;
 
   if (args.length === 1) {
     if (typeof args[0] === 'string') {
       message = args[0];
+    } else {
+      requiredIf = args[0];
     }
   } else if (args.length === 2) {
     message = args[0] as string;
@@ -28,7 +33,7 @@ export const required: ValidateFunction = (...args) => <T>(state: T, field: stri
   }
 
   const errorObj: ErrorFieldInfo = {
-    error: !(state[field as keyof T] as string).trim(),
+    error: typeof value === 'string' ? !value.trim() : !value,
     message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
   };
 
@@ -51,11 +56,13 @@ let objectValidate: ErrorInfo = {
 
 let alreadyCreate = false;
 
-const validateHelper =
+const useValidate =
   <T, R>(state: T, rules: R & ArrayLike<R>): ErrorInfo => {
+  const setError = useState(false)[1];
+
   const validateProcess = (field: string, validateName: string, validateResult: ErrorFieldInfo): boolean => {
     objectValidate[field][validateName].error = validateResult.error;
-    if (validateResult.error) {
+    if (validateResult.error && !objectValidate[field].errors.includes(validateResult.message)) {
       objectValidate[field].errors.push(validateResult.message);
     } else {
       objectValidate[field].errors
@@ -90,14 +97,17 @@ const validateHelper =
           if (objectValidate.dirty || objectValidate[key].dirty) {
             try {
               validateResult =
-              validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
+                validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
             } catch {
               validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
             }
+          } else {
+            objectValidate[key].errors = [];
           }
           return validateResult;
       });
       objectValidate.error = Object.keys(rules).some(key => objectValidate[key].error);
+      setError(objectValidate.error);
     };
     objectValidate[key].validate = validate;
     return validate;
@@ -107,4 +117,4 @@ const validateHelper =
   return objectValidate;
 };
 
-export default validateHelper;
+export default useValidate;

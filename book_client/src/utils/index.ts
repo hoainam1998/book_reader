@@ -1,6 +1,6 @@
-import validateHelper, { required } from './validate';
 import { showToast } from './toast';
-import type { ValidateFunction, ValidateProcess } from './validate';
+import { showLoading, hideLoading } from './loading';
+
 /**
  * Return class text from array.
  *
@@ -24,9 +24,7 @@ const clsx = (...classes: any[]): string => {
 
 export {
   clsx,
-  validateHelper,
-  required,
   showToast,
-  ValidateFunction,
-  ValidateProcess,
+  showLoading,
+  hideLoading,
 };
