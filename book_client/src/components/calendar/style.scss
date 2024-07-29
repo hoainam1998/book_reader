@@ -1,0 +1,26 @@
+.calendar {
+  width: 210px;
+  height: 200px;
+}
+
+.calendar-body {
+  @extend .calendar !optional;
+  display: grid;
+  gap: 5px;
+  column-gap: 5px;
+
+  .day-name {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .days, .day-name {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: repeat(7, 25px);
+  }
+
+  .day-btn {
+    padding: 5px;
+  }
+}

@@ -1,0 +1,13 @@
+.header-calendar {
+  display: flex;
+  justify-content: space-between;
+
+  .icon-arrow {
+    font-size: 20px;
+    line-height: 17px;
+  }
+
+  .header-button {
+    background: transparent;
+  }
+}

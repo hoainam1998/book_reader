@@ -9,12 +9,18 @@ const Api = axios.create({
 Api.interceptors.request.use((config) => {
   showLoading();
   return config;
-}, (error) => Promise.reject(error));
+}, (error) => {
+  hideLoading();
+  return Promise.reject(error);
+});
 
 Api.interceptors.response.use((config) => {
   hideLoading();
   return config;
-}, (error) => Promise.reject(error));
+}, (error) => {
+  hideLoading();
+  return Promise.reject(error);
+});
 
 export type {
   AxiosResponse

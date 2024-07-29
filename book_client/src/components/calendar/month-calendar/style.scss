@@ -1,0 +1,21 @@
+@import '../style.scss';
+
+.month-calendar {
+  @extend .calendar !optional;
+
+  .year-btn {
+    background-color: transparent;
+  }
+
+  .month-btn {
+    width: 50%;
+    height: calc((200px - 27px) / 6);
+    display: inline-block;
+    background-color: transparent;
+  }
+
+  .current-month {
+    background-color: $title-pop-up-color;
+    color: $white-color;
+  }
+}
