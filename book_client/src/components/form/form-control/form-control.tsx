@@ -1,4 +1,4 @@
-import { JSX, ReactElement } from 'react';
+import { JSX, ReactElement, forwardRef, useRef, useImperativeHandle } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -11,9 +11,17 @@ type FormControlProps = {
   errors: string[];
 };
 
-function FormControl({ label, name, children, errors, className, labelClass }: FormControlProps): JSX.Element {
+function FormControl({ label, name, children, errors, className, labelClass }: FormControlProps, ref: any): JSX.Element {
+  const fieldsetRef = useRef(null);
+
+  useImperativeHandle(ref, () => {
+    return {
+      rect: (fieldsetRef.current! as HTMLFieldSetElement).getBoundingClientRect()
+    };
+  }, []);
+
   return (
-    <fieldset className={clsx('fieldset', className)}>
+    <fieldset className={clsx('fieldset', className)} ref={fieldsetRef}>
       {label && <label htmlFor={name} className={labelClass}>{label}</label>}
       {children}
       <div className="error-feedback">
@@ -23,4 +31,4 @@ function FormControl({ label, name, children, errors, className, labelClass }: F
   );
 }
 
-export default FormControl;
+export default forwardRef(FormControl);

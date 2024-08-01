@@ -30,7 +30,7 @@ function Input({
   labelClass,
   onChange,
   onInput,
-  onFocus
+  onFocus,
 }: InputProps): JSX.Element {
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>

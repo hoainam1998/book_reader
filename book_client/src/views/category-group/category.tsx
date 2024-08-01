@@ -8,8 +8,8 @@ import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Button from 'components/button/button';
-import useForm from 'hooks/useForm';
-import { required, ValidateFunction, ValidateProcess } from 'hooks/useValidate';
+import useForm, { RuleType } from 'hooks/useForm';
+import { required } from 'hooks/useValidate';
 import {
   loadInitCategory,
   getCategoryDetail,
@@ -19,13 +19,7 @@ import {
 } from './fetcher';
 import './style.scss';
 
-type RuleTypeCompact = {
-  [key: string]: {
-    [key: string]: ValidateFunction | ValidateProcess;
-  };
-};
-
-type RuleType = RuleTypeCompact & ArrayLike<RuleTypeCompact>;
+type RuleTypeCategory = RuleType & ArrayLike<RuleType>;
 
 type CategoryDetail = { name: string; avatar: string };
 
@@ -40,15 +34,15 @@ const state = {
 };
 
 let currentCategoryId: string = '';
-const formId = 'category-form';
+const formId: string = 'category-form';
 
-const rules: RuleTypeCompact = {
+const rules: RuleType = {
   categoryName: { required: required('fff') },
   avatar: { required: required(() => !currentCategoryId) }
 };
 
 function Category(): JSX.Element {
-  const { categoryName, avatar, handleSubmit, validate, reset } = useForm(state, rules as RuleType, formId);
+  const { categoryName, avatar, handleSubmit, validate, reset } = useForm(state, rules as RuleTypeCategory, formId);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const fetcher = useFetcher();
   const revalidator = useRevalidator();

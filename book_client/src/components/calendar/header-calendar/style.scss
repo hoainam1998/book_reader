@@ -9,5 +9,9 @@
 
   .header-button {
     background: transparent;
+
+    &:focus {
+      color: $title-pop-up-color;
+    }
   }
 }

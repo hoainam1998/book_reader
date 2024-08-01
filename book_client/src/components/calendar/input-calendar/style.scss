@@ -1,0 +1,26 @@
+.input-calendar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid $border-input-color;
+
+  & > input {
+    border: none;
+    outline: none;
+    height: 100%;
+  }
+
+  & > img {
+    width: 17px;
+    height: 17px;
+    margin-right: 5px;
+  }
+}
+
+.input-calendar-position {
+  width: 220px;
+  border: none;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+}

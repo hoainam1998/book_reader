@@ -37,6 +37,20 @@ button {
   height: 30px;
 }
 
+.input {
+  border: 1px solid $border-input-color;
+  padding: 0 5px;
+  width: 100%;
+
+  &[type="file"]::file-selector-button {
+    background-color: $primary-color;
+    border: none;
+    height: 100%;
+    margin-left: -5px;
+    color: $white-color;
+  }
+}
+
 .error-input {
   border-color: $error-color !important;
 }

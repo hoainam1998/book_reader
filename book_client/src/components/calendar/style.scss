@@ -1,10 +1,15 @@
 .calendar {
-  width: 210px;
-  height: 200px;
+  width: 220px;
+  height: 245px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  position: fixed;
+  background-color: $white-color;
 }
 
 .calendar-body {
   @extend .calendar !optional;
+  border-radius: 3px;
+  padding: 7px;
   display: grid;
   gap: 5px;
   column-gap: 5px;
