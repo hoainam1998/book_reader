@@ -12,7 +12,6 @@ import './style.scss';
 
 const months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const currentDate: Date = new Date();
-const currentYear = getYear(currentDate);
 let dateUpdated: Date = new Date(currentDate);
 
 type MonthCalendar = {
@@ -21,22 +20,19 @@ type MonthCalendar = {
     left: number;
   };
   currentMonth: number;
+  currentYear: number;
   docker: Root;
   onOpenYearCalendar: () => void;
   onMonthChange: (month: number) => void;
 };
 
-function MonthCalendar({ position, currentMonth, onOpenYearCalendar, onMonthChange }: MonthCalendar): JSX.Element {
-  const [year, setYear] = useState<number>(getYear(dateUpdated));
+function MonthCalendar({ position, currentMonth, currentYear, onOpenYearCalendar, onMonthChange }: MonthCalendar): JSX.Element {
+  const [year, setYear] = useState<number>(currentYear);
 
   const positionStyle: CSSProperties = {
     ...position,
     zIndex: 2000
   };
-
-  const setMonth = useCallback((monthIndex: number): void => {
-    onMonthChange(monthIndex);
-  }, []);
 
   const onBackToHead = useCallback((): void => {
     dateUpdated = addYears(dateUpdated, -1);
@@ -55,7 +51,7 @@ function MonthCalendar({ position, currentMonth, onOpenYearCalendar, onMonthChan
       </HeaderCalendar>
       {
         months.map((month, index) =>
-          <Button key={index} onClick={() => setMonth(index)}
+          <Button key={index} onClick={() => onMonthChange(index)}
             className={clsx('month-btn', { 'current-month': currentMonth === index && year === currentYear })}>
             {month}
           </Button>

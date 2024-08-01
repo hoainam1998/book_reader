@@ -9,7 +9,9 @@ type YearCalendar = {
   position: {
     left: number;
     top: number;
-  }
+  };
+  currentYear: number;
+  onYearChange: (year: number) => void;
 };
 
 const yearsMatrix: Array<number[]> = [
@@ -17,11 +19,10 @@ const yearsMatrix: Array<number[]> = [
   [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029]
 ];
 
-function YearCalendar({ position }: YearCalendar): JSX.Element {
-  const currentYear: number = getYear(new Date());
+function YearCalendar({ position, currentYear, onYearChange }: YearCalendar): JSX.Element {
   const initYears: number[] = yearsMatrix[0].includes(currentYear) ? yearsMatrix[0] : yearsMatrix[1];
-  const [years, setYears] = useState(initYears);
-  const yearRange = useMemo(() => `${years[0]} - ${years[years.length - 1]}`, [years]);
+  const [years, setYears] = useState<number[]>(initYears);
+  const yearRange = useMemo<string>(() => `${years[0]} - ${years[years.length - 1]}`, [years]);
 
   const positionCalendar: CSSProperties = {
     ...position,
@@ -35,11 +36,11 @@ function YearCalendar({ position }: YearCalendar): JSX.Element {
   return (
     <div className="year-calendar" style={positionCalendar}>
       <HeaderCalendar onBackToHead={() => onRangeYearChange(0)} onBackToLast={() => onRangeYearChange(1)}>
-        <Button onClick={() => {}} className="year-selected">{yearRange}</Button>
+        <span className="year-range">{yearRange}</span>
       </HeaderCalendar>
       {
         years.map((year, index) =>
-          <Button key={index} onClick={() => {}}
+          <Button key={index} onClick={() => onYearChange(year)}
             className={clsx('year-button', { 'current-year': year === currentYear })}>
               {year}
           </Button>

@@ -3,7 +3,6 @@ import {
   useCallback,
   useReducer,
   useEffect,
-  useMemo,
   useImperativeHandle,
   forwardRef,
   useRef,
@@ -25,6 +24,7 @@ import {
   addYears,
   setDate,
   setMonth,
+  setYear,
 } from 'date-fns';
 import { clsx } from 'utils';
 import Button from 'components/button/button';
@@ -44,7 +44,8 @@ enum CalendarActionType {
   PREVIOUS = 'previous',
   LAST = 'last',
   HEAD = 'head',
-  MONTH_SELECTED = 'month_selected'
+  MONTH_SELECTED = 'month_selected',
+  YEAR_SELECTED = 'year_selected',
 };
 
 type Day = {
@@ -55,6 +56,7 @@ type Day = {
 type CalendarReducerAction = {
   type: CalendarActionType;
   month?: number;
+  year?: number;
 };
 
 type CalendarReducerState = {
@@ -72,10 +74,12 @@ const currentDate: Date = new Date();
 const firstDayOfWeekIndex: number = 0;
 const monthName: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 let seletedDate: Date = currentDate;
+let selectedYear: number = getYear(currentDate);
 let calendarDocker: Root | null = null;
 let monthCalendarDocker: Root | null = null;
 let yearCalendarDocker: Root | null = null;
 const browserHeight: number = window.innerHeight;
+
 const positionCalendar = {
   left: 0,
   top: 0
@@ -122,6 +126,8 @@ const calendarChange = (state: CalendarReducerState, action: CalendarReducerActi
         return calculateCalendarInfor(addYears(state.date, -1));
       case CalendarActionType.MONTH_SELECTED:
         return calculateCalendarInfor(setMonth(state.date, action.month!));
+      case CalendarActionType.YEAR_SELECTED:
+        return calculateCalendarInfor(setYear(state.date, action.year!));
       default: return state;
     }
 };
@@ -170,11 +176,6 @@ function Calendar(): JSX.Element {
   const dayCelendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
   const { day } = useForm(state, rule as RuleTypeCalendar, 'form');
 
-  const currentMonthIndex : number = useMemo(
-    () => getMonth(dayCelendarRef.current?.date || currentDate),
-    [dayCelendarRef.current?.date]
-  );
-
   const setDay = useCallback((daySelected: string): void => {
     day.onChange(setDate(dayCelendarRef.current!.date, parseInt(daySelected)));
     calendarDocker?.unmount();
@@ -183,6 +184,13 @@ function Calendar(): JSX.Element {
   const setMonthSelected = useCallback((monthIndex: number): void => {
     dayCelendarRef.current!.dispatch({ type: CalendarActionType.MONTH_SELECTED, month: monthIndex });
     monthCalendarDocker?.unmount();
+  }, []);
+
+  const setYearSelected = useCallback((year: number): void => {
+    selectedYear = year;
+    dayCelendarRef.current!.dispatch({ type: CalendarActionType.YEAR_SELECTED, year });
+    yearCalendarDocker?.unmount();
+    openMonthCalendar();
   }, []);
 
   const DayCalendar = forwardRef(({ selectedDay }: DayCalendarProps, ref: any): JSX.Element => {
@@ -254,8 +262,8 @@ function Calendar(): JSX.Element {
 
   const openYearCalendar = useCallback((): void => {
     yearCalendarDocker = createRoot(document.getElementById('year-calendar-docker')!);
-    yearCalendarDocker.render(<YearCalendar position={positionCalendar} />);
-  }, []);
+    yearCalendarDocker.render(<YearCalendar currentYear={selectedYear} position={positionCalendar} onYearChange={setYearSelected} />);
+  }, [selectedYear]);
 
   const openDayCalendar = useCallback((): void => {
     calendarDocker = createRoot(document.getElementById('calendar-docker')!);
@@ -263,9 +271,11 @@ function Calendar(): JSX.Element {
   }, [day.value]);
 
   const openMonthCalendar = useCallback((): void => {
+    const currentMonthIndex: number = getMonth(dayCelendarRef.current?.date || currentDate);
     monthCalendarDocker = createRoot(document.getElementById('month-calendar-docker')!);
     monthCalendarDocker.render(
       <MonthCalendar
+        currentYear={selectedYear}
         currentMonth={currentMonthIndex}
         docker={monthCalendarDocker}
         onMonthChange={setMonthSelected}
