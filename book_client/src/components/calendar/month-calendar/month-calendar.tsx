@@ -1,18 +1,18 @@
-import { CSSProperties, JSX, useCallback, useState } from 'react';
+import { CSSProperties, JSX, useCallback, useState, useReducer } from 'react';
 import { Root } from 'react-dom/client';
 import HeaderCalendar from '../header-calendar/header-calendar';
-import Button from 'components/button/button';
-import {
-  getYear,
-  getMonth,
-  addYears,
-} from 'date-fns';
+import Button from 'components/button/button';;
 import { clsx } from 'utils';
 import './style.scss';
 
 const months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const currentDate: Date = new Date();
-let dateUpdated: Date = new Date(currentDate);
+const miniYear: number = 2010;
+const maximumYear: number = 2029;
+
+enum YearChangedReducerAction {
+  LAST = 'last',
+  HEAD = 'head',
+};
 
 type MonthCalendar = {
   position: {
@@ -24,10 +24,44 @@ type MonthCalendar = {
   docker: Root;
   onOpenYearCalendar: () => void;
   onMonthChange: (month: number) => void;
+  onYearChange: (year: number) => void;
 };
 
-function MonthCalendar({ position, currentMonth, currentYear, onOpenYearCalendar, onMonthChange }: MonthCalendar): JSX.Element {
-  const [year, setYear] = useState<number>(currentYear);
+
+type YearChangedReducerActionType = {
+  type: string;
+};
+
+const yearChangedReducer =
+  (onYearChange: (year: number) => void) =>
+    (state: number, action: YearChangedReducerActionType): number => {
+  switch (action.type) {
+    case YearChangedReducerAction.HEAD:
+      if (state > miniYear) {
+        onYearChange(state - 1);
+        return state - 1;
+      }
+      return state;
+    case YearChangedReducerAction.LAST:
+      if (state < maximumYear) {
+        onYearChange(state + 1);
+        return state + 1;
+      }
+      return state;
+    default:
+      return state;
+  }
+};
+
+function MonthCalendar({
+  position,
+  currentMonth,
+  currentYear,
+  onOpenYearCalendar,
+  onMonthChange,
+  onYearChange
+}: MonthCalendar): JSX.Element {
+  const [year, dispatch] = useReducer(yearChangedReducer(onYearChange), currentYear);
 
   const positionStyle: CSSProperties = {
     ...position,
@@ -35,13 +69,11 @@ function MonthCalendar({ position, currentMonth, currentYear, onOpenYearCalendar
   };
 
   const onBackToHead = useCallback((): void => {
-    dateUpdated = addYears(dateUpdated, -1);
-    setYear(getYear(dateUpdated));
+    dispatch({ type: YearChangedReducerAction.HEAD });
   }, []);
 
   const onBackToLast = useCallback((): void => {
-    dateUpdated = addYears(dateUpdated, 1);
-    setYear(getYear(dateUpdated));
+    dispatch({ type: YearChangedReducerAction.LAST });
   }, []);
 
   return (

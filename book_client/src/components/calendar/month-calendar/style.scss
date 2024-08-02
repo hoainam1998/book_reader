@@ -2,6 +2,7 @@
 
 .month-calendar {
   @extend .calendar !optional;
+  padding: 5px;
 
   .year-btn {
     background-color: transparent;
@@ -9,7 +10,7 @@
 
   .month-btn {
     width: 50%;
-    height: calc((245px - 27px) / 6);
+    height: calc(((245px - 10px) - 27px) / 6);
     display: inline-block;
     background-color: transparent;
   }

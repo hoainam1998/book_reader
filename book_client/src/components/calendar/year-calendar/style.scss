@@ -2,6 +2,7 @@
 
 .year-calendar {
   @extend .calendar;
+  padding: 5px;
 
   .year-selected {
     background-color: transparent;
@@ -9,7 +10,7 @@
 
   .year-button {
     width: 50%;
-    height: calc((245px - 27px) / 5);
+    height: calc(((245px - 10px) - 27px) / 5);
     background-color: transparent;
   }
 

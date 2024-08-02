@@ -1,5 +1,4 @@
 import { JSX, useState, useMemo, useCallback, CSSProperties } from 'react';
-import { getYear } from 'date-fns';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';
 import { clsx } from 'utils';
@@ -26,7 +25,7 @@ function YearCalendar({ position, currentYear, onYearChange }: YearCalendar): JS
 
   const positionCalendar: CSSProperties = {
     ...position,
-    zIndex: 1000
+    zIndex: 3000
   };
 
   const onRangeYearChange = useCallback((index: number): void => {
