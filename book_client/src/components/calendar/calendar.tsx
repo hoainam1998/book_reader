@@ -26,6 +26,7 @@ let selectedYear: number = getYear(currentDate);
 let calendarDocker: Root | null = null;
 let monthCalendarDocker: Root | null = null;
 let yearCalendarDocker: Root | null = null;
+let monthCalendarShowed: boolean = false;
 
 const positionCalendar = {
   left: 0,
@@ -42,7 +43,14 @@ const rule: RuleType = {
 
 type RuleTypeCalendar = RuleType & ArrayLike<RuleType>;
 
-function Calendar(): JSX.Element {
+type CalendarPropsType = {
+  value: Date;
+  label: string;
+  name: string;
+};
+
+function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
+  state.day = value;
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
   const { day } = useForm(state, rule as RuleTypeCalendar, 'form');
@@ -62,6 +70,7 @@ function Calendar(): JSX.Element {
   const setMonthSelected = useCallback((monthIndex: number): void => {
     dayCalendarRef.current!.dispatch({ type: CalendarActionType.MONTH_SELECTED, month: monthIndex });
     monthCalendarDocker?.unmount();
+    monthCalendarShowed = false;
   }, []);
 
   const setYearSelected = useCallback((year: number): void => {
@@ -100,17 +109,20 @@ function Calendar(): JSX.Element {
   }, [day.value]);
 
   const openMonthCalendar = useCallback((): void => {
-    const currentMonthIndex: number = getMonth(dayCalendarRef.current?.date || currentDate);
-    monthCalendarDocker = createRoot(document.getElementById('month-calendar-docker')!);
-    monthCalendarDocker.render(
-      <MonthCalendar
-        currentYear={selectedYear}
-        currentMonth={currentMonthIndex}
-        docker={monthCalendarDocker}
-        onMonthChange={setMonthSelected}
-        onOpenYearCalendar={openYearCalendar}
-        onYearChange={setYear}
-        position={positionCalendar} />);
+    if (!monthCalendarShowed) {
+      const currentMonthIndex: number = getMonth(dayCalendarRef.current?.date || currentDate);
+      monthCalendarDocker = createRoot(document.getElementById('month-calendar-docker')!);
+      monthCalendarDocker.render(
+        <MonthCalendar
+          currentYear={selectedYear}
+          currentMonth={currentMonthIndex}
+          docker={monthCalendarDocker}
+          onMonthChange={setMonthSelected}
+          onOpenYearCalendar={openYearCalendar}
+          onYearChange={setYear}
+          position={positionCalendar} />);
+      monthCalendarShowed = true;
+    }
   }, [day.value]);
 
   useEffect(() => {
@@ -119,7 +131,7 @@ function Calendar(): JSX.Element {
 
   return (
     <section className="calendar-wrapper">
-      <InputCalendar {...day} label="Day" name="publish-day" onOpen={openDayCalendar} ref={inputCalendarRef} />
+      <InputCalendar {...day} label={label} name={name} onOpen={openDayCalendar} ref={inputCalendarRef} />
       <div id="calendar-docker" />
       <div id="month-calendar-docker" />
       <div id="year-calendar-docker" />

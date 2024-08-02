@@ -1,12 +1,15 @@
 import { JSX } from 'react';
 import Grid, { GridItem } from 'components/grid/grid';
+import Calendar from 'components/calendar/calendar';
 import './style.scss';
 
 function BookDetail(): JSX.Element {
   return (
-    <Grid lg={2} sm={4} md={3}>
-      <GridItem sm={4} md={6} lg={11}>col.1</GridItem>
-      <GridItem lg={12} md={6} sm={4}>col.2</GridItem>
+    <Grid lg={4} sm={4} md={3}>
+      <GridItem>
+        <Calendar value={new Date(new Date().setDate(3))} label="Publish day" name="publish-day" />
+      </GridItem>
+      <GridItem>col.2</GridItem>
       <GridItem>col.3</GridItem>
       <GridItem>col.4</GridItem>
     </Grid>

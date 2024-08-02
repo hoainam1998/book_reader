@@ -14,7 +14,6 @@ import Category, {
   loadInitCategory,
 } from 'views/category-group/category';
 import ApiError from 'components/error/api-error/api-error';
-import Calendar from 'components/calendar/calendar';
 import path from './paths';
 
 const router = createBrowserRouter(
@@ -36,7 +35,6 @@ const router = createBrowserRouter(
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>
         </Route>
       </Route>
-      <Route path="test" element={<Calendar />} />
     </>
   )
 );
