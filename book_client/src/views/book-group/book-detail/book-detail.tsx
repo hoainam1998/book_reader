@@ -13,7 +13,7 @@ type RuleTypeBook = RuleType & ArrayLike<RuleType>;
 const state: StateType = {
   name: '',
   pdf: null,
-  publishedDay: new Date(),
+  publishedDay: null,
   publishedTime: null,
   categoryId: null
 };
@@ -29,7 +29,16 @@ const rules: RuleType = {
 const formId: string = 'book-detail-form';
 
 function BookDetail(): JSX.Element {
-  const { name, categoryId, publishedTime, publishedDay, pdf, handleSubmit, validate, reset } = useForm(state, rules as RuleTypeBook, formId);
+  const {
+    name,
+    categoryId,
+    publishedTime,
+    publishedDay,
+    pdf,
+    handleSubmit,
+    validate,
+    reset
+  } = useForm(state, rules as RuleTypeBook, formId);
 
   const onSubmit = (): void => {
     handleSubmit();
@@ -37,8 +46,8 @@ function BookDetail(): JSX.Element {
 
   return (
     <Form id={formId} submitLabel="Save" onSubmit={onSubmit}>
-      <Grid lg={4} sm={4} md={3}>
-        <GridItem>
+      <Grid>
+        <GridItem lg={3}>
           <Input
             {...name}
             label="Name"
@@ -46,7 +55,7 @@ function BookDetail(): JSX.Element {
             labelClass="name-label"
             inputClass="name-input" />
         </GridItem>
-        <GridItem>
+        <GridItem lg={3}>
           <Input
             {...pdf}
             type="file"
@@ -56,7 +65,7 @@ function BookDetail(): JSX.Element {
             labelClass="pdf-label"
             inputClass="pdf-input" />
         </GridItem>
-        <GridItem>
+        <GridItem lg={2}>
           <Input
             {...publishedTime}
             type="number"
@@ -65,7 +74,7 @@ function BookDetail(): JSX.Element {
             inputClass="published-time-input"
             ame="publishedTime" />
         </GridItem>
-        <GridItem>
+        <GridItem lg={2}>
           <Calendar
             {...publishedDay}
             labelClass="label"
@@ -73,14 +82,14 @@ function BookDetail(): JSX.Element {
             label="Publish day"
             name="publish-day" />
         </GridItem>
-        <GridItem>
+        <GridItem lg={2}>
           <Select
             {...categoryId}
             label="Category"
             labelClass="category-id-label"
             selectClass="category-id-input"
             name="categoryId"
-            options={[]}  />
+            options={[]} />
         </GridItem>
       </Grid>
     </Form>

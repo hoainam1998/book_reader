@@ -53,7 +53,7 @@ export enum CalendarActionType {
 };
 
 type DayCalendarProps = {
-  selectedDay: Date;
+  selectedDay: number | null;
   position: {
     left: number;
     top: number;
@@ -168,7 +168,7 @@ function DayCalendar(
 ): JSX.Element {
   const [{ month, year, weeks, date }, dispatch] = useReducer(
     calendarChange,
-    calculateStateReducer(selectedDay)
+    calculateStateReducer(new Date(selectedDay || currentDate))
   );
   const onNext = useCallback(() => dispatch({ type: CalendarActionType.NEXT }), []);
   const onPrevious = useCallback(() => dispatch({ type: CalendarActionType.PREVIOUS }), []);

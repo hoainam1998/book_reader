@@ -69,7 +69,7 @@ function Category(): JSX.Element {
   const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
 
   const fileChange = useCallback((event: Event): void => {
-    const files = (event.target as HTMLInputElement).files;
+    const files: FileList | null = (event.target as HTMLInputElement).files;
 
     if (files) {
       const images = Array.from(files)

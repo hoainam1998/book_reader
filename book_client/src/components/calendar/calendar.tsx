@@ -32,28 +32,31 @@ const positionCalendar = {
 };
 
 const state = {
-  day: currentDate,
+  day: currentDate.getTime(),
 };
 
 type CalendarPropsType = {
-  value: Date;
+  value: number | null;
   label: string;
   name: string;
   labelClass: string;
   errors: string[];
   error: boolean;
-  onChange: (dateSelected: Date) => void;
+  onChange: (dateSelected: number) => void;
   onFocus: () => void;
 };
 
 function Calendar({ value, label, name, errors, error, labelClass, onChange, onFocus }: CalendarPropsType): JSX.Element {
-  state.day = value;
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
 
+  if (value) {
+    state.day = value;
+  }
+
   const setDay = useCallback((daySelected: string): void => {
     const dateSelected: Date = setDate(dayCalendarRef.current!.date, parseInt(daySelected));
-    onChange(dateSelected);
+    onChange(dateSelected.getTime());
     calendarDocker?.unmount();
     selectedYear = getYear(dateSelected);
   }, []);
