@@ -8,7 +8,7 @@ import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Button from 'components/button/button';
-import useForm, { RuleType } from 'hooks/useForm';
+import useForm, { RuleType, StateType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import {
   loadInitCategory,
@@ -28,7 +28,7 @@ type CategoryType = {
   disabled: boolean;
 } & CategoryDetail;
 
-const state = {
+const state: StateType = {
   categoryName: '',
   avatar: null
 };

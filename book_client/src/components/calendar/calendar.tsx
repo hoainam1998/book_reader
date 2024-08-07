@@ -5,7 +5,6 @@ import {
   useRef,
 } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { required } from 'hooks/useValidate';
 import {
   getMonth,
   getYear,
@@ -15,7 +14,6 @@ import MonthCalendar from './month-calendar/month-calendar';
 import YearCalendar from './year-calendar/year-calendar';
 import InputCalendar from './input-calendar/input-calendar';
 import DayCalendar, { CalendarReducerAction, CalendarActionType } from './day-calendar/day-calendar';
-import useForm, { RuleType } from 'hooks/useForm';
 import './style.scss';
 
 const calendarHeight: number = 245;
@@ -37,27 +35,25 @@ const state = {
   day: currentDate,
 };
 
-const rule: RuleType = {
-  day: { required }
-};
-
-type RuleTypeCalendar = RuleType & ArrayLike<RuleType>;
-
 type CalendarPropsType = {
   value: Date;
   label: string;
   name: string;
+  labelClass: string;
+  errors: string[];
+  error: boolean;
+  onChange: (dateSelected: Date) => void;
+  onFocus: () => void;
 };
 
-function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
+function Calendar({ value, label, name, errors, error, labelClass, onChange, onFocus }: CalendarPropsType): JSX.Element {
   state.day = value;
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
-  const { day } = useForm(state, rule as RuleTypeCalendar, 'form');
 
   const setDay = useCallback((daySelected: string): void => {
     const dateSelected: Date = setDate(dayCalendarRef.current!.date, parseInt(daySelected));
-    day.onChange(dateSelected);
+    onChange(dateSelected);
     calendarDocker?.unmount();
     selectedYear = getYear(dateSelected);
   }, []);
@@ -104,9 +100,9 @@ function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
         onOpenMonthCalendar={openMonthCalendar}
         onOpenYearCalendar={openYearCalendar}
         onDayChange={setDay}
-        selectedDay={day.value}
+        selectedDay={value}
         ref={dayCalendarRef} />);
-  }, [day.value]);
+  }, [value]);
 
   const openMonthCalendar = useCallback((): void => {
     if (!monthCalendarShowed) {
@@ -123,7 +119,7 @@ function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
           position={positionCalendar} />);
       monthCalendarShowed = true;
     }
-  }, [day.value]);
+  }, [value]);
 
   useEffect(() => {
     calculateCalendarPosition();
@@ -131,7 +127,16 @@ function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
 
   return (
     <section className="calendar-wrapper">
-      <InputCalendar {...day} label={label} name={name} onOpen={openDayCalendar} ref={inputCalendarRef} />
+      <InputCalendar
+        error={error}
+        errors={errors}
+        value={value}
+        label={label}
+        labelClass={labelClass}
+        name={name}
+        onOpen={openDayCalendar}
+        onFocus={onFocus}
+        ref={inputCalendarRef} />
       <div id="calendar-docker" />
       <div id="month-calendar-docker" />
       <div id="year-calendar-docker" />

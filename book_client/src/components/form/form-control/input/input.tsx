@@ -13,6 +13,7 @@ type InputProps = {
   value: string;
   errors: string[];
   error: boolean;
+  accept?: string;
   // eslint-disable-next-line no-unused-vars
   onChange: <T>(event: ChangeEvent<T>) => void;
   onInput: FormEventHandler;
@@ -26,16 +27,18 @@ function Input({
   value,
   errors,
   error,
+  accept = 'accept="image/*"',
   className,
   labelClass,
+  inputClass,
   onChange,
   onInput,
   onFocus,
 }: InputProps): JSX.Element {
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
-      <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-        type={type} autoComplete="off" defaultValue={value}
+      <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error }, inputClass)}
+        type={type} autoComplete="off" defaultValue={value} accept={accept}
         onChange={onChange<HTMLInputElement>} onInput={onInput} onFocus={onFocus} />
     </FormControl>
   );

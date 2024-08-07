@@ -1,5 +1,7 @@
 import { Children, ReactElement, JSX } from 'react';
 import { isSlot } from 'components/slot/slot';
+import { clsx } from 'utils';
+import FormControl from 'components/form/form-control/form-control';
 import './style.scss';
 
 type SelectProps<T> = {
@@ -7,11 +9,12 @@ type SelectProps<T> = {
   options: { label: string, value: string | number, class?: string }[];
   children?: ReactElement;
   name: string;
-  label?: {
-    class?: string;
-    text: string;
-  };
-  classes?: string;
+  className?: string;
+  labelClass?: string;
+  selectClass?: string;
+  label?: string;
+  error?: boolean;
+  errors?: string[];
   onChange: (value: T) => void;
 };
 
@@ -22,17 +25,20 @@ function Select<T extends string | number | readonly string[] | undefined>
   name,
   value,
   label,
-  classes,
+  className,
+  labelClass,
+  selectClass,
+  error = false,
+  errors = [],
   onChange
 }: SelectProps<T>): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
   const optionSlot : ReactElement | undefined | null = hasChildren ? Children.only(children) : null;
 
   return (
-    <>
-      {label && <label htmlFor={name} className={label.class}>{label.text}</label>}
-      <div className="select-wrapper">
-        <select className={`select custom-input ${classes}`} name={name} id={name}
+    <FormControl name={name} label={label || ''} labelClass={labelClass} className={className} errors={errors}>
+      <div className={clsx('select-wrapper', selectClass)}>
+        <select className={clsx('select custom-input', { 'error-input': error })} name={name} id={name}
         defaultValue={value} onChange={(event) => onChange(event.target.value as T)}>
           {
             options.map((option, index) =>
@@ -46,7 +52,7 @@ function Select<T extends string | number | readonly string[] | undefined>
           }
         </select>
       </div>
-    </>
+    </FormControl>
   );
 }
 

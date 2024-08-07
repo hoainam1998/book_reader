@@ -1,9 +1,10 @@
 import { ChangeEvent, useState, } from 'react';
 import useValidate, { ValidateFunction, ValidateProcess } from './useValidate';
 
-type StateType = { [key: string]: any };
+export type StateType = { [key: string]: any };
+
 export type RuleType = {
-  [key: string]: {
+  [key: keyof StateType]: {
     [key: string]: ValidateFunction | ValidateProcess
   }
 };
@@ -34,9 +35,13 @@ export default (state: StateType, rules: RuleType & ArrayLike<RuleType>, formId:
   Object.keys(state).forEach((key: keyof StateType) => {
     formControlProps[key] = {
       value: value[key],
-      onChange: <T>(event: ChangeEvent<T | any> | any): void => {
-        setValue({ ...value, [key]: event.currentTarget?.value || event });
-        state[key] = event.currentTarget?.value || event;
+      onChange: <T>(arg: ChangeEvent<T | any> | T | any): void => {
+        const currentValue =
+          arg.currentTarget?.value === null || arg.currentTarget?.value === undefined
+            ? arg
+            : arg.currentTarget?.value;
+        setValue({ ...value, [key]: currentValue });
+        state[key] = currentValue;
         validateObject[key].validate();
       },
       onFocus: (): void => {

@@ -14,7 +14,7 @@ type InputCalendarProps = {
   labelClass?: string;
   inputClass?: string;
   name: string;
-  value: string;
+  value: Date;
   errors: string[];
   error: boolean;
   onFocus: () => void;
@@ -40,7 +40,7 @@ function InputCalendar({
     };
   }, []);
 
-  const dateFormatted: string = useMemo(() => format(value, 'yyyy-MM-dd'), [value]);
+  const dateFormatted: string = useMemo(() => format(value, 'dd-MM-yyyy'), [value]);
 
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>

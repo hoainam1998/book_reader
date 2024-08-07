@@ -98,7 +98,7 @@ const useValidate =
             try {
               validateResult =
                 validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
-            } catch {
+            } catch (e) {
               validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
             }
           } else {
