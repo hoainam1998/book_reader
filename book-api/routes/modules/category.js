@@ -15,10 +15,6 @@ class CategoryRouter extends Router {
     this.post('/pagination', this._pagination);
   }
 
-  get Router() {
-    return this._router;
-  }
-
   @validateResultExecute(200)
   @validateQuery
   _getAll(req, res, next, schema) {

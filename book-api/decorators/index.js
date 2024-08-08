@@ -1,5 +1,6 @@
 const { validate, parse } = require('graphql');
 const upload = require('./upload.js');
+const uploadPdf = require('./upload-pdf-file.js');
 
 /**
  * Return validate query decorator.
@@ -69,5 +70,6 @@ const validateResultExecute = (httpCode) => {
 module.exports = {
   validateQuery,
   validateResultExecute,
-  upload
+  upload,
+  uploadPdf,
 };

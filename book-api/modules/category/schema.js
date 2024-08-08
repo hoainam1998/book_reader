@@ -8,24 +8,7 @@ const {
   GraphQLInt,
   GraphQLBoolean
 } = require('graphql');
-
-const graphqlErrorOption = {
-  extensions: {
-    code: 'BAD_REQUEST',
-    http: {
-      status: 400,
-    },
-  }
-};
-
-const ResponseType = new GraphQLObjectType({
-  name: 'Response',
-  fields: {
-    message: {
-      type: GraphQLString
-    }
-  }
-});
+const { graphqlErrorOption, ResponseType } = require('../common-schema');
 
 const CategoryType = new GraphQLObjectType({
   name: 'Category',

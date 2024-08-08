@@ -11,7 +11,7 @@ const upload = multer({
     files: 10
   },
   fileFilter: (_, file, cb) => {
-    const extensionFileIsValid = /.jpg|.jpeg|.png|.pdf/.test(path.extname(file.originalname));
+    const extensionFileIsValid = /.jpg|.jpeg|.png/.test(path.extname(file.originalname));
     if (extensionFileIsValid) {
       cb(null, true);
     } else {

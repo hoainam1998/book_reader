@@ -5,6 +5,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { GraphQLObjectType, GraphQLSchema } = require('graphql');
 const startCategory = require('./modules/category/index.js');
+const startBook = require('./modules/book/index.js');
 const connectDataBase = require('./config.js');
 const FactoryRouter = require('./routes/factory.js');
 
@@ -22,18 +23,21 @@ app.use((err, req, res, next) => {
 
 connectDataBase().then(querySql => {
   const category = startCategory(querySql);
+  const book = startBook(sql);
 
   const query = new GraphQLObjectType({
     name: 'Query',
     fields: {
-      category: category.query
+      category: category.query,
+      book: book.query
     }
   });
 
   const mutation = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
-      category: category.mutation
+      category: category.mutation,
+      book: book.mutation
     }
   });
 
