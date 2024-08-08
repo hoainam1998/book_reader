@@ -1,6 +1,10 @@
-import { useCallback, Fragment, useState } from 'react';
+import { useCallback, Fragment, useState, JSX } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
+
+type StepperProps = {
+  onSwitch: (step: number) => void;
+};
 
 type StepType = {
   step: number;
@@ -24,13 +28,14 @@ const stepsInit: StepType[] = [
   }
 ];
 
-function Stepper(): JSX.Element {
+function Stepper({ onSwitch }: StepperProps): JSX.Element {
   const [steps, setSteps] = useState<StepType[]>(stepsInit);
 
   const onSwitchStep = useCallback((idx: number): void => {
-   const stepsUpdated: StepType[] = steps.map(
-    (step, index) => ({ ...step, active: index === idx, stepped: index === idx - 1 }));
-   setSteps(stepsUpdated);
+    const stepsUpdated: StepType[] = steps.map(
+      (step, index) => ({ ...step, active: index === idx, stepped: index === idx - 1 }));
+    setSteps(stepsUpdated);
+    onSwitch(idx + 1);
   }, [steps]);
 
   return (
