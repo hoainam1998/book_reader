@@ -1,5 +1,5 @@
-const { GraphQLInputObjectType, GraphQLString, GraphQLObjectType } = require('graphql');
-const { graphqlErrorOption } = require('../common-schema.js');
+const { GraphQLInputObjectType, GraphQLString, GraphQLObjectType, GraphQLError } = require('graphql');
+const { graphqlErrorOption, ResponseType } = require('../common-schema.js');
 
 const BookIntroduceInputType = new GraphQLInputObjectType({
   name: 'BookIntroduceInput',
@@ -13,32 +13,23 @@ const BookIntroduceInputType = new GraphQLInputObjectType({
   },
 });
 
-const BookIntroduceResponseType = new GraphQLObjectType({
-  name: 'BookIntroduceResponseType',
-  fields: {
-    html: {
-      type: GraphQLString
-    },
-    fileName: {
-      type: GraphQLString
-    }
-  },
-});
-
 const mutation = new GraphQLObjectType({
   name: 'BookMutation',
   fields: {
     saveIntroduce: {
-      type: BookIntroduceResponseType,
+      type: ResponseType,
       args: {
-        type: BookIntroduceInputType
+        introduce: {
+          type: BookIntroduceInputType
+        }
       },
-      resolve: (book, args) => {
+      resolve: async (book, args) => {
+        const { name, html } = args.introduce;
         try {
-          book.saveIntroduceHtmlFile(args);
-          return {
-            message: 'Html file created!'
-          };
+          const isSaved = await book.saveIntroduceHtmlFile(name, html);
+          if (isSaved) {
+            return { message: 'Html file created!' };
+          }
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -48,8 +39,13 @@ const mutation = new GraphQLObjectType({
 });
 
 const query = new GraphQLObjectType({
-  name: 'BookCategory',
-  fields: {}
+  name: 'BookQuery',
+  fields: {
+    all: {
+      type: GraphQLString,
+      resolve: () => {}
+    }
+  }
 });
 
 export {

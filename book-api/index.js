@@ -23,7 +23,7 @@ app.use((err, req, res, next) => {
 
 connectDataBase().then(querySql => {
   const category = startCategory(querySql);
-  const book = startBook(sql);
+  const book = startBook(querySql);
 
   const query = new GraphQLObjectType({
     name: 'Query',

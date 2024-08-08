@@ -5,8 +5,17 @@ class BookService {
   _sql = null;
 
   saveIntroduceHtmlFile(fileName, html) {
-    fs.appendFile(path.dirname(`../../public/html/${fileName}`), html);
+    const fileNameSaved = fileName.replace(/\s/, '-');
+    return new Promise((resolve, reject) => {
+      fs.writeFile(path.join(__dirname, `../../public/html/${fileNameSaved}.html`), html, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      });
+    });
   }
 }
 
-export default BookService;
+module.exports = BookService;

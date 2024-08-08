@@ -48,17 +48,21 @@ const validateResultExecute = (httpCode) => {
     target.descriptor.value = function (...args) {
       const response = args[1];
       try {
-        const promiseResult = originalMethod.apply(null, args);
-        promiseResult.then(result => {
-          const resultClone = JSON.parse(JSON.stringify(result));
-          if (resultClone.errors) {
-            const message = resultClone.errors[0].message;
-            const status = resultClone.errors[0].extensions.http.status;
-            response.status(status).json({ message });
-          } else {
-            response.status(httpCode).json(resultClone.data);
-          }
-        });
+        const result = originalMethod.apply(null, args);
+        if (result instanceof Promise) {
+          result.then(result => {
+            const resultClone = JSON.parse(JSON.stringify(result));
+            if (resultClone.errors) {
+              const message = resultClone.errors[0].message;
+              const status = resultClone.errors[0].extensions.http.status;
+              response.status(status).json({ message });
+            } else {
+              response.status(httpCode).json(resultClone.data);
+            }
+          });
+        } else {
+          response.status(httpCode).json(result.data);
+        }
       } catch (error) {
         return response.status(400).json({ message: error.message });
       }

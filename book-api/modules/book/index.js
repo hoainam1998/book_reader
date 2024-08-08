@@ -3,6 +3,7 @@ const { query, mutation } = require('./schema.js');
 
 module.exports = (sql) => {
   const service = new BookService(sql);
+
   return {
     query: {
       type: query,
