@@ -1,6 +1,7 @@
 import { JSX, useEffect } from 'react';
 import Quill, { QuillOptions } from 'quill';
 import Button from 'components/button/button';
+import { BookService, RequestBody } from 'services';
 import './style.scss';
 
 let quill: Quill | null = null;
@@ -30,7 +31,12 @@ function BookIntroduce(): JSX.Element {
   }, []);
 
   const onSave = (): void => {
-    console.log(quill?.getSemanticHTML());
+    const body: RequestBody = {
+      query: 'mutation BookMutation($introduce: BookIntroduceInput) { book { saveIntroduce(introduce: $introduce) { message } }}',
+      html: quill?.getSemanticHTML(),
+      fileName: 'book 1',
+    };
+    BookService.graphql('/save-introduce', body);
   };
 
   return (

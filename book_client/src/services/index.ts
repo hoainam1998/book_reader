@@ -1,7 +1,7 @@
 import Api from '../axios';
 import type { AxiosResponse } from '../axios';
 
-type RequestBody = {
+export type RequestBody = {
   query: string;
   [key: string]: any;
 } | FormData;
@@ -19,3 +19,4 @@ class Service {
 }
 
 export const CategoryService = new Service('/category');
+export const BookService = new Service('/book');
