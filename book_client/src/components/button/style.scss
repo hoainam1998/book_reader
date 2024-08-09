@@ -8,7 +8,14 @@
 
   &:disabled {
     pointer-events: none;
+    opacity: .3;
   }
+}
+
+.btn-submit {
+  background: $primary-color;
+  color: $white-color;
+  font-size: 16px;
 }
 
 .btn-success {
@@ -22,6 +29,6 @@
 }
 
 .btn-primary {
-  background-color: $title-pop-up-color;
+  background-color: $primary-button-color;
   color: $white-color;
 }

@@ -4,36 +4,36 @@ import { clsx } from 'utils';
 import './style.scss';
 
 type InputProps = {
-  type: string;
+  type?: string;
   label: string;
   className?: string;
   labelClass?: string;
   inputClass?: string;
   name: string;
-  value: string;
-  errors: string[];
-  error: boolean;
+  value?: string;
+  errors?: string[];
+  error?: boolean;
   accept?: string;
   // eslint-disable-next-line no-unused-vars
-  onChange: <T>(event: ChangeEvent<T>) => void;
-  onInput: FormEventHandler;
-  onFocus: () => void;
+  onChange?: <T>(event: ChangeEvent<T>) => void;
+  onInput?: FormEventHandler;
+  onFocus?: () => void;
 };
 
 function Input({
-  type,
+  type = 'text',
   label,
   name,
-  value,
-  errors,
-  error,
+  value = '',
+  errors = [],
+  error = false,
   accept = 'accept="image/*"',
   className,
   labelClass,
   inputClass,
-  onChange,
-  onInput,
-  onFocus,
+  onChange = () => {},
+  onInput = () => {},
+  onFocus = () => {},
 }: InputProps): JSX.Element {
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>

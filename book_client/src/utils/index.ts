@@ -12,14 +12,14 @@ const clsx = (...classes: any[]): string => {
     switch (typeof cls) {
       case 'object':
         return  Object.keys(cls).reduce((classTextEmpty, key) => {
-          return cls[key] ? classTextEmpty += `${key} ` : classTextEmpty;
+          return (cls[key] ? classTextEmpty += `${key} ` : classTextEmpty).trim();
         }, '').trim();
       case 'string':
-        return cls;
+        return cls.trim();
       default: return '';
     }
   });
-  return classList.join(' ').trim();
+  return classList.filter(cls => !!cls).join(' ').trim();
 };
 
 export {
