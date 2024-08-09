@@ -55,3 +55,8 @@ button {
 .error-input {
   border-color: $error-color !important;
 }
+
+.image-box {
+  border: 3px dashed $title-pop-up-color;
+  border-radius: 3px;
+}

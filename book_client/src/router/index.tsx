@@ -14,7 +14,7 @@ import Category, {
   loadInitCategory,
 } from 'views/category-group/category';
 import ApiError from 'components/error/api-error/api-error';
-import BookIntroduce from 'views/book-group/book-detail/book-introduce/book-introduce';
+import BookConclusion from 'views/book-group/book-detail/book-conclusion/book-conclusion';
 import path from './paths';
 
 const router = createBrowserRouter(
@@ -36,7 +36,7 @@ const router = createBrowserRouter(
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>
         </Route>
       </Route>
-      <Route path="test" element={<BookIntroduce />} />
+      <Route path="test" element={<BookConclusion />} />
     </>
   )
 );

@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEventHandler, JSX } from 'react';
+import { ChangeEvent, FormEventHandler, JSX, useRef, useImperativeHandle, forwardRef } from 'react';
 import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
@@ -14,6 +14,7 @@ type InputProps = {
   errors?: string[];
   error?: boolean;
   accept?: string;
+  multiple?: boolean;
   // eslint-disable-next-line no-unused-vars
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: FormEventHandler;
@@ -27,21 +28,30 @@ function Input({
   value = '',
   errors = [],
   error = false,
-  accept = 'accept="image/*"',
+  accept = 'image/*',
+  multiple = false,
   className,
   labelClass,
   inputClass,
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
-}: InputProps): JSX.Element {
+}: InputProps, ref: any): JSX.Element {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => {
+    return {
+      input: inputRef.current
+    };
+  }, []);
+
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error }, inputClass)}
-        type={type} autoComplete="off" defaultValue={value} accept={accept}
+        type={type} autoComplete="off" defaultValue={value} accept={accept} multiple={multiple} ref={inputRef}
         onChange={onChange<HTMLInputElement>} onInput={onInput} onFocus={onFocus} />
     </FormControl>
   );
 }
 
-export default Input;
+export default forwardRef(Input);
