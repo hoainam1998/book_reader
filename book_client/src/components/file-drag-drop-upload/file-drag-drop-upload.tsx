@@ -2,9 +2,13 @@ import { DragEvent, JSX, useCallback, useState, useRef, ChangeEvent } from 'reac
 import Input from 'components/form/form-control/input/input';
 import './style.scss';
 
+type InputFileRefType = {
+  input: HTMLInputElement
+};
+
 function FileDragDropUpload(): JSX.Element {
   const [imageFileList, setImageFileList] = useState<File[]>([]);
-  const fileInput = useRef<HTMLInputElement>(null);
+  const fileInput = useRef<InputFileRefType>(null);
 
   const onDrag = useCallback((event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -22,15 +26,15 @@ function FileDragDropUpload(): JSX.Element {
   }, []);
 
   const onOpenFileFolder = useCallback((): void => {
-    (fileInput.current as any).input.click();
+    fileInput.current!.input.click();
   }, [fileInput]);
 
   const onFileChanged = useCallback(<T, >(event: ChangeEvent<T | HTMLInputElement>): void => {
-    const files : File[] = Array.from((event.target as HTMLInputElement).files || []);
+    const files: File[] = Array.from((event.target as HTMLInputElement).files || []);
     setImageFileList(files);
   }, []);
 
-  const onDeleteFile = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+  const onDeleteFile = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number): void => {
     event.stopPropagation();
     imageFileList.splice(index, 1);
     setImageFileList([...imageFileList]);
@@ -39,7 +43,7 @@ function FileDragDropUpload(): JSX.Element {
   return (
     <div className="file-drag-drop-upload image-box" onDragOver={onDrag} onDrop={onDrop} onClick={onOpenFileFolder}>
       {imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
-      <Input type="file" name="html" label="HTML" multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
+      <Input<InputFileRefType> type="file" name="html" label="HTML" multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
       <div className="image-preview-wrapper">
         {
           imageFileList.map((file, index) => (

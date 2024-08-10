@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef, useMemo, JSX } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useMemo, JSX, Ref } from 'react';
 import FormControl from 'components/form/form-control/form-control';
 import { format } from 'date-fns';
 import { clsx } from 'utils';
@@ -26,12 +26,13 @@ function InputCalendar({
   label,
   className,
   labelClass,
+  inputClass,
   errors,
   error,
   value,
   onFocus,
   onOpen
-  }: InputCalendarProps, ref: any): JSX.Element {
+  }: InputCalendarProps, ref: Ref<InputCalendarRect>): JSX.Element {
   const inputCalendarRef = useRef<InputCalendarRect>(null);
 
   useImperativeHandle(ref, () => {
@@ -43,9 +44,9 @@ function InputCalendar({
   const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
 
   return (
-    <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>
+    <FormControl<InputCalendarRect> name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>
       <div className="input-calendar custom-input" onClick={onOpen}>
-        <input name={name} id={name} type="text" readOnly className={clsx('input', { 'error-input': error })}
+        <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass, { 'error-input': error })}
           autoComplete="off" onFocus={onFocus} value={dateFormatted} />
         <img src={require('images/icons/calendar.png')} alt="calendar-icon" />
       </div>

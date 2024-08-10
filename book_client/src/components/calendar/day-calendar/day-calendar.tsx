@@ -1,9 +1,17 @@
+declare module 'react' {
+  function forwardRef<T, P = {}>(
+    render: (props: P, ref: React.Ref<T>) => JSX.Element
+  ): (props: P & React.RefAttributes<T>) => JSX.Element;
+};
+
 import {
   useImperativeHandle,
   forwardRef,
   useReducer,
   useCallback,
-  CSSProperties
+  CSSProperties,
+  Dispatch,
+  Ref
 } from 'react';
 import {
   eachDayOfInterval,
@@ -52,12 +60,14 @@ export enum CalendarActionType {
   YEAR_SELECTED = 'year_selected'
 };
 
-type DayCalendarProps = {
+type DayCalendarRef = {
+  dispatch: Dispatch<CalendarReducerAction>,
+  date: Date;
+};
+
+type DayCalendarProps<T> = {
   selectedDay: number | null;
-  position: {
-    left: number;
-    top: number;
-  };
+  position: T;
   onOpenMonthCalendar: () => void;
   onOpenYearCalendar: () => void;
   onDayChange: (day: string) => void;
@@ -162,22 +172,22 @@ const calendarChange = (
   }
 };
 
-function DayCalendar(
-  { selectedDay, position, onOpenMonthCalendar, onOpenYearCalendar, onDayChange }: DayCalendarProps,
-  ref: any
+function DayCalendar<T>(
+  { selectedDay, position, onOpenMonthCalendar, onOpenYearCalendar, onDayChange }: DayCalendarProps<T>,
+  ref: Ref<DayCalendarRef>
 ): JSX.Element {
   const [{ month, year, weeks, date }, dispatch] = useReducer(
     calendarChange,
     calculateStateReducer(new Date(selectedDay || currentDate))
   );
-  const onNext = useCallback(() => dispatch({ type: CalendarActionType.NEXT }), []);
-  const onPrevious = useCallback(() => dispatch({ type: CalendarActionType.PREVIOUS }), []);
-  const onBackToHead = useCallback(() => dispatch({ type: CalendarActionType.HEAD }), []);
-  const onBackToLast = useCallback(() => dispatch({ type: CalendarActionType.LAST }), []);
+  const onNext = useCallback((): void => dispatch({ type: CalendarActionType.NEXT }), []);
+  const onPrevious = useCallback((): void => dispatch({ type: CalendarActionType.PREVIOUS }), []);
+  const onBackToHead = useCallback((): void => dispatch({ type: CalendarActionType.HEAD }), []);
+  const onBackToLast = useCallback((): void => dispatch({ type: CalendarActionType.LAST }), []);
 
   useImperativeHandle(
     ref,
-    () => ({ dispatch, date }),
+    (): DayCalendarRef => ({ dispatch, date }),
     [date]
   );
 

@@ -1,16 +1,16 @@
-import { ChangeEvent, FormEventHandler, JSX, useRef, useImperativeHandle, forwardRef } from 'react';
+import { ChangeEvent, FormEventHandler, JSX, useRef, useImperativeHandle, forwardRef, Ref } from 'react';
 import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
 
-type InputProps = {
+export type InputProps = {
   type?: string;
   label: string;
   className?: string;
   labelClass?: string;
   inputClass?: string;
   name: string;
-  value?: string;
+  value?: string | number;
   errors?: string[];
   error?: boolean;
   accept?: string;
@@ -21,7 +21,7 @@ type InputProps = {
   onFocus?: () => void;
 };
 
-function Input({
+function Input<T>({
   type = 'text',
   label,
   name,
@@ -36,14 +36,14 @@ function Input({
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
-}: InputProps, ref: any): JSX.Element {
+}: InputProps, ref: Ref<T>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useImperativeHandle(ref, () => {
-    return {
-      input: inputRef.current
-    };
-  }, []);
+  useImperativeHandle(
+    ref,
+    (): T => ({ input: inputRef.current }) as T,
+    []
+  );
 
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>

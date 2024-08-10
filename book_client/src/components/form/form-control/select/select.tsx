@@ -4,7 +4,7 @@ import { clsx } from 'utils';
 import FormControl from 'components/form/form-control/form-control';
 import './style.scss';
 
-type SelectProps<T> = {
+export type SelectPropsType<T> = {
   value: T;
   options: { label: string, value: string | number, class?: string }[];
   children?: ReactElement;
@@ -31,7 +31,7 @@ function Select<T extends string | number | readonly string[] | undefined>
   error = false,
   errors = [],
   onChange
-}: SelectProps<T>): JSX.Element {
+}: SelectPropsType<T>): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
   const optionSlot : ReactElement | undefined | null = hasChildren ? Children.only(children) : null;
 

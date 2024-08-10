@@ -26,7 +26,12 @@ let monthCalendarDocker: Root | null = null;
 let yearCalendarDocker: Root | null = null;
 let monthCalendarShowed: boolean = false;
 
-const positionCalendar = {
+type PositionType = {
+  left: number;
+  top: number;
+};
+
+const positionCalendar: PositionType = {
   left: 0,
   top: 0
 };
@@ -35,18 +40,19 @@ const state = {
   day: currentDate.getTime(),
 };
 
-type CalendarPropsType = {
+export type CalendarPropsType = {
   value: number | null;
   label: string;
   name: string;
   labelClass: string;
+  inputClass?: string;
   errors: string[];
   error: boolean;
   onChange: (dateSelected: number) => void;
   onFocus: () => void;
 };
 
-function Calendar({ value, label, name, errors, error, labelClass, onChange, onFocus }: CalendarPropsType): JSX.Element {
+function Calendar({ value, label, name, errors, error, labelClass, inputClass, onChange, onFocus }: CalendarPropsType): JSX.Element {
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
 
@@ -89,7 +95,7 @@ function Calendar({ value, label, name, errors, error, labelClass, onChange, onF
   const openYearCalendar = useCallback((): void => {
     yearCalendarDocker = createRoot(document.getElementById('year-calendar-docker')!);
     yearCalendarDocker.render(
-      <YearCalendar
+      <YearCalendar<PositionType>
         currentYear={selectedYear}
         position={positionCalendar}
         onYearChange={setYearSelected} />);
@@ -98,7 +104,7 @@ function Calendar({ value, label, name, errors, error, labelClass, onChange, onF
   const openDayCalendar = useCallback((): void => {
     calendarDocker = createRoot(document.getElementById('calendar-docker')!);
     calendarDocker.render(
-      <DayCalendar
+      <DayCalendar<PositionType>
         position={positionCalendar}
         onOpenMonthCalendar={openMonthCalendar}
         onOpenYearCalendar={openYearCalendar}
@@ -112,7 +118,7 @@ function Calendar({ value, label, name, errors, error, labelClass, onChange, onF
       const currentMonthIndex: number = getMonth(dayCalendarRef.current?.date || currentDate);
       monthCalendarDocker = createRoot(document.getElementById('month-calendar-docker')!);
       monthCalendarDocker.render(
-        <MonthCalendar
+        <MonthCalendar<PositionType>
           currentYear={selectedYear}
           currentMonth={currentMonthIndex}
           docker={monthCalendarDocker}
@@ -131,12 +137,13 @@ function Calendar({ value, label, name, errors, error, labelClass, onChange, onF
   return (
     <section className="calendar-wrapper">
       <InputCalendar
+        name={name}
         error={error}
         errors={errors}
         value={value}
         label={label}
         labelClass={labelClass}
-        name={name}
+        inputClass={inputClass}
         onOpen={openDayCalendar}
         onFocus={onFocus}
         ref={inputCalendarRef} />

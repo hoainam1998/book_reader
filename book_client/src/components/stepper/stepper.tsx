@@ -44,7 +44,7 @@ function Stepper({ onSwitch }: StepperProps): JSX.Element {
         steps.map(({ step, active, last, stepped }, index) =>  (
           <Fragment key={index}>
             <div className={clsx('step-point', { 'active': active })} onClick={() => onSwitchStep(index)}>{step}</div>
-            {!last && <div className={clsx('line', { 'line-active': stepped })} /> }
+            {!last && <div className={clsx('line', { 'line-active': stepped })} />}
           </Fragment>
         ))
       }
