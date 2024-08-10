@@ -18,7 +18,8 @@ function FileDragDropUpload(): JSX.Element {
     event.preventDefault();
 
     if (event.dataTransfer.files) {
-      const files: File[] = Array.from(event.dataTransfer.files).filter(file => file.type.includes('image'));
+      const files: File[] = Array.from(event.dataTransfer.files)
+        .filter(file => file.type.includes('image'));
       setImageFileList(files);
     } else {
       setImageFileList([]);
@@ -48,7 +49,7 @@ function FileDragDropUpload(): JSX.Element {
         {
           imageFileList.map((file, index) => (
             <div className="image-preview-item" key={index}>
-              <img height="100%" width="100%" src={URL.createObjectURL(file)} alt="book" />
+              <img height="100%" width="100%" src={URL.createObjectURL(file)} alt="book-image" />
               <div className="delete-image" onClick={(e) => onDeleteFile(e, index)}>x</div>
             </div>
           ))

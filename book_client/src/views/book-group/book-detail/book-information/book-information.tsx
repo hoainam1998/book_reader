@@ -8,7 +8,7 @@ import Form from 'components/form/form';
 import './style.scss';
 
 type BookInformation = {
-  [key: string]: InputProps | CalendarPropsType | SelectPropsType<unknown>;
+  [key: string]: InputProps | CalendarPropsType | SelectPropsType<unknown> | unknown;
 } & {
   onSubmit: () => void
 };
@@ -17,7 +17,7 @@ const formId: string = 'book-detail-form';
 
 function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, onSubmit }: BookInformation): JSX.Element {
   return (
-    <Form id={formId} submitLabel="Save" onSubmit={onSubmit}>
+    <Form id={formId} submitLabel="Save" onSubmit={onSubmit} className="book-information">
       <Grid>
         <GridItem lg={3}>
           <Input

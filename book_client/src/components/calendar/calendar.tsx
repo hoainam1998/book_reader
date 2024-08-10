@@ -2,13 +2,13 @@ import {
   JSX,
   useCallback,
   useEffect,
-  useRef,
+  useRef
 } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import {
   getMonth,
   getYear,
-  setDate,
+  setDate
 } from 'date-fns';
 import MonthCalendar from './month-calendar/month-calendar';
 import YearCalendar from './year-calendar/year-calendar';

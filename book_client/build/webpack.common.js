@@ -78,6 +78,7 @@ module.exports = {
             options: {
               sourceMap: true,
               additionalData: `
+              @use "sass:math";
               @import "src/static/scss/_colors.scss";
               @import "src/static/scss/_responsive.scss";`,
             },
