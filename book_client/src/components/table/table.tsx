@@ -33,7 +33,7 @@ type TableCellProps = {
 };
 
 function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
-  const childrenList = fields.map(field => {
+  const childrenList: JSX.Element[] = fields.map(field => {
     const slot: ReactElement | undefined = cells.find(cell => isSlot(field.key, cell));
     return slot ? <td>{slot.props.render(item)}</td> : <td>{item[field.key]}</td>;
   });
@@ -59,18 +59,18 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
     },
   ];
 
-  const totalPageNumber = useMemo(() => {
-    const pages = total / pageSize;
+  const totalPageNumber = useMemo<number>(() => {
+    const pages: number = total / pageSize;
     return Number.isInteger(pages) ? pages : Math.floor(pages) + 1;
   }, [total, pageSize]);
 
-  const pageSizeChange = (currentPageSize: number) => {
+  const pageSizeChange = (currentPageSize: number): void => {
     pageSize = currentPageSize;
     pageNumber = 1;
     onLoad(pageSize, pageNumber);
   };
 
-  const pageNumberChange = (currentPageNumber: number) => {
+  const pageNumberChange = (currentPageNumber: number): void => {
     pageNumber = currentPageNumber;
     onLoad(pageSize, pageNumber);
   };

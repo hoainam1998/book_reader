@@ -45,8 +45,15 @@ function BookDetail(): JSX.Element {
 
   return (
     <>
-      <Stepper stepNumber={3} onSwitch={(step) => setStep(step)} className="book-detail-stepper" />
-      <BookInformation onSubmit={onSubmit} name={name} categoryId={categoryId} publishedTime={publishedTime} publishedDay={publishedDay} pdf={pdf} />
+      <Stepper stepNumber={3} onSwitch={(step) => setStep(step)} className="book-detail-stepper">
+        <BookInformation
+          onSubmit={onSubmit}
+          name={name}
+          categoryId={categoryId}
+          publishedTime={publishedTime}
+          publishedDay={publishedDay}
+          pdf={pdf} />
+      </Stepper>
     </>
   );
 }
