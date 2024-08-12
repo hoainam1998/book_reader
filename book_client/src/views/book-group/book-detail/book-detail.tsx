@@ -1,6 +1,6 @@
 import { JSX, useState } from 'react';
 import BookInformation from './book-information/book-information';
-import Stepper from 'components/stepper/stepper';
+import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType, StateType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import './style.scss';
@@ -45,7 +45,7 @@ function BookDetail(): JSX.Element {
 
   return (
     <>
-      <Stepper stepNumber={3} onSwitch={(step) => setStep(step)} className="book-detail-stepper">
+      <Stepper stepNumber={3} onSwitch={(step) => setStep(step)} activeStep={1} className="book-detail-stepper">
         <BookInformation
           onSubmit={onSubmit}
           name={name}
@@ -53,6 +53,8 @@ function BookDetail(): JSX.Element {
           publishedTime={publishedTime}
           publishedDay={publishedDay}
           pdf={pdf} />
+        <StepContent step={1}><div>step 1</div></StepContent>
+        <StepContent step={2}><div>step 2</div></StepContent>
       </Stepper>
     </>
   );
