@@ -12,7 +12,7 @@ const clsx = (...classes: any[]): string => {
     switch (typeof cls) {
       case 'object':
         return  Object.keys(cls).reduce((classTextEmpty, key) => {
-          return (cls[key] ? classTextEmpty += `${key} ` : classTextEmpty).trim();
+          return (cls[key] ? classTextEmpty += `${key} ` : classTextEmpty);
         }, '').trim();
       case 'string':
         return cls.trim();

@@ -51,9 +51,17 @@
 
   .note {
     color: $error-color;
-    font-size: 16px;
-    font-weight: bold;
     text-align: center;
     margin-bottom: 15px;
+  }
+
+  .file-name {
+    width: 600px;
+    margin: 0 auto 10px;
+    display: flex;
+
+    & > span {
+      flex-basis: 120px;
+    }
   }
 }

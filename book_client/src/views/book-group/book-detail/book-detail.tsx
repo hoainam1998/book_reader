@@ -1,8 +1,11 @@
 import { JSX, useState } from 'react';
 import BookInformation from './book-information/book-information';
+import BookIntroduce from './book-introduce/book-introduce';
+import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType, StateType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
+import { loadAllCategory } from './fetcher';
 import './style.scss';
 
 type RuleTypeBook = RuleType & ArrayLike<RuleType>;
@@ -12,7 +15,7 @@ const state: StateType = {
   pdf: null,
   publishedDay: null,
   publishedTime: null,
-  categoryId: null
+  categoryId: ''
 };
 
 const rules: RuleType = {
@@ -44,8 +47,12 @@ function BookDetail(): JSX.Element {
   };
 
   return (
-    <>
-      <Stepper stepNumber={3} onSwitch={(step) => setStep(step)} activeStep={1} className="book-detail-stepper">
+    <Stepper
+      stepNumber={3}
+      onSwitch={(step) => setStep(step)}
+      activeStep={1}
+      className="book-detail-stepper">
+      <StepContent step={1}>
         <BookInformation
           onSubmit={onSubmit}
           name={name}
@@ -53,11 +60,16 @@ function BookDetail(): JSX.Element {
           publishedTime={publishedTime}
           publishedDay={publishedDay}
           pdf={pdf} />
-        <StepContent step={1}><div>step 1</div></StepContent>
-        <StepContent step={2}><div>step 2</div></StepContent>
-      </Stepper>
-    </>
+      </StepContent>
+      <StepContent step={2}>
+        <BookIntroduce />
+      </StepContent>
+      <StepContent step={3}>
+        <BookConclusion />
+      </StepContent>
+    </Stepper>
   );
 }
 
+export { loadAllCategory };
 export default BookDetail;

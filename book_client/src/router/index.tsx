@@ -9,12 +9,9 @@ import {
 } from 'react-router-dom';
 import Home from 'views/home/home';
 import BookList from 'views/book-group/book-list/book-list';
-import BookDetail from 'views/book-group/book-detail/book-detail';
-import Category, {
-  loadInitCategory,
-} from 'views/category-group/category';
+import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
+import Category, { loadInitCategory } from 'views/category-group/category';
 import ApiError from 'components/error/api-error/api-error';
-import BookConclusion from 'views/book-group/book-detail/book-conclusion/book-conclusion';
 import path from './paths';
 
 const router = createBrowserRouter(
@@ -33,10 +30,10 @@ const router = createBrowserRouter(
           handle={{ crumb: (match: UIMatch) => <Link key={match.pathname} to={match.pathname}>Book</Link> }}>
           <Route index element={<BookList />} />
           <Route path={path.ID} element={<BookDetail />}
+            loader={loadAllCategory}
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>
         </Route>
       </Route>
-      <Route path="test" element={<BookConclusion />} />
     </>
   )
 );

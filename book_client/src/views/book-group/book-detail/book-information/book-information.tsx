@@ -1,21 +1,31 @@
 import { JSX } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { InputProps } from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar, { CalendarPropsType } from 'components/calendar/calendar';
 import Input from 'components/form/form-control/input/input';
-import Select, { SelectPropsType } from 'components/form/form-control/select/select';
+import Select, { SelectPropsType, OptionPrototype } from 'components/form/form-control/select/select';
 import Form from 'components/form/form';
 import './style.scss';
+import { AxiosResponse } from 'axios';
 
 type BookInformation = {
-  [key: string]: InputProps | CalendarPropsType | SelectPropsType<unknown> | unknown;
+  [key: string]: InputProps | CalendarPropsType | SelectPropsType<string, any> | unknown;
 } & {
   onSubmit: () => void
 };
 
+type CategoryOptions = {
+  name: string;
+  category_id: string;
+} & OptionPrototype<string>;
+
 const formId: string = 'book-detail-form';
 
 function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, onSubmit }: BookInformation): JSX.Element {
+  const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
+  const categories = loaderData?.data.category.all || [];
+
   return (
     <Form id={formId} submitLabel="Save" onSubmit={onSubmit} className="book-information">
       <Grid>
@@ -55,13 +65,16 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, o
             name="publish-day" />
         </GridItem>
         <GridItem lg={2}>
-          <Select<number>
-            {...categoryId as SelectPropsType<number>}
+          <Select<string, CategoryOptions>
+            {...categoryId as SelectPropsType<string, CategoryOptions>}
             label="Category"
             labelClass="category-id-label"
             selectClass="category-id-input"
+            placeholder="Please select category!"
+            labelField="name"
+            valueField="category_id"
             name="categoryId"
-            options={[]} />
+            options={categories} />
         </GridItem>
       </Grid>
     </Form>

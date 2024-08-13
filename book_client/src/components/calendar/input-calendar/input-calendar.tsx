@@ -45,8 +45,8 @@ function InputCalendar({
 
   return (
     <FormControl<InputCalendarRect> name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>
-      <div className="input-calendar custom-input" onClick={onOpen}>
-        <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass, { 'error-input': error })}
+      <div className={clsx('input-calendar custom-input', { 'error-input': error })} onClick={onOpen}>
+        <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass)}
           autoComplete="off" onFocus={onFocus} value={dateFormatted} />
         <img src={require('images/icons/calendar.png')} alt="calendar-icon" />
       </div>

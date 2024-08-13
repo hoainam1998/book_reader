@@ -29,7 +29,7 @@ function BookIntroduce(): JSX.Element {
   const [haveEdit, setHaveEdit] = useState<boolean>(false);
   const [haveContent, setHaveContent] = useState<boolean>(false);
 
-  useEffect(() => {
+  useEffect((): void => {
     if (!quill && haveEdit) {
       quill = new Quill(`#${editSelector}`, options);
 
@@ -65,7 +65,11 @@ function BookIntroduce(): JSX.Element {
 
   return (
     <section className="book-introduce">
-      <p className="note">*Note: I must select a exist file or create new file to switch the next step.</p>
+      <p className="note field-name">*Note: I must select a exist file or create new file to switch the next step.</p>
+      <p className="file-name">
+        <span className="field-name">File name</span>
+        file name
+      </p>
       <Input
         type="file"
         accept=".html"
