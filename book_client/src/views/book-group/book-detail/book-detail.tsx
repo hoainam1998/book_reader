@@ -15,7 +15,8 @@ const state: StateType = {
   pdf: null,
   publishedDay: null,
   publishedTime: null,
-  categoryId: ''
+  categoryId: '',
+  images: null
 };
 
 const rules: RuleType = {
@@ -23,7 +24,8 @@ const rules: RuleType = {
   pdf: { required },
   publishedDay: { required },
   publishedTime: { required },
-  categoryId: { required }
+  categoryId: { required },
+  images: { required }
 };
 
 const formId: string = 'book-detail-form';
@@ -35,6 +37,7 @@ function BookDetail(): JSX.Element {
     publishedTime,
     publishedDay,
     pdf,
+    images,
     handleSubmit,
     validate,
     reset
@@ -42,8 +45,12 @@ function BookDetail(): JSX.Element {
 
   const [step, setStep] = useState<number>(1);
 
-  const onSubmit = (): void => {
+  const onSubmit = (formData: FormData): void => {
     handleSubmit();
+
+    if (!validate.error) {
+      // TODO
+    }
   };
 
   return (
@@ -59,6 +66,7 @@ function BookDetail(): JSX.Element {
           categoryId={categoryId}
           publishedTime={publishedTime}
           publishedDay={publishedDay}
+          images={images}
           pdf={pdf} />
       </StepContent>
       <StepContent step={2}>

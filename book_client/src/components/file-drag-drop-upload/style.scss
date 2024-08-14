@@ -51,3 +51,7 @@ $colum-width: calc((100% - #{$gap}px) / 8);
     }
   }
 }
+
+.error-box {
+  border-color: $error-color;
+}
