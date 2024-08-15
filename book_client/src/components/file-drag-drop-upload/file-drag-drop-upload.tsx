@@ -11,6 +11,7 @@ import {
 import Input from 'components/form/form-control/input/input';
 import FormControl from 'components/form/form-control/form-control';
 import { clsx } from 'utils';
+import { FieldValidateProps } from 'hooks/useForm';
 import './style.scss';
 
 type InputFileRefType = {
@@ -21,17 +22,20 @@ export type ImageFileList = {
   files: File[];
 };
 
-export type FileDragDropUploadType = {
+type FileDragDropUploadType = {
   className?: string;
   name: string;
-  errors: string[];
-  error: boolean;
   label: string;
-  value?: File[];
-  onChange: (files: File[]) => void;
-};
+} & FieldValidateProps<File[]>;
 
-function FileDragDropUpload({ className, name, errors, error, label, onChange }: FileDragDropUploadType, ref: Ref<ImageFileList>): JSX.Element {
+function FileDragDropUpload({
+  className,
+  name,
+  errors,
+  error,
+  label,
+  onChange
+}: FileDragDropUploadType, ref: Ref<ImageFileList>): JSX.Element {
   const [imageFileList, setImageFileList] = useState<File[]>([]);
   const fileInput = useRef<InputFileRefType>(null);
 
@@ -64,7 +68,7 @@ function FileDragDropUpload({ className, name, errors, error, label, onChange }:
   const onDeleteFile = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number): void => {
     event.stopPropagation();
     imageFileList.splice(index, 1);
-    const imageFileListNewest = [...imageFileList];
+    const imageFileListNewest: File[] = [...imageFileList];
     setImageFileList(imageFileListNewest);
     onChange(imageFileListNewest);
   }, [imageFileList]);
@@ -78,7 +82,7 @@ function FileDragDropUpload({ className, name, errors, error, label, onChange }:
         onDrop={onDrop}
         onClick={onOpenFileFolder}>
           {imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
-          <Input<InputFileRefType> type="file" name="html" label="HTML" multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
+          <Input<InputFileRefType> type="file" name={name} label={label} multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
           <div className="image-preview-wrapper">
             {
               imageFileList.map((file, index) => (

@@ -3,14 +3,21 @@ import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
-import useForm, { RuleType, StateType } from 'hooks/useForm';
+import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import { loadAllCategory } from './fetcher';
 import './style.scss';
 
-type RuleTypeBook = RuleType & ArrayLike<RuleType>;
+type BookStateType = {
+  name: string;
+  pdf: File | null;
+  publishedDay: number | null;
+  publishedTime: number | null;
+  categoryId: string;
+  images: File[] | null;
+};
 
-const state: StateType = {
+const state: BookStateType = {
   name: '',
   pdf: null,
   publishedDay: null,
@@ -19,7 +26,7 @@ const state: StateType = {
   images: null
 };
 
-const rules: RuleType = {
+const rules: RuleType<BookStateType> = {
   name: { required },
   pdf: { required },
   publishedDay: { required },
@@ -41,7 +48,7 @@ function BookDetail(): JSX.Element {
     handleSubmit,
     validate,
     reset
-  } = useForm(state, rules as RuleTypeBook, formId);
+  } = useForm(state, rules, formId);
 
   const [step, setStep] = useState<number>(1);
 

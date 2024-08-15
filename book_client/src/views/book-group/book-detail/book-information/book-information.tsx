@@ -1,23 +1,22 @@
 import { JSX } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { InputProps } from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
-import Calendar, { CalendarPropsType } from 'components/calendar/calendar';
+import Calendar from 'components/calendar/calendar';
 import Input from 'components/form/form-control/input/input';
-import Select, { SelectPropsType, OptionPrototype } from 'components/form/form-control/select/select';
-import FileDragDropUpload, { FileDragDropUploadType } from 'components/file-drag-drop-upload/file-drag-drop-upload';
+import Select, { OptionPrototype } from 'components/form/form-control/select/select';
+import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
 import './style.scss';
 import { AxiosResponse } from 'axios';
+import { FieldValidateProps } from 'hooks/useForm';
 
 type BookInformation = {
-  [key: string]:
-    InputProps
-    | CalendarPropsType
-    | SelectPropsType<string, CategoryOptions>
-    | FileDragDropUploadType
-    | unknown;
-} & {
+  name: FieldValidateProps;
+  pdf: FieldValidateProps;
+  publishedTime: FieldValidateProps;
+  publishedDay: FieldValidateProps;
+  categoryId: FieldValidateProps;
+  images: FieldValidateProps;
   onSubmit: (formData: FormData) => void
 };
 
@@ -34,14 +33,15 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
 
   const bookInformationFormSubmit = (): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);
-    const files: File[] | undefined = (images as FileDragDropUploadType).value;
-    const fieldName: string = (images as FileDragDropUploadType).constructor.name;
+    const files: File[] | undefined = images.value;
+    const fieldName: string = images.constructor.name;
 
     if (files && files.length) {
       files.forEach(file => {
         formData.append(fieldName, file);
       });
     }
+
     formData && onSubmit(formData);
   };
 
@@ -50,7 +50,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
       <Grid>
         <GridItem lg={3}>
           <Input
-            {...name as InputProps}
+            {...name}
             label="Name"
             name="name"
             labelClass="name-label"
@@ -58,7 +58,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
         </GridItem>
         <GridItem lg={3}>
           <Input
-            {...pdf as InputProps}
+            {...pdf}
             type="file"
             accept=".pdf"
             label="Pdf file"
@@ -68,7 +68,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
         </GridItem>
         <GridItem lg={2}>
           <Input
-            {...publishedTime as InputProps}
+            {...publishedTime}
             type="number"
             label="Published time"
             labelClass="published-time-label"
@@ -77,7 +77,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
         </GridItem>
         <GridItem lg={2}>
           <Calendar
-            {...publishedDay as CalendarPropsType}
+            {...publishedDay}
             labelClass="label"
             inputClass="input"
             label="Publish day"
@@ -85,7 +85,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
         </GridItem>
         <GridItem lg={2}>
           <Select<string, CategoryOptions>
-            {...categoryId as SelectPropsType<string, CategoryOptions>}
+            {...categoryId}
             label="Category"
             labelClass="category-id-label"
             selectClass="category-id-input"
@@ -96,7 +96,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
             options={categories} />
         </GridItem>
         <GridItem lg={12}>
-          <FileDragDropUpload {...images as FileDragDropUploadType} label="Images" className="image-select-box" />
+          <FileDragDropUpload {...images} name="images" label="Images" className="image-select-box" />
         </GridItem>
       </Grid>
     </Form>

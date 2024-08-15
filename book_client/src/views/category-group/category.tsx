@@ -1,4 +1,4 @@
-import { useState, useCallback, JSX } from 'react';
+import { useState, useCallback, JSX, FormEvent } from 'react';
 import { AxiosResponse } from 'axios';
 import { useFetcher, useLoaderData, useRevalidator } from 'react-router-dom';
 import Table from 'components/table/table';
@@ -8,7 +8,7 @@ import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Button from 'components/button/button';
-import useForm, { RuleType, StateType } from 'hooks/useForm';
+import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import {
   loadInitCategory,
@@ -19,8 +19,6 @@ import {
 } from './fetcher';
 import './style.scss';
 
-type RuleTypeCategory = RuleType & ArrayLike<RuleType>;
-
 type CategoryDetail = { name: string; avatar: string };
 
 type CategoryType = {
@@ -28,7 +26,12 @@ type CategoryType = {
   disabled: boolean;
 } & CategoryDetail;
 
-const state: StateType = {
+type CategoryStateType = {
+  categoryName: string;
+  avatar: File | null;
+};
+
+const state: CategoryStateType = {
   categoryName: '',
   avatar: null
 };
@@ -36,13 +39,19 @@ const state: StateType = {
 let currentCategoryId: string = '';
 const formId: string = 'category-form';
 
-const rules: RuleType = {
+const rules: RuleType<CategoryStateType> = {
   categoryName: { required: required('fff') },
   avatar: { required: required(() => !currentCategoryId) }
 };
 
 function Category(): JSX.Element {
-  const { categoryName, avatar, handleSubmit, validate, reset } = useForm(state, rules as RuleTypeCategory, formId);
+  const {
+    categoryName,
+    avatar,
+    handleSubmit,
+    validate,
+    reset
+  } = useForm<CategoryStateType, RuleType<CategoryStateType>>(state, rules, formId);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -68,7 +77,7 @@ function Category(): JSX.Element {
   const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination?.list || [];
   const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
 
-  const fileChange = useCallback((event: Event): void => {
+  const fileChange = useCallback(<T, >(event: FormEvent<T>): void => {
     const files: FileList | null = (event.target as HTMLInputElement).files;
 
     if (files) {

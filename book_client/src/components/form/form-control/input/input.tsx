@@ -1,9 +1,9 @@
-import { ChangeEvent, FormEventHandler, JSX, useRef, useImperativeHandle, forwardRef, Ref } from 'react';
+import { ChangeEvent, JSX, useRef, useImperativeHandle, forwardRef, Ref, FormEvent } from 'react';
 import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
 
-export type InputProps = {
+type InputProps = {
   type?: string;
   label: string;
   className?: string;
@@ -17,7 +17,7 @@ export type InputProps = {
   multiple?: boolean;
   // eslint-disable-next-line no-unused-vars
   onChange?: <T>(event: ChangeEvent<T>) => void;
-  onInput?: FormEventHandler;
+  onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
 };
 
@@ -49,7 +49,7 @@ function Input<T>({
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error }, inputClass)}
         type={type} autoComplete="off" defaultValue={value} accept={accept} multiple={multiple} ref={inputRef}
-        onChange={onChange<HTMLInputElement>} onInput={onInput} onFocus={onFocus} />
+        onChange={onChange} onInput={onInput} onFocus={onFocus} />
     </FormControl>
   );
 }

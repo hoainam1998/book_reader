@@ -14,6 +14,7 @@ import MonthCalendar from './month-calendar/month-calendar';
 import YearCalendar from './year-calendar/year-calendar';
 import InputCalendar from './input-calendar/input-calendar';
 import DayCalendar, { CalendarReducerAction, CalendarActionType } from './day-calendar/day-calendar';
+import { FieldValidateProps } from 'hooks/useForm';
 import './style.scss';
 
 const calendarHeight: number = 245;
@@ -40,19 +41,24 @@ const state = {
   day: currentDate.getTime(),
 };
 
-export type CalendarPropsType = {
-  value: number | null;
+type CalendarPropsType = {
   label: string;
   name: string;
   labelClass: string;
   inputClass?: string;
-  errors: string[];
-  error: boolean;
-  onChange: (dateSelected: number) => void;
-  onFocus: () => void;
-};
+} & FieldValidateProps<number | null>;
 
-function Calendar({ value, label, name, errors, error, labelClass, inputClass, onChange, onFocus }: CalendarPropsType): JSX.Element {
+function Calendar({
+  value,
+  label,
+  name,
+  errors,
+  error,
+  labelClass,
+  inputClass,
+  onChange,
+  onFocus
+  }: CalendarPropsType): JSX.Element {
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
 

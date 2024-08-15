@@ -11,7 +11,14 @@ type FormControlProps = {
   errors: string[];
 };
 
-function FormControl<T>({ label, name, children, errors, className, labelClass }: FormControlProps, ref: Ref<T>): JSX.Element {
+function FormControl<T>({
+  label,
+  name,
+  children,
+  errors = [],
+  className,
+  labelClass
+}: FormControlProps, ref: Ref<T>): JSX.Element {
   const fieldsetRef = useRef<HTMLFieldSetElement>(null);
 
   useImperativeHandle(

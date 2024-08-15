@@ -1,7 +1,8 @@
 import { Children, ReactElement, JSX, useMemo } from 'react';
 import { isSlot } from 'components/slot/slot';
-import { clsx } from 'utils';
 import FormControl from 'components/form/form-control/form-control';
+import { FieldValidateProps } from 'hooks/useForm';
+import { clsx } from 'utils';
 import './style.scss';
 
 export type OptionPrototype<T> = {
@@ -13,8 +14,7 @@ export type OptionPrototype<T> = {
 
 type OptionType<T, R> = (OptionPrototype<T> & R)[];
 
-export type SelectPropsType<T, R> = {
-  value: T;
+type SelectPropsType<T, R> = {
   options: OptionType<T, R>;
   placeholder?: string;
   valueField?: keyof R;
@@ -25,10 +25,8 @@ export type SelectPropsType<T, R> = {
   labelClass?: string;
   selectClass?: string;
   label?: string;
-  error?: boolean;
-  errors?: string[];
   onChange: (value: T) => void;
-};
+} & Omit<Partial<FieldValidateProps<T>>, 'onChange'>;
 
 function Select<T extends string | number | readonly string[] | undefined, R extends OptionPrototype<T> = {}>
 ({
