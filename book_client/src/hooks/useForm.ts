@@ -68,7 +68,6 @@ export default <T extends Object, R>(
   };
 
   Object.keys(state).forEach((key: string) => {
-    const keyValidateInfo: UnionTypeErrorInfo = validateObject[key] as UnionTypeErrorInfo;
     type ValueType = T[keyof T];
     (formControlProps as UnionTypeFormValidate)[key] = {
       value: value[key as keyof T],
@@ -81,12 +80,12 @@ export default <T extends Object, R>(
             : elementTargetValue;
         setValue({ ...value, [key]: currentValue });
         state[key as keyof T] = currentValue;
-        keyValidateInfo.validate();
+        (validateObject[key] as UnionTypeErrorInfo).validate();
       },
       onFocus: (): void => {
-        keyValidateInfo.dirty = true;
+        (validateObject[key] as UnionTypeErrorInfo).dirty = true;
       },
-      ...keyValidateInfo,
+      ...(validateObject[key] as UnionTypeErrorInfo),
       watch: (currentValue: ValueType): void => {
         (formControlProps as UnionTypeFormValidate)[key].value = currentValue;
         setValue({ ...value, [key]: currentValue });

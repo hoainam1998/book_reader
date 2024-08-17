@@ -28,7 +28,7 @@ const router = createBrowserRouter(
         </Route>
         <Route path={path.BOOK} element={<Outlet />}
           handle={{ crumb: (match: UIMatch) => <Link key={match.pathname} to={match.pathname}>Book</Link> }}>
-          <Route index element={<BookList />} />
+          <Route index element={<BookDetail />} loader={loadAllCategory} />
           <Route path={path.ID} element={<BookDetail />}
             loader={loadAllCategory}
             handle={{ crumb: (match: UIMatch) => <span key={match.pathname}>{match.params.id}</span> }}/>

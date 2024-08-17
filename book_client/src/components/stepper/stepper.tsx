@@ -1,4 +1,14 @@
-import { useCallback, Fragment, useState, useEffect, useMemo, JSX, ReactElement, JSXElementConstructor, Children } from 'react';
+import {
+  useCallback,
+  Fragment,
+  useState,
+  useEffect,
+  useMemo,
+  JSX,
+  ReactElement,
+  JSXElementConstructor,
+  Children
+} from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -37,11 +47,11 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep }: Step
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({
         step: index + 1,
-        active: index === 0,
+        active: index === activeStep - 1,
         last: index + 1 === stepNumber,
-        stepped: false
+        stepped: index <= activeStep - 2
       }));
-  }, [stepNumber]);
+  }, [stepNumber, activeStep]);
 
   const [steps, setSteps] = useState<StepType[]>(stepsInit);
   const [step, setStep] = useState<number>(1);
@@ -97,17 +107,18 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep }: Step
   const onSwitchStep = useCallback((idx: number): void => {
     const stepsUpdated: StepType[] = steps.map(
       (step, index) => ({ ...step, active: index === idx, stepped: index <= idx - 1 }));
-    const activeStep = idx + 1;
+    const switchedStep = idx + 1;
     setSteps(stepsUpdated);
-    onSwitch(activeStep);
-    setStep(activeStep);
+    onSwitch(switchedStep);
+    setStep(switchedStep);
   }, [steps]);
 
   useEffect(() => {
     if (activeStep <= 0) {
-      throw new Error('[Custom Error] Step must start is 1!');
+      throw new Error('[Custom Error] Step must start equal 1!');
     } else {
       setStep(activeStep);
+      setSteps(stepsInit);
     }
   }, [activeStep]);
 

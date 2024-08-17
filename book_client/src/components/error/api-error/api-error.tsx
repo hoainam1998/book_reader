@@ -11,7 +11,7 @@ type ImageError = 'empty' | 'server-error' | 'server-disconnect';
 
 function ApiError(): JSX.Element {
   const error = useRouteError() as AxiosError;
-  let image: 'empty' | 'server-error' | 'server-disconnect' = 'empty';
+  let image: ImageError = 'empty';
   let message: string = '';
 
   if (error.code === 'ERR_NETWORK') {

@@ -1,4 +1,4 @@
-import { JSX, useState } from 'react';
+import { JSX, useSyncExternalStore } from 'react';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
@@ -6,6 +6,7 @@ import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import { loadAllCategory } from './fetcher';
+import store, { CurrentStoreType } from './storage';
 import './style.scss';
 
 type BookStateType = {
@@ -49,22 +50,24 @@ function BookDetail(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId);
+  const { subscribe, getSnapshot, updateData, updateStep } = store;
 
-  const [step, setStep] = useState<number>(1);
+  const { step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const onSubmit = (formData: FormData): void => {
     handleSubmit();
 
     if (!validate.error) {
-      // TODO
+      updateData(formData);
+      updateStep(2);
     }
   };
 
   return (
     <Stepper
       stepNumber={3}
-      onSwitch={(step) => setStep(step)}
-      activeStep={1}
+      onSwitch={(step) => updateStep(step)}
+      activeStep={step}
       className="book-detail-stepper">
       <StepContent step={1}>
         <BookInformation

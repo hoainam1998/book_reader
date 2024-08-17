@@ -71,6 +71,9 @@ function FileDragDropUpload({
     const imageFileListNewest: File[] = [...imageFileList];
     setImageFileList(imageFileListNewest);
     onChange(imageFileListNewest);
+    if (fileInput) {
+      fileInput.current!.input.value = '';
+    }
   }, [imageFileList]);
 
   useImperativeHandle(ref, (): ImageFileList => ({ files: imageFileList }), [imageFileList]);

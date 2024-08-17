@@ -1,8 +1,9 @@
-import { ChangeEvent, JSX, useEffect, useState, useCallback } from 'react';
+import { ChangeEvent, JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import Quill, { QuillOptions } from 'quill';
 import Button from 'components/button/button';
 import Input from 'components/form/form-control/input/input';
 import { BookService, RequestBody } from 'services';
+import store, { CurrentStoreType } from '../storage';
 import './style.scss';
 
 let quill: Quill | null = null;
@@ -28,12 +29,21 @@ const options: QuillOptions = {
 function BookIntroduce(): JSX.Element {
   const [haveEdit, setHaveEdit] = useState<boolean>(false);
   const [haveContent, setHaveContent] = useState<boolean>(false);
+  const { subscribe, getSnapshot } = store;
+  const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+
+  const name: string = useMemo((): string => {
+    if (data && data.has && data.has('name')) {
+      return ((data.get('name') || '') as string).replace(/\s/, '-');
+    }
+    return '';
+  }, [data]);
 
   useEffect((): void => {
     if (!quill && haveEdit) {
       quill = new Quill(`#${editSelector}`, options);
 
-      quill.on('editor-change', () => {
+      quill.on('editor-change', (): void => {
         if (quill?.getLength() === 1) {
           setHaveContent(false);
         } else {
@@ -67,8 +77,7 @@ function BookIntroduce(): JSX.Element {
     <section className="book-introduce">
       <p className="note field-name">*Note: I must select a exist file or create new file to switch the next step.</p>
       <p className="file-name">
-        <span className="field-name">File name</span>
-        file name
+        <span className="field-name">File name</span>{name}
       </p>
       <Input
         type="file"
