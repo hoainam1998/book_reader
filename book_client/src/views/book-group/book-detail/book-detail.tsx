@@ -5,7 +5,7 @@ import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
-import { loadAllCategory } from './fetcher';
+import { loadAllCategory, saveBookInformation } from './fetcher';
 import store, { CurrentStoreType } from './storage';
 import './style.scss';
 
@@ -50,7 +50,7 @@ function BookDetail(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId);
-  const { subscribe, getSnapshot, updateData, updateStep } = store;
+  const { subscribe, getSnapshot, updateStep } = store;
 
   const { step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
@@ -58,8 +58,8 @@ function BookDetail(): JSX.Element {
     handleSubmit();
 
     if (!validate.error) {
-      updateData(formData);
-      updateStep(2);
+      saveBookInformation(formData)
+        // .then(() => updateStep(2));
     }
   };
 
@@ -71,13 +71,14 @@ function BookDetail(): JSX.Element {
       className="book-detail-stepper">
       <StepContent step={1}>
         <BookInformation
-          onSubmit={onSubmit}
           name={name}
           categoryId={categoryId}
           publishedTime={publishedTime}
           publishedDay={publishedDay}
           images={images}
-          pdf={pdf} />
+          pdf={pdf}
+          onSubmit={onSubmit}
+          onReset={reset} />
       </StepContent>
       <StepContent step={2}>
         <BookIntroduce />

@@ -3,7 +3,7 @@ import { showLoading, hideLoading } from 'utils';
 
 const Api = axios.create({
   baseURL: process.env.BASE_URL,
-  timeout: 3000,
+  timeout: 30000,
 });
 
 Api.interceptors.request.use((config) => {

@@ -61,7 +61,6 @@ export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
 
 export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
   const url: URL = new URL(request.url);
-
   const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
   const body: RequestBody = {

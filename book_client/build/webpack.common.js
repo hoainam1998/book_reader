@@ -40,6 +40,7 @@ module.exports = {
       'interfaces': getResolvePath('../src/interfaces'),
       'hooks': getResolvePath('../src/hooks'),
       'services': getResolvePath('../src/services'),
+      'storage': getResolvePath('../src/storage')
     }
   },
   module: {

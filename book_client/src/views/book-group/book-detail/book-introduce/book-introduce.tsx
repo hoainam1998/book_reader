@@ -5,6 +5,7 @@ import Input from 'components/form/form-control/input/input';
 import { BookService, RequestBody } from 'services';
 import store, { CurrentStoreType } from '../storage';
 import './style.scss';
+const { subscribe, getSnapshot, updateStep } = store;
 
 let quill: Quill | null = null;
 const editSelector: string = 'book-introduce-editor';
@@ -29,12 +30,11 @@ const options: QuillOptions = {
 function BookIntroduce(): JSX.Element {
   const [haveEdit, setHaveEdit] = useState<boolean>(false);
   const [haveContent, setHaveContent] = useState<boolean>(false);
-  const { subscribe, getSnapshot } = store;
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const name: string = useMemo((): string => {
-    if (data && data.has && data.has('name')) {
-      return ((data.get('name') || '') as string).replace(/\s/, '-');
+    if (data && Object.hasOwn(data, 'name')) {
+      return ((data.name || '') as string).replace(/\s/, '-');
     }
     return '';
   }, [data]);
@@ -57,9 +57,9 @@ function BookIntroduce(): JSX.Element {
     const body: RequestBody = {
       query: 'mutation BookMutation($introduce: BookIntroduceInput) { book { saveIntroduce(introduce: $introduce) { message }}}',
       html: quill?.getSemanticHTML(),
-      fileName: 'book 1',
+      fileName: name,
     };
-    BookService.graphql('/save-introduce', body);
+    BookService.graphql('/save-introduce', body).then(() => updateStep(3));
   }, []);
 
   const fileChanged = useCallback(<T,>(event: ChangeEvent<T | HTMLInputElement>): void => {

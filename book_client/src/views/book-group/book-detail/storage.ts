@@ -1,15 +1,20 @@
+import { StepStorage } from 'storage';
+
 export type CurrentStoreType = {
   step: number;
-  data: FormData;
-  isComplete: boolean;
+  data: any;
+  isComplete?: boolean;
+};
+
+type BookInfo = {
+  step: number;
+  data: any;
 };
 
 type ListenerType = (() => void)[];
 
-console.log(localStorage.getItem('book-introduce-data'));
-
 const initStore: CurrentStoreType = {
-  step: +(localStorage.getItem('step') || '1'),
+  step: +StepStorage.getItem() || 1,
   data: JSON.parse(localStorage.getItem('book-introduce-data')!),
   isComplete: false
 };
@@ -25,17 +30,23 @@ const store = {
   listeners: [] as ListenerType,
   updateStep(currentStep: number): void {
     store.currentStore = { ...store.currentStore, step: currentStep };
-    localStorage.setItem('step', currentStep.toString());
+    StepStorage.setItem(currentStep);
     emitChange(store.listeners);
   },
   updateData(data: FormData): void {
     store.currentStore = { ...store.currentStore, data };
     localStorage.setItem('book-introduce-data', JSON.stringify(data));
+    emitChange(store.listeners);
+  },
+  updateBookInfo(newStore: BookInfo): void {
+    store.updateStep(newStore.step);
+    store.updateData({...newStore.data, images: 'images' });
+    emitChange(store.listeners);
   },
   subscribe(callback: () => void): () => void {
     store.listeners = [...store.listeners, callback];
     return () => {
-      store.currentStore.isComplete && localStorage.removeItem('step');
+      store.currentStore.isComplete && StepStorage.delete();
     };
   },
   getSnapshot(): CurrentStoreType {

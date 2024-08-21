@@ -1,4 +1,4 @@
-import { JSX } from 'react';
+import { JSX, useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
@@ -17,6 +17,7 @@ type BookInformation = {
   publishedDay: FieldValidateProps;
   categoryId: FieldValidateProps;
   images: FieldValidateProps;
+  onReset: () => void;
   onSubmit: (formData: FormData) => void
 };
 
@@ -27,26 +28,41 @@ type CategoryOptions = {
 
 const formId: string = 'book-detail-form';
 
-function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, images, onSubmit }: BookInformation): JSX.Element {
+function BookInformation({
+  name,
+  pdf,
+  publishedTime,
+  publishedDay,
+  categoryId,
+  images,
+  onReset,
+  onSubmit
+}: BookInformation): JSX.Element {
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptions[] = loaderData?.data.category.all || [];
 
   const bookInformationFormSubmit = (): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);
-    const files: File[] | undefined = images.value;
-    const fieldName: string = images.constructor.name;
-
-    if (files && files.length) {
-      files.forEach(file => {
-        formData.append(fieldName, file);
-      });
-    }
-
     formData && onSubmit(formData);
   };
 
+  useEffect(() => {
+    return () => {
+      name.watch(null);
+      pdf.watch(null);
+      publishedTime.watch(null);
+      publishedTime.watch(null);
+      categoryId.watch(null);
+      images.watch(null);
+      onReset();
+    };
+  }, []);
+
   return (
-    <Form id={formId} submitLabel="Save" onSubmit={bookInformationFormSubmit} className="book-information">
+    <Form id={formId}
+    submitLabel="Save"
+    onSubmit={bookInformationFormSubmit}
+    className="book-information">
       <Grid>
         <GridItem lg={3}>
           <Input
@@ -81,7 +97,7 @@ function BookInformation({ name, pdf, publishedTime, publishedDay, categoryId, i
             labelClass="label"
             inputClass="input"
             label="Publish day"
-            name="publish-day" />
+            name="publishedDay" />
         </GridItem>
         <GridItem lg={2}>
           <Select<string, CategoryOptions>

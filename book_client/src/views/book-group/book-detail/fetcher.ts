@@ -1,8 +1,8 @@
 import { AxiosResponse } from 'axios';
-import { CategoryService, RequestBody } from 'services';
+import { CategoryService, BookService, RequestBody } from 'services';
 import { showToast } from 'utils';
 
-export const loadAllCategory = (): Promise<AxiosResponse> => {
+const loadAllCategory = (): Promise<AxiosResponse> => {
   const body: RequestBody = {
     query: `query AllCategory {
       category {
@@ -14,4 +14,13 @@ export const loadAllCategory = (): Promise<AxiosResponse> => {
     }`
   };
   return CategoryService.graphql('all', body);
+};
+
+const saveBookInformation = (formData: FormData): Promise<AxiosResponse> => {
+  return BookService.graphql('save-book-info', formData);
+};
+
+export {
+  loadAllCategory,
+  saveBookInformation
 };

@@ -52,7 +52,7 @@ export default <T extends Object, R>(
       (formControlProps as FormValidateProps).validate.validate();
       Object.keys(state).forEach((key: string) => {
         (formControlProps as ErrorInfo)[key] = Object.assign(
-          formControlProps as ErrorInfo,
+          (formControlProps as UnionTypeFormValidate)[key],
           validateObject[key]
         );
       });
