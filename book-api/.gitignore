@@ -11,6 +11,7 @@
 # production
 /dist
 *.html
+*.pdf
 
 # misc
 .DS_Store

@@ -1,5 +1,32 @@
-const { GraphQLInputObjectType, GraphQLString, GraphQLObjectType, GraphQLError } = require('graphql');
-const { graphqlErrorOption, ResponseType } = require('../common-schema.js');
+const {
+  GraphQLInputObjectType,
+  GraphQLString,
+  GraphQLObjectType,
+  GraphQLError,
+  GraphQLInt,
+  GraphQLID,
+  GraphQLList
+} = require('graphql');
+const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
+const { messageCreator } = require('../../utils/index.js');
+
+const commonBookField = {
+  name: {
+    type: GraphQLString
+  },
+  pdf: {
+    type: GraphQLString
+  },
+  publishedTime: {
+    type: GraphQLInt
+  },
+  publishedDay: {
+    type: GraphQLString
+  },
+  categoryId: {
+    type: GraphQLString
+  }
+};
 
 const BookIntroduceInputType = new GraphQLInputObjectType({
   name: 'BookIntroduceInput',
@@ -10,7 +37,30 @@ const BookIntroduceInputType = new GraphQLInputObjectType({
     html: {
       type: GraphQLString
     }
-  },
+  }
+});
+
+const BookInformationInputType = new GraphQLInputObjectType({
+  name: 'BookInformationInput',
+  fields: {
+    bookId: {
+      type: GraphQLID
+    },
+    ...commonBookField,
+  }
+});
+
+const BookInformationType = new GraphQLObjectType({
+  name: 'BookInformation',
+  fields: {
+    ...commonBookField,
+    images: {
+      type: new GraphQLList(GraphQLString)
+    },
+    introduce: {
+      type: GraphQLString
+    }
+  }
 });
 
 const mutation = new GraphQLObjectType({
@@ -28,8 +78,43 @@ const mutation = new GraphQLObjectType({
         try {
           const isSaved = await book.saveIntroduceHtmlFile(name, html);
           if (isSaved) {
-            return { message: 'Html file created!' };
+            return messageCreator('Html file created!');
           }
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    saveBookInfo: {
+      type: ResponseType,
+      args: {
+        book: {
+          type: BookInformationInputType
+        }
+      },
+      resolve: async (book, args) => {
+        try {
+          await book.saveBookInfo(args.book);
+          return messageCreator('Book has been created!');
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    saveBookImages: {
+      type: ResponseType,
+      args: {
+        images: {
+          type: new GraphQLList(GraphQLString)
+        },
+        bookId: {
+          type: GraphQLID
+        }
+      },
+      resolve: async (book, args) => {
+        try {
+          await book.saveBookImages(args.images, args.bookId);
+          return messageCreator('Book images has been created!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -44,6 +129,32 @@ const query = new GraphQLObjectType({
     all: {
       type: GraphQLString,
       resolve: () => {}
+    },
+    detail: {
+      type: BookInformationType,
+      args: {
+        bookId: {
+          type: GraphQLID
+        }
+      },
+      resolve: async (book, { bookId }) => {
+        try {
+          const [bookInfo, images] = await book.getBookDetail(bookId);
+          if (bookInfo.length > 0) {
+            return {
+              ...bookInfo[0],
+              images
+            };
+          } else {
+            throw new GraphQLError(`Can not found book with id is ${bookId}`, graphqlNotFoundErrorOption);
+          }
+        } catch (err) {
+          if (err instanceof GraphQLError) {
+            throw err;
+          }
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
     }
   }
 });

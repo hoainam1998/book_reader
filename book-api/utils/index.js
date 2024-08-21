@@ -13,6 +13,15 @@ const deepFreeze = (object) => {
   return Object.freeze(object);
 };
 
+/**
+ * Return message response object.
+ *
+ * @param {string} message - message.
+ * @returns {object} - message object.
+ */
+const messageCreator = (message) => ({ message });
+
 module.exports = {
-  deepFreeze
+  deepFreeze,
+  messageCreator
 };

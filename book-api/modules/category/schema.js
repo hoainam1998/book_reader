@@ -9,6 +9,7 @@ const {
   GraphQLBoolean
 } = require('graphql');
 const { graphqlErrorOption, ResponseType } = require('../common-schema');
+const { messageCreator } = require('../../utils/index.js');
 
 const CategoryType = new GraphQLObjectType({
   name: 'Category',
@@ -61,9 +62,9 @@ const mutation = new GraphQLObjectType({
         try {
           const result = await category.create(args.category);
           if (result.affectedRows > 0) {
-            return { message: 'Create category success!' };
+            return messageCreator('Create category success!');
           }
-          return { message: 'Create category fail!' };
+          return messageCreator('Create category fail!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -75,9 +76,9 @@ const mutation = new GraphQLObjectType({
         try {
           const result = await category.update(args.category);
           if (result.affectedRows > 0) {
-            return { message: 'Update category success!' };
+            return messageCreator('Update category success!');
           }
-          return { message: 'Update category fail!' };
+          return messageCreator('Update category fail!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -91,7 +92,7 @@ const query = new GraphQLObjectType({
   fields: {
     all: {
       type: new GraphQLList(CategoryType),
-      resolve: async (category, _) => {
+      resolve: async (category) => {
         try {
           return await category.all();
         } catch (err) {
@@ -158,9 +159,9 @@ const query = new GraphQLObjectType({
         try {
           const result = await category.delete(categoryId);
           if (result.affectedRows > 0) {
-            return { message: 'Delete category success!' };
+            return messageCreator('Delete category success!');
           }
-          return { message: 'Delete category fail!' };
+          return messageCreator('Delete category fail!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }

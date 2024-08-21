@@ -1,6 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const { UPLOAD_MODE } = require('../constants/index.js');
+const { UPLOAD_MODE, HTTP_CODE } = require('../constants/index.js');
 
 const storage = multer.memoryStorage();
 
@@ -44,7 +44,7 @@ module.exports = (mode, fields, maxCount) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
-          response.status(400).json({ message: err.message });
+          response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
           switch (mode) {
             case UPLOAD_MODE.SINGLE:

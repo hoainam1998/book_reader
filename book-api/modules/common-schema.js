@@ -2,13 +2,23 @@ const {
   GraphQLString,
   GraphQLObjectType
 } = require('graphql');
+const { HTTP_CODE } = require('../constants/index.js');
 
 export const graphqlErrorOption = {
   extensions: {
     code: 'BAD_REQUEST',
     http: {
-      status: 400,
-    },
+      status: HTTP_CODE.BAD_REQUEST,
+    }
+  }
+};
+
+export const graphqlNotFoundErrorOption = {
+  extensions: {
+    code: 'NOT_FOUND',
+    http: {
+      status: HTTP_CODE.NOT_FOUND,
+    }
   }
 };
 

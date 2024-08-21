@@ -20,8 +20,16 @@ class Router {
     return this._router;
   }
 
-  post(path, handle) {
-    this._router.post(path, (req, res, next) => handle(req, res, next, this._schema));
+  post(...args) {
+    const path = args[0];
+    if (args.length === 3) {
+      const helper = args[1];
+      const handle = args[2];
+      this._router.post(path, helper, (req, res, next) => handle(req, res, next, this._schema));
+    } else {
+      const handle = args[1];
+      this._router.post(path, (req, res, next) => handle(req, res, next, this._schema));
+    }
   }
 }
 

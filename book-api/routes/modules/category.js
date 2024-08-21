@@ -1,7 +1,7 @@
 const Router = require('../router.js');
 const { execute } = require('graphql');
 const { validateQuery, validateResultExecute, upload } = require('../../decorators/index.js');
-const { UPLOAD_MODE } = require('../../constants/index.js');
+const { UPLOAD_MODE, HTTP_CODE } = require('../../constants/index.js');
 
 class CategoryRouter extends Router {
 
@@ -15,13 +15,13 @@ class CategoryRouter extends Router {
     this.post('/pagination', this._pagination);
   }
 
-  @validateResultExecute(200)
+  @validateResultExecute(HTTP_CODE.OK)
   @validateQuery
   _getAll(req, res, next, schema) {
     return execute({ schema, document: req.body.query });
   }
 
-  @validateResultExecute(200)
+  @validateResultExecute(HTTP_CODE.OK)
   @validateQuery
   _pagination(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues:
@@ -33,7 +33,7 @@ class CategoryRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validateResultExecute(201)
+  @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
   _create(req, res, next, schema) {
     const variables = {
@@ -45,7 +45,7 @@ class CategoryRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validateResultExecute(201)
+  @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
   _update(req, res, next, schema) {
     const variables = {
@@ -56,13 +56,13 @@ class CategoryRouter extends Router {
     return execute({ schema, document: req.body.query, variableValues: { category: variables } });
   }
 
-  @validateResultExecute(200)
+  @validateResultExecute(HTTP_CODE.OK)
   @validateQuery
   _getDetail(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: { categoryId: req.body.categoryId } });
   }
 
-  @validateResultExecute(201)
+  @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
   _delete(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: { categoryId: req.body.categoryId } });
