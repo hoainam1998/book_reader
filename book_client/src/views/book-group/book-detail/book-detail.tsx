@@ -5,7 +5,7 @@ import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
-import { loadAllCategory, saveBookInformation } from './fetcher';
+import { loadAllCategory, saveBookInformation, shouldRevalidateBookLoader } from './fetcher';
 import store, { CurrentStoreType } from './storage';
 import './style.scss';
 
@@ -90,5 +90,5 @@ function BookDetail(): JSX.Element {
   );
 }
 
-export { loadAllCategory };
+export { loadAllCategory, shouldRevalidateBookLoader };
 export default BookDetail;
