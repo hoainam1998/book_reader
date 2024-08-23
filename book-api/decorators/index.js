@@ -59,8 +59,7 @@ const validateResultExecute = (httpCode) => {
             const resultClone = JSON.parse(JSON.stringify(result));
             if (resultClone.errors) {
               const message = resultClone.errors[0].message;
-              const status = resultClone.errors[0].extensions.http.status;
-
+              const status = resultClone.errors[0].extensions?.http.status || HTTP_CODE.BAD_REQUEST;
               response.status(status).json(messageCreator(message));
             } else {
               response.status(httpCode).json(resultClone.data);

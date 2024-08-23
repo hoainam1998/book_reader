@@ -55,7 +55,17 @@ const BookInformationType = new GraphQLObjectType({
   fields: {
     ...commonBookField,
     images: {
-      type: new GraphQLList(GraphQLString)
+      type: new GraphQLList(new GraphQLObjectType({
+        name: 'BookImages',
+        fields: {
+          name: {
+            type: GraphQLString
+          },
+          image: {
+            type: GraphQLString
+          }
+        }
+      }))
     },
     introduce: {
       type: GraphQLString
@@ -107,13 +117,16 @@ const mutation = new GraphQLObjectType({
         images: {
           type: new GraphQLList(GraphQLString)
         },
+        name: {
+          type: new GraphQLList(GraphQLString)
+        },
         bookId: {
           type: GraphQLID
         }
       },
-      resolve: async (book, args) => {
+      resolve: async (book, { images, bookId, name }) => {
         try {
-          await book.saveBookImages(args.images, args.bookId);
+          await book.saveBookImages(images, bookId, name);
           return messageCreator('Book images has been created!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
@@ -143,7 +156,7 @@ const query = new GraphQLObjectType({
           if (bookInfo.length > 0) {
             return {
               ...bookInfo[0],
-              images
+              images: images.map(({ image, name }) => ({ image, name }))
             };
           } else {
             throw new GraphQLError(`Can not found book with id is ${bookId}`, graphqlNotFoundErrorOption);

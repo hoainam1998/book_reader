@@ -8,7 +8,7 @@ const {
   upload
 } = require('../../decorators/index.js');
 const { UPLOAD_MODE, HTTP_CODE } = require('../../constants/index.js');
-const { messageCreator } = require('../../utils/index.js');
+const { messageCreator, promiseAllSettledOrder } = require('../../utils/index.js');
 const formable = multer();
 const cpUpload = formable.fields([
   { name: 'pdf', maxCount: 1 },
@@ -57,7 +57,8 @@ class BookRouter extends Router {
   _saveImages(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: {
         images: req.body.images,
-        bookId: req.body.bookId
+        bookId: req.body.bookId,
+        name: req.body.name
       }
     });
   }
@@ -83,45 +84,42 @@ class BookRouter extends Router {
     formDataBookInfo.append('pdf', new File(pdf.buffer, pdf.originalname), pdf.originalname);
     formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
 
-    images.forEach(image => {
-      formDataBookImages.append('images', new File(image.buffer, image.originalname, { type: image.mimetype }), image.originalname);
+    images.forEach((image, index) => {
+      formDataBookImages.append('images', new File([image.buffer], pdf.originalname, { type: image.mimetype }), image.originalname);
+      formDataBookImages.append('name', req.body.name + (index + 1));
     });
 
-    formDataBookImages.append('query', 'mutation SaveBookImages($images: [String], $bookId: ID) { book { saveBookImages(images: $images, bookId: $bookId) { message } } }');
+    formDataBookImages.append(
+      'query',
+      'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }');
     formDataBookImages.append('bookId', bookId);
     formDataBookInfo.append('bookId', bookId);
 
-    const fetchHelper = (path, body) => {
-      return fetch(`${url}/${path}`, {
-        method: 'POST',
-        body
+    const fetchHelper = (path, body) => fetch(`${url}/${path}`, { method: 'POST', body });
+
+    const promiseFetchBookData = (fetchHandler, name) => {
+      return new Promise((resolve, reject) => {
+        fetchHandler
+          .then(saveBookInfoResponse => {
+            if (saveBookInfoResponse.status === HTTP_CODE.CREATED) {
+              resolve(saveBookInfoResponse);
+            } else {
+              reject(new Error(`Save ${name} failed!`));
+            }
+          })
+          .catch(err => reject(new Error(`Save ${name} failed by ${err.message}`)));
       });
     };
 
-    new Promise((resolve, reject) => {
-      fetchHelper('save-book', formDataBookInfo)
-        .then(saveBookInfoResponse => {
-          if (saveBookInfoResponse.status === HTTP_CODE.CREATED) {
-            fetchHelper('save-images', formDataBookImages)
-              .then(saveImagesResponse => {
-                if (saveImagesResponse.status === HTTP_CODE.CREATED) {
-                  resolve(saveImagesResponse);
-                } else {
-                  reject(new Error('Save book information failed!'));
-                }
-              })
-              .catch(err => reject(err));
-          } else {
-            reject(new Error('Save book information failed!'));
-          }
-        })
-        .catch(err => reject(err));
-      })
-      .then(() => res.status(HTTP_CODE.OK).json({
+    promiseAllSettledOrder([
+      () => promiseFetchBookData(fetchHelper('save-book', formDataBookInfo), 'book information'),
+      () => promiseFetchBookData(fetchHelper('save-images', formDataBookImages), 'book images')
+    ],
+    () => res.status(HTTP_CODE.OK).json({
         ...messageCreator('Save book information success!'),
         bookId
-      }))
-      .catch(err => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message)));
+      }),
+    err => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message)));
   }
 }
 

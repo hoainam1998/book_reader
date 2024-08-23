@@ -27,18 +27,18 @@ class BookService {
       [[bookId, name, pdf, publishedDay, publishedTime, categoryId]]);
   }
 
-  saveBookImages(images, bookId) {
-    const imagesRecord = images.reduce((arr, image) => {
-      arr.push([bookId, image]);
+  saveBookImages(images, bookId, name) {
+    const imagesRecord = images.reduce((arr, image, index) => {
+      arr.push([bookId, image, name[index]]);
       return arr;
     }, []);
-    return this._sql.query('INSERT INTO BOOK_IMAGE(BOOK_ID, IMAGE) VALUES ?', [imagesRecord]);
+    return this._sql.query('INSERT INTO BOOK_IMAGE(BOOK_ID, IMAGE, NAME) VALUES ?', [imagesRecord]);
   }
 
   getBookDetail(bookId) {
     return this._sql.query(
-      `SELECT * FROM BOOK WHERE BOOK_ID = ?;
-      SELECT IMAGE FROM BOOK_IMAGE WHERE BOOK_ID = ?;`,
+      `SELECT name, pdf, PUBLISHED_TIME AS publishedTime, PUBLISHED_DAY AS publishedDay, CATEGORY_ID AS categoryId, INTRODUCE_FILE as introduce FROM BOOK WHERE BOOK_ID = ?;
+      SELECT image, name FROM BOOK_IMAGE WHERE BOOK_ID = ?;`,
       [bookId, bookId]
     );
   }
