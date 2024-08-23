@@ -3,11 +3,13 @@ import {
   JSX,
   useCallback,
   useState,
+  useEffect,
   useRef,
   ChangeEvent,
   useImperativeHandle,
   forwardRef,
-  Ref } from 'react';
+  Ref
+} from 'react';
 import Input from 'components/form/form-control/input/input';
 import FormControl from 'components/form/form-control/form-control';
 import { clsx } from 'utils';
@@ -31,6 +33,7 @@ type FileDragDropUploadType = {
 function FileDragDropUpload({
   className,
   name,
+  value,
   errors,
   error,
   label,
@@ -78,17 +81,23 @@ function FileDragDropUpload({
 
   useImperativeHandle(ref, (): ImageFileList => ({ files: imageFileList }), [imageFileList]);
 
+  useEffect(() => {
+    if (value) {
+      setImageFileList(value);
+    }
+  }, [value]);
+
   return (
     <FormControl label={label} name={name} errors={errors}>
       <div className={clsx('file-drag-drop-upload image-box', className, { 'error-box': error })}
         onDragOver={onDrag}
         onDrop={onDrop}
         onClick={onOpenFileFolder}>
-          {imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
+          {imageFileList && imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
           <Input<InputFileRefType> type="file" name={name} label={label} multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
           <div className="image-preview-wrapper">
             {
-              imageFileList.map((file, index) => (
+              imageFileList && imageFileList.map((file, index) => (
                 <div className="image-preview-item" key={index}>
                   <img height="100%" width="100%" src={URL.createObjectURL(file)} alt="book-image" />
                   <div className="delete-image" onClick={(e) => onDeleteFile(e, index)}>x</div>

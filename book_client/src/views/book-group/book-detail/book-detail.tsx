@@ -5,7 +5,7 @@ import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
-import { loadAllCategory, saveBookInformation, shouldRevalidateBookLoader } from './fetcher';
+import { loadAllCategory, getBookDetail, saveBookInformation, shouldRevalidateBookLoader } from './fetcher';
 import store, { CurrentStoreType } from './storage';
 import './style.scss';
 
@@ -50,7 +50,7 @@ function BookDetail(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId);
-  const { subscribe, getSnapshot, updateStep } = store;
+  const { subscribe, getSnapshot, updateBookInfo, updateStep } = store;
 
   const { step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
@@ -59,7 +59,11 @@ function BookDetail(): JSX.Element {
 
     if (!validate.error) {
       saveBookInformation(formData)
-        // .then(() => updateStep(2));
+        .then(res => {
+          const bookId: string = res.data.bookId;
+          getBookDetail(bookId)
+            .then(res => updateBookInfo({ data: res.data.book.detail, step: 2 }));
+        });
     }
   };
 
@@ -72,11 +76,11 @@ function BookDetail(): JSX.Element {
       <StepContent step={1}>
         <BookInformation
           name={name}
+          pdf={pdf}
           categoryId={categoryId}
           publishedTime={publishedTime}
           publishedDay={publishedDay}
           images={images}
-          pdf={pdf}
           onSubmit={onSubmit}
           onReset={reset} />
       </StepContent>

@@ -66,7 +66,7 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
     <FormControl name={name} label={label || ''} labelClass={labelClass} className={className} errors={errors}>
       <div className={clsx('select-wrapper', selectClass)}>
         <select name={name} id={name} className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
-          defaultValue={value} onChange={(event) => onChange(event.target.value as T)}>
+          value={value} onChange={(event) => onChange(event.target.value as T)}>
           {
             optionsFormatted.map((option, index) =>
               <option

@@ -58,6 +58,7 @@ const routes: RoutePropsUnion[] = [
             path: path.ID,
             element: <BookDetail />,
             loader: loadAllCategory,
+            shouldRevalidate: shouldRevalidateBookLoader,
             handle: {
               crumb: ({ pathname, params }: UIMatch) =>
                 <span key={pathname}>{params.id}</span>

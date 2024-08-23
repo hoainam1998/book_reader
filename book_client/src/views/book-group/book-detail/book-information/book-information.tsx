@@ -1,4 +1,4 @@
-import { JSX, useEffect } from 'react';
+import { JSX, useEffect, useSyncExternalStore } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
@@ -9,6 +9,8 @@ import Form from 'components/form/form';
 import './style.scss';
 import { AxiosResponse } from 'axios';
 import { FieldValidateProps } from 'hooks/useForm';
+import store, { CurrentStoreType, Image } from '../storage';
+const { subscribe, getSnapshot } = store;
 
 type BookInformation = {
   name: FieldValidateProps;
@@ -28,6 +30,18 @@ type CategoryOptions = {
 
 const formId: string = 'book-detail-form';
 
+const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
+  const imagesPromise: Promise<File>[] = base64String.map(({ image, name }) => {
+    return new Promise((resolve, reject) => {
+      fetch(image)
+      .then(res => res.blob())
+      .then(blob => resolve(new File([blob], name, { type: 'image/png' })))
+      .catch(err => reject(err));
+    });
+  });
+  return Promise.all(imagesPromise);
+};
+
 function BookInformation({
   name,
   pdf,
@@ -40,13 +54,23 @@ function BookInformation({
 }: BookInformation): JSX.Element {
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptions[] = loaderData?.data.category.all || [];
+  const { data } : CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const bookInformationFormSubmit = (): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);
+    formData.set('publishedDay', publishedDay.value);
     formData && onSubmit(formData);
   };
 
   useEffect(() => {
+    if (data) {
+      name.watch(data.name);
+      publishedTime.watch(data.publishedTime);
+      publishedDay.watch(+data.publishedDay);
+      categoryId.watch(data.categoryId);
+      convertBase64ImageToFile(data.images).then(res => images.watch(res));
+    }
+
     return () => {
       name.watch(null);
       pdf.watch(null);

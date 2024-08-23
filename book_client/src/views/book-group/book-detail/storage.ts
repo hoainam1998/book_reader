@@ -1,10 +1,13 @@
-import { StepStorage } from 'storage';
+import { StepStorage, BookInfoStorage, BookInfoType } from 'storage';
+import type { Image } from 'storage';
 
 export type CurrentStoreType = {
   step: number;
-  data: any;
+  data: BookInfoType;
   isComplete?: boolean;
 };
+
+export { Image };
 
 type BookInfo = {
   step: number;
@@ -15,7 +18,7 @@ type ListenerType = (() => void)[];
 
 const initStore: CurrentStoreType = {
   step: +StepStorage.getItem() || 1,
-  data: JSON.parse(localStorage.getItem('book-introduce-data')!),
+  data: BookInfoStorage.getItem(),
   isComplete: false
 };
 
@@ -33,20 +36,23 @@ const store = {
     StepStorage.setItem(currentStep);
     emitChange(store.listeners);
   },
-  updateData(data: FormData): void {
+  updateData(data: BookInfoType): void {
     store.currentStore = { ...store.currentStore, data };
-    localStorage.setItem('book-introduce-data', JSON.stringify(data));
+    BookInfoStorage.setItem(data);
     emitChange(store.listeners);
   },
   updateBookInfo(newStore: BookInfo): void {
     store.updateStep(newStore.step);
-    store.updateData({...newStore.data, images: 'images' });
+    store.updateData(newStore.data);
     emitChange(store.listeners);
   },
   subscribe(callback: () => void): () => void {
     store.listeners = [...store.listeners, callback];
     return () => {
-      store.currentStore.isComplete && StepStorage.delete();
+      if (store.currentStore.isComplete) {
+        StepStorage.delete();
+        BookInfoStorage.delete();
+      }
     };
   },
   getSnapshot(): CurrentStoreType {

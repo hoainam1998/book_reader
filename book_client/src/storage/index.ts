@@ -1,3 +1,17 @@
+export type Image = {
+  image: string;
+  name: string;
+};
+
+export type BookInfoType = {
+  name: string;
+  pdf: string;
+  publishedTime: number;
+  publishedDay: string;
+  categoryId: string;
+  images: Image[];
+};
+
 class LocalStorage<T> {
   private readonly _name: string;
 
@@ -19,3 +33,4 @@ class LocalStorage<T> {
 }
 
 export const StepStorage = new LocalStorage<number>('step');
+export const BookInfoStorage = new LocalStorage<BookInfoType>('book-info');
