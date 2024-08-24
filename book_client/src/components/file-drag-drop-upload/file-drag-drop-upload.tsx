@@ -84,6 +84,11 @@ function FileDragDropUpload({
   useEffect(() => {
     if (value) {
       setImageFileList(value);
+      if (fileInput.current) {
+        const dataTransfer = new DataTransfer();
+        value.map(v => dataTransfer.items.add(v));
+        fileInput.current.input.files = dataTransfer.files;
+      }
     }
   }, [value]);
 

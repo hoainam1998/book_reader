@@ -1,4 +1,4 @@
-import { JSX, useSyncExternalStore } from 'react';
+import { JSX, useSyncExternalStore, useEffect } from 'react';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
@@ -6,7 +6,7 @@ import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import { loadAllCategory, getBookDetail, saveBookInformation, shouldRevalidateBookLoader } from './fetcher';
-import store, { CurrentStoreType } from './storage';
+import store, { CurrentStoreType, Image } from './storage';
 import './style.scss';
 
 type BookStateType = {
@@ -38,6 +38,36 @@ const rules: RuleType<BookStateType> = {
 
 const formId: string = 'book-detail-form';
 
+/**
+ * Convert base64 image string list to promise all file list.
+ *
+ * @param {Image[]} base64String - base64 string chain.
+ * @returns {Promise<File[]>} - promise all file list.
+ */
+const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
+  const imagesPromise: Promise<File>[] = base64String.map(({ image, name }) => {
+    return new Promise((resolve, reject) => {
+      fetch(image)
+      .then(res => res.blob())
+      .then(blob => resolve(new File([blob], name, { type: blob.type })))
+      .catch(err => reject(err));
+    });
+  });
+  return Promise.all(imagesPromise);
+};
+
+const convertFilePathToFile = (filePath: string, name: string): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    fetch(filePath)
+    .then(res => res.arrayBuffer())
+    .then(blob => {
+      console.log(blob);
+      resolve(new File([blob], name + '.pdf'));
+    })
+    .catch(err => reject(err));
+  });
+};
+
 function BookDetail(): JSX.Element {
   const {
     name,
@@ -52,7 +82,7 @@ function BookDetail(): JSX.Element {
   } = useForm(state, rules, formId);
   const { subscribe, getSnapshot, updateBookInfo, updateStep } = store;
 
-  const { step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const onSubmit = (formData: FormData): void => {
     handleSubmit();
@@ -67,10 +97,24 @@ function BookDetail(): JSX.Element {
     }
   };
 
+  useEffect(() => {
+    if (data) {
+      name.watch(data.name);
+      publishedTime.watch(data.publishedTime);
+      publishedDay.watch(+data.publishedDay);
+      categoryId.watch(data.categoryId);
+      pdf.watch('');
+      images.watch('');
+      // convertFilePathToFile(data.pdf, data.name).then(res => pdf.watch(res)).catch(err => console.log(err))
+      convertBase64ImageToFile(data.images)
+        .then(res => images.watch(res));
+    }
+  }, []);
+
   return (
     <Stepper
       stepNumber={3}
-      onSwitch={(step) => updateStep(step)}
+      onSwitch={updateStep}
       activeStep={step}
       className="book-detail-stepper">
       <StepContent step={1}>

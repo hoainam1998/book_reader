@@ -88,9 +88,8 @@ export default <T extends Object, R>(
       ...(validateObject[key] as UnionTypeErrorInfo),
       watch: (currentValue: ValueType): void => {
         (formControlProps as UnionTypeFormValidate)[key].value = currentValue;
-        setValue({ ...value, [key]: currentValue });
         state[key as keyof T] = currentValue;
-        validateObject.validate();
+        setValue({ ...value, [key]: currentValue });
       }
     } as FieldValidateProps<ValueType>;
   });

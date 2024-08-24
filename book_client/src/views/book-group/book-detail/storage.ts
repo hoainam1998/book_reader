@@ -11,7 +11,7 @@ export { Image };
 
 type BookInfo = {
   step: number;
-  data: any;
+  data: BookInfoType;
 };
 
 type ListenerType = (() => void)[];

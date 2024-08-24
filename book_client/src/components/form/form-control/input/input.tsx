@@ -1,4 +1,14 @@
-import { ChangeEvent, JSX, useRef, useImperativeHandle, forwardRef, Ref, FormEvent } from 'react';
+import {
+  ChangeEvent,
+  JSX,
+  useRef,
+  useMemo,
+  useImperativeHandle,
+  forwardRef,
+  Ref,
+  FormEvent,
+  HTMLProps
+} from 'react';
 import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
@@ -45,10 +55,21 @@ function Input<T>({
     []
   );
 
+  const specificPropInput: HTMLProps<HTMLInputElement> = useMemo(() => {
+    return type === 'file' ? {
+      accept,
+      multiple
+    } :
+    {
+      autoComplete: 'off',
+      defaultValue: value
+    };
+  }, [type, value, accept, multiple]);
+
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error }, inputClass)}
-        type={type} autoComplete="off" defaultValue={value} accept={accept} multiple={multiple} ref={inputRef}
+        type={type} {...specificPropInput} multiple={multiple} ref={inputRef}
         onChange={onChange} onInput={onInput} onFocus={onFocus} />
     </FormControl>
   );

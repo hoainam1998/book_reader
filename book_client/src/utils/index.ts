@@ -1,4 +1,4 @@
-import { showToast } from './toast';
+import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
 
 /**
