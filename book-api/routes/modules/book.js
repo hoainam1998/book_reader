@@ -1,6 +1,7 @@
 const Router = require('../router.js');
 const multer = require('multer');
 const { execute } = require('graphql');
+const path = require('path');
 const {
   validateQuery,
   validateResultExecute,
@@ -69,7 +70,7 @@ class BookRouter extends Router {
     return execute({ schema, document: req.body.query, variableValues: { bookId: req.body.bookId } });
   }
 
-  _processSaveBookInformation(req, res, next, _) {
+  _processSaveBookInformation(req, res, next, schema) {
     const pdf = req.files.pdf[0];
     const images = req.files.images;
     const bookId = Date.now();
@@ -81,17 +82,18 @@ class BookRouter extends Router {
       formDataBookInfo.append(key, req.body[key]);
     });
 
-    formDataBookInfo.append('pdf', new File(pdf.buffer, pdf.originalname), pdf.originalname);
+    formDataBookInfo.append('pdf', new File([pdf.buffer], pdf.originalname), pdf.originalname);
     formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
 
     images.forEach((image, index) => {
       formDataBookImages.append('images', new File([image.buffer], pdf.originalname, { type: image.mimetype }), image.originalname);
-      formDataBookImages.append('name', req.body.name + (index + 1));
+      formDataBookImages.append('name', `${req.body.name}${index + 1}${path.extname(image.originalname)}`);
     });
 
     formDataBookImages.append(
       'query',
-      'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }');
+      'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
+    );
     formDataBookImages.append('bookId', bookId);
     formDataBookInfo.append('bookId', bookId);
 
