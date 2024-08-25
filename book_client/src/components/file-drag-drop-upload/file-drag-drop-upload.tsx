@@ -10,17 +10,13 @@ import {
   forwardRef,
   Ref
 } from 'react';
-import Input from 'components/form/form-control/input/input';
+import Input, { InputRefType } from 'components/form/form-control/input/input';
 import FormControl from 'components/form/form-control/form-control';
 import { clsx } from 'utils';
 import { FieldValidateProps } from 'hooks/useForm';
 import './style.scss';
 
-type InputFileRefType = {
-  input: HTMLInputElement;
-};
-
-export type ImageFileList = {
+type ImageFileListType = {
   files: File[];
 };
 
@@ -38,9 +34,9 @@ function FileDragDropUpload({
   error,
   label,
   onChange
-}: FileDragDropUploadType, ref: Ref<ImageFileList>): JSX.Element {
+}: FileDragDropUploadType, ref: Ref<ImageFileListType>): JSX.Element {
   const [imageFileList, setImageFileList] = useState<File[]>([]);
-  const fileInput = useRef<InputFileRefType>(null);
+  const fileInput = useRef<InputRefType>(null);
 
   const onDrag = useCallback((event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -59,7 +55,7 @@ function FileDragDropUpload({
   }, []);
 
   const onOpenFileFolder = useCallback((): void => {
-    fileInput.current!.input.click();
+    fileInput.current!.input!.click();
   }, [fileInput]);
 
   const onFileChanged = useCallback(<T, >(event: ChangeEvent<T | HTMLInputElement>): void => {
@@ -75,11 +71,11 @@ function FileDragDropUpload({
     setImageFileList(imageFileListNewest);
     onChange(imageFileListNewest);
     if (fileInput) {
-      fileInput.current!.input.value = '';
+      fileInput.current!.input!.value = '';
     }
   }, [imageFileList]);
 
-  useImperativeHandle(ref, (): ImageFileList => ({ files: imageFileList }), [imageFileList]);
+  useImperativeHandle(ref, (): ImageFileListType => ({ files: imageFileList }), [imageFileList]);
 
   useEffect(() => {
     if (value) {
@@ -87,7 +83,7 @@ function FileDragDropUpload({
       if (fileInput.current) {
         const dataTransfer = new DataTransfer();
         value.map(v => dataTransfer.items.add(v));
-        fileInput.current.input.files = dataTransfer.files;
+        fileInput.current.input!.files = dataTransfer.files;
       }
     }
   }, [value]);
@@ -99,7 +95,7 @@ function FileDragDropUpload({
         onDrop={onDrop}
         onClick={onOpenFileFolder}>
           {imageFileList && imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
-          <Input<InputFileRefType> type="file" name={name} label={label} multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
+          <Input type="file" name={name} label={label} multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
           <div className="image-preview-wrapper">
             {
               imageFileList && imageFileList.map((file, index) => (

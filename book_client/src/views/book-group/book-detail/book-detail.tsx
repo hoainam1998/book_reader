@@ -1,11 +1,16 @@
-import { JSX, useSyncExternalStore, useEffect } from 'react';
+import { JSX, useCallback, useSyncExternalStore, useEffect } from 'react';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
-import { loadAllCategory, getBookDetail, saveBookInformation, shouldRevalidateBookLoader } from './fetcher';
+import {
+  loadAllCategory,
+  getBookDetail,
+  saveBookInformation,
+  shouldRevalidateBookLoader
+} from './fetcher';
 import store, { CurrentStoreType, Image } from './storage';
 import './style.scss';
 
@@ -56,13 +61,19 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
   return Promise.all(imagesPromise);
 };
 
+/**
+ * Convert url to promise file.
+ *
+ * @param {string} filePath - url link to file.
+ * @returns {Promise<File>} - promise include file.
+ */
 const convertFilePathToFile = (filePath: string, name: string): Promise<File> => {
   return new Promise((resolve, reject) => {
     fetch(filePath)
-    .then(res => res.arrayBuffer())
+    .then(res => res.blob())
     .then(blob => {
-      console.log(blob);
-      resolve(new File([blob], name + '.pdf'));
+      const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`
+      resolve(new File([blob], fileName));
     })
     .catch(err => reject(err));
   });
@@ -81,10 +92,9 @@ function BookDetail(): JSX.Element {
     reset
   } = useForm(state, rules, formId);
   const { subscribe, getSnapshot, updateBookInfo, updateStep } = store;
-
   const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
-  const onSubmit = (formData: FormData): void => {
+  const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
 
     if (!validate.error) {
@@ -95,7 +105,7 @@ function BookDetail(): JSX.Element {
             .then(res => updateBookInfo({ data: res.data.book.detail, step: 2 }));
         });
     }
-  };
+  }, [validate.error]);
 
   useEffect(() => {
     if (data) {
@@ -105,7 +115,8 @@ function BookDetail(): JSX.Element {
       categoryId.watch(data.categoryId);
       pdf.watch('');
       images.watch('');
-      // convertFilePathToFile(data.pdf, data.name).then(res => pdf.watch(res)).catch(err => console.log(err))
+      convertFilePathToFile(`${process.env.BASE_URL}${data.pdf}`, data.name)
+        .then(res => pdf.watch(res));
       convertBase64ImageToFile(data.images)
         .then(res => images.watch(res));
     }

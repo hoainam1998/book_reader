@@ -1,7 +1,7 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { showLoading, hideLoading } from 'utils';
 
-const Api = axios.create({
+const Api: AxiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
   timeout: 30000,
 });

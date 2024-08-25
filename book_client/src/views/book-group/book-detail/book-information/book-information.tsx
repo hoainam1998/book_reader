@@ -1,8 +1,8 @@
-import { JSX } from 'react';
+import { JSX, useCallback, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
-import Input from 'components/form/form-control/input/input';
+import Input, { InputRefType } from 'components/form/form-control/input/input';
 import Select, { OptionPrototype } from 'components/form/form-control/select/select';
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
@@ -10,7 +10,7 @@ import './style.scss';
 import { AxiosResponse } from 'axios';
 import { FieldValidateProps } from 'hooks/useForm';
 
-type BookInformation = {
+type BookInformationPropsType = {
   name: FieldValidateProps;
   pdf: FieldValidateProps;
   publishedTime: FieldValidateProps;
@@ -21,7 +21,7 @@ type BookInformation = {
   onSubmit: (formData: FormData) => void
 };
 
-type CategoryOptions = {
+type CategoryOptionsType = {
   name: string;
   category_id: string;
 } & OptionPrototype<string>;
@@ -36,15 +36,24 @@ function BookInformation({
   categoryId,
   images,
   onSubmit
-}: BookInformation): JSX.Element {
+}: BookInformationPropsType): JSX.Element {
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
-  const categories: CategoryOptions[] = loaderData?.data.category.all || [];
+  const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
+  const pdfRef = useRef<InputRefType>(null);
 
-  const bookInformationFormSubmit = (): void => {
+  const bookInformationFormSubmit = useCallback((): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);
     formData.set('publishedDay', publishedDay.value);
     formData && onSubmit(formData);
-  };
+  }, [publishedDay.value]);
+
+  useEffect(() => {
+    if (pdf.value instanceof File && pdfRef.current?.input) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(pdf.value);
+      pdfRef.current.input.files = dataTransfer.files;
+    }
+  }, [pdf.value]);
 
   return (
     <Form id={formId}
@@ -68,7 +77,8 @@ function BookInformation({
             label="Pdf file"
             name="pdf"
             labelClass="pdf-label"
-            inputClass="pdf-input" />
+            inputClass="pdf-input"
+            ref={pdfRef} />
         </GridItem>
         <GridItem lg={2}>
           <Input
@@ -88,7 +98,7 @@ function BookInformation({
             name="publishedDay" />
         </GridItem>
         <GridItem lg={2}>
-          <Select<string, CategoryOptions>
+          <Select<string, CategoryOptionsType>
             {...categoryId}
             label="Category"
             labelClass="category-id-label"

@@ -19,12 +19,15 @@ import {
 } from './fetcher';
 import './style.scss';
 
-type CategoryDetail = { name: string; avatar: string };
+type CategoryDetailType = {
+  name: string;
+  avatar: string
+};
 
 type CategoryType = {
   category_id: string;
   disabled: boolean;
-} & CategoryDetail;
+} & CategoryDetailType;
 
 type CategoryStateType = {
   categoryName: string;

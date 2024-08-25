@@ -13,7 +13,11 @@ import FormControl from '../form-control';
 import { clsx } from 'utils';
 import './style.scss';
 
-type InputProps = {
+export type InputRefType = {
+  input: HTMLInputElement | null;
+};
+
+type InputPropsType = {
   type?: string;
   label: string;
   className?: string;
@@ -31,7 +35,7 @@ type InputProps = {
   onFocus?: () => void;
 };
 
-function Input<T>({
+function Input({
   type = 'text',
   label,
   name,
@@ -46,12 +50,12 @@ function Input<T>({
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
-}: InputProps, ref: Ref<T>): JSX.Element {
+}: InputPropsType, ref: Ref<InputRefType>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useImperativeHandle(
     ref,
-    (): T => ({ input: inputRef.current }) as T,
+    (): InputRefType => ({ input: inputRef.current }),
     []
   );
 

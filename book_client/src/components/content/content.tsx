@@ -3,7 +3,7 @@ import { Outlet, UIMatch, useMatches } from 'react-router-dom';
 import Footer from 'components/footer/footer';
 import './style.scss';
 
-type Handle = { 
+type Handle = {
   crumb?: (match: UIMatch) => JSX.Element;
 };
 

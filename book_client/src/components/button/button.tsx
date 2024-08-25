@@ -2,7 +2,7 @@ import { MouseEventHandler, JSX, ReactNode, useMemo } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
-type ButtonProps = {
+type ButtonPropsType = {
   onClick: MouseEventHandler<HTMLButtonElement>;
   children: ReactNode;
   className?: string;
@@ -16,12 +16,9 @@ function Button({
   variant,
   onClick,
   disabled
-}: ButtonProps): JSX.Element {
+}: ButtonPropsType): JSX.Element {
   const buttonTypeClass: string = useMemo(() => {
-    if (variant) {
-      return `btn-${variant}`;
-    }
-    return '';
+    return variant ? `btn-${variant}` : '';
   }, [variant]);
 
   return (
