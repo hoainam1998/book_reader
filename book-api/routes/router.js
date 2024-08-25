@@ -1,3 +1,5 @@
+const { messageCreator } = require('../utils/index.js');
+
 class Router {
   _express = null;
   _router = null;
@@ -11,7 +13,7 @@ class Router {
       if (this._schema) {
         next();
       } else {
-        res.status(500).json({ msg: 'Server error. Please contact my admin!' });
+        res.status(500).json(messageCreator('Server error. Please contact my admin!'));
       }
     });
   }

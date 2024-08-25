@@ -43,7 +43,7 @@ module.exports = (field) => {
           response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
           if (request.file) {
-            request.body[field] = `public/pdf/${request.file.filename}`;
+            request.body[field] = `/pdf/${request.file.filename}`;
           }
           originalMethod.apply(null, args);
         }

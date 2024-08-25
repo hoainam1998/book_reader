@@ -2,6 +2,7 @@ const Router = require('../router.js');
 const multer = require('multer');
 const { execute } = require('graphql');
 const path = require('path');
+const cors = require('cors');
 const {
   validateQuery,
   validateResultExecute,
@@ -15,13 +16,19 @@ const cpUpload = formable.fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 }
 ]);
+const corsOptionsDelegate = (req, callback) => {
+  const corsOptions = {
+    origin: `${req.protocol}://${req.get('host')}`
+  };
+  callback(null, corsOptions);
+};
 
 class BookRouter extends Router {
   constructor(express, schema) {
     super(express, schema);
     this.post('/save-introduce', this._saveIntroduceHtmlFile);
-    this.post('/save-book', this._saveBookInformation);
-    this.post('/save-images', this._saveImages);
+    this.post('/save-book', cors(corsOptionsDelegate), this._saveBookInformation);
+    this.post('/save-images', cors(corsOptionsDelegate), this._saveImages);
     this.post('/detail', this._getBookDetail);
     this.post('/save-book-info', cpUpload, this._processSaveBookInformation);
   }
@@ -78,9 +85,7 @@ class BookRouter extends Router {
     const formDataBookImages = new FormData();
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
 
-    Object.keys(req.body).forEach(key => {
-      formDataBookInfo.append(key, req.body[key]);
-    });
+    Object.keys(req.body).forEach(key => formDataBookInfo.append(key, req.body[key]));
 
     formDataBookInfo.append('pdf', new File([pdf.buffer], pdf.originalname), pdf.originalname);
     formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
