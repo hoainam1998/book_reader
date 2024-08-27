@@ -5,41 +5,10 @@
     margin-bottom: 15px;
   }
 
-  .introduce-wrapper {
-    width: 600px;
-    margin: auto;
-    display: flex;
-    align-items: center;
-  }
-
-  .introduce-label {
-    flex-basis: 25%;
-  }
-
   .horizontal-line {
-    position: relative;
     height: 3px;
     background: $black-color;
     margin: 30px 0;
-
-    &::after {
-      content: 'OR';
-      padding: 5px;
-      background-color: $white-color;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 16px;
-      font-weight: bold;
-    }
-  }
-
-  .edit-btn {
-    display: block;
-    width: 70px;
-    height: 30px;
-    margin: 0 auto 30px;
   }
 
   .introduce-save-btn {
@@ -47,12 +16,6 @@
     margin: auto;
     width: 200px;
     height: 30px;
-  }
-
-  .note {
-    color: $error-color;
-    text-align: center;
-    margin-bottom: 15px;
   }
 
   .file-name {
@@ -64,4 +27,8 @@
       flex-basis: 120px;
     }
   }
+}
+
+.preview {
+  margin-left: 20px;
 }

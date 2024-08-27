@@ -4,12 +4,17 @@ export type Image = {
 };
 
 export type BookInfoType = {
+  bookId: string;
   name: string;
   pdf: string;
   publishedTime: number;
   publishedDay: string;
   categoryId: string;
   images: Image[];
+  introduce?: {
+    html: string;
+    json: string;
+  };
 };
 
 class LocalStorage<T> {

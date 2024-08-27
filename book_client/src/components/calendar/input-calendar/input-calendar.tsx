@@ -35,11 +35,7 @@ function InputCalendar({
   }: InputCalendarProps, ref: Ref<InputCalendarRect>): JSX.Element {
   const inputCalendarRef = useRef<InputCalendarRect>(null);
 
-  useImperativeHandle(ref, () => {
-    return {
-      rect: inputCalendarRef.current!.rect as DOMRect
-    };
-  }, []);
+  useImperativeHandle(ref, () => ({ rect: inputCalendarRef.current!.rect as DOMRect }), []);
 
   const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
 

@@ -80,11 +80,6 @@ function FileDragDropUpload({
   useEffect(() => {
     if (value) {
       setImageFileList(value);
-      if (fileInput.current) {
-        const dataTransfer = new DataTransfer();
-        value.map(v => dataTransfer.items.add(v));
-        fileInput.current.input!.files = dataTransfer.files;
-      }
     }
   }, [value]);
 
@@ -95,7 +90,15 @@ function FileDragDropUpload({
         onDrop={onDrop}
         onClick={onOpenFileFolder}>
           {imageFileList && imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
-          <Input type="file" name={name} label={label} multiple className="input-file-hidden" onChange={onFileChanged} ref={fileInput}/>
+          <Input
+            type="file"
+            name={name}
+            label={label}
+            value={value}
+            multiple
+            className="input-file-hidden"
+            onChange={onFileChanged}
+            ref={fileInput} />
           <div className="image-preview-wrapper">
             {
               imageFileList && imageFileList.map((file, index) => (

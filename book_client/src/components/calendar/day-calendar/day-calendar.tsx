@@ -60,6 +60,12 @@ export enum CalendarActionType {
   YEAR_SELECTED = 'year_selected'
 };
 
+export type CalendarReducerAction = {
+  type: CalendarActionType;
+  month?: number;
+  year?: number;
+};
+
 type DayCalendarRef = {
   dispatch: Dispatch<CalendarReducerAction>,
   date: Date;
@@ -76,12 +82,6 @@ type DayCalendarProps<T> = {
 type Day = {
   day: string;
   active: boolean;
-};
-
-export type CalendarReducerAction = {
-  type: CalendarActionType;
-  month?: number;
-  year?: number;
 };
 
 type CalendarReducerState = {

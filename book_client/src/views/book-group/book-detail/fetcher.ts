@@ -3,7 +3,7 @@ import { CategoryService, BookService, RequestBody } from 'services';
 import { StepStorage } from 'storage';
 import { showToast } from 'utils';
 
-type DefaultCategoryListType = {
+export type CategoryListType = {
   data: {
     category: {
       all: {
@@ -14,7 +14,7 @@ type DefaultCategoryListType = {
   };
 };
 
-const loadAllCategory = (): Promise<AxiosResponse | DefaultCategoryListType> => {
+const loadAllCategory = (): Promise<AxiosResponse | CategoryListType> => {
   if (shouldRevalidateBookLoader()) {
     const body: RequestBody = {
       query: `query AllCategory {
@@ -28,7 +28,7 @@ const loadAllCategory = (): Promise<AxiosResponse | DefaultCategoryListType> => 
     };
     return CategoryService.graphql('all', body);
   }
-  const defaultCategoryList: DefaultCategoryListType = {
+  const defaultCategoryList: CategoryListType = {
     data: {
       category: {
         all: []
@@ -44,18 +44,69 @@ const saveBookInformation = (formData: FormData): Promise<AxiosResponse> => {
 
 const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
   return BookService.graphql('detail', {
-    query: `query GetBookDetail($bookId: ID) { book { detail(bookId: $bookId) { name, pdf, publishedTime, publishedDay, categoryId, images { image, name } } } }`,
-    bookId,
+    query: `query GetBookDetail($bookId: ID)
+      {
+        book {
+          detail(bookId: $bookId) {
+            name,
+            pdf,
+            publishedTime,
+            publishedDay,
+            categoryId,
+            images
+              {
+                image,
+                name
+              }
+            }
+          }
+        }`,
+    bookId
   });
 };
 
+const getBookIntroduceFile = (bookId: string) => {
+  return BookService.graphql('detail', {
+    query: `query GetBookDetail($bookId: ID) {
+      book {
+        detail(bookId: $bookId) {
+          introduce {
+            html,
+            json
+          }
+        }
+      }
+    }`,
+    bookId
+  });
+};
+
+const saveIntroduceFile = (html: string, json: string, fileName: string, bookId: string): Promise<AxiosResponse> => {
+  const body: RequestBody = {
+    query: `mutation BookMutation($html: String, $json: String, $name: String, $bookId: ID) {
+      book {
+        saveIntroduce(html: $html, json: $json, name: $name, bookId: $bookId) {
+          message
+        }
+      }
+    }`,
+    html,
+    json,
+    fileName,
+    bookId
+  };
+  return BookService.graphql('/save-introduce', body);
+}
+
 const shouldRevalidateBookLoader = (): boolean => {
-  return +(StepStorage.getItem() || 1) === 1;
+  return [1, 3].includes((StepStorage.getItem() || 1));
 };
 
 export {
   loadAllCategory,
   saveBookInformation,
   getBookDetail,
+  saveIntroduceFile,
+  getBookIntroduceFile,
   shouldRevalidateBookLoader
 };

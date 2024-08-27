@@ -3,6 +3,7 @@ import {
   JSX,
   useRef,
   useMemo,
+  useEffect,
   useImperativeHandle,
   forwardRef,
   Ref,
@@ -24,7 +25,7 @@ type InputPropsType = {
   labelClass?: string;
   inputClass?: string;
   name: string;
-  value?: string | number;
+  value?: string | number | File | File [];
   errors?: string[];
   error?: boolean;
   accept?: string;
@@ -62,13 +63,35 @@ function Input({
   const specificPropInput: HTMLProps<HTMLInputElement> = useMemo(() => {
     return type === 'file' ? {
       accept,
-      multiple
+      multiple,
     } :
     {
       autoComplete: 'off',
-      defaultValue: value
+      defaultValue: value as string | number
     };
   }, [type, value, accept, multiple]);
+
+  useEffect(() => {
+    if (value !== (null && undefined) && type === 'file') {
+      if (Array.isArray(value)) {
+        if (value.every(file => file instanceof File)) {
+          const dataTransfer = new DataTransfer();
+          value.map(v => dataTransfer.items.add(v));
+          inputRef.current!.files = dataTransfer.files;
+        }
+      } else if (value instanceof File) {
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(value);
+        inputRef.current!.files = dataTransfer.files;
+      } else if (typeof value === 'string') {
+        if (value === '') {
+          inputRef.current!.value = value;
+        }
+      } else {
+        throw new Error("[Custom Error] Value of input type file must be file, file list or empty string ('')!");
+      }
+    }
+  }, [value, type]);
 
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>

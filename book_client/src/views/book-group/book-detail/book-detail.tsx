@@ -102,7 +102,7 @@ function BookDetail(): JSX.Element {
         .then(res => {
           const bookId: string = res.data.bookId;
           getBookDetail(bookId)
-            .then(res => updateBookInfo({ data: res.data.book.detail, step: 2 }));
+            .then(res => updateBookInfo({ data: {... res.data.book.detail, bookId }, step: 2 }));
         });
     }
   }, [validate.error]);
@@ -115,7 +115,7 @@ function BookDetail(): JSX.Element {
       categoryId.watch(data.categoryId);
       pdf.watch('');
       images.watch('');
-      convertFilePathToFile(`${process.env.BASE_URL}${data.pdf}`, data.name)
+      convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
         .then(res => pdf.watch(res));
       convertBase64ImageToFile(data.images)
         .then(res => images.watch(res));

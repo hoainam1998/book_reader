@@ -12,7 +12,7 @@ import {
 import { clsx } from 'utils';
 import './style.scss';
 
-type StepperProps = {
+type StepperPropsType = {
   onSwitch: (step: number) => void;
   stepNumber: number;
   className?: string;
@@ -27,7 +27,7 @@ type StepType = {
   stepped: boolean;
 };
 
-type StepContentProps = {
+type StepContentPropsType = {
   children: React.ReactElement;
   step: number;
 };
@@ -38,11 +38,11 @@ const isStep = (child: ReactElement): boolean => {
     && child.props.step > 0;
 };
 
-export function StepContent({ children }: StepContentProps): JSX.Element {
+export function StepContent({ children }: StepContentPropsType): JSX.Element {
   return children;
 };
 
-function Stepper({ onSwitch, stepNumber, className, children, activeStep }: StepperProps): JSX.Element {
+function Stepper({ onSwitch, stepNumber, className, children, activeStep }: StepperPropsType): JSX.Element {
   const stepsInit = useMemo<StepType[]>(() => {
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({

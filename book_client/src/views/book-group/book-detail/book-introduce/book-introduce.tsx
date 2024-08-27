@@ -1,11 +1,10 @@
-import { ChangeEvent, JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import Quill, { QuillOptions } from 'quill';
 import Button from 'components/button/button';
-import Input from 'components/form/form-control/input/input';
-import { BookService, RequestBody } from 'services';
 import store, { CurrentStoreType } from '../storage';
+import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
 import './style.scss';
-const { subscribe, getSnapshot, updateStep } = store;
+const { subscribe, getSnapshot, updateStep, updateData } = store;
 
 let quill: Quill | null = null;
 const editSelector: string = 'book-introduce-editor';
@@ -15,12 +14,12 @@ const options: QuillOptions = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
       ['link', 'image', 'video'],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'font': [] }],
-      [{ 'align': [] }],
+      [{ indent: '-1' }, { indent: '+1' }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      [{ color: [] }, { background: [] }],
+      [{ font: [] }],
+      [{ align: [] }]
     ]
   },
   placeholder: 'Please enter book introduce information ...',
@@ -28,7 +27,6 @@ const options: QuillOptions = {
 };
 
 function BookIntroduce(): JSX.Element {
-  const [haveEdit, setHaveEdit] = useState<boolean>(false);
   const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
@@ -39,58 +37,54 @@ function BookIntroduce(): JSX.Element {
     return '';
   }, [data]);
 
-  useEffect((): void => {
-    if (!quill && haveEdit) {
-      quill = new Quill(`#${editSelector}`, options);
-
-      quill.on('editor-change', (): void => {
-        if (quill?.getLength() === 1) {
-          setHaveContent(false);
-        } else {
-          setHaveContent(true);
-        }
-      });
-    }
-  }, [haveEdit]);
-
   const onSave = useCallback((): void => {
-    const body: RequestBody = {
-      query: 'mutation BookMutation($introduce: BookIntroduceInput) { book { saveIntroduce(introduce: $introduce) { message }}}',
-      html: quill?.getSemanticHTML(),
-      fileName: name,
-    };
-    BookService.graphql('/save-introduce', body).then(() => updateStep(3));
-  }, []);
+    const html: string = quill!.getSemanticHTML();
+    const json: string = JSON.stringify(quill!.getContents());
 
-  const fileChanged = useCallback(<T,>(event: ChangeEvent<T | HTMLInputElement>): void => {
-    const files: FileList | null = (event.target as HTMLInputElement).files;
-    if (files && files.length > 0) {
-      const formData = new FormData();
-      formData.append('introduce', files[0]);
-      setHaveContent(true);
-    } else {
-      setHaveContent(false);
+    saveIntroduceFile(html, json, name, data.bookId).then(() => {
+      getBookIntroduceFile(data.bookId).then((res) => {
+        updateData({ ...data, introduce: res.data.book.detail.introduce });
+        updateStep(3);
+      });
+    });
+  }, [name]);
+
+  const quillCreator = (): void => {
+    quill = new Quill(`#${editSelector}`, options);
+    quill.on('editor-change', (): void => {
+      if (quill?.getLength() === 1) {
+        setHaveContent(false);
+      } else {
+        setHaveContent(true);
+      }
+    });
+  };
+
+  let time = 1;
+  useEffect(() => {
+    ++time;
+    if (time > 1) {
+      quillCreator();
+      time = 0;
     }
-  }, [haveContent]);
+    return () => { quill = null };
+  }, []);
 
   return (
     <section className="book-introduce">
-      <p className="note field-name">*Note: I must select a exist file or create new file to switch the next step.</p>
       <p className="file-name">
-        <span className="field-name">File name</span>{name}
+        <span className="field-name">File name</span>
+        {name}
       </p>
-      <Input
-        type="file"
-        accept=".html"
-        name="introduce"
-        label="Introduce file"
-        className="introduce-wrapper"
-        labelClass="introduce-label"
-        onChange={fileChanged} />
       <p className="horizontal-line" />
-      <Button onClick={() => setHaveEdit(true)} className="edit-btn" variant="primary">Edit</Button>
       <div id={editSelector} className="book-introduce-editor" />
-      <Button onClick={onSave} disabled={!haveContent} className="introduce-save-btn" variant="submit">Save</Button>
+      <Button
+        onClick={onSave}
+        disabled={!haveContent}
+        className="introduce-save-btn"
+        variant="submit">
+        Save
+      </Button>
     </section>
   );
 }
