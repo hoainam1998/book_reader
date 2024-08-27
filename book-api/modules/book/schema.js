@@ -28,18 +28,6 @@ const commonBookField = {
   }
 };
 
-const BookIntroduceInputType = new GraphQLInputObjectType({
-  name: 'BookIntroduceInput',
-  fields: {
-    name: {
-      type: GraphQLString
-    },
-    html: {
-      type: GraphQLString
-    }
-  }
-});
-
 const BookInformationInputType = new GraphQLInputObjectType({
   name: 'BookInformationInput',
   fields: {
@@ -68,7 +56,17 @@ const BookInformationType = new GraphQLObjectType({
       }))
     },
     introduce: {
-      type: GraphQLString
+      type: new GraphQLObjectType({
+        name: 'IntroduceFile',
+        fields: {
+          json: {
+            type: GraphQLString
+          },
+          html: {
+            type: GraphQLString
+          }
+        }
+      })
     }
   }
 });
@@ -79,17 +77,24 @@ const mutation = new GraphQLObjectType({
     saveIntroduce: {
       type: ResponseType,
       args: {
-        introduce: {
-          type: BookIntroduceInputType
+        name: {
+          type: GraphQLString
+        },
+        html: {
+          type: GraphQLString
+        },
+        json: {
+          type: GraphQLString
+        },
+        bookId: {
+          type: GraphQLID
         }
       },
       resolve: async (book, args) => {
-        const { name, html } = args.introduce;
+        const { name, html, json, bookId } = args;
         try {
-          const isSaved = await book.saveIntroduceHtmlFile(name, html);
-          if (isSaved) {
-            return messageCreator('Html file created!');
-          }
+          await book.saveIntroduceHtmlFile(name, html, json, bookId);
+          return messageCreator('Html file created!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -154,8 +159,14 @@ const query = new GraphQLObjectType({
         try {
           const [bookInfo, images] = await book.getBookDetail(bookId);
           if (bookInfo.length > 0) {
+            const bookDetail = bookInfo[0];
+            const [html, json] = bookDetail['introduce'].split(',');
             return {
-              ...bookInfo[0],
+              ...bookDetail,
+              introduce: {
+                html,
+                json
+              },
               images: images.map(({ image, name }) => ({ image, name }))
             };
           } else {

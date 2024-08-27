@@ -37,7 +37,10 @@ class BookRouter extends Router {
   @validateQuery
   _saveIntroduceHtmlFile(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: {
-        introduce: { html: req.body.html, name: req.body.fileName }
+        html: req.body.html,
+        name: req.body.fileName,
+        json: req.body.json,
+        bookId: req.body.bookId
       }
     });
   }

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = require('path');
+const { join } = require('path');
 
 class BookService {
   _sql = null;
@@ -8,16 +8,26 @@ class BookService {
     this._sql = sql;
   }
 
-  saveIntroduceHtmlFile(fileName, html) {
+  saveIntroduceHtmlFile(fileName, html, json, bookId) {
     const fileNameSaved = fileName.replace(/\s/, '-');
-    return new Promise((resolve, reject) => {
-      fs.writeFile(path.join(__dirname, `../../public/html/${fileNameSaved}.html`), html, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(true);
-        }
+    const saveFile = (path, content) => {
+      const filePath = `${path}/${fileNameSaved}.${path}`;
+      return new Promise((resolve, reject) => {
+        fs.writeFile(join(__dirname, `../../public/${filePath}`), content, (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(filePath);
+          }
+        });
       });
+    };
+    return Promise.all([
+      saveFile('html', html),
+      saveFile('json', json)
+    ]).then(result => {
+      const introduceFilePath = result.join(',');
+      return this._sql.query('UPDATE BOOK SET INTRODUCE_FILE = ? WHERE BOOK_ID = ?', [introduceFilePath, bookId]);
     });
   }
 

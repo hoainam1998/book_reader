@@ -28,7 +28,7 @@ const upload = multer({
 /**
  * Return upload pdf file helper decorator.
  *
- * @param {String} - field name.
+ * @param {String} field - field name.
  * @returns {Function} - upload decorator function.
  */
 module.exports = (field) => {
@@ -42,9 +42,7 @@ module.exports = (field) => {
         if (err) {
           response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
-          if (request.file) {
-            request.body[field] = `/pdf/${request.file.filename}`;
-          }
+          request.body[field] = request.file ? `${field}/${request.file.filename}` : '';
           originalMethod.apply(null, args);
         }
       });
