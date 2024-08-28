@@ -2,13 +2,13 @@ import React, { JSX } from 'react';
 
 export type SlotProps = {
   name: string;
-  slotProps?: any;
+  children?: React.ReactNode;
   // eslint-disable-next-line no-unused-vars
-  render: (slotProps: any) => React.ReactElement;
+  render?: (slotProps: any) => React.ReactElement;
 };
 
-function Slot({ render, slotProps }: SlotProps): JSX.Element {
-  return render(slotProps);
+function Slot({ children }: SlotProps): JSX.Element {
+  return children ? <>{children}</> : <></>;
 }
 
 export const isSlot = (name: string, child: any): Boolean => {

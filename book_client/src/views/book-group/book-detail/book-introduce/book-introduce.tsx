@@ -60,12 +60,13 @@ function BookIntroduce(): JSX.Element {
     });
   };
 
-  let time = 1;
+  // useEffect called twice time by strict mode,
+  // therefore create a flag to detect quill was set up or was not.
+  let isSetupQuill: boolean = false;
   useEffect(() => {
-    ++time;
-    if (time > 1) {
+    if (!isSetupQuill) {
       quillCreator();
-      time = 0;
+      isSetupQuill = true;
     }
     return () => { quill = null };
   }, []);

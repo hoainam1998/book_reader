@@ -7,7 +7,7 @@ let isToastShowed: boolean = false;
 /**
  * Show pop-up frame.
  */
-const showToast = (title: string, children: ReactNode) => {
+const showToast = (title: string, children: ReactNode): void => {
   if (!isToastShowed) {
     const root: Root | null = createRoot(document.getElementById('pop-up')!);
     const closeToast = (): void => {

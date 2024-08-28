@@ -9,7 +9,7 @@ import {
   JSXElementConstructor,
   Children
 } from 'react';
-import { clsx } from 'utils';
+import { clsx, customError } from 'utils';
 import './style.scss';
 
 type StepperPropsType = {
@@ -60,11 +60,11 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep }: Step
     const step: number = children.props.step;
 
     if (step > stepNumber) {
-      throw new Error('[Custom Error] Step exceed step number!');
+      throw customError('Step exceed step number!');
     }
 
     if (uniqueStep.includes(step)) {
-      throw new Error('[Custom Error] Duplicate step order!');
+      throw customError('Duplicate step order!');
     } else {
       uniqueStep.push(step);
     }
@@ -115,7 +115,7 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep }: Step
 
   useEffect(() => {
     if (activeStep <= 0) {
-      throw new Error('[Custom Error] Step must start equal 1!');
+      throw customError('Step must start equal 1!');
     } else {
       setStep(activeStep);
       setSteps(stepsInit);

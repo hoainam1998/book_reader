@@ -28,7 +28,19 @@
   color: $white-color;
 }
 
+.btn-warning {
+  background-color: $warning-color;
+  color: $white-color;
+}
+
 .btn-primary {
   background-color: $primary-button-color;
   color: $white-color;
+}
+
+.btn-outline {
+  border: 2px solid $primary-button-color;
+  background-color: $white-color;
+  color: $primary-button-color;
+  font-weight: bold;
 }

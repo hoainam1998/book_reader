@@ -1,10 +1,11 @@
 import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
+import showModal from './modal';
 
 /**
  * Return class text from array.
  *
- * @param {Array} - array contain object or string to parse them to class.
+ * @param {Array} classes - array contain object or string to parse them to class.
  * @returns {string} - class text.
  */
 const clsx = (...classes: any[]): string => {
@@ -22,9 +23,19 @@ const clsx = (...classes: any[]): string => {
   return classList.filter(cls => !!cls).join(' ').trim();
 };
 
+/**
+ * Return new error with message provided.
+ *
+ * @param {string} message - error message.
+ * @returns {Error} - error with message have given!.
+ */
+const customError = (message: string) => new Error(`[Custom Error] ${message}`);
+
 export {
   clsx,
   showToast,
   showLoading,
   hideLoading,
+  showModal,
+  customError
 };

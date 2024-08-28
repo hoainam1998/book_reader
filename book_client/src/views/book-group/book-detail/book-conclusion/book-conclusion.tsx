@@ -49,6 +49,10 @@ function BookConclusion(): JSX.Element {
     window.open(`${process.env.BASE_URL}/${fileName}`, '_blank');
   }, []);
 
+  const complete = useCallback(() => {
+    // TODO
+  }, []);
+
   if (data) {
     return (
       <section className="book-conclusion">
@@ -96,8 +100,8 @@ function BookConclusion(): JSX.Element {
             </li>
           </ul>
         </div>
-        <Button onClick={() => {}} variant="submit" className="btn-complete">
-          Save
+        <Button onClick={complete} variant="submit" className="btn-complete">
+          Complete
         </Button>
       </section>
     );

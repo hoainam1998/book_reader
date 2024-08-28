@@ -22,9 +22,7 @@ const renderRoutes = (routes: RoutePropsUnion[]): JSX.Element[] => {
 };
 
 const router = createBrowserRouter(
-  createRoutesFromElements(
-    renderRoutes(routes)
-  )
+  createRoutesFromElements(renderRoutes(routes))
 );
 
 export default router;

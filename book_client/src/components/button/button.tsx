@@ -6,7 +6,7 @@ type ButtonPropsType = {
   onClick: MouseEventHandler<HTMLButtonElement>;
   children: ReactNode;
   className?: string;
-  variant?: 'success' | 'warning' | 'dangerous' | 'primary' | 'submit';
+  variant?: 'success' | 'warning' | 'dangerous' | 'primary' | 'submit' | 'outline';
   disabled?: boolean;
 };
 

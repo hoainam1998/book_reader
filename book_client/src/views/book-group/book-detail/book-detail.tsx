@@ -1,4 +1,5 @@
-import { JSX, useCallback, useSyncExternalStore, useEffect } from 'react';
+import { JSX, useCallback, useSyncExternalStore, useEffect, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
@@ -11,8 +12,11 @@ import {
   saveBookInformation,
   shouldRevalidateBookLoader
 } from './fetcher';
+import { showModal } from 'utils';
 import store, { CurrentStoreType, Image } from './storage';
 import './style.scss';
+import Slot from 'components/slot/slot';
+import Button from 'components/button/button';
 
 type BookStateType = {
   name: string;
@@ -53,9 +57,9 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
   const imagesPromise: Promise<File>[] = base64String.map(({ image, name }) => {
     return new Promise((resolve, reject) => {
       fetch(image)
-      .then(res => res.blob())
-      .then(blob => resolve(new File([blob], name, { type: blob.type })))
-      .catch(err => reject(err));
+        .then((res) => res.blob())
+        .then((blob) => resolve(new File([blob], name, { type: blob.type })))
+        .catch((err) => reject(err));
     });
   });
   return Promise.all(imagesPromise);
@@ -70,14 +74,23 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
 const convertFilePathToFile = (filePath: string, name: string): Promise<File> => {
   return new Promise((resolve, reject) => {
     fetch(filePath)
-    .then(res => res.blob())
-    .then(blob => {
-      const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`
-      resolve(new File([blob], fileName));
-    })
-    .catch(err => reject(err));
+      .then((res) => res.blob())
+      .then((blob) => {
+        const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`;
+        resolve(new File([blob], fileName));
+      })
+      .catch((err) => reject(err));
   });
 };
+
+const bodyModal: JSX.Element = (
+  <Slot name="body">
+    <p style={{ textAlign: 'center' }}>
+      All information you have been filled will lost.
+      Are you sure to leave this page!
+    </p>
+  </Slot>
+);
 
 function BookDetail(): JSX.Element {
   const {
@@ -93,19 +106,68 @@ function BookDetail(): JSX.Element {
   } = useForm(state, rules, formId);
   const { subscribe, getSnapshot, updateBookInfo, updateStep } = store;
   const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const [isNavigation, setIsNavigation] = useState<boolean>(false);
 
-  const onSubmit = useCallback((formData: FormData): void => {
-    handleSubmit();
+  const blocker = useBlocker(({ currentLocation, nextLocation }: any) => {
+    const isBlocked = currentLocation.pathname !== nextLocation.pathname;
+    setIsNavigation(isBlocked);
+    return isBlocked;
+  });
 
-    if (!validate.error) {
-      saveBookInformation(formData)
-        .then(res => {
+  const footerModal = useCallback((): JSX.Element => {
+    const onLeave = () => {
+      if (blocker.state === 'blocked') {
+        blocker!.proceed!();
+      }
+    };
+    return (
+      <Slot
+        name="footer"
+        render={({ onClose }) => (
+          <div className="footer-navigation-modal">
+            <Button variant="success" onClick={onClose}>Stay</Button>
+            <Button variant="outline"
+              onClick={() => {
+                onLeave();
+                onClose();
+              }}>
+              Leave
+            </Button>
+          </div>
+        )}
+      />
+    );
+  }, [blocker.state]);
+
+  const onSubmit = useCallback(
+    (formData: FormData): void => {
+      handleSubmit();
+
+      if (!validate.error) {
+        saveBookInformation(formData).then((res) => {
           const bookId: string = res.data.bookId;
-          getBookDetail(bookId)
-            .then(res => updateBookInfo({ data: {... res.data.book.detail, bookId }, step: 2 }));
+          getBookDetail(bookId).then((res) =>
+            updateBookInfo({ data: { ...res.data.book.detail, bookId }, step: 2 })
+          );
         });
+      }
+    },
+    [validate.error]
+  );
+
+  useEffect(() => {
+    if (isNavigation) {
+      showModal(
+        <>
+          {bodyModal}
+          {footerModal()}
+        </>,
+        'fff',
+        'sm'
+      );
+      setIsNavigation(false);
     }
-  }, [validate.error]);
+  }, [isNavigation]);
 
   useEffect(() => {
     if (data) {
@@ -116,9 +178,8 @@ function BookDetail(): JSX.Element {
       pdf.watch('');
       images.watch('');
       convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
-        .then(res => pdf.watch(res));
-      convertBase64ImageToFile(data.images)
-        .then(res => images.watch(res));
+        .then((res) =>pdf.watch(res));
+      convertBase64ImageToFile(data.images).then((res) => images.watch(res));
     }
   }, []);
 
@@ -137,7 +198,8 @@ function BookDetail(): JSX.Element {
           publishedDay={publishedDay}
           images={images}
           onSubmit={onSubmit}
-          onReset={reset} />
+          onReset={reset}
+        />
       </StepContent>
       <StepContent step={2}>
         <BookIntroduce />
