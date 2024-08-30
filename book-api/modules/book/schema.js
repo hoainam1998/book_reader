@@ -160,12 +160,12 @@ const query = new GraphQLObjectType({
           const [bookInfo, images] = await book.getBookDetail(bookId);
           if (bookInfo.length > 0) {
             const bookDetail = bookInfo[0];
-            const [html, json] = bookDetail['introduce'].split(',');
+            const [html, json] = bookDetail['introduce'] ? bookDetail['introduce'].split(',') : [];
             return {
               ...bookDetail,
               introduce: {
-                html,
-                json
+                html: html ? html : '',
+                json: json ? json: '',
               },
               images: images.map(({ image, name }) => ({ image, name }))
             };
