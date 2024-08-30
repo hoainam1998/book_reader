@@ -1,5 +1,6 @@
 import { JSX, useCallback, useRef, useEffect } from 'react';
 import { useLoaderData } from 'react-router-dom';
+import { AxiosResponse } from 'axios';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
@@ -7,8 +8,8 @@ import Select, { OptionPrototype } from 'components/form/form-control/select/sel
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
 import './style.scss';
-import { AxiosResponse } from 'axios';
 import { FieldValidateProps } from 'hooks/useForm';
+import useModalNavigation from '../useModalNavigation';
 
 type BookInformationPropsType = {
   name: FieldValidateProps;
@@ -35,11 +36,13 @@ function BookInformation({
   publishedDay,
   categoryId,
   images,
+  onReset,
   onSubmit
 }: BookInformationPropsType): JSX.Element {
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
   const pdfRef = useRef<InputRefType>(null);
+  useModalNavigation({ onLeaveAction: onReset });
 
   const bookInformationFormSubmit = useCallback((): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);

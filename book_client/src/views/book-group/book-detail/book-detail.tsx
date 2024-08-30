@@ -1,5 +1,4 @@
-import { JSX, useCallback, useSyncExternalStore, useEffect, useState } from 'react';
-import { useBlocker } from 'react-router-dom';
+import { JSX, useCallback, useSyncExternalStore, useEffect } from 'react';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
@@ -12,11 +11,10 @@ import {
   saveBookInformation,
   shouldRevalidateBookLoader
 } from './fetcher';
-import { showModal } from 'utils';
 import store, { CurrentStoreType, Image } from './storage';
+import BlockerProvider from './blocker-context';
 import './style.scss';
-import Slot from 'components/slot/slot';
-import Button from 'components/button/button';
+const { subscribe, getSnapshot, updateBookInfo, updateStep, updateConditionNavigate } = store;
 
 type BookStateType = {
   name: string;
@@ -83,15 +81,6 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
   });
 };
 
-const bodyModal: JSX.Element = (
-  <Slot name="body">
-    <p style={{ textAlign: 'center' }}>
-      All information you have been filled will lost.
-      Are you sure to leave this page!
-    </p>
-  </Slot>
-);
-
 function BookDetail(): JSX.Element {
   const {
     name,
@@ -104,40 +93,7 @@ function BookDetail(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId);
-  const { subscribe, getSnapshot, updateBookInfo, updateStep } = store;
   const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
-  const [isNavigation, setIsNavigation] = useState<boolean>(false);
-
-  const blocker = useBlocker(({ currentLocation, nextLocation }: any) => {
-    const isBlocked = currentLocation.pathname !== nextLocation.pathname;
-    setIsNavigation(isBlocked);
-    return isBlocked;
-  });
-
-  const footerModal = useCallback((): JSX.Element => {
-    const onLeave = () => {
-      if (blocker.state === 'blocked') {
-        blocker!.proceed!();
-      }
-    };
-    return (
-      <Slot
-        name="footer"
-        render={({ onClose }) => (
-          <div className="footer-navigation-modal">
-            <Button variant="success" onClick={onClose}>Stay</Button>
-            <Button variant="outline"
-              onClick={() => {
-                onLeave();
-                onClose();
-              }}>
-              Leave
-            </Button>
-          </div>
-        )}
-      />
-    );
-  }, [blocker.state]);
 
   const onSubmit = useCallback(
     (formData: FormData): void => {
@@ -156,20 +112,6 @@ function BookDetail(): JSX.Element {
   );
 
   useEffect(() => {
-    if (isNavigation) {
-      showModal(
-        <>
-          {bodyModal}
-          {footerModal()}
-        </>,
-        'fff',
-        'sm'
-      );
-      setIsNavigation(false);
-    }
-  }, [isNavigation]);
-
-  useEffect(() => {
     if (data) {
       name.watch(data.name);
       publishedTime.watch(data.publishedTime);
@@ -179,35 +121,42 @@ function BookDetail(): JSX.Element {
       images.watch('');
       convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
         .then((res) =>pdf.watch(res));
-      convertBase64ImageToFile(data.images).then((res) => images.watch(res));
+      convertBase64ImageToFile(data.images)
+        .then((res) => images.watch(res));
     }
   }, []);
 
+  useEffect(() => {
+    updateConditionNavigate(validate.dirty);
+  }, [validate.dirty]);
+
   return (
-    <Stepper
-      stepNumber={3}
-      onSwitch={updateStep}
-      activeStep={step}
-      className="book-detail-stepper">
-      <StepContent step={1}>
-        <BookInformation
-          name={name}
-          pdf={pdf}
-          categoryId={categoryId}
-          publishedTime={publishedTime}
-          publishedDay={publishedDay}
-          images={images}
-          onSubmit={onSubmit}
-          onReset={reset}
-        />
-      </StepContent>
-      <StepContent step={2}>
-        <BookIntroduce />
-      </StepContent>
-      <StepContent step={3}>
-        <BookConclusion />
-      </StepContent>
-    </Stepper>
+    <BlockerProvider>
+      <Stepper
+        stepNumber={3}
+        onSwitch={updateStep}
+        activeStep={step}
+        className="book-detail-stepper">
+        <StepContent step={1}>
+          <BookInformation
+            name={name}
+            pdf={pdf}
+            categoryId={categoryId}
+            publishedTime={publishedTime}
+            publishedDay={publishedDay}
+            images={images}
+            onSubmit={onSubmit}
+            onReset={reset}
+          />
+        </StepContent>
+        <StepContent step={2}>
+          <BookIntroduce />
+        </StepContent>
+        <StepContent step={3}>
+          <BookConclusion />
+        </StepContent>
+      </Stepper>
+    </BlockerProvider>
   );
 }
 

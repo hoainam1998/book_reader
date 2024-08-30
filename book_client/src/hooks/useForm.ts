@@ -51,6 +51,7 @@ export default <T extends Object, R>(
       }
       (formControlProps as FormValidateProps).validate.validate();
       Object.keys(state).forEach((key: string) => {
+        (validateObject[key] as ErrorInfo).dirty = true;
         (formControlProps as ErrorInfo)[key] = Object.assign(
           (formControlProps as UnionTypeFormValidate)[key],
           validateObject[key]
@@ -59,8 +60,10 @@ export default <T extends Object, R>(
     },
     reset: (): void => {
       Object.keys(state).forEach(
-        (key: string) => ((validateObject[key] as UnionTypeErrorInfo).dirty = false)
-      );
+        (key: string) => {
+          (validateObject[key] as UnionTypeErrorInfo).dirty = false;
+          (formControlProps as UnionTypeFormValidate)[key].watch('');
+      });
       validateObject.dirty = false;
       validateObject.validate();
       document.forms.namedItem(formId)?.reset();
@@ -84,6 +87,7 @@ export default <T extends Object, R>(
       },
       onFocus: (): void => {
         (validateObject[key] as UnionTypeErrorInfo).dirty = true;
+        validateObject.dirty = true;
       },
       ...(validateObject[key] as UnionTypeErrorInfo),
       watch: (currentValue: ValueType): void => {

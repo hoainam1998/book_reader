@@ -3,8 +3,9 @@ import Quill, { QuillOptions } from 'quill';
 import Button from 'components/button/button';
 import store, { CurrentStoreType } from '../storage';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
+import useModalNavigation from '../useModalNavigation';
 import './style.scss';
-const { subscribe, getSnapshot, updateStep, updateData } = store;
+const { subscribe, getSnapshot, updateStep, updateData, updateConditionNavigate } = store;
 
 let quill: Quill | null = null;
 const editSelector: string = 'book-introduce-editor';
@@ -29,10 +30,11 @@ const options: QuillOptions = {
 function BookIntroduce(): JSX.Element {
   const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  useModalNavigation();
 
   const name: string = useMemo((): string => {
     if (data && Object.hasOwn(data, 'name')) {
-      return ((data.name || '') as string).replace(/\s/, '-');
+      return data.name.replace(/\s/, '-');
     }
     return '';
   }, [data]);
@@ -49,7 +51,7 @@ function BookIntroduce(): JSX.Element {
     });
   }, [name]);
 
-  const quillCreator = (): void => {
+  const quillCreator = useCallback((): void => {
     quill = new Quill(`#${editSelector}`, options);
     quill.on('editor-change', (): void => {
       if (quill?.getLength() === 1) {
@@ -58,7 +60,11 @@ function BookIntroduce(): JSX.Element {
         setHaveContent(true);
       }
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    updateConditionNavigate(haveContent);
+  }, [haveContent]);
 
   // useEffect called twice time by strict mode,
   // therefore create a flag to detect quill was set up or was not.
@@ -68,7 +74,9 @@ function BookIntroduce(): JSX.Element {
       quillCreator();
       isSetupQuill = true;
     }
-    return () => { quill = null };
+    return () => {
+      quill = null;
+    };
   }, []);
 
   return (
@@ -84,7 +92,7 @@ function BookIntroduce(): JSX.Element {
         disabled={!haveContent}
         className="introduce-save-btn"
         variant="submit">
-        Save
+          Save
       </Button>
     </section>
   );

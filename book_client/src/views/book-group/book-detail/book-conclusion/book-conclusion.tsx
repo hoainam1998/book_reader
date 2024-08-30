@@ -1,12 +1,14 @@
-import { JSX, useSyncExternalStore, useMemo, useCallback } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback } from 'react';
+import { Blocker, useLoaderData } from 'react-router-dom';
 import { format } from 'date-fns';
 import Button from 'components/button/button';
 import List from 'components/list/list';
+import Slot from 'components/slot/slot';
+import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
 import './style.scss';
 import { CategoryListType } from '../fetcher';
-const { updateStep, subscribe, getSnapshot } = store;
+const { updateConditionNavigate, subscribe, getSnapshot } = store;
 
 type FieldHightLightBoxPropsType = {
   label: string;
@@ -30,6 +32,35 @@ const FieldHightLightBox = ({
   );
 };
 
+const bodyModal: JSX.Element = (
+  <Slot name="body">
+    <p style={{ textAlign: 'center' }}>
+      You must complete edit book information before leave this page!
+    </p>
+  </Slot>
+);
+
+const footerModal = (blocker: Blocker): JSX.Element => {
+  const onCloseModal = (onClose: () => void) => {
+    onClose();
+    blocker!.reset!();
+  };
+
+  return (
+    <Slot
+      name="footer"
+      render={({ onClose }) => (
+        <div className="footer-navigation-modal">
+          <Button variant="success"
+            onClick={() => onCloseModal(onClose)}>
+              Stay
+          </Button>
+        </div>
+      )}
+    />
+  );
+};
+
 function BookConclusion(): JSX.Element {
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const loaderData = useLoaderData() as CategoryListType;
@@ -37,20 +68,28 @@ function BookConclusion(): JSX.Element {
     () => (Boolean(data && data.publishedDay) ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
     [data]
   );
+
   const categories: CategoryListType['data']['category']['all'] =
     loaderData.data.category.all || [];
+
   const category: string = useMemo(() => {
     return data
       ? categories.find((categoryItem) => categoryItem.category_id === data.categoryId)?.name || ''
       : '';
   }, [data, categories]);
 
-  const openFile = useCallback((fileName: string) => {
+  useModalNavigation({ body: bodyModal, footer: footerModal })
+
+  const openFile = useCallback((fileName: string): void => {
     window.open(`${process.env.BASE_URL}/${fileName}`, '_blank');
   }, []);
 
   const complete = useCallback(() => {
     // TODO
+  }, []);
+
+  useEffect(() => {
+    updateConditionNavigate(true);
   }, []);
 
   if (data) {

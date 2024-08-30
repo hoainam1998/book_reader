@@ -5,6 +5,7 @@ export type CurrentStoreType = {
   step: number;
   data: BookInfoType;
   isComplete?: boolean;
+  isNavigate: boolean;
 };
 
 export { Image };
@@ -19,7 +20,8 @@ type ListenerType = (() => void)[];
 const initStore: CurrentStoreType = {
   step: +StepStorage.getItem() || 1,
   data: BookInfoStorage.getItem(),
-  isComplete: false
+  isComplete: false,
+  isNavigate: false
 };
 
 const emitChange = (listeners: ListenerType): void => {
@@ -28,7 +30,7 @@ const emitChange = (listeners: ListenerType): void => {
   }
 };
 
-const store = {
+const store: any = {
   currentStore: initStore,
   listeners: [] as ListenerType,
   updateStep(currentStep: number): void {
@@ -44,6 +46,10 @@ const store = {
   updateBookInfo(newStore: BookInfo): void {
     store.updateStep(newStore.step);
     store.updateData(newStore.data);
+    emitChange(store.listeners);
+  },
+  updateConditionNavigate(isNavigate: boolean): void {
+    store.currentStore = { ...store.currentStore, isNavigate };
     emitChange(store.listeners);
   },
   subscribe(callback: () => void): () => void {
