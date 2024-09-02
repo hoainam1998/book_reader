@@ -32,14 +32,26 @@ const promiseAllSettledOrder = (promiseChain, success, error) => {
   const promises = [];
   const handlePromise = (index = 0) => {
     if (index < promiseChain.length) {
-      promises.push(new Promise((resolve, reject) => {
+      promises.push(
         promiseChain[index]()
-          .then(response => resolve(response))
-          .catch(err => reject(err))
-          .finally(() => handlePromise(index + 1));
-        }));
+          .catch((err) => err)
+          .finally(() => handlePromise(index + 1))
+      );
     } else {
-      Promise.all(promises).then(success).catch(error);
+      Promise.all(promises).then((results) => {
+        const messages = results.reduce((message, result) => {
+          if (result instanceof Error) {
+            message += result.message + '; ';
+          }
+          return message;
+        }, '').trim();
+
+        if (messages) {
+          throw new Error(messages);
+        } else {
+          success(results);
+        }
+      }).catch(error);
     }
   };
   handlePromise();

@@ -93,6 +93,7 @@ const mutation = new GraphQLObjectType({
       resolve: async (book, args) => {
         const { name, html, json, bookId } = args;
         try {
+          await book.deleteIntroduceFile(bookId);
           await book.saveIntroduceHtmlFile(name, html, json, bookId);
           return messageCreator('Html file created!');
         } catch (err) {
@@ -133,6 +134,52 @@ const mutation = new GraphQLObjectType({
         try {
           await book.saveBookImages(images, bookId, name);
           return messageCreator('Book images has been created!');
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    updateBookInfo: {
+      type: ResponseType,
+      args: {
+        book: {
+          type: BookInformationInputType
+        }
+      },
+      resolve: async (book, args) => {
+        try {
+          await book.deletePdfFile(args.book.bookId, args.book.pdf);
+          const result = await book.updateBookInfo(args.book);
+          if (result.affectedRows === 0) {
+            throw new GraphQLError(`Book with id = ${args.book.bookId} not found`, graphqlNotFoundErrorOption);
+          }
+          return messageCreator('Update book success!');
+        } catch (err) {
+          if (err instanceof GraphQLError) {
+            throw err;
+          }
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    updateBookImages: {
+      type: ResponseType,
+      args: {
+        images: {
+          type: new GraphQLList(GraphQLString)
+        },
+        name: {
+          type: new GraphQLList(GraphQLString)
+        },
+        bookId: {
+          type: GraphQLID
+        }
+      },
+      resolve: async (book, { images, bookId, name }) => {
+        try {
+          await book.deleteImages(bookId);
+          await book.saveBookImages(images, bookId, name);
+          return messageCreator('Book images has been updated!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }

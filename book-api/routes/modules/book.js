@@ -83,52 +83,71 @@ class BookRouter extends Router {
   _processSaveBookInformation(req, res, next, schema) {
     const pdf = req.files.pdf[0];
     const images = req.files.images;
-    const bookId = Date.now();
+    const bookId = req.body.bookId || Date.now();
     const formDataBookInfo = new FormData();
     const formDataBookImages = new FormData();
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const message = req.body.bookId ? 'Update book information success!' : 'Save book information success!';
 
-    Object.keys(req.body).forEach(key => formDataBookInfo.append(key, req.body[key]));
+    Object.keys(req.body).forEach(key => {
+      if (!formDataBookInfo.has(key)) {
+        formDataBookInfo.append(key, req.body[key]);
+      }
+    });
 
     formDataBookInfo.append('pdf', new File([pdf.buffer], pdf.originalname), pdf.originalname);
-    formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
+
+    if (req.body.bookId) {
+      formDataBookInfo.append('query', 'mutation UpdateBookInformation($book: BookInformationInput) { book { updateBookInfo(book: $book) { message } } }');
+      formDataBookImages.append(
+        'query',
+        'mutation UpdateBookImages($images: [String], $bookId: ID, $name: [String]) { book { updateBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
+      );
+    } else {
+      formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
+      formDataBookImages.append(
+        'query',
+        'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
+      );
+    }
 
     images.forEach((image, index) => {
       formDataBookImages.append('images', new File([image.buffer], pdf.originalname, { type: image.mimetype }), image.originalname);
       formDataBookImages.append('name', `${req.body.name}${index + 1}${path.extname(image.originalname)}`);
     });
 
-    formDataBookImages.append(
-      'query',
-      'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
-    );
     formDataBookImages.append('bookId', bookId);
-    formDataBookInfo.append('bookId', bookId);
+    if (!formDataBookInfo.has('bookId')) {
+      formDataBookInfo.append('bookId', bookId);
+    }
 
     const fetchHelper = (path, body) => fetch(`${url}/${path}`, { method: 'POST', body });
 
     const promiseFetchBookData = (fetchHandler, name) => {
-      return new Promise((resolve, reject) => {
-        fetchHandler
-          .then(saveBookInfoResponse => {
-            if (saveBookInfoResponse.status === HTTP_CODE.CREATED) {
-              resolve(saveBookInfoResponse);
-            } else {
-              reject(new Error(`Save ${name} failed!`));
-            }
-          })
-          .catch(err => reject(new Error(`Save ${name} failed by ${err.message}`)));
-      });
+      return fetchHandler
+        .then(async saveBookInfoResponse => {
+          if (saveBookInfoResponse.status === HTTP_CODE.CREATED) {
+            return saveBookInfoResponse;
+          } else {
+            const { message } = await saveBookInfoResponse.json();
+            throw new Error(`[${name}] ${message}`);
+          }
+        })
+        .catch(err => {
+          throw new Error(err.message);
+        });
     };
 
     promiseAllSettledOrder([
-      () => promiseFetchBookData(fetchHelper('save-book', formDataBookInfo), 'book information'),
-      () => promiseFetchBookData(fetchHelper('save-images', formDataBookImages), 'book images')
+      () => promiseFetchBookData(fetchHelper('save-book', formDataBookInfo), 'Book information'),
+      () => promiseFetchBookData(fetchHelper('save-images', formDataBookImages), 'Book images')
     ],
-    () => res.status(HTTP_CODE.OK).json({
-        ...messageCreator('Save book information success!'),
+    () => {
+      res.status(HTTP_CODE.OK).json({
+        ...messageCreator(message),
         bookId
-      }),
+      });
+    },
     err => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message)));
   }
 }
