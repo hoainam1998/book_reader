@@ -5,7 +5,7 @@ import store, { CurrentStoreType } from '../storage';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
 import useModalNavigation from '../useModalNavigation';
 import './style.scss';
-const { subscribe, getSnapshot, updateStep, updateData, updateConditionNavigate } = store;
+const { subscribe, getSnapshot, updateStep, updateDisableStep, updateData, updateConditionNavigate } = store;
 
 const editSelector: string = 'book-introduce-editor';
 
@@ -40,7 +40,7 @@ function BookIntroduce(): JSX.Element {
     return '';
   }, [data]);
 
-  const onSave = (): void => {
+  const onSave = useCallback((): void => {
     const html: string = quill!.getSemanticHTML();
     const json: string = JSON.stringify(quill!.getContents());
 
@@ -48,9 +48,10 @@ function BookIntroduce(): JSX.Element {
       getBookIntroduceFile(data.bookId).then((res) => {
         updateData({ ...data, introduce: res.data.book.detail.introduce });
         updateStep(3);
+        updateDisableStep(false);
       });
     });
-  };
+  }, [quill]);
 
   const quillCreator = useCallback((): void => {
     const quillInstance = new Quill(`#${editSelector}`, options);

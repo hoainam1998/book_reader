@@ -86,8 +86,8 @@ function BookConclusion(): JSX.Element {
   }, []);
 
   const complete = useCallback(() => {
-    deleteAllStorage(true);
     navigate('/home/book/detail');
+    deleteAllStorage(true);
   }, []);
 
   useEffect(() => {

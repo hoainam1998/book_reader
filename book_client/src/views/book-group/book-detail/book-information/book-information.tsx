@@ -1,4 +1,4 @@
-import { JSX, useCallback, useRef, useEffect } from 'react';
+import { JSX, useCallback, useRef, useEffect, useSyncExternalStore } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import Grid, { GridItem } from 'components/grid/grid';
@@ -7,42 +7,123 @@ import Input, { InputRefType } from 'components/form/form-control/input/input';
 import Select, { OptionPrototype } from 'components/form/form-control/select/select';
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
-import './style.scss';
-import { FieldValidateProps } from 'hooks/useForm';
+import useForm, { RuleType } from 'hooks/useForm';
+import { required } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
-
-type BookInformationPropsType = {
-  name: FieldValidateProps;
-  pdf: FieldValidateProps;
-  publishedTime: FieldValidateProps;
-  publishedDay: FieldValidateProps;
-  categoryId: FieldValidateProps;
-  images: FieldValidateProps;
-  onReset: () => void;
-  onSubmit: (formData: FormData) => void
-};
+import store, { CurrentStoreType, Image } from '../storage';
+import {
+  getBookDetail,
+  saveBookInformation
+} from '../fetcher';
+import './style.scss';
+const { subscribe, getSnapshot, updateBookInfo, updateDisableStep, updateConditionNavigate } = store;
 
 type CategoryOptionsType = {
   name: string;
   category_id: string;
 } & OptionPrototype<string>;
 
+type BookStateType = {
+  name: string;
+  pdf: File | null;
+  publishedDay: number | null;
+  publishedTime: number | null;
+  categoryId: string;
+  images: File[] | null;
+};
+
 const formId: string = 'book-detail-form';
 
-function BookInformation({
-  name,
-  pdf,
-  publishedTime,
-  publishedDay,
-  categoryId,
-  images,
-  onReset,
-  onSubmit
-}: BookInformationPropsType): JSX.Element {
+const rules: RuleType<BookStateType> = {
+  name: { required },
+  pdf: { required },
+  publishedDay: { required },
+  publishedTime: { required },
+  categoryId: { required },
+  images: { required }
+};
+
+const state: BookStateType = {
+  name: '',
+  pdf: null,
+  publishedDay: null,
+  publishedTime: null,
+  categoryId: '',
+  images: null
+};
+
+/**
+ * Convert base64 image string list to promise all file list.
+ *
+ * @param {Image[]} base64String - base64 string chain.
+ * @returns {Promise<File[]>} - promise all file list.
+ */
+const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
+  const imagesPromise: Promise<File>[] = base64String.map(({ image, name }) => {
+    return new Promise((resolve, reject) => {
+      fetch(image)
+        .then((res) => res.blob())
+        .then((blob) => resolve(new File([blob], name, { type: blob.type })))
+        .catch((err) => reject(err));
+    });
+  });
+  return Promise.all(imagesPromise);
+};
+
+/**
+ * Convert url to promise file.
+ *
+ * @param {string} filePath - url link to file.
+ * @returns {Promise<File>} - promise include file.
+ */
+const convertFilePathToFile = (filePath: string, name: string): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    fetch(filePath)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`;
+        resolve(new File([blob], fileName));
+      })
+      .catch((err) => reject(err));
+  });
+};
+
+function BookInformation(): JSX.Element {
+  const {
+    name,
+    categoryId,
+    publishedTime,
+    publishedDay,
+    pdf,
+    images,
+    handleSubmit,
+    validate,
+    reset
+  } = useForm(state, rules, formId);
+  const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
   const pdfRef = useRef<InputRefType>(null);
-  useModalNavigation({ onLeaveAction: onReset });
+  useModalNavigation({ onLeaveAction: reset });
+
+  const onSubmit = useCallback(
+    (formData: FormData): void => {
+      handleSubmit();
+
+      if (!validate.error) {
+        if (data?.bookId) {
+          formData.append('bookId', data.bookId);
+        }
+        saveBookInformation(formData).then((res) => {
+          const bookId: string = res.data.bookId;
+          getBookDetail(bookId).then((res) =>
+            updateBookInfo({ data: { ...res.data.book.detail, bookId }, step: 2, disableStep: 3 })
+          );
+        });
+      }
+    },
+    [validate.error]
+  );
 
   const bookInformationFormSubmit = useCallback((): void => {
     const formData: FormData | null = new FormData(document.forms.namedItem(formId)!);
@@ -57,6 +138,26 @@ function BookInformation({
       pdfRef.current.input.files = dataTransfer.files;
     }
   }, [pdf.value]);
+
+  useEffect(() => {
+    if (data) {
+      name.watch(data.name);
+      publishedTime.watch(data.publishedTime);
+      publishedDay.watch(+data.publishedDay);
+      categoryId.watch(data.categoryId);
+      pdf.watch('');
+      images.watch('');
+      convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
+        .then((res) =>pdf.watch(res));
+      convertBase64ImageToFile(data.images)
+        .then((res) => images.watch(res));
+    }
+    return () => reset();
+  }, []);
+
+  useEffect(() => {
+    updateConditionNavigate(validate.dirty);
+  }, [validate.dirty]);
 
   return (
     <Form id={formId}

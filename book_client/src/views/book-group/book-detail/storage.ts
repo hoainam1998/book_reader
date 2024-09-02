@@ -1,8 +1,9 @@
-import { StepStorage, BookInfoStorage, BookInfoType } from 'storage';
+import { StepStorage, DisableStepStorage, BookInfoStorage, BookInfoType } from 'storage';
 import type { Image } from 'storage';
 
 export type CurrentStoreType = {
   step: number;
+  disableStep: number | false;
   data: BookInfoType;
   isComplete?: boolean;
   isNavigate: boolean;
@@ -12,13 +13,28 @@ export { Image };
 
 type BookInfo = {
   step: number;
+  disableStep: number;
   data: BookInfoType;
 };
 
 type ListenerType = (() => void)[];
 
+type BookStoreType = {
+  currentStore: CurrentStoreType;
+  listeners: ListenerType;
+  updateStep: (step: number) => void;
+  updateDisableStep: (step: number | false) => void;
+  updateData: (data: BookInfoType) => void;
+  updateBookInfo: (store: BookInfo) => void;
+  updateConditionNavigate: (isNavigate: boolean) => void;
+  deleteAllStorage: (isComplete: boolean) => void;
+  subscribe: (callback: () => void) => () => void;
+  getSnapshot: () => CurrentStoreType;
+};
+
 const initStore: CurrentStoreType = {
-  step: +StepStorage.getItem() || 1,
+  step: +(StepStorage.getItem() || 1),
+  disableStep: +(DisableStepStorage.getItem() || 2),
   data: BookInfoStorage.getItem(),
   isComplete: false,
   isNavigate: false
@@ -30,12 +46,17 @@ const emitChange = (listeners: ListenerType): void => {
   }
 };
 
-const store: any = {
+const store: BookStoreType = {
   currentStore: initStore,
   listeners: [] as ListenerType,
   updateStep(currentStep: number): void {
     store.currentStore = { ...store.currentStore, step: currentStep };
     StepStorage.setItem(currentStep);
+    emitChange(store.listeners);
+  },
+  updateDisableStep(disableStep: number | false): void {
+    store.currentStore = { ...store.currentStore, disableStep };
+    DisableStepStorage.setItem(disableStep);
     emitChange(store.listeners);
   },
   updateData(data: BookInfoType): void {
@@ -46,6 +67,7 @@ const store: any = {
   updateBookInfo(newStore: BookInfo): void {
     store.updateStep(newStore.step);
     store.updateData(newStore.data);
+    store.updateDisableStep(newStore.disableStep);
     emitChange(store.listeners);
   },
   updateConditionNavigate(isNavigate: boolean): void {
@@ -53,9 +75,13 @@ const store: any = {
     emitChange(store.listeners);
   },
   deleteAllStorage(isComplete: boolean): void {
-    store.currentStep = { ...store.currentStore, isComplete };
     StepStorage.delete();
     BookInfoStorage.delete();
+    DisableStepStorage.delete();
+    store.currentStore = {
+      ...initStore,
+      isComplete
+    };
     emitChange(store.listeners);
   },
   subscribe(callback: () => void): () => void {
@@ -63,6 +89,7 @@ const store: any = {
     return () => {
       if (store.currentStore.isComplete) {
         StepStorage.delete();
+        DisableStepStorage.delete();
         BookInfoStorage.delete();
       }
     };

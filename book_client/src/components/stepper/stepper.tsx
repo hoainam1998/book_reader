@@ -1,6 +1,5 @@
 import {
   useCallback,
-  Fragment,
   useState,
   useEffect,
   useMemo,
@@ -9,6 +8,7 @@ import {
   JSXElementConstructor,
   Children
 } from 'react';
+import List from 'components/list/list';
 import { clsx, customError } from 'utils';
 import './style.scss';
 
@@ -17,6 +17,7 @@ type StepperPropsType = {
   stepNumber: number;
   className?: string;
   activeStep: number;
+  disableStep: number | false;
   children: React.ReactElement | React.ReactElement[];
 };
 
@@ -25,6 +26,7 @@ type StepType = {
   active: boolean;
   last: boolean;
   stepped: boolean;
+  disabled: boolean;
 };
 
 type StepContentPropsType = {
@@ -42,14 +44,15 @@ export function StepContent({ children }: StepContentPropsType): JSX.Element {
   return children;
 };
 
-function Stepper({ onSwitch, stepNumber, className, children, activeStep }: StepperPropsType): JSX.Element {
+function Stepper({ onSwitch, stepNumber, className, children, activeStep, disableStep }: StepperPropsType): JSX.Element {
   const stepsInit = useMemo<StepType[]>(() => {
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({
         step: index + 1,
         active: index === activeStep - 1,
         last: index + 1 === stepNumber,
-        stepped: index <= activeStep - 2
+        stepped: index <= activeStep - 2,
+        disabled: disableStep === false ? disableStep : index >= disableStep - 1
       }));
   }, [stepNumber, activeStep]);
 
@@ -125,14 +128,16 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep }: Step
   return (
     <>
       <div className={clsx('stepper', className)}>
-        {
-          steps.map(({ step, active, last, stepped }, index) =>  (
-            <Fragment key={index}>
-              <div className={clsx('step-point', { 'active': active })} onClick={() => onSwitchStep(index)}>{step}</div>
-              {!last && <div className={clsx('line', { 'line-active': stepped })} />}
-            </Fragment>
-          ))
-        }
+        <List items={steps} render={({ step, active, disabled, last, stepped }, index) =>
+          <>
+            <div
+              className={clsx('step-point', { 'active': active, 'disabled': disabled })}
+              onClick={() => onSwitchStep(index)}>
+                {step}
+              </div>
+            {!last && <div className={clsx('line', { 'line-active': stepped })} />}
+          </>
+        } />
       </div>
       { currentStep }
     </>

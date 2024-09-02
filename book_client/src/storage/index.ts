@@ -38,4 +38,5 @@ class LocalStorage<T> {
 }
 
 export const StepStorage = new LocalStorage<number>('step');
+export const DisableStepStorage = new LocalStorage<number | boolean>('disable-step');
 export const BookInfoStorage = new LocalStorage<BookInfoType>('book-info');
