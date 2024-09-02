@@ -7,7 +7,6 @@ import useModalNavigation from '../useModalNavigation';
 import './style.scss';
 const { subscribe, getSnapshot, updateStep, updateData, updateConditionNavigate } = store;
 
-let quill: Quill | null = null;
 const editSelector: string = 'book-introduce-editor';
 
 const options: QuillOptions = {
@@ -28,6 +27,8 @@ const options: QuillOptions = {
 };
 
 function BookIntroduce(): JSX.Element {
+  let isSetupQuill: boolean = false;
+  const [quill, setQuill] = useState<Quill | null>(null);
   const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   useModalNavigation();
@@ -39,7 +40,7 @@ function BookIntroduce(): JSX.Element {
     return '';
   }, [data]);
 
-  const onSave = useCallback((): void => {
+  const onSave = (): void => {
     const html: string = quill!.getSemanticHTML();
     const json: string = JSON.stringify(quill!.getContents());
 
@@ -49,17 +50,18 @@ function BookIntroduce(): JSX.Element {
         updateStep(3);
       });
     });
-  }, [name]);
+  };
 
   const quillCreator = useCallback((): void => {
-    quill = new Quill(`#${editSelector}`, options);
-    quill.on('editor-change', (): void => {
+    const quillInstance = new Quill(`#${editSelector}`, options);
+    quillInstance.on('editor-change', (): void => {
       if (quill?.getLength() === 1) {
         setHaveContent(false);
       } else {
         setHaveContent(true);
       }
     });
+    setQuill(quillInstance);
   }, []);
 
   useEffect(() => {
@@ -67,16 +69,12 @@ function BookIntroduce(): JSX.Element {
   }, [haveContent]);
 
   // useEffect called twice time by strict mode,
-  // therefore create a flag to detect quill was set up or was not.
-  let isSetupQuill: boolean = false;
+  // therefore create a flag (isSetupQuill) to detect quill was set up or was not.
   useEffect(() => {
     if (!isSetupQuill) {
       quillCreator();
       isSetupQuill = true;
     }
-    return () => {
-      quill = null;
-    };
   }, []);
 
   return (
@@ -87,13 +85,15 @@ function BookIntroduce(): JSX.Element {
       </p>
       <p className="horizontal-line" />
       <div id={editSelector} className="book-introduce-editor" />
-      <Button
-        onClick={onSave}
-        disabled={!haveContent}
-        className="introduce-save-btn"
-        variant="submit">
-          Save
-      </Button>
+      {quill &&
+        <Button
+          onClick={onSave}
+          disabled={!haveContent}
+          className="introduce-save-btn"
+          variant="submit">
+            Save
+        </Button>
+      }
     </section>
   );
 }

@@ -52,6 +52,12 @@ const store: any = {
     store.currentStore = { ...store.currentStore, isNavigate };
     emitChange(store.listeners);
   },
+  deleteAllStorage(isComplete: boolean): void {
+    store.currentStep = { ...store.currentStore, isComplete };
+    StepStorage.delete();
+    BookInfoStorage.delete();
+    emitChange(store.listeners);
+  },
   subscribe(callback: () => void): () => void {
     store.listeners = [...store.listeners, callback];
     return () => {

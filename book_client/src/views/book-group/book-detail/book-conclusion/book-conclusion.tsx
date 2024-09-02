@@ -1,5 +1,5 @@
 import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback } from 'react';
-import { Blocker, useLoaderData } from 'react-router-dom';
+import { Blocker, useLoaderData, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Button from 'components/button/button';
 import List from 'components/list/list';
@@ -8,7 +8,7 @@ import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
 import './style.scss';
 import { CategoryListType } from '../fetcher';
-const { updateConditionNavigate, subscribe, getSnapshot } = store;
+const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
 
 type FieldHightLightBoxPropsType = {
   label: string;
@@ -63,6 +63,7 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 
 function BookConclusion(): JSX.Element {
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const navigate = useNavigate();
   const loaderData = useLoaderData() as CategoryListType;
   const publishedDay: string = useMemo(
     () => (Boolean(data && data.publishedDay) ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
@@ -85,12 +86,13 @@ function BookConclusion(): JSX.Element {
   }, []);
 
   const complete = useCallback(() => {
-    // TODO
+    deleteAllStorage(true);
+    navigate('/home/book/detail');
   }, []);
 
   useEffect(() => {
-    updateConditionNavigate(true);
-  }, []);
+    updateConditionNavigate(!data);
+  }, [data]);
 
   if (data) {
     return (
@@ -133,7 +135,7 @@ function BookConclusion(): JSX.Element {
                   onClick={() => openFile(data.introduce!.html)}
                   className="preview"
                   variant="success">
-                  Preview
+                    Preview
                 </Button>
               </FieldHightLightBox>
             </li>

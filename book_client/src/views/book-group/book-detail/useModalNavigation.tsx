@@ -17,6 +17,8 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
 
   body = body instanceof Function ? body(blocker) : body;
 
+  const onClose = useCallback(() => blocker!.reset!(), [blocker]);
+
   const bodyModal: JSX.Element = (
     <Slot name="body">
       <p style={{ textAlign: 'center' }}>
@@ -74,7 +76,8 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
           {footer ? footer(blocker) : footerModal()}
         </>,
         title: 'Navigation warning',
-        size: 'sm'
+        size: 'sm',
+        onClose
       });
       setIsNavigation(false);
     }

@@ -100,6 +100,9 @@ function BookDetail(): JSX.Element {
       handleSubmit();
 
       if (!validate.error) {
+        if (data?.bookId) {
+          formData.append('bookId', data.bookId);
+        }
         saveBookInformation(formData).then((res) => {
           const bookId: string = res.data.bookId;
           getBookDetail(bookId).then((res) =>
