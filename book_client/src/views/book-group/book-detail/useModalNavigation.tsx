@@ -17,7 +17,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
 
   body = body instanceof Function ? body(blocker) : body;
 
-  const onClose = useCallback(() => blocker!.reset!(), [blocker]);
+  const onClose = useCallback((): void => blocker!.reset!(), [blocker]);
 
   const bodyModal: JSX.Element = (
     <Slot name="body">
@@ -29,14 +29,14 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
   );
 
   const footerModal = useCallback((): JSX.Element => {
-    const onLeave = () => {
+    const onLeave = (): void => {
       if (blocker.state === 'blocked') {
         blocker!.proceed!();
         onLeaveAction && onLeaveAction();
       }
     };
 
-    const onCloseModal = (onClose: () => void) => {
+    const onCloseModal = (onClose: () => void): void => {
       onClose();
       blocker!.reset!();
     };
@@ -75,7 +75,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
           {body ? body : bodyModal}
           {footer ? footer(blocker) : footerModal()}
         </>,
-        title: 'Navigation warning',
+        title: 'Navigation warning!',
         size: 'sm',
         onClose
       });

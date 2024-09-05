@@ -34,10 +34,9 @@ function InputCalendar({
   onOpen
   }: InputCalendarProps, ref: Ref<InputCalendarRect>): JSX.Element {
   const inputCalendarRef = useRef<InputCalendarRect>(null);
+  const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
 
   useImperativeHandle(ref, () => ({ rect: inputCalendarRef.current!.rect as DOMRect }), []);
-
-  const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
 
   return (
     <FormControl<InputCalendarRect> name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>

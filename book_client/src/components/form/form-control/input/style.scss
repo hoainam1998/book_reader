@@ -1,3 +1,7 @@
-.fieldset {
-  border: none;
+.input-wrapper {
+  display: inline-block;
+  & > .limit {
+    font-size: 12px;
+    float: right;
+  }
 }

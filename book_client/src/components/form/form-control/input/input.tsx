@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   JSX,
   useRef,
+  useState,
   useMemo,
   useEffect,
   useImperativeHandle,
@@ -11,7 +12,7 @@ import {
   HTMLProps
 } from 'react';
 import FormControl from '../form-control';
-import { clsx } from 'utils';
+import { clsx, customError } from 'utils';
 import './style.scss';
 
 export type InputRefType = {
@@ -30,6 +31,7 @@ type InputPropsType = {
   error?: boolean;
   accept?: string;
   multiple?: boolean;
+  max?: number;
   // eslint-disable-next-line no-unused-vars
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: <T>(event: FormEvent<T>) => void;
@@ -45,6 +47,7 @@ function Input({
   error = false,
   accept = 'image/*',
   multiple = false,
+  max,
   className,
   labelClass,
   inputClass,
@@ -53,6 +56,7 @@ function Input({
   onFocus = () => {},
 }: InputPropsType, ref: Ref<InputRefType>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [targetValue, setTargetValue] = useState<string>('');
 
   useImperativeHandle(
     ref,
@@ -67,9 +71,20 @@ function Input({
     } :
     {
       autoComplete: 'off',
-      defaultValue: value as string | number
+      defaultValue: value as string | number,
     };
   }, [type, value, accept, multiple]);
+
+  const limitCharacter: string = useMemo(() => {
+    return max ? `${targetValue.length}/${max}` : '';
+  }, [targetValue, max]);
+
+  const onChangeEvent = (event: ChangeEvent<HTMLInputElement>): void => {
+    if (typeof event.target.value === 'string') {
+      setTargetValue(event.target.value);
+    }
+    onChange(event);
+  };
 
   useEffect(() => {
     if (value !== (null && undefined) && type === 'file') {
@@ -88,16 +103,19 @@ function Input({
           inputRef.current!.value = value;
         }
       } else {
-        throw new Error("[Custom Error] Value of input type file must be file, file list or empty string ('')!");
+        throw customError("Value of input type file must be file, file list or empty string ('')!");
       }
     }
   }, [value, type]);
 
   return (
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
-      <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error }, inputClass)}
-        type={type} {...specificPropInput} multiple={multiple} ref={inputRef}
-        onChange={onChange} onInput={onInput} onFocus={onFocus} />
+      <div className={clsx('input-wrapper', inputClass)}>
+        <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
+          type={type} {...specificPropInput} multiple={multiple} ref={inputRef}
+          onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} />
+        {limitCharacter && <p className="limit">{limitCharacter}</p>}
+      </div>
     </FormControl>
   );
 }

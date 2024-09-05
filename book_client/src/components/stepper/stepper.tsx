@@ -44,7 +44,7 @@ export function StepContent({ children }: StepContentPropsType): JSX.Element {
   return children;
 };
 
-function Stepper({ onSwitch, stepNumber, className, children, activeStep, disableStep }: StepperPropsType): JSX.Element {
+function Stepper({ stepNumber, className, children, activeStep, disableStep, onSwitch }: StepperPropsType): JSX.Element {
   const stepsInit = useMemo<StepType[]>(() => {
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({
@@ -128,10 +128,9 @@ function Stepper({ onSwitch, stepNumber, className, children, activeStep, disabl
   return (
     <>
       <div className={clsx('stepper', className)}>
-        <List items={steps} render={({ step, active, disabled, last, stepped }, index) =>
+        <List<StepType> items={steps} render={({ step, active, disabled, last, stepped }, index) =>
           <>
-            <div
-              className={clsx('step-point', { 'active': active, 'disabled': disabled })}
+            <div className={clsx('step-point', { 'active': active, 'disabled': disabled })}
               onClick={() => onSwitchStep(index)}>
                 {step}
               </div>

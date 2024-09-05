@@ -1,17 +1,13 @@
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent } from 'react';
 import useValidate, {
   ValidateFunction,
   ValidateProcess,
   ErrorInfo,
-  UnionTypeErrorInfo,
+  ValidateInfo,
   ValidateName
 } from './useValidate';
 
-export type RuleType<T> = {
-  [key in keyof T]: Record<ValidateName, ValidateFunction | ValidateProcess>;
-};
-
-export type RuleTypeCompact<T> = RuleType<T>;
+export type RuleType<T> = Record<keyof T, Partial<Record<ValidateName, ValidateFunction | ValidateProcess | ValidateInfo>>>;
 
 export type FieldValidateProps<T = any> = {
   value: T;
@@ -25,11 +21,8 @@ export type FieldValidateProps<T = any> = {
   validate: () => void;
 };
 
-type UnionTypeFormValidate = {
-  [key: string]: FieldValidateProps;
-};
-
 export type FormValidateProps = {
+  [key: string]: any;
   validate: ErrorInfo;
   handleSubmit: () => void;
   reset: () => void;
@@ -39,21 +32,20 @@ export default <T extends Object, R>(
   state: T,
   rules: R,
   formId: string
-): FormValidateProps & UnionTypeFormValidate => {
+): FormValidateProps => {
   const validateObject: ErrorInfo = useValidate<T, R>(state, rules);
-  const [value, setValue] = useState<typeof state>(state);
 
-  const formControlProps: unknown = {
+  const formControlProps: FormValidateProps = {
     validate: validateObject,
     handleSubmit: (): void => {
-      if (!(formControlProps as FormValidateProps).validate.dirty) {
-        (formControlProps as FormValidateProps).validate.dirty = true;
+      if (!formControlProps .validate.dirty) {
+        formControlProps.validate.dirty = true;
       }
-      (formControlProps as FormValidateProps).validate.validate();
+      (validateObject.validate as Function)();
       Object.keys(state).forEach((key: string) => {
-        (validateObject[key] as ErrorInfo).dirty = true;
-        (formControlProps as ErrorInfo)[key] = Object.assign(
-          (formControlProps as UnionTypeFormValidate)[key],
+        validateObject[key].dirty = true;
+        formControlProps[key] = Object.assign(
+          formControlProps[key],
           validateObject[key]
         );
       });
@@ -61,42 +53,38 @@ export default <T extends Object, R>(
     reset: (): void => {
       Object.keys(state).forEach(
         (key: string) => {
-          (validateObject[key] as UnionTypeErrorInfo).dirty = false;
-          (formControlProps as UnionTypeFormValidate)[key].watch('');
+          const keyValidateObject = validateObject[key]!;
+          keyValidateObject.dirty = false;
+          keyValidateObject.watch('', key);
       });
       validateObject.dirty = false;
-      validateObject.validate();
       document.forms.namedItem(formId)?.reset();
     }
   };
 
   Object.keys(state).forEach((key: string) => {
     type ValueType = T[keyof T];
-    (formControlProps as UnionTypeFormValidate)[key] = {
-      value: value[key as keyof T],
+    formControlProps[key] = {
+      value: validateObject.values[key],
       onChange: <O extends HTMLInputElement>(arg: ChangeEvent<O> | ValueType): void => {
-        const elementTargetValue: ValueType = (arg as ChangeEvent<O>).currentTarget
-          ?.value as ValueType;
+        const elementTargetValue: ValueType =
+          (arg as ChangeEvent<O>).currentTarget?.value as ValueType;
         const currentValue: ValueType =
           elementTargetValue === null || elementTargetValue === undefined
             ? (arg as ValueType)
             : elementTargetValue;
-        setValue({ ...value, [key]: currentValue });
-        state[key as keyof T] = currentValue;
-        (validateObject[key] as UnionTypeErrorInfo).validate();
+        validateObject[key].watch!(currentValue, key);
       },
       onFocus: (): void => {
-        (validateObject[key] as UnionTypeErrorInfo).dirty = true;
+        validateObject[key].dirty = true;
         validateObject.dirty = true;
       },
-      ...(validateObject[key] as UnionTypeErrorInfo),
+      ...validateObject[key],
       watch: (currentValue: ValueType): void => {
-        (formControlProps as UnionTypeFormValidate)[key].value = currentValue;
-        state[key as keyof T] = currentValue;
-        setValue({ ...value, [key]: currentValue });
+        validateObject[key].watch!(currentValue, key);
       }
-    } as FieldValidateProps<ValueType>;
+    }
   });
 
-  return formControlProps as FormValidateProps & UnionTypeFormValidate;
+  return formControlProps;
 };

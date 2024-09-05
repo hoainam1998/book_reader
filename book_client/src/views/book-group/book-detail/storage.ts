@@ -32,13 +32,14 @@ type BookStoreType = {
   getSnapshot: () => CurrentStoreType;
 };
 
-const initStore: CurrentStoreType = {
+const disableStep: CurrentStoreType['disableStep'] = DisableStepStorage.getItem();
+const initStore: () => CurrentStoreType = () => ({
   step: +(StepStorage.getItem() || 1),
-  disableStep: +(DisableStepStorage.getItem() || 2),
+  disableStep: (disableStep === false ? false : +disableStep || 2),
   data: BookInfoStorage.getItem(),
   isComplete: false,
   isNavigate: false
-};
+});
 
 const emitChange = (listeners: ListenerType): void => {
   for (let listener of listeners) {
@@ -47,7 +48,7 @@ const emitChange = (listeners: ListenerType): void => {
 };
 
 const store: BookStoreType = {
-  currentStore: initStore,
+  currentStore: initStore(),
   listeners: [] as ListenerType,
   updateStep(currentStep: number): void {
     store.currentStore = { ...store.currentStore, step: currentStep };
@@ -79,20 +80,14 @@ const store: BookStoreType = {
     BookInfoStorage.delete();
     DisableStepStorage.delete();
     store.currentStore = {
-      ...initStore,
+      ...initStore(),
       isComplete
     };
     emitChange(store.listeners);
   },
   subscribe(callback: () => void): () => void {
     store.listeners = [...store.listeners, callback];
-    return () => {
-      if (store.currentStore.isComplete) {
-        StepStorage.delete();
-        DisableStepStorage.delete();
-        BookInfoStorage.delete();
-      }
-    };
+    return () => {};
   },
   getSnapshot(): CurrentStoreType {
     return store.currentStore;

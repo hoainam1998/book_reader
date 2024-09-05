@@ -8,7 +8,7 @@ import Select, { OptionPrototype } from 'components/form/form-control/select/sel
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
 import useForm, { RuleType } from 'hooks/useForm';
-import { required } from 'hooks/useValidate';
+import { required, maxLength } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
 import {
@@ -16,7 +16,7 @@ import {
   saveBookInformation
 } from '../fetcher';
 import './style.scss';
-const { subscribe, getSnapshot, updateBookInfo, updateDisableStep, updateConditionNavigate } = store;
+const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate } = store;
 
 type CategoryOptionsType = {
   name: string;
@@ -35,7 +35,7 @@ type BookStateType = {
 const formId: string = 'book-detail-form';
 
 const rules: RuleType<BookStateType> = {
-  name: { required },
+  name: { required, maxLength: maxLength(3) },
   pdf: { required },
   publishedDay: { required },
   publishedTime: { required },
@@ -53,7 +53,7 @@ const state: BookStateType = {
 };
 
 /**
- * Convert base64 image string list to promise all file list.
+ * Convert base64 image string list to promise all file list. List file return by this function will be re-assign to input type file.
  *
  * @param {Image[]} base64String - base64 string chain.
  * @returns {Promise<File[]>} - promise all file list.
@@ -71,7 +71,7 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
 };
 
 /**
- * Convert url to promise file.
+ * Convert url to promise file. File return by this function will be re-assign to input type file.
  *
  * @param {string} filePath - url link to file.
  * @returns {Promise<File>} - promise include file.

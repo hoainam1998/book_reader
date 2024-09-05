@@ -1,5 +1,6 @@
 import { JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
 import Quill, { QuillOptions } from 'quill';
+import { Op } from 'quill/core';
 import Button from 'components/button/button';
 import store, { CurrentStoreType } from '../storage';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
@@ -24,6 +25,18 @@ const options: QuillOptions = {
   },
   placeholder: 'Please enter book introduce information ...',
   theme: 'snow'
+};
+
+/**
+ * Convert file path string list to promise of options. Those options will be content of quill.
+ *
+ * @param {string} filePath - file path to json file contain options
+ * @returns {Promise<Op[]>} - promise options.
+ */
+const getContent = (filePath: string): Promise<Op[]> => {
+  return fetch(`${process.env.BASE_URL}/${filePath}`)
+    .then(res => res.json())
+    .then(json => json);
 };
 
 function BookIntroduce(): JSX.Element {
@@ -56,7 +69,7 @@ function BookIntroduce(): JSX.Element {
   const quillCreator = useCallback((): void => {
     const quillInstance = new Quill(`#${editSelector}`, options);
     quillInstance.on('editor-change', (): void => {
-      if (quill?.getLength() === 1) {
+      if (quillInstance?.getLength() === 1) {
         setHaveContent(false);
       } else {
         setHaveContent(true);
@@ -77,6 +90,13 @@ function BookIntroduce(): JSX.Element {
       isSetupQuill = true;
     }
   }, []);
+
+  useEffect(() => {
+    if (data && data.introduce) {
+      getContent(data.introduce.json)
+        .then(json => quill?.setContents(json));
+    }
+  }, [quill, data]);
 
   return (
     <section className="book-introduce">
