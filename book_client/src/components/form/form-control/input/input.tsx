@@ -32,6 +32,7 @@ type InputPropsType = {
   accept?: string;
   multiple?: boolean;
   max?: number;
+  min?: number | string;
   // eslint-disable-next-line no-unused-vars
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: <T>(event: FormEvent<T>) => void;
@@ -48,6 +49,7 @@ function Input({
   accept = 'image/*',
   multiple = false,
   max,
+  min,
   className,
   labelClass,
   inputClass,
@@ -112,7 +114,7 @@ function Input({
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <div className={clsx('input-wrapper', inputClass)}>
         <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-          type={type} {...specificPropInput} multiple={multiple} ref={inputRef}
+          type={type} {...specificPropInput} multiple={multiple} min={min} ref={inputRef}
           onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} />
         {limitCharacter && <p className="limit">{limitCharacter}</p>}
       </div>

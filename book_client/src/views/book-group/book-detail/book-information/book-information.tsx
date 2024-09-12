@@ -188,6 +188,7 @@ function BookInformation(): JSX.Element {
           <Input
             {...publishedTime}
             type="number"
+            min="1"
             label="Published time"
             labelClass="published-time-label"
             inputClass="published-time-input"

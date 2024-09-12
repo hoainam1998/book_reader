@@ -162,6 +162,7 @@ function Category(): JSX.Element {
           <Input
             label="Category name"
             className="category-form-control"
+            inputClass="input-class"
             name="name"
             type="text"
             {...categoryName}
@@ -169,6 +170,7 @@ function Category(): JSX.Element {
           <Input
             label="Avatar"
             className="category-form-control"
+            inputClass="input-class"
             name="avatar"
             onInput={fileChange}
             type="file"

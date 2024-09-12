@@ -223,7 +223,6 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
     (keyErrorInfo[validateName] as ErrorFieldInfo).error = validateResult.error;
 
     if (validateResult.max) {
-      keyErrorInfo.max = validateResult.max;
       (keyErrorInfo[validateName] as ErrorFieldInfo).max = validateResult.max;
     }
 

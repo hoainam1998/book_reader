@@ -8,11 +8,19 @@ const { getResolvePath, getAssetPath } = require('./utils.js');
 const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
 const { dev } = require('../config');
 
+// process.env.BASE_URL at here was config by docker, if it exist, then app is running by docker.
+const env = {
+  'process.env': JSON.stringify(dev),
+  ...Boolean(process.env.BASE_URL) ? {
+    'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL)
+  } : {}
+};
+
 module.exports = {
   entry: getResolvePath('../src/index.tsx'),
   output: {
     filename: 'js/[name].bundle.js',
-    path: path.join(__dirname, OUTPUT_DIR),
+    path: getAssetPath(__dirname, OUTPUT_DIR),
     publicPath: PUBLIC_PATH,
     clean: true
   },
@@ -22,9 +30,7 @@ module.exports = {
       favicon: getAssetPath(PUBLIC, 'book.png'),
       template: getAssetPath(PUBLIC, 'index.html')
     }),
-    new DefinePlugin({
-      'process.env': JSON.stringify(dev)
-    }),
+    new DefinePlugin(env),
     new MiniCssExtractPlugin({
       filename: 'css/[name].css'
     }),
