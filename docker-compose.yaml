@@ -1,0 +1,60 @@
+services:
+  db:
+    image: mysql:latest
+    container_name: db_c
+    env_file: ./book-api/.env
+    environment:
+      MYSQL_DATABASE: books
+      MYSQL_HOST: ${LOCALHOST}
+      MYSQL_ROOT_PASSWORD: ${USER}
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+    ports:
+      - 3306:3306
+    volumes:
+      - ./book-api/db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: pma_c
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: unless-stopped
+    ports:
+      - 8081:80
+
+  api:
+    build: ./book-api
+    container_name: api_c
+    environment:
+      LOCALHOST: db_c
+    volumes:
+      - .//book-api:/api
+      - /api/node_modules
+    ports:
+     - ${API_PORT}:${API_PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  client:
+    env_file: ./book-api/.env
+    build: ./book_client
+    container_name: client_c
+    volumes:
+      - .//book_client:/app
+    environment:
+      BASE_URL: 'http://localhost:${API_PORT}'
+      WDS_SOCKET_PORT: ${CLIENT_PORT}
+      WATCHPACK_POLLING: true
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    depends_on:
+      - api

@@ -12,6 +12,7 @@
 /dist
 *.html
 *.pdf
+/db
 
 # misc
 .DS_Store

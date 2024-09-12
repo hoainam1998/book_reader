@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec babel-node index.js"
+    "dev": "nodemon -L --exec babel-node index.js"
   },
   "author": "hoai nam",
   "license": "ISC",
@@ -19,7 +19,7 @@
     "graphql-http": "^1.22.0",
     "graphql-upload": "^16.0.2",
     "multer": "^1.4.5-lts.1",
-    "mysql": "^2.18.1"
+    "mysql2": "^3.11.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",
