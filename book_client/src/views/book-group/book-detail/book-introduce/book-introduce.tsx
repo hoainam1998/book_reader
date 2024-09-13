@@ -5,6 +5,7 @@ import Button from 'components/button/button';
 import store, { CurrentStoreType } from '../storage';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
 import useModalNavigation from '../useModalNavigation';
+import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import './style.scss';
 const { subscribe, getSnapshot, updateStep, updateDisableStep, updateData, updateConditionNavigate } = store;
 
@@ -40,7 +41,6 @@ const getContent = (filePath: string): Promise<Op[]> => {
 };
 
 function BookIntroduce(): JSX.Element {
-  let isSetupQuill: boolean = false;
   const [quill, setQuill] = useState<Quill | null>(null);
   const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
@@ -82,20 +82,21 @@ function BookIntroduce(): JSX.Element {
     updateConditionNavigate(haveContent);
   }, [haveContent]);
 
-  // useEffect called twice time by strict mode,
-  // therefore create a flag (isSetupQuill) to detect quill was set up or was not.
-  useEffect(() => {
-    if (!isSetupQuill) {
-      quillCreator();
-      isSetupQuill = true;
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched()) {
+        quillCreator();
+      }
     }
-  }, []);
+  });
 
-  useEffect(() => {
-    if (data && data.introduce) {
-      getContent(data.introduce.json)
-        .then(json => quill?.setContents(json));
-    }
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (data && data.introduce && !haveFetched()) {
+        getContent(data.introduce.json)
+          .then(json => quill?.setContents(json));
+      }
+    };
   }, [quill, data]);
 
   return (

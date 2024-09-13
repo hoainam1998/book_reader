@@ -8,7 +8,8 @@ const { getResolvePath, getAssetPath } = require('./utils.js');
 const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
 const { dev } = require('../config');
 
-// process.env.BASE_URL at here was config by docker, if it exist, then app is running by docker.
+// process.env.BASE_URL at here was config by docker,
+// if it exist, then app is running by docker.
 const env = {
   'process.env': JSON.stringify(dev),
   ...Boolean(process.env.BASE_URL) ? {
@@ -20,7 +21,7 @@ module.exports = {
   entry: getResolvePath('../src/index.tsx'),
   output: {
     filename: 'js/[name].bundle.js',
-    path: getAssetPath(__dirname, OUTPUT_DIR),
+    path: getResolvePath(OUTPUT_DIR),
     publicPath: PUBLIC_PATH,
     clean: true
   },

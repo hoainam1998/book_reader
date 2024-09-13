@@ -16,6 +16,7 @@ import {
   saveBookInformation
 } from '../fetcher';
 import './style.scss';
+import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate } = store;
 
 type CategoryOptionsType = {
@@ -40,7 +41,7 @@ const rules: RuleType<BookStateType> = {
   publishedDay: { required },
   publishedTime: { required },
   categoryId: { required },
-  images: { required }
+  images: { required, maxLength: maxLength(8) }
 };
 
 const state: BookStateType = {
@@ -100,7 +101,7 @@ function BookInformation(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId);
-  const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
   const pdfRef = useRef<InputRefType>(null);
@@ -139,20 +140,24 @@ function BookInformation(): JSX.Element {
     }
   }, [pdf.value]);
 
-  useEffect(() => {
-    if (data) {
-      name.watch(data.name);
-      publishedTime.watch(data.publishedTime);
-      publishedDay.watch(+data.publishedDay);
-      categoryId.watch(data.categoryId);
-      pdf.watch('');
-      images.watch('');
-      convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
-        .then((res) =>pdf.watch(res));
-      convertBase64ImageToFile(data.images)
-        .then((res) => images.watch(res));
-    }
-    return () => reset();
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (data && step === 1) {
+        name.watch(data.name);
+        publishedTime.watch(data.publishedTime);
+        publishedDay.watch(+data.publishedDay);
+        categoryId.watch(data.categoryId);
+        pdf.watch('');
+        images.watch('');
+        if (!haveFetched()) {
+          convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
+            .then((res) =>pdf.watch(res));
+        }
+        convertBase64ImageToFile(data.images)
+          .then((res) => images.watch(res));
+      }
+      return () => reset();
+    };
   }, []);
 
   useEffect(() => {

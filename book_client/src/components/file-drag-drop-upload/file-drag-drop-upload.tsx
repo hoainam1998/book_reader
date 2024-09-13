@@ -33,6 +33,7 @@ function FileDragDropUpload({
   errors,
   error,
   label,
+  onFocus,
   onChange
 }: FileDragDropUploadType, ref: Ref<ImageFileListType>): JSX.Element {
   const [imageFileList, setImageFileList] = useState<File[]>([]);
@@ -51,6 +52,7 @@ function FileDragDropUpload({
         .filter(file => file.type.includes('image'));
     }
     setImageFileList(files);
+    onFocus();
     onChange(files);
   }, []);
 
@@ -61,6 +63,7 @@ function FileDragDropUpload({
   const onFileChanged = useCallback(<T, >(event: ChangeEvent<T | HTMLInputElement>): void => {
     const files: File[] = Array.from((event.target as HTMLInputElement).files || []);
     setImageFileList(files);
+    onFocus();
     onChange(files);
   }, []);
 
