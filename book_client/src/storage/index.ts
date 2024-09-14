@@ -11,6 +11,7 @@ export type BookInfoType = {
   publishedDay: string;
   categoryId: string;
   images: Image[];
+  avatar: string;
   introduce?: {
     html: string;
     json: string;

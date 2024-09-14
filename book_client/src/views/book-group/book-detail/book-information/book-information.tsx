@@ -30,6 +30,7 @@ type BookStateType = {
   publishedDay: number | null;
   publishedTime: number | null;
   categoryId: string;
+  avatar: File | null;
   images: File[] | null;
 };
 
@@ -41,6 +42,7 @@ const rules: RuleType<BookStateType> = {
   publishedDay: { required },
   publishedTime: { required },
   categoryId: { required },
+  avatar: { required },
   images: { required, maxLength: maxLength(8) }
 };
 
@@ -50,6 +52,7 @@ const state: BookStateType = {
   publishedDay: null,
   publishedTime: null,
   categoryId: '',
+  avatar: null,
   images: null
 };
 
@@ -97,6 +100,7 @@ function BookInformation(): JSX.Element {
     publishedDay,
     pdf,
     images,
+    avatar,
     handleSubmit,
     validate,
     reset
@@ -219,7 +223,15 @@ function BookInformation(): JSX.Element {
             name="categoryId"
             options={categories} />
         </GridItem>
-        <GridItem lg={12}>
+        <GridItem lg={3}>
+          <FileDragDropUpload
+            {...avatar}
+            multiple={false}
+            name="avatar"
+            label="Avatar"
+            className="image-select-box" />
+        </GridItem>
+        <GridItem lg={9}>
           <FileDragDropUpload
             {...images}
             name="images"

@@ -4,12 +4,23 @@ $colum-width: calc((100% - #{$gap}px) / 8);
 .file-drag-drop-upload {
   min-height: 250px;
   width: 100%;
-  background-image: url("images/picture.png");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 200px;
   padding: 10px;
   position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url("images/picture.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 200px;
+    opacity: .3;
+  }
 
   .placeholder {
     position: absolute;
@@ -23,35 +34,47 @@ $colum-width: calc((100% - #{$gap}px) / 8);
     display: none;
   }
 
-  .image-preview-wrapper {
+  .multiple-image-preview-wrapper {
     display: grid;
     grid-template-columns: repeat(8, $colum-width);
     grid-template-rows: 230px;
     grid-gap: 7px;
+  }
 
-    .image-preview-item {
-        height: 100%;
-        width: 100%;
-        position: relative;
+  .single-image-preview-wrapper {
+    width: 200px;
+    height: 230px;
+    margin: auto;
+  }
 
-        .delete-image {
-          position: absolute;
-          bottom: 0%;
-          right: 0;
-          height: 30px;
-          width: 30px;
-          text-align: center;
-          padding-top: 4px;
-          cursor: pointer;
-          border-radius: 50%;
-          background-color: $error-color;
-          color: $white-color;
-          box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-        }
+  .image-preview-item {
+    height: 100%;
+    width: 100%;
+    position: relative;
+
+    .delete-image {
+      position: absolute;
+      bottom: 0%;
+      right: 0;
+      height: 30px;
+      width: 30px;
+      text-align: center;
+      padding-top: 4px;
+      cursor: pointer;
+      border-radius: 50%;
+      background-color: $error-color;
+      color: $white-color;
+      box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     }
   }
 }
 
 .error-box {
   border-color: $error-color;
+}
+
+.label-with-length {
+  font-size: 12px;
+  font-weight: normal;
+  margin-left: 10px;
 }

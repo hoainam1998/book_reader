@@ -2,13 +2,15 @@ import {
   DragEvent,
   JSX,
   useCallback,
+  useMemo,
   useState,
   useEffect,
   useRef,
   ChangeEvent,
   useImperativeHandle,
   forwardRef,
-  Ref
+  Ref,
+  ReactNode
 } from 'react';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
 import FormControl from 'components/form/form-control/form-control';
@@ -24,6 +26,8 @@ type FileDragDropUploadType = {
   className?: string;
   name: string;
   label: string;
+  multiple?: boolean;
+  max?: number;
 } & FieldValidateProps<File[]>;
 
 function FileDragDropUpload({
@@ -33,11 +37,29 @@ function FileDragDropUpload({
   errors,
   error,
   label,
+  multiple,
+  max,
   onFocus,
   onChange
 }: FileDragDropUploadType, ref: Ref<ImageFileListType>): JSX.Element {
   const [imageFileList, setImageFileList] = useState<File[]>([]);
   const fileInput = useRef<InputRefType>(null);
+
+  const multiSelectFlag = useMemo((): boolean => {
+    return multiple ? true : (multiple === undefined ? true: false);
+  }, [multiple]);
+
+  const labelWithMaxLength = useMemo((): ReactNode => {
+    if (max) {
+      return (
+        <>
+          {label}
+          <span className="label-with-length">{`${imageFileList.length}/${max}`}</span>
+        </>
+      );
+    }
+    return label;
+  }, [label, max, imageFileList]);
 
   const onDrag = useCallback((event: DragEvent<HTMLDivElement>): void => {
     event.preventDefault();
@@ -87,7 +109,7 @@ function FileDragDropUpload({
   }, [value]);
 
   return (
-    <FormControl label={label} name={name} errors={errors}>
+    <FormControl label={labelWithMaxLength} name={name} errors={errors}>
       <div className={clsx('file-drag-drop-upload image-box', className, { 'error-box': error })}
         onDragOver={onDrag}
         onDrop={onDrop}
@@ -98,11 +120,14 @@ function FileDragDropUpload({
             name={name}
             label={label}
             value={value}
-            multiple
+            multiple={multiSelectFlag}
             className="input-file-hidden"
             onChange={onFileChanged}
             ref={fileInput} />
-          <div className="image-preview-wrapper">
+          <div className={clsx({
+              'multiple-image-preview-wrapper': multiSelectFlag,
+              'single-image-preview-wrapper': !multiSelectFlag
+              })}>
             {
               imageFileList && imageFileList.map((file, index) => (
                 <div className="image-preview-item" key={index}>

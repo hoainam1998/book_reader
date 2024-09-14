@@ -130,7 +130,7 @@ const objectValidate: ErrorInfo = {
 };
 
 const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
-  const setError = useState<boolean>(false)[1];
+  const setError = useState<{[key: string]: boolean}>({})[1];
   const [value, setValue] = useState<T>(state);
   const rulesEntries: [string, R][] = Object.entries(rules as ArrayLike<R>);
   objectValidate.values = value;
@@ -157,16 +157,16 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
       const keyValidateInfo: ValidateErrorInfo = objectValidate[key];
       const validateRulePair = Object.entries(validateRule as ArrayLike<R>)
         .reduce((obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
-        if (validateInfo instanceof Function) {
-          obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
-        } else {
-          const validateInfoObject = (validateInfo as ValidateInfo);
-          obj[validateName] = validateInfoObject.func;
-          if (validateInfoObject.max) {
-            keyValidateInfo.max = validateInfoObject.max;
+          if (validateInfo instanceof Function) {
+            obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
+          } else {
+            const validateInfoObject = (validateInfo as ValidateInfo);
+            obj[validateName] = validateInfoObject.func;
+            if (validateInfoObject.max) {
+              keyValidateInfo.max = validateInfoObject.max;
+            }
           }
-        }
-        return obj;
+          return obj;
       }, {});
       const validate = (value: any = state[key as keyof T]): void => {
         keyValidateInfo.error = Object.entries(validateRulePair).map(
@@ -193,7 +193,7 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
           }
         ).some(err => err === true);
         objectValidate.error = rulesEntries.some(([key]: [string, R]) => objectValidate[key].error);
-        setError(objectValidate.error);
+        setError({ key: keyValidateInfo.error });
       };
       keyValidateInfo.validate = validate;
       return validate;
@@ -208,10 +208,8 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
 
   function watch(this: ErrorInfo, currentValue: any, key: string) {
     this.validate(currentValue);
-    if (!this.error) {
-      setValue({ ...value, [key]: currentValue });
-      state[key as keyof T] = currentValue;
-    }
+    setValue({ ...value, [key]: currentValue });
+    state[key as keyof T] = currentValue;
   }
 
   const validateProcess = (
@@ -227,8 +225,10 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
     }
 
     if (Array.isArray(keyErrorInfo.errors)) {
-      if (validateResult.error && !keyErrorInfo.errors!.includes(validateResult.message)) {
-        keyErrorInfo.errors.push(validateResult.message);
+      if (validateResult.error) {
+        if (!keyErrorInfo.errors!.includes(validateResult.message)) {
+          keyErrorInfo.errors.push(validateResult.message);
+        }
       } else {
         keyErrorInfo.errors = keyErrorInfo.errors.filter(
           (message: string) => message != validateResult.message

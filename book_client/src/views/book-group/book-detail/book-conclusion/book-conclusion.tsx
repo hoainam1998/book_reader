@@ -6,6 +6,7 @@ import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
+import { showToast } from 'utils';
 import './style.scss';
 import { CategoryListType } from '../fetcher';
 const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
@@ -86,8 +87,11 @@ function BookConclusion(): JSX.Element {
   }, []);
 
   const complete = useCallback(() => {
-    navigate('/home/book/detail');
+    showToast('Add book', 'This book has been added success!');
     deleteAllStorage(true);
+    setTimeout(() => {
+      navigate('/home/book/detail');
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -98,6 +102,12 @@ function BookConclusion(): JSX.Element {
     return (
       <section className="book-conclusion">
         <div className="information-section">
+          <div className="avatar-box">
+            <span className="field-name">Avatar</span>
+            <div className="avatar image-box">
+              { data && data.avatar && (<img src={data.avatar} alt="avatar" />)}
+            </div>
+          </div>
           <div className="image-box-wrapper">
             <span className="field-name">Images</span>
             <div className="image-selected image-box">
