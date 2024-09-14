@@ -45,6 +45,10 @@ class BookService {
     );
   }
 
+  saveBookAvatar(avatar, bookId) {
+    return this._sql.query('UPDATE BOOK SET AVATAR = ? WHERE BOOK_ID = ?', [avatar, bookId]);
+  };
+
   saveBookImages(images, bookId, name) {
     const imagesRecord = images.reduce((arr, image, index) => {
       arr.push([bookId, image, name[index]]);
@@ -120,7 +124,7 @@ class BookService {
 
   getBookDetail(bookId) {
     return this._sql.query(
-      `SELECT name, pdf, PUBLISHED_TIME AS publishedTime, PUBLISHED_DAY AS publishedDay, CATEGORY_ID AS categoryId, INTRODUCE_FILE as introduce FROM BOOK WHERE BOOK_ID = ?;
+      `SELECT name, pdf, PUBLISHED_TIME AS publishedTime, PUBLISHED_DAY AS publishedDay, CATEGORY_ID AS categoryId, INTRODUCE_FILE AS introduce, AVATAR AS avatar FROM BOOK WHERE BOOK_ID = ?;
       SELECT image, name FROM BOOK_IMAGE WHERE BOOK_ID = ?;`,
       [bookId, bookId]
     );

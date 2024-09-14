@@ -48,5 +48,3 @@ connectDataBase().then(querySql => {
 .catch(() => FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router)));
 
 app.listen(PORT, () => console.log(`GraphQl started at ${PORT}!`));
-
-app.get('/', (req, res) => res.send('first request!'));

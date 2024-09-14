@@ -55,6 +55,9 @@ const BookInformationType = new GraphQLObjectType({
         }
       }))
     },
+    avatar: {
+      type: GraphQLString
+    },
     introduce: {
       type: new GraphQLObjectType({
         name: 'IntroduceFile',
@@ -112,6 +115,25 @@ const mutation = new GraphQLObjectType({
         try {
           await book.saveBookInfo(args.book);
           return messageCreator('Book has been created!');
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    saveBookAvatar: {
+      type: ResponseType,
+      args: {
+        avatar: {
+          type: GraphQLString
+        },
+        bookId: {
+          type: GraphQLID
+        }
+      },
+      resolve: async (book, { avatar, bookId }) => {
+        try {
+          await book.saveBookAvatar(avatar, bookId);
+          return messageCreator('Avatar book has been inserted!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
