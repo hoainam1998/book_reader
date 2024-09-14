@@ -1,11 +1,10 @@
 import { ReactNode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
+import { createElementWrapper } from './element-wrapper';
 import Modal from 'components/modal/modal';
 
 const bodyDOM: HTMLElement = document.body;
-const modalContainer: HTMLDivElement = document.createElement('div');
-modalContainer.classList.add('modal-container');
-modalContainer.id = 'modal-container';
+const modalContainer: HTMLDivElement = createElementWrapper('modal-container', 'modal-container');
 
 type ModalUtilProps = {
   children: ReactNode | ReactNode[];
@@ -23,7 +22,7 @@ const showModal = (props: ModalUtilProps): void => {
 
   if (!bodyDOM.contains(modalContainer)) {
     bodyDOM.appendChild(modalContainer);
-    const root: Root | null = createRoot(document.getElementById('modal-container')!);
+    const root: Root | null = createRoot(modalContainer);
     onOpen && onOpen();
 
     const hideModal = (): void => {

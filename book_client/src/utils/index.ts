@@ -1,6 +1,7 @@
 import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
 import showModal from './modal';
+import { createElementWrapper } from './element-wrapper';
 
 /**
  * Return class text from array.
@@ -37,5 +38,6 @@ export {
   showLoading,
   hideLoading,
   showModal,
-  customError
+  customError,
+  createElementWrapper
 };
