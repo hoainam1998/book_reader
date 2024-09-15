@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import { ChangeEvent, DependencyList } from 'react';
 import useValidate, {
   ValidateFunction,
   ValidateProcess,
@@ -7,7 +7,7 @@ import useValidate, {
   ValidateName
 } from './useValidate';
 
-export type RuleType<T> = Record<keyof T, Partial<Record<ValidateName, ValidateFunction | ValidateProcess | ValidateInfo>>>;
+export type RuleType<T> = Record<keyof T, Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>>;
 
 export type FieldValidateProps<T = any> = {
   value: T;
@@ -31,9 +31,10 @@ export type FormValidateProps = {
 export default <T extends Object, R>(
   state: T,
   rules: R,
-  formId: string
+  formId: string,
+  dependencyList?: DependencyList
 ): FormValidateProps => {
-  const validateObject: ErrorInfo = useValidate<T, R>(state, rules);
+  const validateObject: ErrorInfo = useValidate<T, R>(state, rules, dependencyList);
 
   const formControlProps: FormValidateProps = {
     validate: validateObject,

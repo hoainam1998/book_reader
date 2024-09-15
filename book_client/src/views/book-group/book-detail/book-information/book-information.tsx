@@ -1,4 +1,11 @@
-import { JSX, useCallback, useRef, useEffect, useSyncExternalStore } from 'react';
+import {
+  JSX,
+  useCallback,
+  useRef,
+  useEffect,
+  useSyncExternalStore,
+  useState
+} from 'react';
 import { useLoaderData } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import Grid, { GridItem } from 'components/grid/grid';
@@ -8,13 +15,10 @@ import Select, { OptionPrototype } from 'components/form/form-control/select/sel
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
 import useForm, { RuleType } from 'hooks/useForm';
-import { required, maxLength } from 'hooks/useValidate';
+import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
-import {
-  getBookDetail,
-  saveBookInformation
-} from '../fetcher';
+import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
 import './style.scss';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate } = store;
@@ -35,16 +39,6 @@ type BookStateType = {
 };
 
 const formId: string = 'book-detail-form';
-
-const rules: RuleType<BookStateType> = {
-  name: { required, maxLength: maxLength(3) },
-  pdf: { required },
-  publishedDay: { required },
-  publishedTime: { required },
-  categoryId: { required },
-  avatar: { required },
-  images: { required, maxLength: maxLength(8) }
-};
 
 const state: BookStateType = {
   name: '',
@@ -93,6 +87,31 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
 };
 
 function BookInformation(): JSX.Element {
+  const [bookNames, setBookNames] = useState<string[]>([]);
+
+  const validateName = useCallback(
+    (message: string) =>
+      (currentValue: string): ErrorFieldInfo => ({
+        error: bookNames.includes(currentValue),
+        message
+      }),
+    [bookNames]
+  );
+
+  const rules: RuleType<BookStateType> = {
+    name: {
+      required,
+      maxLength: maxLength(3),
+      validateName: validateName('validate name')
+    },
+    pdf: { required },
+    publishedDay: { required },
+    publishedTime: { required },
+    categoryId: { required },
+    avatar: { required },
+    images: { required, maxLength: maxLength(8) }
+  };
+
   const {
     name,
     categoryId,
@@ -104,7 +123,8 @@ function BookInformation(): JSX.Element {
     handleSubmit,
     validate,
     reset
-  } = useForm(state, rules, formId);
+  } = useForm(state, rules, formId, [bookNames]);
+
   const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
@@ -155,7 +175,7 @@ function BookInformation(): JSX.Element {
         images.watch('');
         if (!haveFetched()) {
           convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
-            .then((res) =>pdf.watch(res));
+            .then((res) => pdf.watch(res));
         }
         convertBase64ImageToFile(data.images)
           .then((res) => images.watch(res));
@@ -168,11 +188,20 @@ function BookInformation(): JSX.Element {
     updateConditionNavigate(validate.dirty);
   }, [validate.dirty]);
 
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched()) {
+        getAllBookName().then((res) => setBookNames(res.data.book.allName));
+      }
+    };
+  }, []);
+
   return (
-    <Form id={formId}
-    submitLabel="Save"
-    onSubmit={bookInformationFormSubmit}
-    className="book-information">
+    <Form
+      id={formId}
+      submitLabel="Save"
+      onSubmit={bookInformationFormSubmit}
+      className="book-information">
       <Grid>
         <GridItem lg={3}>
           <Input
@@ -180,7 +209,8 @@ function BookInformation(): JSX.Element {
             label="Name"
             name="name"
             labelClass="name-label"
-            inputClass="name-input" />
+            inputClass="name-input"
+          />
         </GridItem>
         <GridItem lg={3}>
           <Input
@@ -191,7 +221,8 @@ function BookInformation(): JSX.Element {
             name="pdf"
             labelClass="pdf-label"
             inputClass="pdf-input"
-            ref={pdfRef} />
+            ref={pdfRef}
+          />
         </GridItem>
         <GridItem lg={2}>
           <Input
@@ -201,7 +232,8 @@ function BookInformation(): JSX.Element {
             label="Published time"
             labelClass="published-time-label"
             inputClass="published-time-input"
-            name="publishedTime" />
+            name="publishedTime"
+          />
         </GridItem>
         <GridItem lg={2}>
           <Calendar
@@ -209,7 +241,8 @@ function BookInformation(): JSX.Element {
             labelClass="label"
             inputClass="input"
             label="Publish day"
-            name="publishedDay" />
+            name="publishedDay"
+          />
         </GridItem>
         <GridItem lg={2}>
           <Select<string, CategoryOptionsType>
@@ -221,7 +254,8 @@ function BookInformation(): JSX.Element {
             labelField="name"
             valueField="category_id"
             name="categoryId"
-            options={categories} />
+            options={categories}
+          />
         </GridItem>
         <GridItem lg={3}>
           <FileDragDropUpload
@@ -229,14 +263,16 @@ function BookInformation(): JSX.Element {
             multiple={false}
             name="avatar"
             label="Avatar"
-            className="image-select-box" />
+            className="image-select-box"
+          />
         </GridItem>
         <GridItem lg={9}>
           <FileDragDropUpload
             {...images}
             name="images"
             label="Images"
-            className="image-select-box" />
+            className="image-select-box"
+          />
         </GridItem>
       </Grid>
     </Form>

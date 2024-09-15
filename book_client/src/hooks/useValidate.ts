@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, DependencyList } from 'react';
 import { customError } from 'utils';
 
-type ErrorFieldInfo = {
+export type ErrorFieldInfo = {
   error: boolean;
   message: string;
   max?: number;
 };
 
-export type ValidateName = 'required' |  'maxLength';
+export type ValidateName = 'required' | 'maxLength';
 
 export type ValidateErrorInfo = {
   [key: string]: ErrorFieldInfo | boolean | number | Function | Array<string> | undefined;
@@ -34,6 +34,9 @@ export type ValidateInfo = {
 export type ValidateFunction = (
   ...args: (string | number | (<T>(state: T) => boolean))[]
 ) => ValidateProcess | ValidateInfo;
+
+const customValidate = (validateCallback: any): ValidateProcess =>
+  (currentValue: string) => validateCallback(currentValue);
 
 export const required: ValidateFunction =
   (...args) =>
@@ -129,13 +132,13 @@ const objectValidate: ErrorInfo = {
   validate: () => {},
 };
 
-const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
+const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = []): ErrorInfo => {
   const setError = useState<{[key: string]: boolean}>({})[1];
   const [value, setValue] = useState<T>(state);
   const rulesEntries: [string, R][] = Object.entries(rules as ArrayLike<R>);
   objectValidate.values = value;
 
-  useEffect((): void => {
+  useEffect(() => {
     rulesEntries.forEach(([key, validateRule]: [string, R]) => {
       const field: ValidateErrorInfo = {
         validate: () => {},
@@ -152,13 +155,19 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
       });
       objectValidate[key] = field;
     });
+  }, []);
 
+  useEffect((): void => {
     const validateFuncs: ((value: any) => void)[] = rulesEntries.map(([key, validateRule]: [string, R]) => {
       const keyValidateInfo: ValidateErrorInfo = objectValidate[key];
       const validateRulePair = Object.entries(validateRule as ArrayLike<R>)
         .reduce((obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
           if (validateInfo instanceof Function) {
-            obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
+            if (['required', 'maxLength'].includes(validateName)) {
+              obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
+            } else {
+              obj[validateName] = customValidate(validateInfo);
+            }
           } else {
             const validateInfoObject = (validateInfo as ValidateInfo);
             obj[validateName] = validateInfoObject.func;
@@ -200,7 +209,7 @@ const useValidate = <T, R>(state: T, rules: R): ErrorInfo => {
     });
 
     objectValidate.validate = validateCompact(validateFuncs);
-  }, []);
+  }, dependencyList);
 
   useEffect(() => {
     objectValidate.values = value;

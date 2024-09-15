@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { CategoryService, BookService, RequestBody } from 'services';
 import { StepStorage } from 'storage';
-import { showToast } from 'utils';
 
 export type CategoryListType = {
   data: {
@@ -66,6 +65,12 @@ const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
   });
 };
 
+const getAllBookName = (): Promise<AxiosResponse> => {
+  return BookService.graphql('get-all-book-name', {
+    query: `query GetAllBookName { book { allName } }`
+  });
+};
+
 const getBookIntroduceFile = (bookId: string) => {
   return BookService.graphql('detail', {
     query: `query GetBookDetail($bookId: ID) {
@@ -97,7 +102,7 @@ const saveIntroduceFile = (html: string, json: string, fileName: string, bookId:
     bookId
   };
   return BookService.graphql('/save-introduce', body);
-}
+};
 
 const shouldRevalidateBookLoader = (): boolean => {
   return [1, 3].includes((StepStorage.getItem() || 1));
@@ -109,5 +114,6 @@ export {
   getBookDetail,
   saveIntroduceFile,
   getBookIntroduceFile,
+  getAllBookName,
   shouldRevalidateBookLoader
 };
