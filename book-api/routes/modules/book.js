@@ -28,6 +28,7 @@ class BookRouter extends Router {
   constructor(express, schema) {
     super(express, schema);
     this.post('/save-introduce', this._saveIntroduceHtmlFile);
+    this.post('/get-all-book-name', this._getAllBookName);
     this.post('/save-book', cors(corsOptionsDelegate), this._saveBookInformation);
     this.post('/save-images', cors(corsOptionsDelegate), this._saveImages);
     this.post('/save-avatar', cors(corsOptionsDelegate), this._saveBookAvatar);
@@ -91,6 +92,12 @@ class BookRouter extends Router {
   @validateQuery
   _getBookDetail(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: { bookId: req.body.bookId } });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @validateQuery
+  _getAllBookName(req, res, next, schema) {
+    return execute({ schema, document: req.body.query });
   }
 
   _processSaveBookInformation(req, res, next, schema) {

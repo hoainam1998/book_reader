@@ -129,6 +129,10 @@ class BookService {
       [bookId, bookId]
     );
   }
+
+  getAllName() {
+    return this._sql.query('SELECT NAME AS name FROM BOOK');
+  }
 }
 
 module.exports = BookService;

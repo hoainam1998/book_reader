@@ -248,6 +248,17 @@ const query = new GraphQLObjectType({
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }
+    },
+    allName: {
+      type: new GraphQLList(GraphQLString),
+      resolve: async (book) => {
+        try {
+          const names = await book.getAllName();
+          return names.map(({ name }) => name);
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
     }
   }
 });
