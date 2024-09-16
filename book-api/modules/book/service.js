@@ -133,6 +133,21 @@ class BookService {
   getAllName() {
     return this._sql.query('SELECT NAME AS name FROM BOOK');
   }
+
+  pagination(pageSize, pageNumber) {
+    return this._sql.query(
+      `SELECT
+      BOOK_ID AS bookId,
+      NAME AS name,
+      PDF AS pdf,
+      PUBLISHED_DAY AS publishedDay,
+      PUBLISHED_TIME AS publishedTime,
+      (SELECT NAME FROM CATEGORY WHERE CATEGORY_ID = book.CATEGORY_ID) AS category,
+      INTRODUCE_FILE AS introduce,
+      AVATAR AS avatar FROM BOOK AS book LIMIT ? OFFSET ?;
+      SELECT COUNT(*) AS total FROM BOOK;`,
+      [pageSize, (pageNumber - 1) * pageSize]);
+  };
 }
 
 module.exports = BookService;

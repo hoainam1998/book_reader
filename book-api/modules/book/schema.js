@@ -28,6 +28,36 @@ const commonBookField = {
   }
 };
 
+const BookType = new GraphQLObjectType({
+  name: 'Book',
+  fields: {
+    bookId: {
+      type: GraphQLID
+    },
+    name: {
+      type: GraphQLString
+    },
+    pdf: {
+      type: GraphQLString
+    },
+    publishedTime: {
+      type: GraphQLInt
+    },
+    publishedDay: {
+      type: GraphQLString
+    },
+    category: {
+      type: GraphQLString
+    },
+    introduce: {
+      type: GraphQLString
+    },
+    avatar: {
+      type: GraphQLString
+    }
+  }
+});
+
 const BookInformationInputType = new GraphQLInputObjectType({
   name: 'BookInformationInput',
   fields: {
@@ -255,6 +285,38 @@ const query = new GraphQLObjectType({
         try {
           const names = await book.getAllName();
           return names.map(({ name }) => name);
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    pagination: {
+      type: new GraphQLObjectType({
+        name: 'BookPagination',
+        fields: {
+          list: {
+            type: new GraphQLList(BookType)
+          },
+          total: {
+            type: GraphQLInt
+          }
+        }
+      }),
+      args: {
+        pageNumber: {
+          type: GraphQLInt
+        },
+        pageSize: {
+          type: GraphQLInt
+        }
+      },
+      resolve: async (book, { pageNumber, pageSize }) => {
+        try {
+          const result = await book.pagination(pageSize, pageNumber);
+          return {
+            list: result[0].map((book) => ({ ...book, introduce: book.introduce?.split(',')[0] || '' })),
+            total: result[1][0].total
+          };
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }

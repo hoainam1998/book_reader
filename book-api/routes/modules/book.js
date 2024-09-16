@@ -34,6 +34,7 @@ class BookRouter extends Router {
     this.post('/save-avatar', cors(corsOptionsDelegate), this._saveBookAvatar);
     this.post('/detail', this._getBookDetail);
     this.post('/save-book-info', cpUpload, this._processSaveBookInformation);
+    this.post('/pagination', this._paginationBook);
   }
 
   @validateResultExecute(HTTP_CODE.CREATED)
@@ -98,6 +99,16 @@ class BookRouter extends Router {
   @validateQuery
   _getAllBookName(req, res, next, schema) {
     return execute({ schema, document: req.body.query });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @validateQuery
+  _paginationBook(req, res, next, schema) {
+    return execute({ schema, document: req.body.query, variableValues: {
+        pageNumber: req.body.pageNumber,
+        pageSize: req.body.pageSize
+      }
+    });
   }
 
   _processSaveBookInformation(req, res, next, schema) {
