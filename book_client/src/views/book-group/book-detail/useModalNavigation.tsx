@@ -2,7 +2,7 @@ import { useCallback, JSX, useEffect, useState } from 'react';
 import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import { showModal } from 'utils';
+import { showModal, ModalSlotProps } from 'utils';
 import { useBlockerContext } from './blocker-context';
 
 type ModalNavigationPropsType = {
@@ -42,7 +42,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
     };
 
     return (
-      <Slot
+      <Slot<ModalSlotProps>
         name="footer"
         render={({ onClose }) => (
           <div className="footer-navigation-modal">

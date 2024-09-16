@@ -17,6 +17,10 @@ type ModalSlotsType = {
   footer: React.ReactNode;
 };
 
+export type ModalSlotProps = {
+  onClose: () => void;
+};
+
 const slotMapping = (child: JSX.Element, onClose: ModalPropsType['onClose'], slots: ModalSlotsType ): void => {
   const renderChild = () => (child.props.render ? child.props.render({ onClose }) : child);
 

@@ -6,6 +6,7 @@ import {
   ReactNode,
   JSX,
   useMemo,
+  useCallback,
 } from 'react';
 import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
@@ -14,6 +15,7 @@ import './style.scss';
 
 export type Field = {
   key: string;
+  label?: string;
   width?: number;
   style?: CSSProperties;
 };
@@ -42,38 +44,38 @@ function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
 
 let pageSize = 10;
 let pageNumber = 1;
+const options = [
+  {
+    value: 10,
+    label: '10'
+  },
+  {
+    value: 30,
+    label: '30'
+  },
+  {
+    value: 50,
+    label: '50'
+  },
+];
 
 function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Element {
-  const options = [
-    {
-      value: 10,
-      label: '10'
-    },
-    {
-      value: 30,
-      label: '30'
-    },
-    {
-      value: 50,
-      label: '50'
-    },
-  ];
 
   const totalPageNumber = useMemo<number>(() => {
     const pages: number = total / pageSize;
     return Number.isInteger(pages) ? pages : Math.floor(pages) + 1;
   }, [total, pageSize]);
 
-  const pageSizeChange = (currentPageSize: number): void => {
+  const pageSizeChange = useCallback((currentPageSize: number): void => {
     pageSize = currentPageSize;
     pageNumber = 1;
     onLoad(pageSize, pageNumber);
-  };
+  }, []);
 
-  const pageNumberChange = (currentPageNumber: number): void => {
+  const pageNumberChange = useCallback((currentPageNumber: number): void => {
     pageNumber = currentPageNumber;
     onLoad(pageSize, pageNumber);
-  };
+  }, []);
 
   return (
     <section>
@@ -84,7 +86,7 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
           </colgroup>
           <thead>
             <tr>
-              { fields.map((field, index) => (<th key={index} style={field.style}>{field.key}</th>)) }
+              { fields.map((field, index) => (<th key={index} style={field.style}>{field.label || field.key}</th>)) }
             </tr>
           </thead>
           <tbody>

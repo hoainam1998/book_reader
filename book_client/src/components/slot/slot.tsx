@@ -1,13 +1,13 @@
 import React, { JSX } from 'react';
 
-export type SlotProps = {
+export type SlotProps<T> = {
   name: string;
   children?: React.ReactNode;
   // eslint-disable-next-line no-unused-vars
-  render?: (slotProps: any) => React.ReactElement;
+  render?: (slotProps: T) => React.ReactNode;
 };
 
-function Slot({ children }: SlotProps): JSX.Element {
+function Slot<T>({ children }: SlotProps<T>): JSX.Element {
   return children ? <>{children}</> : <></>;
 }
 

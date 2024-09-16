@@ -6,7 +6,7 @@ import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../storage';
-import { showToast } from 'utils';
+import { showToast, ModalSlotProps } from 'utils';
 import './style.scss';
 import { CategoryListType } from '../fetcher';
 const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
@@ -48,9 +48,9 @@ const footerModal = (blocker: Blocker): JSX.Element => {
   };
 
   return (
-    <Slot
+    <Slot<ModalSlotProps>
       name="footer"
-      render={({ onClose }) => (
+      render={({ onClose }: ModalSlotProps) => (
         <div className="footer-navigation-modal">
           <Button variant="success"
             onClick={() => onCloseModal(onClose)}>

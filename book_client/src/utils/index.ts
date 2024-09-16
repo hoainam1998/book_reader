@@ -1,6 +1,6 @@
 import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
-import showModal from './modal';
+import showModal, { ModalSlotProps } from './modal';
 import { createElementWrapper } from './element-wrapper';
 
 /**
@@ -32,6 +32,7 @@ const clsx = (...classes: any[]): string => {
  */
 const customError = (message: string) => new Error(`[Custom Error] ${message}`);
 
+export type { ModalSlotProps };
 export {
   clsx,
   showToast,

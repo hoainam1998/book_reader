@@ -151,7 +151,7 @@ function Category(): JSX.Element {
     <Grid>
       <GridItem lg={9}>
         <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
-          <Slot name="avatar" render={
+          <Slot<CategoryType> name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
           } />
           <Slot name="operation" render={operationSlot} />

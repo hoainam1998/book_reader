@@ -2,6 +2,7 @@ import { RouteProps, Navigate, Link, UIMatch, Outlet } from 'react-router-dom';
 import Home from 'views/home/home';
 import Category, { loadInitCategory } from 'views/category-group/category';
 import BookDetail, { loadAllCategory, shouldRevalidateBookLoader } from 'views/book-group/book-detail/book-detail';
+import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import ApiError from 'components/error/api-error/api-error';
 import path from './paths';
 
@@ -50,9 +51,8 @@ const routes: RoutePropsUnion[] = [
         children: [
           {
             index: true,
-            element: <BookDetail />,
-            loader: loadAllCategory,
-            shouldRevalidate: shouldRevalidateBookLoader
+            element: <BookList />,
+            loader: bookPagination
           },
           {
             path: path.ID,
@@ -62,6 +62,16 @@ const routes: RoutePropsUnion[] = [
             handle: {
               crumb: ({ pathname, params }: UIMatch) =>
                 <span key={pathname}>{params.id}</span>
+            }
+          },
+          {
+            path: 'new',
+            element: <BookDetail />,
+            loader: loadAllCategory,
+            shouldRevalidate: shouldRevalidateBookLoader,
+            handle: {
+              crumb: ({ pathname }: UIMatch) =>
+                <span key={pathname}>New</span>
             }
           }
         ]

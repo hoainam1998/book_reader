@@ -37,6 +37,7 @@ type InputPropsType = {
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
+  onBlur?: (value: number | string) => void;
 };
 
 function Input({
@@ -56,6 +57,7 @@ function Input({
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
+  onBlur = () => {}
 }: InputPropsType, ref: Ref<InputRefType>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
   const [targetValue, setTargetValue] = useState<string>('');
@@ -115,7 +117,7 @@ function Input({
       <div className={clsx('input-wrapper', inputClass)}>
         <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
           type={type} {...specificPropInput} multiple={multiple} min={min} ref={inputRef}
-          onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} />
+          onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
         {limitCharacter && <p className="limit">{limitCharacter}</p>}
       </div>
     </FormControl>
