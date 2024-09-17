@@ -91,16 +91,16 @@ function BookList(): JSX.Element {
     );
   }, []);
 
-  const fetchBookPagination = useCallback((pageSize: number, pageNumber: number): void => {
-    fetcher.submit({ pageSize, pageNumber });
-  }, []);
+  const fetchBookPagination = (pageSize: number, pageNumber: number): void => {
+    fetcher.submit({ pageSize, pageNumber, keyword });
+  };
 
   const previewFile = useCallback((pdf: string): void => {
     window.open(`${process.env.BASE_URL}/${pdf}`, '_blank');
   }, []);
 
   const search = useCallback((): void => {
-    // TODO
+    fetcher.submit({ pageSize: 10, pageNumber: 1, keyword });
   }, [keyword]);
 
   return (
@@ -110,7 +110,7 @@ function BookList(): JSX.Element {
         <Input label="" name="search" labelClass="label-search" onBlur={(value) => setKeyword(value as string)} />
         <Button variant="outline" className="btn-search" onClick={search}>&#128270;</Button>
       </div>
-      <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination}>
+      <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination} key={keyword}>
         <Slot<BookType>
           name="avatar"
           render={(slotProp) => (

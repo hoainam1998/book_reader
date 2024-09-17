@@ -134,7 +134,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
 };
 
 function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
-  const pages = useMemo(() => {
+  const pages = useMemo<Node<PageButton>[]>(() => {
     const paginationArray: PageButton[] = [];
 
     for (let i = 1; i <= pageNumber; i++) {
@@ -150,16 +150,18 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
 
   const [page, setPage] = useState<Node<PageButton>>(pages[0]);
 
-  const pageList = useMemo(() => renderPagination(page, pages), [page, pageNumber]);
+  const initPage = useMemo<Node<PageButton>>(() => {
+    return page.data.page === 1 ? pages[0] : page;
+  }, [pages, page]);
 
-  const { disablePrevious, disableNext } = useMemo(() => {
-    return {
-      disablePrevious: previousSelectedPage!.data.page === pages[0].data.page,
-      disableNext: previousSelectedPage!.data.page === pages[pages.length - 1].data.page,
-    };
-  }, [previousSelectedPage]);
+  const pageList = useMemo<(Node<PageButton> | DotPageButton)[]>(() => renderPagination(initPage, pages), [initPage, pageNumber]);
 
-  const pageClick = useCallback((page: Node<PageButton> | DotPageButton) => {
+  const { disablePrevious, disableNext } = useMemo<{ disablePrevious: boolean; disableNext: boolean }>(() => ({
+    disablePrevious: previousSelectedPage!.data.page === pages[0].data.page,
+    disableNext: previousSelectedPage!.data.page === pages[pages.length - 1].data.page,
+  }), [previousSelectedPage]);
+
+  const pageClick = useCallback((page: Node<PageButton> | DotPageButton): void => {
     if (page && !(page as DotPageButton).dots
       && previousSelectedPage?.data.page !== (page as Node<PageButton>).data.page) {
         setPage(page as Node<PageButton>);
@@ -196,7 +198,7 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
             <Button
               className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })}
               onClick={() => pageClick(page)}>
-                {page.data?.page || '...'}
+                { page.data?.page || '...' }
             </Button>
           </li>
         ))

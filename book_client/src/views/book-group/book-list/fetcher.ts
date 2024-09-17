@@ -6,11 +6,12 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
   const url: URL = new URL(request.url);
   const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
+  const keyword: string | null = url.searchParams.get('keyword');
 
   return BookService.graphql('pagination', {
-    query: `query BookPagination($pageSize: Int, $pageNumber: Int) {
+    query: `query BookPagination($pageSize: Int, $pageNumber: Int, $keyword: String) {
       book {
-        pagination(pageSize: $pageSize, pageNumber: $pageNumber) {
+        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
           list {
             bookId,
             name,
@@ -25,7 +26,8 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
         }
       }
     }`,
-  pageSize,
-  pageNumber
+    pageSize,
+    pageNumber,
+    keyword
   });
 };
