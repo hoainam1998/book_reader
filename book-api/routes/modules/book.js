@@ -106,7 +106,8 @@ class BookRouter extends Router {
   _paginationBook(req, res, next, schema) {
     return execute({ schema, document: req.body.query, variableValues: {
         pageNumber: req.body.pageNumber,
-        pageSize: req.body.pageSize
+        pageSize: req.body.pageSize,
+        keyword: req.body.keyword
       }
     });
   }

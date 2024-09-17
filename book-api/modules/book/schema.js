@@ -308,11 +308,14 @@ const query = new GraphQLObjectType({
         },
         pageSize: {
           type: GraphQLInt
+        },
+        keyword: {
+          type: GraphQLString
         }
       },
-      resolve: async (book, { pageNumber, pageSize }) => {
+      resolve: async (book, { pageNumber, pageSize, keyword }) => {
         try {
-          const result = await book.pagination(pageSize, pageNumber);
+          const result = await book.pagination(pageSize, pageNumber, keyword);
           return {
             list: result[0].map((book) => ({ ...book, introduce: book.introduce?.split(',')[0] || '' })),
             total: result[1][0].total
