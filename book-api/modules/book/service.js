@@ -147,10 +147,10 @@ class BookService {
     AVATAR AS avatar FROM BOOK AS book`;
     const variables = [pageSize, (pageNumber - 1) * pageSize];
     if (keyword) {
-      return this._sql.query(`${sqlQuery} WHERE NAME LIKE ? LIMIT ? OFFSET ?; SELECT COUNT(*) AS total FROM BOOK WHERE NAME LIKE ?;`, [`%${keyword}%`, ...variables, `%${keyword}%`]);
+      return this._sql.query(`${sqlQuery} WHERE NAME LIKE ? ORDER BY BOOK_ID DESC LIMIT ? OFFSET ?; SELECT COUNT(*) AS total FROM BOOK WHERE NAME LIKE ?;`, [`%${keyword}%`, ...variables, `%${keyword}%`]);
     }
     return this._sql.query(
-      `${sqlQuery} LIMIT ? OFFSET ?;
+      `${sqlQuery} ORDER BY BOOK_ID DESC LIMIT ? OFFSET ?;
       SELECT COUNT(*) AS total FROM BOOK;`,
       variables);
   };
