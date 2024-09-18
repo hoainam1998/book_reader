@@ -109,6 +109,8 @@ function Input({
       } else {
         throw customError("Value of input type file must be file, file list or empty string ('')!");
       }
+    } else {
+      inputRef.current!.value = value as string;
     }
   }, [value, type]);
 

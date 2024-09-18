@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactElement, useSyncExternalStore } from 'react';
 import { Blocker, useBlocker } from 'react-router-dom';
-import store, { CurrentStoreType } from './storage';
+import store, { CurrentStoreType } from '../storage';
 const { subscribe, getSnapshot } = store;
 
 const BlockerContext = createContext<Blocker | unknown>(null);

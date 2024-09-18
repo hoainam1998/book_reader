@@ -1,14 +1,16 @@
-import { JSX, useCallback, useMemo, useState } from 'react';
+import { JSX, useCallback, useMemo, useState, useRef } from 'react';
 import { AxiosResponse } from 'axios';
+import { format } from 'date-fns';
 import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import Input from 'components/form/form-control/input/input';
-import { bookPagination } from './fetcher';
-import { format } from 'date-fns';
+import { bookPagination, getBookDetail } from './fetcher';
+import store from '../storage';
 import './style.scss';
+const { updateData } = store;
 
 type BookType = {
   bookId: string;
@@ -56,7 +58,9 @@ const fields: Field[] = [
 ];
 
 function BookList(): JSX.Element {
+  const [isClear, setIsClear] = useState<boolean>(false);
   const [keyword, setKeyword] = useState<string>('');
+  const oldKeyword = useRef<string>(keyword)
   const fetcher = useFetcher();
   const loaderData = useLoaderData() as AxiosResponse;
   const navigate = useNavigate();
@@ -78,9 +82,17 @@ function BookList(): JSX.Element {
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
     const { bookId } = slotProp;
 
+    const getBookInformation = (): void => {
+      getBookDetail(bookId)
+        .then(res => {
+          updateData(res.data.book.detail);
+          navigate(bookId);
+        });
+    };
+
     return (
       <>
-        <Button variant="success" onClick={() => {}}>
+        <Button variant="success" onClick={getBookInformation}>
           Update
         </Button>
         &nbsp;&nbsp;
@@ -100,15 +112,39 @@ function BookList(): JSX.Element {
   }, []);
 
   const search = useCallback((): void => {
+    setIsClear(true);
+    oldKeyword.current = keyword;
     fetcher.submit({ pageSize: 10, pageNumber: 1, keyword });
   }, [keyword]);
+
+  const clear = useCallback((): void => {
+    setIsClear(false);
+    setKeyword('');
+    fetcher.submit({ pageSize: 10, pageNumber: 1, keyword: '' });
+  }, []);
+
+  const setClearFlag = useCallback((value: string) => {
+    if (oldKeyword.current && value !== oldKeyword.current) {
+      setIsClear(false);
+    }
+  }, []);
 
   return (
     <section>
       <div className="book-list-header">
         <Button variant="success" className="add-new" onClick={() => navigate('new')}>+New</Button>
-        <Input label="" name="search" labelClass="label-search" onBlur={(value) => setKeyword(value as string)} />
-        <Button variant="outline" className="btn-search" onClick={search}>&#128270;</Button>
+        <Input
+          label=""
+          value={keyword}
+          name="search"
+          labelClass="label-search"
+          onChange={(e) => setClearFlag((e.target as any).value)}
+          onBlur={(value) => setKeyword(value as string)} />
+        {
+          !isClear
+          ?<Button variant="outline" className="btn-search" onClick={search}>&#128270;</Button>
+          :<Button variant="outline" className="btn-search" onClick={clear}>&#x2715;</Button>
+        }
       </div>
       <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination} key={keyword}>
         <Slot<BookType>

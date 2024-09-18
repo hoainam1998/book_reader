@@ -17,7 +17,7 @@ import Form from 'components/form/form';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
-import store, { CurrentStoreType, Image } from '../storage';
+import store, { CurrentStoreType, Image } from '../../storage';
 import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
 import './style.scss';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
@@ -68,6 +68,12 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
   return Promise.all(imagesPromise);
 };
 
+const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
+  return fetch(imageBase64String)
+    .then(res => res.blob())
+    .then(blob => new File([blob], name, { type: blob.type }));
+};
+
 /**
  * Convert url to promise file. File return by this function will be re-assign to input type file.
  *
@@ -75,14 +81,11 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
  * @returns {Promise<File>} - promise include file.
  */
 const convertFilePathToFile = (filePath: string, name: string): Promise<File> => {
-  return new Promise((resolve, reject) => {
-    fetch(filePath)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`;
-        resolve(new File([blob], fileName));
-      })
-      .catch((err) => reject(err));
+  return fetch(filePath)
+    .then((res) => res.blob())
+    .then((blob) => {
+      const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`;
+      return new File([blob], fileName);
   });
 };
 
@@ -179,6 +182,12 @@ function BookInformation(): JSX.Element {
         }
         convertBase64ImageToFile(data.images)
           .then((res) => images.watch(res));
+        convertBase64ToSingleFile(data.avatar, data.name)
+          .then((res) => {
+            if (res.type.includes('image')) {
+              avatar.watch([res]);
+            }
+          });
       }
       return () => reset();
     };

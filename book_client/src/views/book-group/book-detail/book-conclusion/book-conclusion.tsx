@@ -5,7 +5,7 @@ import Button from 'components/button/button';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from '../useModalNavigation';
-import store, { CurrentStoreType, Image } from '../storage';
+import store, { CurrentStoreType, Image } from '../../storage';
 import { showToast, ModalSlotProps } from 'utils';
 import './style.scss';
 import { CategoryListType } from '../fetcher';

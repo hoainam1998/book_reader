@@ -7,7 +7,7 @@ import {
   loadAllCategory,
   shouldRevalidateBookLoader
 } from './fetcher';
-import store, { CurrentStoreType } from './storage';
+import store, { CurrentStoreType } from '../storage';
 import BlockerProvider from './blocker-context';
 import './style.scss';
 const { subscribe, getSnapshot, updateStep } = store;

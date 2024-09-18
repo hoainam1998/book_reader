@@ -31,3 +31,30 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
     keyword
   });
 };
+
+export const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
+  return BookService.graphql('detail', {
+    query: `query GetBookDetail($bookId: ID)
+      {
+        book {
+          detail(bookId: $bookId) {
+            name,
+            pdf,
+            publishedTime,
+            publishedDay,
+            categoryId,
+            avatar,
+            introduce {
+              html,
+              json
+            },
+            images {
+              image,
+              name
+            }
+          }
+        }
+      }`,
+    bookId
+  });
+};
