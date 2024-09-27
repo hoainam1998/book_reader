@@ -194,7 +194,7 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
       </li>
       {
         pageList.map((page: any, index: number) => (
-          <li key={index}>
+          <li key={index} data-testid={`pagination-button-${index + 1}`}>
             <Button
               className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })}
               onClick={() => pageClick(page)}>

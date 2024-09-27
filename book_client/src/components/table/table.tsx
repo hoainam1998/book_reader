@@ -92,7 +92,7 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
           <tbody>
             {
               data.map((item, index) => (
-                <tr key={index}>
+                <tr key={index} data-testid={`row-${index}`}>
                   <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
                 </tr>
               ))

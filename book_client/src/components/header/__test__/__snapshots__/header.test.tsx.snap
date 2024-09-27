@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header header should render correctly 1`] = `
+<header
+  className="header"
+>
+  <img
+    alt="logo"
+    height="40"
+    src="book.png"
+    width="40"
+  />
+  <div
+    className="personal-information-group"
+  >
+    <button
+      className="button button-avatar"
+      onClick={[Function]}
+    >
+      <img
+        alt="logo"
+        height="30"
+        src="book.png"
+        width="30"
+      />
+    </button>
+    <span>
+      username
+    </span>
+  </div>
+</header>
+`;

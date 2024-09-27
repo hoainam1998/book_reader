@@ -98,8 +98,6 @@ function Category(): JSX.Element {
   }, []);
 
   const resetState = useCallback((): void => {
-    categoryName.watch('');
-    avatar.watch(null);
     currentCategoryId = '';
     setPreviewImage([]);
     reset();
@@ -176,7 +174,7 @@ function Category(): JSX.Element {
             type="file"
             {...avatar}
           />
-          <div className="image-preview">
+          <div className="image-preview" data-testid="image-preview">
             {previewImage.map((image, index) => <img key={index} src={image} alt="preview" />)}
           </div>
         </Form>

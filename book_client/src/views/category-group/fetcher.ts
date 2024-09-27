@@ -3,19 +3,15 @@ import { LoaderFunctionArgs } from 'react-router-dom';
 import { CategoryService, RequestBody } from 'services';
 import { showToast } from 'utils';
 
-const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
-  return new Promise((resolve, reject) => {
-    promise
-      .then(res => {
-        res.data?.category?.create?.message &&
-          showToast('Category', res.data.category.create.message);
-        res.data?.category.delete?.message &&
-          showToast('Category', res.data?.category.delete?.message);
-        res.data?.category.update?.message &&
-          showToast('Category', res.data?.category.update?.message);
-        resolve(res);
-      })
-      .catch(err => reject(err));
+export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
+  return promise.then(res => {
+    res.data?.category?.create?.message &&
+      showToast('Category', res.data.category.create.message);
+    res.data?.category.delete?.message &&
+      showToast('Category', res.data?.category.delete?.message);
+    res.data?.category.update?.message &&
+      showToast('Category', res.data?.category.update?.message);
+    return res;
   });
 };
 

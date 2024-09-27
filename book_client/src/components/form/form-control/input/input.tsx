@@ -118,7 +118,7 @@ function Input({
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <div className={clsx('input-wrapper', inputClass)}>
         <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-          type={type} {...specificPropInput} multiple={multiple} min={min} ref={inputRef}
+          type={type} {...specificPropInput} multiple={multiple} min={min} ref={inputRef} data-testid={`input-${name}`}
           onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
         {limitCharacter && <p className="limit">{limitCharacter}</p>}
       </div>

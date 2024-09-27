@@ -28,6 +28,24 @@ export type FormValidateProps = {
   reset: () => void;
 };
 
+const validateValue = (event: ChangeEvent): any => {
+  const elementTargetValue: any =
+  (event.currentTarget as HTMLInputElement)?.value;
+
+  if (elementTargetValue === null || elementTargetValue === undefined) {
+    return event;
+  } else {
+    if (!elementTargetValue
+      && (event.currentTarget as HTMLInputElement)?.files
+      && (event.currentTarget as HTMLInputElement)?.files!.length > 0) {
+        const fileList =  Array.from((event.currentTarget as HTMLInputElement)?.files || []);
+        return fileList[0].name;
+    } else {
+      return elementTargetValue;
+    }
+  }
+};
+
 export default <T extends Object, R>(
   state: T,
   rules: R,
@@ -52,13 +70,13 @@ export default <T extends Object, R>(
       });
     },
     reset: (): void => {
+      validateObject.dirty = false;
       Object.keys(state).forEach(
         (key: string) => {
           const keyValidateObject = validateObject[key]!;
-          keyValidateObject.dirty = false;
           keyValidateObject.watch('', key);
+          keyValidateObject.dirty = false;
       });
-      validateObject.dirty = false;
       document.forms.namedItem(formId)?.reset();
     }
   };
@@ -68,12 +86,8 @@ export default <T extends Object, R>(
     formControlProps[key] = {
       value: validateObject.values[key],
       onChange: <O extends HTMLInputElement>(arg: ChangeEvent<O> | ValueType): void => {
-        const elementTargetValue: ValueType =
-          (arg as ChangeEvent<O>).currentTarget?.value as ValueType;
-        const currentValue: ValueType =
-          elementTargetValue === null || elementTargetValue === undefined
-            ? (arg as ValueType)
-            : elementTargetValue;
+
+        const currentValue = validateValue(arg as any);
         validateObject[key].watch!(currentValue, key);
       },
       onFocus: (): void => {

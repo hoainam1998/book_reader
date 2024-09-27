@@ -5,6 +5,7 @@ import PopUp from 'components/pop-up/pop-up';
 
 const bodyDOM: HTMLElement = document.body;
 const popUpContainer = createElementWrapper('pop-up', 'pop-up');
+popUpContainer.dataset.testid = 'toast';
 
 /**
  * Show pop-up frame.

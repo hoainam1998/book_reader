@@ -60,12 +60,12 @@ export const required: ValidateFunction =
       message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`
     };
 
-    if (typeof currentValue === 'string') {
+    if (requiredIf) {
+      errorObj.error = requiredIf(state) ? errorObj.error : false;
+    } else if (typeof currentValue === 'string') {
       errorObj.error = !currentValue.trim();
     } else if (Array.isArray(currentValue)) {
       errorObj.error = currentValue.length === 0;
-    } else if (requiredIf) {
-      errorObj.error = requiredIf(state) ? errorObj.error : false;
     }
 
     return errorObj;

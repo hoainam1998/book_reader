@@ -66,10 +66,11 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
     <FormControl name={name} label={label || ''} labelClass={labelClass} className={className} errors={errors}>
       <div className={clsx('select-wrapper', selectClass)}>
         <select name={name} id={name} className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
-          value={value} onChange={(event) => onChange(event.target.value as T)}>
+          value={value} onChange={(event) => onChange(event.target.value as T)} data-testid="select">
           {
             optionsFormatted.map((option, index) =>
               <option
+                data-testid={`option-${index + 1}`}
                 key={index}
                 value={option[valueField || 'value'] as T}
                 className={option.class}
