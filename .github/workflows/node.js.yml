@@ -24,6 +24,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache-dependency-path: book_client/package-lock.json
         cache: 'npm'
+    - working-directory: ./book_client
     - run: npm i
     - run: npm run build --if-present
     - run: npm test
