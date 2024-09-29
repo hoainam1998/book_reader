@@ -33,7 +33,7 @@
   "scripts": {
     "start": "webpack serve --mode development --config build/webpack.dev.js",
     "build": "webpack --config build/webpack.prod.js",
-    "test": "react-scripts test --watchAll --detectOpenHandles",
+    "test": "react-scripts test --watchAll=false --detectOpenHandles",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
