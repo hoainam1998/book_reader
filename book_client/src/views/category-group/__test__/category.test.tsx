@@ -87,8 +87,8 @@ jest.mock('../fetcher', () => {
 
 describe('Category.test', () => {
   global.URL.createObjectURL = jest.fn();
+  (global.DataTransfer as typeof DataTransfer) = DataTransfer;
   beforeEach(() => {
-    (global.DataTransfer as typeof DataTransfer) = DataTransfer;
     jest.spyOn(React, 'useCallback').mockImplementation((cb) => cb);
     jest.clearAllMocks();
   });
