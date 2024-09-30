@@ -1,4 +1,4 @@
-import { useState, useCallback, JSX } from 'react';
+import { useState, useCallback, JSX, FormEvent } from 'react';
 import { AxiosResponse } from 'axios';
 import { useFetcher, useLoaderData, useRevalidator } from 'react-router-dom';
 import Table from 'components/table/table';
@@ -19,16 +19,22 @@ import {
 } from './fetcher';
 import './style.scss';
 
-type RuleTypeCategory = RuleType & ArrayLike<RuleType>;
-
-type CategoryDetail = { name: string; avatar: string };
+type CategoryDetailType = {
+  name: string;
+  avatar: string
+};
 
 type CategoryType = {
   category_id: string;
   disabled: boolean;
-} & CategoryDetail;
+} & CategoryDetailType;
 
-const state = {
+type CategoryStateType = {
+  categoryName: string;
+  avatar: File | null;
+};
+
+const state: CategoryStateType = {
   categoryName: '',
   avatar: null
 };
@@ -36,13 +42,19 @@ const state = {
 let currentCategoryId: string = '';
 const formId: string = 'category-form';
 
-const rules: RuleType = {
+const rules: RuleType<CategoryStateType> = {
   categoryName: { required: required('fff') },
   avatar: { required: required(() => !currentCategoryId) }
 };
 
 function Category(): JSX.Element {
-  const { categoryName, avatar, handleSubmit, validate, reset } = useForm(state, rules as RuleTypeCategory, formId);
+  const {
+    categoryName,
+    avatar,
+    handleSubmit,
+    validate,
+    reset
+  } = useForm<CategoryStateType, RuleType<CategoryStateType>>(state, rules, formId);
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
@@ -68,8 +80,8 @@ function Category(): JSX.Element {
   const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination?.list || [];
   const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
 
-  const fileChange = useCallback((event: Event): void => {
-    const files = (event.target as HTMLInputElement).files;
+  const fileChange = useCallback(<T, >(event: FormEvent<T>): void => {
+    const files: FileList | null = (event.target as HTMLInputElement).files;
 
     if (files) {
       const images = Array.from(files)
@@ -86,8 +98,6 @@ function Category(): JSX.Element {
   }, []);
 
   const resetState = useCallback((): void => {
-    categoryName.watch('');
-    avatar.watch(null);
     currentCategoryId = '';
     setPreviewImage([]);
     reset();
@@ -139,7 +149,7 @@ function Category(): JSX.Element {
     <Grid>
       <GridItem lg={9}>
         <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
-          <Slot name="avatar" render={
+          <Slot<CategoryType> name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
           } />
           <Slot name="operation" render={operationSlot} />
@@ -150,6 +160,7 @@ function Category(): JSX.Element {
           <Input
             label="Category name"
             className="category-form-control"
+            inputClass="input-class"
             name="name"
             type="text"
             {...categoryName}
@@ -157,12 +168,13 @@ function Category(): JSX.Element {
           <Input
             label="Avatar"
             className="category-form-control"
+            inputClass="input-class"
             name="avatar"
             onInput={fileChange}
             type="file"
             {...avatar}
           />
-          <div className="image-preview">
+          <div className="image-preview" data-testid="image-preview">
             {previewImage.map((image, index) => <img key={index} src={image} alt="preview" />)}
           </div>
         </Form>

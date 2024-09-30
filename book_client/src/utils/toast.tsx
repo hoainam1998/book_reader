@@ -1,21 +1,25 @@
 import { ReactNode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
+import { createElementWrapper } from './element-wrapper';
 import PopUp from 'components/pop-up/pop-up';
 
-let isToastShowed = false;
+const bodyDOM: HTMLElement = document.body;
+const popUpContainer = createElementWrapper('pop-up', 'pop-up');
+popUpContainer.dataset.testid = 'toast';
 
-const showToast = (title: string, children: ReactNode) => {
-  if (!isToastShowed) {
-    const root = createRoot(document.getElementById('pop-up')!);
-    const closeToast = () => {
+/**
+ * Show pop-up frame.
+ */
+const showToast = (title: string, children: ReactNode): void => {
+  if (!bodyDOM.contains(popUpContainer)) {
+    bodyDOM.appendChild(popUpContainer);
+    const root: Root | null = createRoot(popUpContainer);
+    const closeToast = (): void => {
       root.unmount();
-      isToastShowed = false;
+      popUpContainer.remove();
     };
     root.render(<PopUp title={title} onClose={closeToast}>{children}</PopUp>);
-    isToastShowed = true;
   }
 };
 
-export {
-  showToast
-};
+export default showToast;

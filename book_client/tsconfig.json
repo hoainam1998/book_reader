@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -23,7 +23,8 @@
       "images/*": ["src/static/images/*"],
       "interfaces": ["src/interfaces"],
       "hooks/*": ["src/hooks/*"],
-      "services": ["src/services"]
+      "services": ["src/services"],
+      "storage": ["src/storage"]
     }
   },
   "include": ["src", "declaration.d.ts"]

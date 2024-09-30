@@ -1,17 +1,31 @@
 import { createRoot, Root } from 'react-dom/client';
+import { createElementWrapper } from './element-wrapper';
 import Loading from 'components/loading/loading';
 
+const bodyDOM: HTMLElement = document.body;
+const loadingContainer: HTMLDivElement = createElementWrapper('loading-wrapper', 'loading-wrapper');
 let root: null | Root = null;
-const loadingWrapperDOM: HTMLElement | null = document.getElementById('loading-wrapper');
 
+/**
+ * Show loading panel.
+ */
 const showLoading = (): void => {
-  if (loadingWrapperDOM) {
-    root = createRoot(loadingWrapperDOM);
+  if (!bodyDOM.contains(loadingContainer)) {
+    bodyDOM.append(loadingContainer);
+    root = createRoot(loadingContainer);
     root.render(<Loading />);
   }
 };
 
-const hideLoading = () => root && root.unmount();
+/**
+ * Hide loading panel.
+ */
+const hideLoading = (): void => {
+  if (root) {
+    root.unmount();
+    loadingContainer.remove();
+  }
+};
 
 export {
   showLoading,

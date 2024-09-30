@@ -1,24 +1,31 @@
-import { JSX, ReactElement, forwardRef, useRef, useImperativeHandle } from 'react';
+import { JSX, ReactElement, forwardRef, useRef, useImperativeHandle, Ref, ReactNode } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
 type FormControlProps = {
   children?: ReactElement;
   name: string;
-  label: string;
+  label: ReactNode;
   className?: string;
   labelClass?: string;
   errors: string[];
 };
 
-function FormControl({ label, name, children, errors, className, labelClass }: FormControlProps, ref: any): JSX.Element {
-  const fieldsetRef = useRef(null);
+function FormControl<T>({
+  label,
+  name,
+  children,
+  errors = [],
+  className,
+  labelClass
+}: FormControlProps, ref: Ref<T>): JSX.Element {
+  const fieldsetRef = useRef<HTMLFieldSetElement>(null);
 
-  useImperativeHandle(ref, () => {
-    return {
-      rect: (fieldsetRef.current! as HTMLFieldSetElement).getBoundingClientRect()
-    };
-  }, []);
+  useImperativeHandle(
+    ref,
+    (): T => ({ rect: fieldsetRef.current!.getBoundingClientRect() }) as T,
+    []
+  );
 
   return (
     <fieldset className={clsx('fieldset', className)} ref={fieldsetRef}>

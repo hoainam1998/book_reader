@@ -4,6 +4,17 @@
 }
 
 .pop-up {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  min-width: 200px;
+  max-width: 320px;
+  overflow: hidden;
+  background: $white-color;
+
   &:after {
     content: '';
     position: fixed;
@@ -28,7 +39,7 @@
       color: $white-color;
       width: 25px;
       height: 25px;
-      padding: 3px 0 0 1px;
+      padding: 3px 0 0 .5px;
     }
   }
 

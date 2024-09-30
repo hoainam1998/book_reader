@@ -1,26 +1,22 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
-import { CategoryService } from 'services';
+import { CategoryService, RequestBody } from 'services';
 import { showToast } from 'utils';
 
-const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
-  return new Promise((resolve, reject) => {
-    promise
-      .then((res) => {
-        res.data?.category?.create?.message &&
-          showToast('Category', res.data.category.create.message);
-        res.data?.category.delete?.message &&
-          showToast('Category', res.data?.category.delete?.message);
-        res.data?.category.update?.message &&
-          showToast('Category', res.data?.category.update?.message);
-        resolve(res);
-      })
-      .catch((err) => reject(err));
+export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
+  return promise.then(res => {
+    res.data?.category?.create?.message &&
+      showToast('Category', res.data.category.create.message);
+    res.data?.category.delete?.message &&
+      showToast('Category', res.data?.category.delete?.message);
+    res.data?.category.update?.message &&
+      showToast('Category', res.data?.category.update?.message);
+    return res;
   });
 };
 
 export const getCategoryDetail = (categoryId: string): Promise<AxiosResponse> => {
-  const body = {
+  const body: RequestBody = {
     query: `query CategoryDetail($categoryId: ID) {
       category {
         detail (categoryId: $categoryId) {
@@ -51,7 +47,7 @@ export const updateCategory = (formData: FormData): Promise<AxiosResponse> => {
 };
 
 export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
-  const body = {
+  const body: RequestBody = {
     query:
       'query DeleteCategory($categoryId: ID) { category { delete (categoryId: $categoryId) { message } } }',
     categoryId
@@ -59,12 +55,11 @@ export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
   return handlePromise(CategoryService.graphql('delete', body));
 };
 
-export const loadInitCategory = ({ request}: LoaderFunctionArgs<any>) => {
-  const url = new URL(request.url);
-
-  const pageSize = parseInt(url.searchParams.get('pageSize') || '10');
-  const pageNumber = parseInt(url.searchParams.get('pageNumber') || '1');
-  const body = {
+export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
+  const url: URL = new URL(request.url);
+  const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
+  const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
+  const body: RequestBody = {
     query: `query CategoryPagination($pageSize: Int, $pageNumber: Int) {
       category {
         pagination (pageSize: $pageSize, pageNumber: $pageNumber) {

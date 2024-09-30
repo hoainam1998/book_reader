@@ -2,21 +2,26 @@ import {
   JSX,
   useCallback,
   useEffect,
-  useRef,
+  useRef
 } from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { required } from 'hooks/useValidate';
 import {
   getMonth,
   getYear,
-  setDate,
+  setDate
 } from 'date-fns';
 import MonthCalendar from './month-calendar/month-calendar';
 import YearCalendar from './year-calendar/year-calendar';
 import InputCalendar from './input-calendar/input-calendar';
-import DayCalendar, { CalendarReducerAction, CalendarActionType } from './day-calendar/day-calendar';
-import useForm, { RuleType } from 'hooks/useForm';
+import DayCalendar, { CalendarReducerAction, CalendarActionType, DisableDayActionEnum } from './day-calendar/day-calendar';
+import { FieldValidateProps } from 'hooks/useForm';
+import { createElementWrapper } from 'utils';
 import './style.scss';
+
+const bodyDOM: HTMLElement = document.body;
+const monthCalendarDockerDOM = createElementWrapper('month-calendar-docker');
+const calendarDockerDOM = createElementWrapper('calendar-docker');
+const yearCalendarDockerDOM = createElementWrapper('year-calendar-docker');
 
 const calendarHeight: number = 245;
 const marginCalendar: number = 10;
@@ -26,39 +31,47 @@ let selectedYear: number = getYear(currentDate);
 let calendarDocker: Root | null = null;
 let monthCalendarDocker: Root | null = null;
 let yearCalendarDocker: Root | null = null;
-let monthCalendarShowed: boolean = false;
 
-const positionCalendar = {
+type PositionType = {
+  left: number;
+  top: number;
+};
+
+const positionCalendar: PositionType = {
   left: 0,
   top: 0
 };
 
 const state = {
-  day: currentDate,
+  day: currentDate.getTime(),
 };
-
-const rule: RuleType = {
-  day: { required }
-};
-
-type RuleTypeCalendar = RuleType & ArrayLike<RuleType>;
 
 type CalendarPropsType = {
-  value: Date;
   label: string;
   name: string;
-};
+  labelClass: string;
+  inputClass?: string;
+} & FieldValidateProps<number | null>;
 
-function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
-  state.day = value;
+function Calendar({
+  value,
+  label,
+  name,
+  errors,
+  error,
+  labelClass,
+  inputClass,
+  onChange,
+  onFocus
+  }: CalendarPropsType): JSX.Element {
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
   const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
-  const { day } = useForm(state, rule as RuleTypeCalendar, 'form');
 
   const setDay = useCallback((daySelected: string): void => {
     const dateSelected: Date = setDate(dayCalendarRef.current!.date, parseInt(daySelected));
-    day.onChange(dateSelected);
+    onChange(dateSelected.getTime());
     calendarDocker?.unmount();
+    calendarDockerDOM.remove();
     selectedYear = getYear(dateSelected);
   }, []);
 
@@ -70,60 +83,82 @@ function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
   const setMonthSelected = useCallback((monthIndex: number): void => {
     dayCalendarRef.current!.dispatch({ type: CalendarActionType.MONTH_SELECTED, month: monthIndex });
     monthCalendarDocker?.unmount();
-    monthCalendarShowed = false;
+    monthCalendarDockerDOM.remove();
   }, []);
 
   const setYearSelected = useCallback((year: number): void => {
     setYear(year);
     yearCalendarDocker?.unmount();
+    yearCalendarDockerDOM.remove();
     openMonthCalendar();
   }, []);
 
-  const calculateCalendarPosition = (): void => {
+  const calculateCalendarPosition = useCallback((): void => {
     const { bottom, left, height } = inputCalendarRef.current?.rect as DOMRect;
     const spaceCanDock: number = bottom + calendarHeight + (marginCalendar * 2);
     const top: number = spaceCanDock <= browserHeight ? bottom + marginCalendar : bottom - (height + marginCalendar + calendarHeight);
     positionCalendar.left = left;
     positionCalendar.top = top;
-  };
+  }, [inputCalendarRef.current]);
 
   const openYearCalendar = useCallback((): void => {
-    yearCalendarDocker = createRoot(document.getElementById('year-calendar-docker')!);
-    yearCalendarDocker.render(
-      <YearCalendar
-        currentYear={selectedYear}
-        position={positionCalendar}
-        onYearChange={setYearSelected} />);
+    if (!bodyDOM.contains(yearCalendarDockerDOM)) {
+      bodyDOM.appendChild(yearCalendarDockerDOM);
+      yearCalendarDocker = createRoot(yearCalendarDockerDOM);
+      yearCalendarDocker.render(
+        <YearCalendar<PositionType>
+          currentYear={selectedYear}
+          position={positionCalendar}
+          onYearChange={setYearSelected} />
+      );
+    }
   }, [selectedYear]);
 
   const openDayCalendar = useCallback((): void => {
-    calendarDocker = createRoot(document.getElementById('calendar-docker')!);
-    calendarDocker.render(
-      <DayCalendar
-        position={positionCalendar}
-        onOpenMonthCalendar={openMonthCalendar}
-        onOpenYearCalendar={openYearCalendar}
-        onDayChange={setDay}
-        selectedDay={day.value}
-        ref={dayCalendarRef} />);
-  }, [day.value]);
+    if (!bodyDOM.contains(calendarDockerDOM)) {
+      bodyDOM.appendChild(calendarDockerDOM);
+      calendarDocker = createRoot(calendarDockerDOM);
+      calendarDocker.render(
+        <DayCalendar<PositionType>
+          position={positionCalendar}
+          onOpenMonthCalendar={openMonthCalendar}
+          onOpenYearCalendar={openYearCalendar}
+          onDayChange={setDay}
+          selectedDay={value}
+          disable={
+            {
+              action: DisableDayActionEnum.AFTER_OR_EQUAL,
+              day: Date.now()
+            }
+          }
+          ref={dayCalendarRef} />
+      );
+    }
+  }, [value]);
 
   const openMonthCalendar = useCallback((): void => {
-    if (!monthCalendarShowed) {
+    if (!bodyDOM.contains(monthCalendarDockerDOM)) {
       const currentMonthIndex: number = getMonth(dayCalendarRef.current?.date || currentDate);
-      monthCalendarDocker = createRoot(document.getElementById('month-calendar-docker')!);
+      bodyDOM.appendChild(monthCalendarDockerDOM);
+      monthCalendarDocker = createRoot(monthCalendarDockerDOM);
       monthCalendarDocker.render(
-        <MonthCalendar
+        <MonthCalendar<PositionType>
           currentYear={selectedYear}
           currentMonth={currentMonthIndex}
           docker={monthCalendarDocker}
           onMonthChange={setMonthSelected}
           onOpenYearCalendar={openYearCalendar}
           onYearChange={setYear}
-          position={positionCalendar} />);
-      monthCalendarShowed = true;
+          position={positionCalendar} />
+      );
     }
-  }, [day.value]);
+  }, [value]);
+
+  useEffect(() => {
+    if (value) {
+      state.day = value;
+    }
+  }, [value]);
 
   useEffect(() => {
     calculateCalendarPosition();
@@ -131,10 +166,17 @@ function Calendar({ value, label, name }: CalendarPropsType): JSX.Element {
 
   return (
     <section className="calendar-wrapper">
-      <InputCalendar {...day} label={label} name={name} onOpen={openDayCalendar} ref={inputCalendarRef} />
-      <div id="calendar-docker" />
-      <div id="month-calendar-docker" />
-      <div id="year-calendar-docker" />
+      <InputCalendar
+        name={name}
+        error={error}
+        errors={errors}
+        value={value}
+        label={label}
+        labelClass={labelClass}
+        inputClass={inputClass}
+        onOpen={openDayCalendar}
+        onFocus={onFocus}
+        ref={inputCalendarRef} />
     </section>
   );
 }

@@ -1,8 +1,28 @@
+.select-disabled {
+  font-style: italic;
+  color: $placeholder;
+}
+
 .select {
   padding: 0 5px;
   -webkit-appearance: none;
   -moz-appearance: none;
   min-width: 100px;
+  width: 100%;
+  border-color: $border-input-color;
+
+  & > option:disabled {
+    @extend .select-disabled;
+  }
+
+  & > option:not(& > option:disabled) {
+    color: initial !important;
+    font-style: normal;
+  }
+}
+
+.placeholder {
+  @extend .select-disabled;
 }
 
 .select-wrapper {

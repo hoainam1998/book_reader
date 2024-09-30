@@ -1,0 +1,86 @@
+.modal-container {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+
+  &::after {
+    position: absolute;
+    top: 0;
+    content: '';
+    width: inherit;
+    height: inherit;
+    opacity: .3;
+    z-index: 2000;
+    background-color: $border-input-color;
+  }
+}
+
+.modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%;
+  min-height: 25%;
+  background-color: $white-color;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  opacity: 1;
+  border-radius: 5px;
+  z-index: 3000;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+
+  .header-modal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .close-icon {
+    cursor: pointer;
+    padding: 5px;
+    line-height: 16px;
+
+    &:hover {
+      opacity: .3;
+    }
+  }
+
+  .body-modal {
+    flex-grow: 8;
+    text-wrap: wrap;
+  }
+
+  .body-modal, .footer-modal {
+    padding: 5px 0;
+  }
+
+  .lg {
+    width: 60%;
+    min-width: 60%;
+  }
+
+  .md {
+    width: 30%;
+    min-width: 30%;
+  }
+
+  .sm {
+    width: 15%;
+    min-width: 15%;
+  }
+}
+
+@mixin size($size, $width) {
+  .#{$size} {
+    width: #{$width + '%'};
+    min-width: #{$width + '%'};
+  }
+}
+
+@include size('lg', 60);
+@include size('md', 30);
+@include size('sm', 15);

@@ -31,11 +31,11 @@ $maximum-grid-column: 12;
 @for $i from 2 through $maximum-grid-column {
   .col-row-#{$i} {
     & > * {
-      grid-column: #{span calc($maximum-grid-column / $i)};
+      grid-column: #{span math.ceil(calc($maximum-grid-column / $i))};
     }
   }
 
   .col-#{$i} {
-    grid-column: #{span $i};
+    grid-column: #{span $i} !important;
   }
 }

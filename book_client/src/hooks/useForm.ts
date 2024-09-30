@@ -1,55 +1,104 @@
-import { ChangeEvent, useState, } from 'react';
-import useValidate, { ValidateFunction, ValidateProcess } from './useValidate';
+import { ChangeEvent, DependencyList } from 'react';
+import useValidate, {
+  ValidateFunction,
+  ValidateProcess,
+  ErrorInfo,
+  ValidateInfo,
+  ValidateName
+} from './useValidate';
 
-type StateType = { [key: string]: any };
-export type RuleType = {
-  [key: string]: {
-    [key: string]: ValidateFunction | ValidateProcess
+export type RuleType<T> = Record<keyof T, Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>>;
+
+export type FieldValidateProps<T = any> = {
+  value: T;
+  onChange: (value: T) => void;
+  onFocus: () => void;
+  onInput?: (value: T) => void;
+  watch: (value: T) => void;
+  dirty: boolean;
+  error: boolean;
+  errors: string[];
+  validate: () => void;
+};
+
+export type FormValidateProps = {
+  [key: string]: any;
+  validate: ErrorInfo;
+  handleSubmit: () => void;
+  reset: () => void;
+};
+
+const validateValue = (event: ChangeEvent): any => {
+  const elementTargetValue: any =
+  (event.currentTarget as HTMLInputElement)?.value;
+
+  if (elementTargetValue === null || elementTargetValue === undefined) {
+    return event;
+  } else {
+    if (!elementTargetValue
+      && (event.currentTarget as HTMLInputElement)?.files
+      && (event.currentTarget as HTMLInputElement)?.files!.length > 0) {
+        const fileList =  Array.from((event.currentTarget as HTMLInputElement)?.files || []);
+        return fileList[0].name;
+    } else {
+      return elementTargetValue;
+    }
   }
 };
 
-export default (state: StateType, rules: RuleType & ArrayLike<RuleType>, formId: string) => {
-  const validateObject = useValidate<StateType, RuleType>(state, rules);
-  const [value, setValue] = useState<typeof state>(state);
+export default <T extends Object, R>(
+  state: T,
+  rules: R,
+  formId: string,
+  dependencyList?: DependencyList
+): FormValidateProps => {
+  const validateObject: ErrorInfo = useValidate<T, R>(state, rules, dependencyList);
 
-  const formControlProps: { [key: string]: any } = {
+  const formControlProps: FormValidateProps = {
     validate: validateObject,
-    handleSubmit: () => {
-      if (!formControlProps.validate.dirty) {
+    handleSubmit: (): void => {
+      if (!formControlProps .validate.dirty) {
         formControlProps.validate.dirty = true;
       }
-      formControlProps.validate.validate();
-      Object.keys(formControlProps).forEach(key => {
-        formControlProps[key] = Object.assign(formControlProps[key], validateObject[key]);
+      (validateObject.validate as Function)();
+      Object.keys(state).forEach((key: string) => {
+        validateObject[key].dirty = true;
+        formControlProps[key] = Object.assign(
+          formControlProps[key],
+          validateObject[key]
+        );
       });
     },
-    reset: () => {
-      Object.keys(state).forEach(key => validateObject[key].dirty = false);
+    reset: (): void => {
       validateObject.dirty = false;
-      validateObject.validate();
+      Object.keys(state).forEach(
+        (key: string) => {
+          const keyValidateObject = validateObject[key]!;
+          keyValidateObject.watch('', key);
+          keyValidateObject.dirty = false;
+      });
       document.forms.namedItem(formId)?.reset();
     }
   };
 
-  Object.keys(state).forEach((key: keyof StateType) => {
+  Object.keys(state).forEach((key: string) => {
+    type ValueType = T[keyof T];
     formControlProps[key] = {
-      value: value[key],
-      onChange: <T>(event: ChangeEvent<T | any> | any): void => {
-        setValue({ ...value, [key]: event.currentTarget?.value || event });
-        state[key] = event.currentTarget?.value || event;
-        validateObject[key].validate();
+      value: validateObject.values[key],
+      onChange: <O extends HTMLInputElement>(arg: ChangeEvent<O> | ValueType): void => {
+
+        const currentValue = validateValue(arg as any);
+        validateObject[key].watch!(currentValue, key);
       },
       onFocus: (): void => {
         validateObject[key].dirty = true;
+        validateObject.dirty = true;
       },
       ...validateObject[key],
-      watch: <T>(currentValue: T): void => {
-        formControlProps[key].value = currentValue;
-        setValue({ ...value, [key]: currentValue });
-        state[key] = currentValue;
-        validateObject.validate();
+      watch: (currentValue: ValueType): void => {
+        validateObject[key].watch!(currentValue, key);
       }
-    };
+    }
   });
 
   return formControlProps;

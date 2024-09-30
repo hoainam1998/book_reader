@@ -1,6 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const { UPLOAD_MODE } = require('../constants/index.js');
+const { UPLOAD_MODE, HTTP_CODE } = require('../constants/index.js');
 
 const storage = multer.memoryStorage();
 
@@ -11,7 +11,7 @@ const upload = multer({
     files: 10
   },
   fileFilter: (_, file, cb) => {
-    const extensionFileIsValid = /.jpg|.jpeg|.png|.pdf/.test(path.extname(file.originalname));
+    const extensionFileIsValid = /.jpg|.jpeg|.png/.test(path.extname(file.originalname));
     if (extensionFileIsValid) {
       cb(null, true);
     } else {
@@ -44,7 +44,7 @@ module.exports = (mode, fields, maxCount) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
-          response.status(400).json({ message: err.message });
+          response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
           switch (mode) {
             case UPLOAD_MODE.SINGLE:

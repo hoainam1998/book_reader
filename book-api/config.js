@@ -1,8 +1,8 @@
-const { createPool } = require('mysql');
+const { createPool } = require('mysql2');
 const Query = require('./query.js');
 
 const pool = createPool({
-  host: process.env.HOST,
+  host: process.env.LOCALHOST,
   user: process.env.USER,
   database: 'books',
   multipleStatements: true,
@@ -20,9 +20,7 @@ function connectDataBase() {
     pool.getConnection((err, connection) => {
       if (err) {
         console.log('Connect to database fail!');
-        pool.end(() => {
-          console.log('Force disconnect success!');
-        });
+        pool.end(() => console.log('Force disconnect success!'));
         reject(err);
       } else {
         console.log('Connect to database success!');

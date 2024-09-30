@@ -1,4 +1,4 @@
-import { CSSProperties, JSX, useCallback, useState, useReducer } from 'react';
+import { CSSProperties, JSX, useCallback, useReducer } from 'react';
 import { Root } from 'react-dom/client';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';;
@@ -14,11 +14,8 @@ enum YearChangedReducerAction {
   HEAD = 'head',
 };
 
-type MonthCalendar = {
-  position: {
-    top: number;
-    left: number;
-  };
+type MonthCalendar<T> = {
+  position: T;
   currentMonth: number;
   currentYear: number;
   docker: Root;
@@ -53,14 +50,14 @@ const yearChangedReducer =
   }
 };
 
-function MonthCalendar({
+function MonthCalendar<T>({
   position,
   currentMonth,
   currentYear,
   onOpenYearCalendar,
   onMonthChange,
   onYearChange
-}: MonthCalendar): JSX.Element {
+}: MonthCalendar<T>): JSX.Element {
   const [year, dispatch] = useReducer(yearChangedReducer(onYearChange), currentYear);
 
   const positionStyle: CSSProperties = {

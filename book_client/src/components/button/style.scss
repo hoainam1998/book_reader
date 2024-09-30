@@ -8,7 +8,14 @@
 
   &:disabled {
     pointer-events: none;
+    opacity: .3;
   }
+}
+
+.btn-submit {
+  background: $primary-color;
+  color: $white-color;
+  font-size: 16px;
 }
 
 .btn-success {
@@ -21,7 +28,19 @@
   color: $white-color;
 }
 
-.btn-primary {
-  background-color: $title-pop-up-color;
+.btn-warning {
+  background-color: $warning-color;
   color: $white-color;
+}
+
+.btn-primary {
+  background-color: $primary-button-color;
+  color: $white-color;
+}
+
+.btn-outline {
+  border: 2px solid $primary-button-color;
+  background-color: $white-color;
+  color: $primary-button-color;
+  font-weight: bold;
 }

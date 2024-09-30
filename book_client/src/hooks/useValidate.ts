@@ -1,119 +1,253 @@
-import { useState } from 'react';
+import { useState, useEffect, DependencyList } from 'react';
+import { customError } from 'utils';
 
-type ErrorFieldInfo = {
+export type ErrorFieldInfo = {
   error: boolean;
   message: string;
+  max?: number;
 };
 
-type ErrorInfo = {
+export type ValidateName = 'required' | 'maxLength';
+
+export type ValidateErrorInfo = {
+  [key: string]: ErrorFieldInfo | boolean | number | Function | Array<string> | undefined;
+};
+
+export type ErrorInfo = {
+  [key: string]: any;
   dirty: boolean;
   error: boolean;
-  validate: () => void;
-  [key: string]: any;
+  errors: string[];
+  watch: (value: any, key: string) => void;
+  validate: (value: any) => void;
+  max?: number;
+  values?: any;
 };
 
-export type ValidateProcess = <T>(state: T, field: string) => ErrorFieldInfo;
+export type ValidateProcess = <T>(currentValue: any, state: T, field: string) => ErrorFieldInfo;
 
-export type ValidateFunction = (...args: (string | (<T>(state: T) => boolean))[]) => ValidateProcess;
+export type ValidateInfo = {
+  func: ValidateProcess;
+  max?: number;
+};
 
-export const required: ValidateFunction = (...args) => <T>(state: T, field: string) => {
-  const value = state[field as keyof T];
-  let message: string = '';
-  let requiredIf: (<T>(state: T) => boolean) | undefined = undefined;
+export type ValidateFunction = (
+  ...args: (string | number | (<T>(state: T) => boolean))[]
+) => ValidateProcess | ValidateInfo;
 
-  if (args.length === 1) {
-    if (typeof args[0] === 'string') {
-      message = args[0];
-    } else {
-      requiredIf = args[0];
+const customValidate = (validateCallback: any): ValidateProcess =>
+  (currentValue: string) => validateCallback(currentValue);
+
+export const required: ValidateFunction =
+  (...args) =>
+  <T>(currentValue: any, state: T, field: string) => {
+    let message: string = '';
+    let requiredIf: (<T>(state: T) => boolean) | undefined = undefined;
+
+    if (args.length === 1) {
+      if (typeof args[0] === 'string') {
+        message = args[0];
+      } else {
+        requiredIf = args[0] as (<T>(state: T) => boolean);
+      }
+    } else if (args.length === 2) {
+      message = args[0] as string;
+      requiredIf = args[1] as <T>(state: T) => boolean;
     }
-  } else if (args.length === 2) {
-    message = args[0] as string;
-    requiredIf = args[1] as (<T>(state: T) => boolean);
-  }
 
-  const errorObj: ErrorFieldInfo = {
-    error: typeof value === 'string' ? !value.trim() : !value,
-    message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`,
+    const errorObj: ErrorFieldInfo = {
+      error: !currentValue,
+      message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is required!`
+    };
+
+    if (requiredIf) {
+      errorObj.error = requiredIf(state) ? errorObj.error : false;
+    } else if (typeof currentValue === 'string') {
+      errorObj.error = !currentValue.trim();
+    } else if (Array.isArray(currentValue)) {
+      errorObj.error = currentValue.length === 0;
+    }
+
+    return errorObj;
   };
 
-  if (requiredIf) {
-    errorObj.error = requiredIf(state) ? errorObj.error : false;
-  }
+export const maxLength: ValidateFunction =
+  (...args) => {
+    return {
+      max: typeof args[0] === 'number' ? args[0] : undefined,
+      func: <T>(currentValue: any, state: T, field: string) => {
+        let max: number = Math.max();
+        let message: string = '';
 
-  return errorObj;
+        if (args.length === 1) {
+          if (typeof args[0] === 'number') {
+            max = args[0];
+          } else {
+            throw customError('First argument is not positive number!');
+          }
+        } else if (args.length === 2) {
+          if (typeof args[0] === 'number') {
+            max = args[0];
+          } else {
+            throw customError('First argument is not positive number!');
+          }
+
+          if (typeof args[1] === 'string') {
+            message = args[1] as unknown as string;
+          } else {
+            throw customError('Second argument is not string!');
+          }
+        } else {
+          throw customError('Length are not provide!');
+        }
+
+        objectValidate[field].max = max;
+
+        const errorObj: ErrorFieldInfo = {
+          error: false,
+          message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} exceed to ${max} elements!`,
+          max
+        };
+
+        if (typeof currentValue === 'string') {
+          errorObj.error = currentValue.trim().length > max;
+        } else if (Array.isArray(currentValue)) {
+          errorObj.error = currentValue.length > max;
+        }
+
+        return errorObj;
+      }
+    }
+}
+
+const validateCompact = (validates: ((value?: any) => void)[]): (() => void) => {
+  return () => validates.forEach((validate) => validate());
 };
 
-const validateCompact = (validates: (() => void)[]): () => void => {
-  return () => validates.forEach(validate => validate());
-};
-
-let objectValidate: ErrorInfo = {
+const objectValidate: ErrorInfo = {
   dirty: false,
   error: false,
-  validate: () => {}
+  errors: [],
+  watch: () => {},
+  validate: () => {},
 };
 
-let alreadyCreate = false;
+const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = []): ErrorInfo => {
+  const setError = useState<{[key: string]: boolean}>({})[1];
+  const [value, setValue] = useState<T>(state);
+  const rulesEntries: [string, R][] = Object.entries(rules as ArrayLike<R>);
+  objectValidate.values = value;
 
-const useValidate =
-  <T, R>(state: T, rules: R & ArrayLike<R>): ErrorInfo => {
-  const setError = useState(false)[1];
-
-  const validateProcess = (field: string, validateName: string, validateResult: ErrorFieldInfo): boolean => {
-    objectValidate[field][validateName].error = validateResult.error;
-    if (validateResult.error && !objectValidate[field].errors.includes(validateResult.message)) {
-      objectValidate[field].errors.push(validateResult.message);
-    } else {
-      objectValidate[field].errors
-        = objectValidate[field].errors.filter((message: string) => message != validateResult.message);
-    }
-    return validateResult.error;
-  };
-
-  if (!alreadyCreate) {
-    Object.entries(rules).forEach(([key, validateRule]: [string, R]) => {
-      const field: ErrorInfo = {
+  useEffect(() => {
+    rulesEntries.forEach(([key, validateRule]: [string, R]) => {
+      const field: ValidateErrorInfo = {
         validate: () => {},
+        watch,
         errors: [],
         dirty: false,
         error: false
       };
-      Object.keys(validateRule as ArrayLike<R>).forEach(validateName => {
+      Object.keys(validateRule as ArrayLike<R>).forEach((validateName: string) => {
         field[validateName] = {
-          error: false
+          error: false,
+          message: '',
         };
       });
       objectValidate[key] = field;
     });
-    alreadyCreate = true;
-  }
+  }, []);
 
-  const validateFuncs = Object.entries(rules).map(([key, validateRule]: [string, R]) => {
-    const validate = (): void => {
-      objectValidate[key].error = Object.entries(validateRule as ArrayLike<R>)
-        .every(([validateName, validateFunc]:[string, R]) => {
-          let validateResult: boolean = false;
-          if (objectValidate.dirty || objectValidate[key].dirty) {
-            try {
-              validateResult =
-                validateProcess(key, validateName, (validateFunc as ValidateFunction)()<T>(state, key));
-            } catch {
-              validateResult = validateProcess(key, validateName, (validateFunc as ValidateProcess)<T>(state, key));
+  useEffect((): void => {
+    const validateFuncs: ((value: any) => void)[] = rulesEntries.map(([key, validateRule]: [string, R]) => {
+      const keyValidateInfo: ValidateErrorInfo = objectValidate[key];
+      const validateRulePair = Object.entries(validateRule as ArrayLike<R>)
+        .reduce((obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
+          if (validateInfo instanceof Function) {
+            if (['required', 'maxLength'].includes(validateName)) {
+              obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
+            } else {
+              obj[validateName] = customValidate(validateInfo);
             }
           } else {
-            objectValidate[key].errors = [];
+            const validateInfoObject = (validateInfo as ValidateInfo);
+            obj[validateName] = validateInfoObject.func;
+            if (validateInfoObject.max) {
+              keyValidateInfo.max = validateInfoObject.max;
+            }
           }
-          return validateResult;
-      });
-      objectValidate.error = Object.keys(rules).some(key => objectValidate[key].error);
-      setError(objectValidate.error);
-    };
-    objectValidate[key].validate = validate;
-    return validate;
-  });
+          return obj;
+      }, {});
+      const validate = (value: any = state[key as keyof T]): void => {
+        keyValidateInfo.error = Object.entries(validateRulePair).map(
+          ([validateName, validateFunc]: [string, ValidateFunction | ValidateProcess]) => {
+            let validateResult: boolean = false;
+            if (objectValidate.dirty || keyValidateInfo.dirty) {
+              try {
+                validateResult = validateProcess(
+                  key,
+                  validateName as ValidateName,
+                  ((validateFunc as ValidateFunction)() as ValidateProcess)<T>(value, state, key)
+                );
+              } catch {
+                validateResult = validateProcess(
+                  key,
+                  validateName as ValidateName,
+                  (validateFunc as ValidateProcess)<T>(value, state, key)
+                );
+              }
+            } else {
+              keyValidateInfo.errors = [];
+            }
+            return validateResult;
+          }
+        ).some(err => err === true);
+        objectValidate.error = rulesEntries.some(([key]: [string, R]) => objectValidate[key].error);
+        setError({ key: keyValidateInfo.error });
+      };
+      keyValidateInfo.validate = validate;
+      return validate;
+    });
 
-  objectValidate.validate = validateCompact(validateFuncs);
+    objectValidate.validate = validateCompact(validateFuncs);
+  }, dependencyList);
+
+  useEffect(() => {
+    objectValidate.values = value;
+  }, [value]);
+
+  function watch(this: ErrorInfo, currentValue: any, key: string) {
+    this.validate(currentValue);
+    setValue({ ...value, [key]: currentValue });
+    state[key as keyof T] = currentValue;
+  }
+
+  const validateProcess = (
+    field: string,
+    validateName: ValidateName,
+    validateResult: ErrorFieldInfo
+  ): boolean => {
+    const keyErrorInfo: ValidateErrorInfo = objectValidate[field];
+    (keyErrorInfo[validateName] as ErrorFieldInfo).error = validateResult.error;
+
+    if (validateResult.max) {
+      (keyErrorInfo[validateName] as ErrorFieldInfo).max = validateResult.max;
+    }
+
+    if (Array.isArray(keyErrorInfo.errors)) {
+      if (validateResult.error) {
+        if (!keyErrorInfo.errors!.includes(validateResult.message)) {
+          keyErrorInfo.errors.push(validateResult.message);
+        }
+      } else {
+        keyErrorInfo.errors = keyErrorInfo.errors.filter(
+          (message: string) => message != validateResult.message
+        );
+      }
+    }
+
+    return validateResult.error;
+  };
+
   return objectValidate;
 };
 

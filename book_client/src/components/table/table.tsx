@@ -6,6 +6,7 @@ import {
   ReactNode,
   JSX,
   useMemo,
+  useCallback,
 } from 'react';
 import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
@@ -14,6 +15,7 @@ import './style.scss';
 
 export type Field = {
   key: string;
+  label?: string;
   width?: number;
   style?: CSSProperties;
 };
@@ -33,7 +35,7 @@ type TableCellProps = {
 };
 
 function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
-  const childrenList = fields.map(field => {
+  const childrenList: JSX.Element[] = fields.map(field => {
     const slot: ReactElement | undefined = cells.find(cell => isSlot(field.key, cell));
     return slot ? <td>{slot.props.render(item)}</td> : <td>{item[field.key]}</td>;
   });
@@ -42,38 +44,38 @@ function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
 
 let pageSize = 10;
 let pageNumber = 1;
+const options = [
+  {
+    value: 10,
+    label: '10'
+  },
+  {
+    value: 30,
+    label: '30'
+  },
+  {
+    value: 50,
+    label: '50'
+  },
+];
 
 function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Element {
-  const options = [
-    {
-      value: 10,
-      label: '10'
-    },
-    {
-      value: 30,
-      label: '30'
-    },
-    {
-      value: 50,
-      label: '50'
-    },
-  ];
 
-  const totalPageNumber = useMemo(() => {
-    const pages = total / pageSize;
+  const totalPageNumber = useMemo<number>(() => {
+    const pages: number = total / pageSize;
     return Number.isInteger(pages) ? pages : Math.floor(pages) + 1;
   }, [total, pageSize]);
 
-  const pageSizeChange = (currentPageSize: number) => {
+  const pageSizeChange = useCallback((currentPageSize: number): void => {
     pageSize = currentPageSize;
     pageNumber = 1;
     onLoad(pageSize, pageNumber);
-  };
+  }, []);
 
-  const pageNumberChange = (currentPageNumber: number) => {
+  const pageNumberChange = useCallback((currentPageNumber: number): void => {
     pageNumber = currentPageNumber;
     onLoad(pageSize, pageNumber);
-  };
+  }, []);
 
   return (
     <section>
@@ -84,13 +86,13 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
           </colgroup>
           <thead>
             <tr>
-              { fields.map((field, index) => (<th key={index} style={field.style}>{field.key}</th>)) }
+              { fields.map((field, index) => (<th key={index} style={field.style}>{field.label || field.key}</th>)) }
             </tr>
           </thead>
           <tbody>
             {
               data.map((item, index) => (
-                <tr key={index}>
+                <tr key={index} data-testid={`row-${index}`}>
                   <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
                 </tr>
               ))
@@ -100,7 +102,7 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
       </div>
       { totalPageNumber > 0 &&
         <div className="table-footer">
-          <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" classes="page-size" />
+          <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" selectClass="page-size" />
           <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
         </div>
       }
