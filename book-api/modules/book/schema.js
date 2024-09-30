@@ -8,7 +8,7 @@ const {
   GraphQLList
 } = require('graphql');
 const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
-const { messageCreator } = require('../../utils/index.js');
+const { messageCreator } = require('#utils');
 
 const commonBookField = {
   name: {

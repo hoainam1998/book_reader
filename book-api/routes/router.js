@@ -1,4 +1,4 @@
-const { messageCreator } = require('../utils/index.js');
+const { messageCreator } = require('#utils');
 
 class Router {
   _express = null;

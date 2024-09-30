@@ -1,8 +1,8 @@
 const { validate, parse } = require('graphql');
 const upload = require('./upload.js');
 const uploadPdf = require('./upload-pdf-file.js');
-const { HTTP_CODE } = require('../constants/index.js');
-const { messageCreator } = require('../utils/index.js');
+const { HTTP_CODE } = require('#constants');
+const { messageCreator } = require('#utils');
 
 /**
  * Return validate query decorator.

@@ -2,7 +2,7 @@ const {
   GraphQLString,
   GraphQLObjectType
 } = require('graphql');
-const { HTTP_CODE } = require('../constants/index.js');
+const { HTTP_CODE } = require('#constants');
 
 export const graphqlErrorOption = {
   extensions: {

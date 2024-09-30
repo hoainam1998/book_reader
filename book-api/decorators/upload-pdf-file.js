@@ -1,6 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const { HTTP_CODE } = require('../constants/index.js');
+const { HTTP_CODE } = require('#constants');
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {

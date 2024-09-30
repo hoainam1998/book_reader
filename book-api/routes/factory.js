@@ -1,6 +1,6 @@
 const CategoryRouter = require('./modules/category.js');
 const BookRouter = require('./modules/book.js');
-const { PATH } = require('../constants/index.js');
+const { PATH } = require('#constants');
 
 class RouterFactory {
   static getRoutes(express, schema = null) {

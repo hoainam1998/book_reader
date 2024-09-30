@@ -28,5 +28,10 @@
     "@babel/plugin-proposal-decorators": "^7.24.1",
     "@babel/plugin-syntax-decorators": "^7.24.1",
     "@babel/preset-env": "^7.24.5"
+  },
+  "imports": {
+    "#utils": "./utils/index.js",
+    "#decorators": "./decorators/index.js",
+    "#constants": "./constants/index.js"
   }
 }

@@ -1,4 +1,4 @@
-const { deepFreeze } = require('../utils/index.js');
+const { deepFreeze } = require('#utils');
 
 module.exports = deepFreeze({
   UPLOAD_MODE: {

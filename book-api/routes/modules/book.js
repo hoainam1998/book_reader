@@ -8,9 +8,9 @@ const {
   validateResultExecute,
   uploadPdf,
   upload
-} = require('../../decorators/index.js');
-const { UPLOAD_MODE, HTTP_CODE } = require('../../constants/index.js');
-const { messageCreator, promiseAllSettledOrder } = require('../../utils/index.js');
+} = require('#decorators');
+const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
+const { messageCreator, promiseAllSettledOrder } = require('#utils');
 const formable = multer();
 const cpUpload = formable.fields([
   { name: 'pdf', maxCount: 1 },

@@ -1,6 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const { UPLOAD_MODE, HTTP_CODE } = require('../constants/index.js');
+const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 
 const storage = multer.memoryStorage();
 

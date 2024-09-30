@@ -1,7 +1,7 @@
 const Router = require('../router.js');
 const { execute } = require('graphql');
-const { validateQuery, validateResultExecute, upload } = require('../../decorators/index.js');
-const { UPLOAD_MODE, HTTP_CODE } = require('../../constants/index.js');
+const { validateQuery, validateResultExecute, upload } = require('#decorators');
+const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 
 class CategoryRouter extends Router {
 

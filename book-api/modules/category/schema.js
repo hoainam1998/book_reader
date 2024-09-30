@@ -9,7 +9,7 @@ const {
   GraphQLBoolean
 } = require('graphql');
 const { graphqlErrorOption, ResponseType } = require('../common-schema');
-const { messageCreator } = require('../../utils/index.js');
+const { messageCreator } = require('#utils');
 
 const CategoryType = new GraphQLObjectType({
   name: 'Category',
