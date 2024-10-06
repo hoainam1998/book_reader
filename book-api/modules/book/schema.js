@@ -316,11 +316,17 @@ const query = new GraphQLObjectType({
       resolve: async (book, { pageNumber, pageSize, keyword }) => {
         try {
           const result = await book.pagination(pageSize, pageNumber, keyword);
+          if (result[0].length === 0) {
+            throw new GraphQLError('Book is empty', graphqlNotFoundErrorOption);
+          }
           return {
             list: result[0].map((book) => ({ ...book, introduce: book.introduce?.split(',')[0] || '' })),
             total: result[1][0].total
           };
         } catch (err) {
+          if (err instanceof GraphQLError) {
+            throw err;
+          }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }

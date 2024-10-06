@@ -14,6 +14,7 @@ module.exports = deepFreeze({
   },
   PATH: {
     CATEGORY: '/category',
-    BOOK: '/book'
+    BOOK: '/book',
+    USER: '/user'
   }
 });
