@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   ChangeEvent,
   JSX,
@@ -9,7 +10,8 @@ import {
   forwardRef,
   Ref,
   FormEvent,
-  HTMLProps
+  HTMLProps,
+  useCallback
 } from 'react';
 import FormControl from '../form-control';
 import { clsx, customError } from 'utils';
@@ -33,7 +35,6 @@ type InputPropsType = {
   multiple?: boolean;
   max?: number;
   min?: number | string;
-  // eslint-disable-next-line no-unused-vars
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
@@ -60,6 +61,7 @@ function Input({
   onBlur = () => {}
 }: InputPropsType, ref: Ref<InputRefType>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [inputType, setInputType] = useState<string>(type);
   const [targetValue, setTargetValue] = useState<string>('');
 
   useImperativeHandle(
@@ -90,6 +92,12 @@ function Input({
     onChange(event);
   };
 
+  const toggleChangeInputType = useCallback((event: any) => {
+    event.preventDefault();
+    const inputTypeUpdated = inputType === 'password' ? 'text' : 'password';
+    setInputType(inputTypeUpdated);
+  }, [inputType]);
+
   useEffect(() => {
     if (value !== (null && undefined) && type === 'file') {
       if (Array.isArray(value)) {
@@ -107,7 +115,7 @@ function Input({
           inputRef.current!.value = value;
         }
       } else {
-        throw customError("Value of input type file must be file, file list or empty string ('')!");
+        throw customError('Value of input type file must be file, file list or empty string (\'\')!');
       }
     } else {
       inputRef.current!.value = value as string;
@@ -118,8 +126,15 @@ function Input({
     <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
       <div className={clsx('input-wrapper', inputClass)}>
         <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-          type={type} {...specificPropInput} multiple={multiple} min={min} ref={inputRef} data-testid={`input-${name}`}
+          type={inputType} {...specificPropInput} multiple={multiple}
+          min={min} ref={inputRef} data-testid={`input-${name}`}
           onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
+        {
+          type === 'password' &&
+          <button onClick={toggleChangeInputType} className="eye-button">
+            <img src={require('images/icons/eye.svg')} alt="eye-icon" />
+          </button>
+        }
         {limitCharacter && <p className="limit">{limitCharacter}</p>}
       </div>
     </FormControl>

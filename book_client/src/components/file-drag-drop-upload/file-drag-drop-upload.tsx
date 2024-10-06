@@ -1,4 +1,4 @@
-import {
+import React, {
   DragEvent,
   JSX,
   useCallback,
@@ -87,6 +87,7 @@ function FileDragDropUpload({
     setImageFileList(files);
     onFocus();
     onChange(files);
+    console.log(files);
   }, []);
 
   const onDeleteFile = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number): void => {
@@ -104,7 +105,11 @@ function FileDragDropUpload({
 
   useEffect(() => {
     if (value) {
-      setImageFileList(value);
+      if (Array.isArray(value)) {
+        setImageFileList(value);
+      } else {
+        setImageFileList([value]);
+      }
     }
   }, [value]);
 
@@ -114,7 +119,9 @@ function FileDragDropUpload({
         onDragOver={onDrag}
         onDrop={onDrop}
         onClick={onOpenFileFolder}>
-          {imageFileList && imageFileList.length === 0 && <span className="placeholder">Please drag file into hear!</span>}
+          {imageFileList && imageFileList.length === 0 && <span className="placeholder">
+            Please drag file into hear!
+          </span>}
           <Input
             type="file"
             name={name}

@@ -25,9 +25,10 @@ export type HaveLoadedFnType = () => boolean;
  * Note: useEffect called twice time by strict mode,
  * therefore create a hook to execute code only once.
  */
-const useComponentDidMount = <T>(
+const useComponentDidMount = (
+  // eslint-disable-next-line no-unused-vars
   executeFn: (updateHaveFetchedFlag: () => boolean) => EffectCallback,
-  dependencyList: DependencyList = [],
+  dependencyList: DependencyList = []
 ): void => {
   let haveFetched: boolean = false;
   const updateHaveFetchedFlag: HaveLoadedFnType = () => {

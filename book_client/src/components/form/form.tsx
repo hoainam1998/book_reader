@@ -8,7 +8,7 @@ type FormProps = {
   id: string;
   className?: string;
   children: React.ReactElement[] | React.ReactElement;
-  submitLabel: string;
+  submitLabel?: string;
   disableSubmitButton?: boolean;
   // eslint-disable-next-line no-unused-vars,
   onSubmit: (formData: FormData) => void;

@@ -2,13 +2,13 @@ import { JSX, ReactElement, forwardRef, useRef, useImperativeHandle, Ref, ReactN
 import { clsx } from 'utils';
 import './style.scss';
 
-type FormControlProps = {
+export type FormControlProps = {
   children?: ReactElement;
   name: string;
   label: ReactNode;
   className?: string;
   labelClass?: string;
-  errors: string[];
+  errors?: string[];
 };
 
 function FormControl<T>({

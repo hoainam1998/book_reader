@@ -1,29 +1,48 @@
 import { JSX } from 'react';
 import { NavLink } from 'react-router-dom';
-import './style.scss';
+import List from 'components/list/list';
 import { clsx } from 'utils';
 import path from '../../router/paths';
+import './style.scss';
+
+type NavLinkPropsType = {
+  path: string;
+  label: string;
+  image: string;
+};
+
+const navLinks: NavLinkPropsType[] = [
+  {
+    path: path.CATEGORY,
+    label: 'categories',
+    image: 'application.png'
+  },
+  {
+    path: path.BOOK,
+    label: 'books',
+    image: 'book.png'
+  },
+  {
+    path: path.USER,
+    label: 'users',
+    image: 'user-group.png'
+  }
+];
 
 function Menu(): JSX.Element {
   return (
     <section className="menu-wrapper">
       <ul className="menu">
-        <li className="menu-item">
-          <NavLink to={path.CATEGORY} className={({ isActive }) => clsx({'active': isActive}) }>
-            <div className="menu-icon">
-              <img src={require('images/application.png')} alt="menu-icon" width="30" height="30"/>
-            </div>
-            categories
-          </NavLink>
+        <List<NavLinkPropsType> items={navLinks} render={({ path, label, image }) => (
+          <li className="menu-item">
+            <NavLink to={path} className={({ isActive }) => clsx({'active': isActive}) }>
+              <div className="menu-icon">
+                <img src={require(`images/${image}`)} alt="menu-icon" width="30" height="30"/>
+              </div>
+              {label}
+            </NavLink>
         </li>
-        <li className="menu-item">
-          <NavLink to={path.BOOK}>
-            <div className="menu-icon">
-              <img src={require('images/book.png')} alt="menu-icon" width="30" height="30"/>
-            </div>
-            books
-          </NavLink>
-        </li>
+        )} />
       </ul>
     </section>
   );

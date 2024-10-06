@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useCallback, JSX, useEffect, useState } from 'react';
 import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';

@@ -32,6 +32,36 @@ const clsx = (...classes: any[]): string => {
  */
 const customError = (message: string) => new Error(`[Custom Error] ${message}`);
 
+/**
+ * Return extension from blob type.
+ *
+ * @param {string} blobType - base64 string present image.
+ * @returns {string} - extension name.
+ */
+const getExtnameFromBlobType = (blobType: string): string => {
+  const matches: RegExpMatchArray | null = blobType.match(/(\/\w+)/);
+  return matches ? matches[0].replace('/', '.') : '';
+};
+
+/**
+ * Return promise of file from base64 string.
+ *
+ * @param {string} imageBase64String - base64 string present image.
+ * @param {string} name - file name.
+ * @returns {Promise<File>} - promise file.
+ */
+const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
+  return fetch(imageBase64String)
+    .then(res => res.blob())
+    .then(blob => {
+      if (name.search((/\.\w+/)) < 0) {
+        const ext: string = getExtnameFromBlobType(blob.type);
+        name = `${name}${ext}`;
+      }
+      return new File([blob], name, { type: blob.type });
+    });
+};
+
 export type { ModalSlotProps };
 export {
   clsx,
@@ -40,5 +70,7 @@ export {
   hideLoading,
   showModal,
   customError,
-  createElementWrapper
+  createElementWrapper,
+  convertBase64ToSingleFile,
+  getExtnameFromBlobType
 };

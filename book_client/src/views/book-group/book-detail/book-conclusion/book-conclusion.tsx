@@ -1,4 +1,4 @@
-import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback } from 'react';
+import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback, ReactElement } from 'react';
 import { Blocker, useLoaderData, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Button from 'components/button/button';
@@ -14,7 +14,7 @@ const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = st
 type FieldHightLightBoxPropsType = {
   label: string;
   value: string | number;
-  children?: React.ReactElement;
+  children?: ReactElement;
 };
 
 const FieldHightLightBox = ({
@@ -67,7 +67,7 @@ function BookConclusion(): JSX.Element {
   const navigate = useNavigate();
   const loaderData = useLoaderData() as CategoryListType;
   const publishedDay: string = useMemo(
-    () => (Boolean(data && data.publishedDay) ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
+    () => (data && data.publishedDay ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
     [data]
   );
 
@@ -80,7 +80,7 @@ function BookConclusion(): JSX.Element {
       : '';
   }, [data, categories]);
 
-  useModalNavigation({ body: bodyModal, footer: footerModal })
+  useModalNavigation({ body: bodyModal, footer: footerModal });
 
   const openFile = useCallback((fileName: string): void => {
     window.open(`${process.env.BASE_URL}/${fileName}`, '_blank');

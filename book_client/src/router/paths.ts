@@ -4,5 +4,6 @@ export default Object.freeze({
   LOGIN: '/login',
   CATEGORY: 'category',
   ID: ':id',
-  BOOK: 'book'
+  BOOK: 'book',
+  USER: 'user',
 });

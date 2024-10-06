@@ -14,7 +14,7 @@ class DataTransfer {
      * Bolt on DataTransferItemList things so we can manipulate and reuse it.
      */
     const fileListProxy = new Proxy(fileList, {
-      get(target, prop, receiver) {
+      get(target, prop) {
         if (prop === 'add') {
           return (x: any) => {
             arr.push(x);

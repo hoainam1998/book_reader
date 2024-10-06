@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, DependencyList } from 'react';
 import { customError } from 'utils';
 
@@ -71,6 +73,19 @@ export const required: ValidateFunction =
     return errorObj;
   };
 
+export const email: ValidateFunction =
+  (...args) =>
+  <T>(currentValue: any, state: T, field: string) => {
+    const message: string = args[0] ? args[0] as string: '';
+    // I copy this regex at https://github.com/logaretm/vee-validate/blob/main/packages/rules/src/email.ts
+    const emailRE = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\\-]*\.)+[A-Z]{2,}$/i;
+
+    return {
+      error: currentValue ? !emailRE.test(currentValue) : false,
+      message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is not valid!`,
+    };
+  };
+
 export const maxLength: ValidateFunction =
   (...args) => {
     return {
@@ -93,7 +108,7 @@ export const maxLength: ValidateFunction =
           }
 
           if (typeof args[1] === 'string') {
-            message = args[1] as unknown as string;
+            message = args[1] as string;
           } else {
             throw customError('Second argument is not string!');
           }
@@ -101,6 +116,7 @@ export const maxLength: ValidateFunction =
           throw customError('Length are not provide!');
         }
 
+        // eslint-disable-next-line no-use-before-define
         objectValidate[field].max = max;
 
         const errorObj: ErrorFieldInfo = {
@@ -117,8 +133,8 @@ export const maxLength: ValidateFunction =
 
         return errorObj;
       }
-    }
-}
+    };
+};
 
 const validateCompact = (validates: ((value?: any) => void)[]): (() => void) => {
   return () => validates.forEach((validate) => validate());
@@ -161,9 +177,10 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
     const validateFuncs: ((value: any) => void)[] = rulesEntries.map(([key, validateRule]: [string, R]) => {
       const keyValidateInfo: ValidateErrorInfo = objectValidate[key];
       const validateRulePair = Object.entries(validateRule as ArrayLike<R>)
-        .reduce((obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
+        .reduce(
+          (obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
           if (validateInfo instanceof Function) {
-            if (['required', 'maxLength'].includes(validateName)) {
+            if (['required', 'maxLength', 'email'].includes(validateName)) {
               obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
             } else {
               obj[validateName] = customValidate(validateInfo);

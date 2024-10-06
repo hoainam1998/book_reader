@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { ChangeEvent, DependencyList } from 'react';
 import useValidate, {
   ValidateFunction,
@@ -7,7 +8,8 @@ import useValidate, {
   ValidateName
 } from './useValidate';
 
-export type RuleType<T> = Record<keyof T, Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>>;
+export type RuleType<T> =
+  Record<keyof T, Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>>;
 
 export type FieldValidateProps<T = any> = {
   value: T;
@@ -38,7 +40,7 @@ const validateValue = (event: ChangeEvent): any => {
     if (!elementTargetValue
       && (event.currentTarget as HTMLInputElement)?.files
       && (event.currentTarget as HTMLInputElement)?.files!.length > 0) {
-        const fileList =  Array.from((event.currentTarget as HTMLInputElement)?.files || []);
+        const fileList = Array.from((event.currentTarget as HTMLInputElement)?.files || []);
         return fileList[0].name;
     } else {
       return elementTargetValue;
@@ -86,7 +88,6 @@ export default <T extends Object, R>(
     formControlProps[key] = {
       value: validateObject.values[key],
       onChange: <O extends HTMLInputElement>(arg: ChangeEvent<O> | ValueType): void => {
-
         const currentValue = validateValue(arg as any);
         validateObject[key].watch!(currentValue, key);
       },
@@ -98,7 +99,7 @@ export default <T extends Object, R>(
       watch: (currentValue: ValueType): void => {
         validateObject[key].watch!(currentValue, key);
       }
-    }
+    };
   });
 
   return formControlProps;

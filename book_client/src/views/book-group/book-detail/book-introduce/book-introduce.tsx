@@ -87,7 +87,7 @@ function BookIntroduce(): JSX.Element {
       if (!haveFetched()) {
         quillCreator();
       }
-    }
+    };
   });
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {

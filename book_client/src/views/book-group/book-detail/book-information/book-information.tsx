@@ -19,8 +19,10 @@ import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
 import store, { CurrentStoreType, Image } from '../../storage';
 import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
-import './style.scss';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import { convertBase64ToSingleFile, getExtnameFromBlobType } from 'utils';
+import './style.scss';
+
 const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate } = store;
 
 type CategoryOptionsType = {
@@ -51,7 +53,8 @@ const state: BookStateType = {
 };
 
 /**
- * Convert base64 image string list to promise all file list. List file return by this function will be re-assign to input type file.
+ * Convert base64 image string list to promise all file list.
+ * List file return by this function will be re-assign to input type file.
  *
  * @param {Image[]} base64String - base64 string chain.
  * @returns {Promise<File[]>} - promise all file list.
@@ -68,12 +71,6 @@ const convertBase64ImageToFile = (base64String: Image[]): Promise<File[]> => {
   return Promise.all(imagesPromise);
 };
 
-const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
-  return fetch(imageBase64String)
-    .then(res => res.blob())
-    .then(blob => new File([blob], name, { type: blob.type }));
-};
-
 /**
  * Convert url to promise file. File return by this function will be re-assign to input type file.
  *
@@ -84,7 +81,8 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
   return fetch(filePath)
     .then((res) => res.blob())
     .then((blob) => {
-      const fileName: string = `${name}${blob.type.match(/(?=\/)(.\w+)/g)![0].replace('/', '.')}`;
+      const extName: string = getExtnameFromBlobType(blob.type);
+      const fileName: string = `${name}${extName}`;
       return new File([blob], fileName);
   });
 };

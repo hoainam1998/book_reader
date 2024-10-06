@@ -1,7 +1,20 @@
 .input-wrapper {
   display: inline-block;
+  position: relative;
+  width: 100%;
+
   & > .limit {
     font-size: 12px;
     float: right;
+  }
+
+  .eye-button {
+    background-color: $white-color;
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    height: 94%;
+    width: 30px;
   }
 }

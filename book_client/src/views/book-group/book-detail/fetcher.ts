@@ -13,6 +13,10 @@ export type CategoryListType = {
   };
 };
 
+const shouldRevalidateBookLoader = (): boolean => {
+  return [1, 3].includes((StepStorage.getItem() || 1));
+};
+
 const loadAllCategory = (): Promise<AxiosResponse | CategoryListType> => {
   if (shouldRevalidateBookLoader()) {
     const body: RequestBody = {
@@ -67,7 +71,7 @@ const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
 
 const getAllBookName = (): Promise<AxiosResponse> => {
   return BookService.graphql('get-all-book-name', {
-    query: `query GetAllBookName { book { allName } }`
+    query: 'query GetAllBookName { book { allName } }'
   });
 };
 
@@ -102,10 +106,6 @@ const saveIntroduceFile = (html: string, json: string, fileName: string, bookId:
     bookId
   };
   return BookService.graphql('/save-introduce', body);
-};
-
-const shouldRevalidateBookLoader = (): boolean => {
-  return [1, 3].includes((StepStorage.getItem() || 1));
 };
 
 export {

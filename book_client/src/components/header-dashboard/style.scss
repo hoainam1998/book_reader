@@ -1,0 +1,22 @@
+.header-dashboard {
+  display: flex;
+  align-items: center;
+  margin-bottom: 7px;
+  gap: 7px;
+
+  .add-new {
+    font-weight: bold;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .label-search {
+    display: none !important;
+  }
+
+  .btn-search {
+    border-radius: 5px;
+    width: 32px;
+    height: 32px;
+  }
+}

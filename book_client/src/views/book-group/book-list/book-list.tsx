@@ -1,12 +1,12 @@
-import { JSX, useCallback, useMemo, useState, useRef } from 'react';
+import { JSX, useCallback, useMemo } from 'react';
 import { AxiosResponse } from 'axios';
 import { format } from 'date-fns';
 import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
+import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import Input from 'components/form/form-control/input/input';
 import { bookPagination, getBookDetail } from './fetcher';
 import store from '../storage';
 import './style.scss';
@@ -56,11 +56,10 @@ const fields: Field[] = [
     }
   }
 ];
+let _keyword: string = '';
+let _pageSize: number = 10;
 
 function BookList(): JSX.Element {
-  const [isClear, setIsClear] = useState<boolean>(false);
-  const [keyword, setKeyword] = useState<string>('');
-  const oldKeyword = useRef<string>(keyword)
   const fetcher = useFetcher();
   const loaderData = useLoaderData() as AxiosResponse;
   const navigate = useNavigate();
@@ -104,49 +103,23 @@ function BookList(): JSX.Element {
   }, []);
 
   const fetchBookPagination = (pageSize: number, pageNumber: number): void => {
-    fetcher.submit({ pageSize, pageNumber, keyword });
+    _pageSize = pageSize;
+    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
   };
+
+  const search = useCallback((keyword: string) => {
+    _keyword = keyword;
+    fetchBookPagination(_pageSize, 1);
+  }, []);
 
   const previewFile = useCallback((pdf: string): void => {
     window.open(`${process.env.BASE_URL}/${pdf}`, '_blank');
   }, []);
 
-  const search = useCallback((): void => {
-    setIsClear(true);
-    oldKeyword.current = keyword;
-    fetcher.submit({ pageSize: 10, pageNumber: 1, keyword });
-  }, [keyword]);
-
-  const clear = useCallback((): void => {
-    setIsClear(false);
-    setKeyword('');
-    fetcher.submit({ pageSize: 10, pageNumber: 1, keyword: '' });
-  }, []);
-
-  const setClearFlag = useCallback((value: string) => {
-    if (oldKeyword.current && value !== oldKeyword.current) {
-      setIsClear(false);
-    }
-  }, []);
-
   return (
-    <section>
-      <div className="book-list-header">
-        <Button variant="success" className="add-new" onClick={() => navigate('new')}>+New</Button>
-        <Input
-          label=""
-          value={keyword}
-          name="search"
-          labelClass="label-search"
-          onChange={(e) => setClearFlag((e.target as any).value)}
-          onBlur={(value) => setKeyword(value as string)} />
-        {
-          !isClear
-          ?<Button variant="outline" className="btn-search" onClick={search}>&#128270;</Button>
-          :<Button variant="outline" className="btn-search" onClick={clear}>&#x2715;</Button>
-        }
-      </div>
-      <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination} key={keyword}>
+    <section className="book-list">
+      <HeaderDashboard add={() => navigate('new')} search={search} />
+      <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination} key={_keyword}>
         <Slot<BookType>
           name="avatar"
           render={(slotProp) => (

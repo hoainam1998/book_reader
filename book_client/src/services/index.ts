@@ -20,3 +20,4 @@ class Service {
 
 export const CategoryService = new Service('/category');
 export const BookService = new Service('/book');
+export const UserService = new Service('/user');

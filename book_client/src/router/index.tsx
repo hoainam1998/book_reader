@@ -14,9 +14,9 @@ const renderRoutes = (routes: RoutePropsUnion[]): JSX.Element[] => {
         <Route key={index} {...route as any}>
           { renderRoutes(route.children) }
         </Route>
-      )
+      );
     } else {
-      return <Route key={index} {...route as any} />
+      return <Route key={index} {...route as any} />;
     }
   });
 };
