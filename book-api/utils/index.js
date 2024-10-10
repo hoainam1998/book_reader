@@ -1,3 +1,4 @@
+const sendMail = require('./sendMail');
 /**
  * Return freezed object.
  *
@@ -20,6 +21,19 @@ const deepFreeze = (object) => {
  * @returns {object} - message object.
  */
 const messageCreator = (message) => ({ message });
+
+/**
+ * Return otp code.
+ *
+ * @returns {string} - otp number.
+ */
+const generateOtp = () => {
+  let otp = '';
+  for (let i = 0; i < 6; i++) {
+    otp += Math.round(Math.random() * 10);
+  }
+  return otp.substring(0, 6);
+};
 
 /**
  * Handle multiple promise by order.
@@ -60,5 +74,7 @@ const promiseAllSettledOrder = (promiseChain, success, error) => {
 module.exports = {
   deepFreeze,
   messageCreator,
-  promiseAllSettledOrder
+  promiseAllSettledOrder,
+  generateOtp,
+  sendMail
 };

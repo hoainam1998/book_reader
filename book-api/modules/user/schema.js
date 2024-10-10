@@ -1,52 +1,86 @@
-const { GraphQLObjectType, GraphQLString, GraphQLBoolean, GraphQLError, GraphQLID, GraphQLInt, GraphQLInputObjectType, GraphQLList } = require('graphql');
+const {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLBoolean,
+  GraphQLError,
+  GraphQLID,
+  GraphQLInt,
+  GraphQLInputObjectType,
+  GraphQLList,
+} = require('graphql');
 const { message } = require('#utils');
 const { messageCreator } = require('#utils');
-const { ResponseType, graphqlErrorOption, graphqlNotFoundErrorOption } = require('../common-schema');
+const {
+  ResponseType,
+  graphqlErrorOption,
+  graphqlNotFoundErrorOption,
+} = require('../common-schema');
 
 const userInformationFields = {
   userId: {
-    type: GraphQLID
+    type: GraphQLID,
   },
   email: {
-    type: GraphQLString
+    type: GraphQLString,
   },
   avatar: {
-    type: GraphQLString
+    type: GraphQLString,
   },
   mfaEnable: {
-    type: GraphQLBoolean
-  }
+    type: GraphQLBoolean,
+  },
 };
 
 const UserInformationInput = new GraphQLInputObjectType({
-  name: 'UserInformationInput',
+  name: "UserInformationInput",
   fields: {
-    ... userInformationFields,
+    ...userInformationFields,
     firstName: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     lastName: {
-      type: GraphQLString
-    }
-  }
+      type: GraphQLString,
+    },
+  },
 });
 
 const UserInformationUpdate = new GraphQLObjectType({
   name: 'UserInformationUpdate',
   fields: {
     email: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     avatar: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     mfaEnable: {
-      type: GraphQLBoolean
+      type: GraphQLBoolean,
     },
     firstName: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     lastName: {
+      type: GraphQLString,
+    },
+  },
+});
+
+const UserLoginInformation = new GraphQLObjectType({
+  name: 'UserLoginInformation',
+  fields: {
+    email: {
+      type: GraphQLString,
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+    mfaEnable: {
+      type: GraphQLBoolean,
+    },
+    name: {
+      type: GraphQLString,
+    },
+    apiKey: {
       type: GraphQLString
     }
   }
@@ -57,9 +91,9 @@ const UserInformation = new GraphQLObjectType({
   fields: {
     ...userInformationFields,
     name: {
-      type: GraphQLString
-    }
-  }
+      type: GraphQLString,
+    },
+  },
 });
 
 const query = new GraphQLObjectType({
@@ -70,23 +104,23 @@ const query = new GraphQLObjectType({
         name: 'UserPagination',
         fields: {
           list: {
-            type: new GraphQLList(UserInformation)
+            type: new GraphQLList(UserInformation),
           },
           total: {
-            type: GraphQLInt
-          }
-        }
+            type: GraphQLInt,
+          },
+        },
       }),
       args: {
         pageSize: {
-          type: GraphQLInt
+          type: GraphQLInt,
         },
         pageNumber: {
-          type: GraphQLInt
+          type: GraphQLInt,
         },
         keyword: {
-          type: GraphQLString
-        }
+          type: GraphQLString,
+        },
       },
       resolve: async (user, { pageSize, pageNumber, keyword }) => {
         try {
@@ -96,22 +130,22 @@ const query = new GraphQLObjectType({
           }
           return {
             list: result[0],
-            total: result[1][0].total
+            total: result[1][0].total,
           };
-        } catch(err) {
+        } catch (err) {
           if (err instanceof GraphQLError) {
             throw err;
           }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
+      },
     },
     detail: {
       type: UserInformationUpdate,
       args: {
         userId: {
-          type: GraphQLID
-        }
+          type: GraphQLID,
+        },
       },
       resolve: async (user, { userId }) => {
         try {
@@ -120,9 +154,59 @@ const query = new GraphQLObjectType({
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
+      },
+    },
+    login: {
+      type: UserLoginInformation,
+      args: {
+        email: {
+          type: GraphQLString
+        },
+        password: {
+          type: GraphQLString
+        }
+      },
+      resolve: async (user, { email, password }) => {
+        try {
+          const userLogin = await user.login(email, password);
+          if (userLogin) {
+            return { ...userLogin, email };
+          }
+          throw new GraphQLError('Can not found user', graphqlNotFoundErrorOption);
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      }
+    },
+    verifyOtp: {
+      type: new GraphQLObjectType({
+        name: 'VerifyOtp',
+        fields: {
+          verify: {
+            type: GraphQLBoolean
+          },
+          apiKey: {
+            type: GraphQLString
+          }
+        }
+      }),
+      args: {
+        email: {
+          type: GraphQLString
+        },
+        otp: {
+          type: GraphQLString
+        }
+      },
+      resolve: async (user, { email, otp }) => {
+        try {
+          return await user.verifyOtpCode(email, otp);
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
       }
     }
-  }
+  },
 });
 
 const mutation = new GraphQLObjectType({
@@ -132,32 +216,60 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         user: {
-          type: UserInformationInput
-        }
+          type: UserInformationInput,
+        },
       },
       resolve: async (user, args) => {
         try {
           await user.addUser(args.user);
           return messageCreator('Add user success!');
-        } catch(err) {
+        } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
+      },
     },
     updateMfaState: {
       type: ResponseType,
       args: {
         userId: {
-          type: GraphQLID
+          type: GraphQLID,
         },
         mfaEnable: {
-          type: GraphQLBoolean
-        }
+          type: GraphQLBoolean,
+        },
       },
       resolve: async (user, { userId, mfaEnable }) => {
         try {
           await user.updateMfaState(mfaEnable, userId);
-          return messageCreator(`Update mfs state for user_id = ${userId} success!`);
+          return messageCreator(
+            `Update mfs state for user_id = ${userId} success!`
+          );
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      },
+    },
+    updateOtpCode: {
+      type: new GraphQLObjectType({
+        name: 'Otp',
+        fields: {
+          otp: {
+            type: GraphQLString
+          },
+          message: {
+            type: GraphQLString
+          }
+        }
+      }),
+      args: {
+        email: {
+          type: GraphQLString
+        }
+      },
+      resolve: async (user, { email }) => {
+        try {
+          const otp = await user.updateOtpCode(email);
+          return { ...messageCreator('Otp code has sent to your email!'), otp };
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -167,8 +279,8 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         user: {
-          type: UserInformationInput
-        }
+          type: UserInformationInput,
+        },
       },
       resolve: async (user, args) => {
         try {
@@ -177,28 +289,30 @@ const mutation = new GraphQLObjectType({
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
+      },
     },
     delete: {
       type: ResponseType,
       args: {
         userId: {
-          type: GraphQLID
-        }
+          type: GraphQLID,
+        },
       },
       resolve: async (user, { userId }) => {
         try {
           await user.deleteUser(userId);
-          return messageCreator(`Delete user with user_id = ${userId} success!`);
+          return messageCreator(
+            `Delete user with user_id = ${userId} success!`
+          );
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 module.exports = {
   query,
-  mutation
+  mutation,
 };

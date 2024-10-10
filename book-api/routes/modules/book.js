@@ -17,6 +17,7 @@ const cpUpload = formable.fields([
   { name: 'images', maxCount: 8 },
   { name: 'avatar', maxCount: 1 }
 ]);
+
 const corsOptionsDelegate = (req, callback) => {
   const corsOptions = {
     origin: `${req.protocol}://${req.get('host')}`
