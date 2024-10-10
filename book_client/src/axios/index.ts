@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { showLoading, hideLoading } from 'utils';
+import auth from 'store/auth';
 
 const Api: AxiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
@@ -7,6 +8,7 @@ const Api: AxiosInstance = axios.create({
 });
 
 Api.interceptors.request.use((config) => {
+  config.headers['Authorization'] = auth.ApiKey;
   showLoading();
   return config;
 }, (error) => {

@@ -44,6 +44,7 @@ function Login(): JSX.Element {
         .then(res => {
           auth.saveUserLogin(res.data.user.login);
           if (res.data.user.login.mfaEnable === false) {
+            auth.saveApiKey(res.data.user.login.apiKey);
             navigate(path.HOME);
           } else {
             navigate(path.OTP);

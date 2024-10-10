@@ -9,6 +9,7 @@ import { sendOtp, verifyOtp } from './fetcher';
 import { showToast } from 'utils';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import path from 'paths';
+import auth from 'store/auth';
 import './style.scss';
 
 function VerifyOtp(): JSX.Element {
@@ -27,6 +28,7 @@ function VerifyOtp(): JSX.Element {
     verifyOtp(email, otp as string)
       .then((res) => {
         if (res.data.user.verifyOtp.verify) {
+          auth.saveApiKey(res.data.user.verifyOtp.apiKey);
           navigate(path.HOME);
         }
       })
