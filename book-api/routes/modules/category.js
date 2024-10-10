@@ -2,17 +2,18 @@ const Router = require('../router.js');
 const { execute } = require('graphql');
 const { validateQuery, validateResultExecute, upload } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
+const loginRequire = require('#auth/login-require');
 
 class CategoryRouter extends Router {
 
   constructor(express, schema) {
     super(express, schema);
-    this.post('/all', this._getAll);
-    this.post('/create', this._create);
-    this.post('/update', this._update);
-    this.post('/detail', this._getDetail);
-    this.post('/delete', this._delete);
-    this.post('/pagination', this._pagination);
+    this.post('/all', loginRequire, this._getAll);
+    this.post('/create', loginRequire, this._create);
+    this.post('/update', loginRequire, this._update);
+    this.post('/detail', loginRequire, this._getDetail);
+    this.post('/delete', loginRequire, this._delete);
+    this.post('/pagination', loginRequire, this._pagination);
   }
 
   @validateResultExecute(HTTP_CODE.OK)

@@ -1,5 +1,5 @@
 const { generateOtp } = require('#utils');
-const { sign, verify } = require('jsonwebtoken');
+const { sign } = require('jsonwebtoken');
 
 class UserService {
   _sql = null;

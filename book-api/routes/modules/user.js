@@ -4,6 +4,7 @@ const cors = require('cors');
 const { upload, validateQuery, validateResultExecute } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 const { sendMail, messageCreator } = require('#utils');
+const loginRequire = require('#auth/login-require');
 
 const corsOptionsDelegate = (req, callback) => {
   const corsOptions = {
@@ -15,12 +16,12 @@ const corsOptionsDelegate = (req, callback) => {
 class UserRouter extends Router {
   constructor(express, schema) {
     super(express, schema);
-    this.post('/add', this._addBook);
-    this.post('/pagination', this._pagination);
-    this.post('/update-mfa', this._updateMfaState);
-    this.post('/delete-user', this._deleteUser);
-    this.post('/user-detail', this._getUserDetail);
-    this.post('/update-user', this._updateUser);
+    this.post('/add', this._addUser);
+    this.post('/pagination', loginRequire, this._pagination);
+    this.post('/update-mfa', loginRequire, this._updateMfaState);
+    this.post('/delete-user', loginRequire, this._deleteUser);
+    this.post('/user-detail', loginRequire, this._getUserDetail);
+    this.post('/update-user', loginRequire,  this._updateUser);
     this.post('/send-otp', this._sendOtpCode);
     this.post('/update-otp', cors(corsOptionsDelegate), this._updateOtpCode);
     this.post('/login', this._login);
@@ -30,7 +31,7 @@ class UserRouter extends Router {
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
-  _addBook(req, res, next, schema) {
+  _addUser(req, res, next, schema) {
     const variables = {
       userId: Date.now(),
       firstName: req.body.first_name,
@@ -168,7 +169,7 @@ class UserRouter extends Router {
       .then((response) => response.json())
       .then((json) => {
         try {
-          sendMail(json.user.updateOtpCode.otp, json.user.updateOtpCode.email)
+          sendMail(json.user.updateOtpCode.otp, req.body.email)
           .then(
             () => {
               res.json({

@@ -34,6 +34,7 @@
   "imports": {
     "#utils": "./utils/index.js",
     "#decorators": "./decorators/index.js",
-    "#constants": "./constants/index.js"
+    "#constants": "./constants/index.js",
+    "#auth/*": "./auth/*.js"
   }
 }

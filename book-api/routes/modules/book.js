@@ -9,6 +9,7 @@ const {
   uploadPdf,
   upload
 } = require('#decorators');
+const loginRequire = require('#auth/login-require');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 const { messageCreator, promiseAllSettledOrder } = require('#utils');
 const formable = multer();
@@ -28,14 +29,14 @@ const corsOptionsDelegate = (req, callback) => {
 class BookRouter extends Router {
   constructor(express, schema) {
     super(express, schema);
-    this.post('/save-introduce', this._saveIntroduceHtmlFile);
-    this.post('/get-all-book-name', this._getAllBookName);
+    this.post('/save-introduce', loginRequire, this._saveIntroduceHtmlFile);
+    this.post('/get-all-book-name', loginRequire, this._getAllBookName);
     this.post('/save-book', cors(corsOptionsDelegate), this._saveBookInformation);
     this.post('/save-images', cors(corsOptionsDelegate), this._saveImages);
     this.post('/save-avatar', cors(corsOptionsDelegate), this._saveBookAvatar);
-    this.post('/detail', this._getBookDetail);
-    this.post('/save-book-info', cpUpload, this._processSaveBookInformation);
-    this.post('/pagination', this._paginationBook);
+    this.post('/detail', loginRequire, this._getBookDetail);
+    this.post('/save-book-info', loginRequire, cpUpload, this._processSaveBookInformation);
+    this.post('/pagination', loginRequire, this._paginationBook);
   }
 
   @validateResultExecute(HTTP_CODE.CREATED)
