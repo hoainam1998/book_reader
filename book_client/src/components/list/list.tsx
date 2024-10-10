@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Fragment, JSX } from 'react';
 
 type ListPropsType<T> = {

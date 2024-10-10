@@ -1,9 +1,14 @@
 import { JSX, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LoginWrapper from 'components/login-wrapper/login-wrapper';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, email } from 'hooks/useValidate';
+import auth from 'store/auth';
+import { login } from './fetcher';
+import path from 'paths';
+import { showToast } from 'utils';
 import './style.scss';
 
 type LoginFieldType = {
@@ -30,13 +35,23 @@ function Login(): JSX.Element {
     handleSubmit,
     validate
   } = useForm<LoginFieldType, RuleType<LoginFieldType>>(state, rules, formId);
+  const navigate = useNavigate();
 
-  const onSubmit = useCallback(() => {
+  const onSubmit = useCallback((): void => {
     handleSubmit();
     if (!validate.error) {
-      // Todo
+      login(email.value, password.value)
+        .then(res => {
+          auth.saveUserLogin(res.data.user.login);
+          if (res.data.user.login.mfaEnable === false) {
+            navigate(path.HOME);
+          } else {
+            navigate(path.OTP);
+          }
+        })
+        .catch(error => showToast('OTP', error.response.data.message));
     }
-  }, []);
+  }, [email.value, password.value]);
 
   return (
     <LoginWrapper>

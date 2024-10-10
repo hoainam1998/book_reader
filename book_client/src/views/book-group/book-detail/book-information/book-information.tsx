@@ -17,7 +17,7 @@ import Form from 'components/form/form';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from '../useModalNavigation';
-import store, { CurrentStoreType, Image } from '../../storage';
+import store, { CurrentStoreType, Image } from 'store/book';
 import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType } from 'utils';

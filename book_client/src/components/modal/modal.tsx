@@ -42,7 +42,7 @@ function Modal({ onClose, children, title, size = 'md' }: ModalPropsType): JSX.E
   if (Children.count(children) > 0) {
     Children.forEach(children as JSX.Element[], (child: JSX.Element) => {
       if (child.props.children.length > 0) {
-        child.props.children.forEach((c: JSX.Element) => slotMapping(c, onClose, slots))
+        child.props.children.forEach((c: JSX.Element) => slotMapping(c, onClose, slots));
       } else {
         slotMapping(child, onClose, slots);
       }

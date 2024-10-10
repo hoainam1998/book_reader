@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   useCallback,
   useMemo,
@@ -154,7 +155,8 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
     return page.data.page === 1 ? pages[0] : page;
   }, [pages, page]);
 
-  const pageList = useMemo<(Node<PageButton> | DotPageButton)[]>(() => renderPagination(initPage, pages), [initPage, pageNumber]);
+  const pageList = useMemo<(Node<PageButton> | DotPageButton)[]>
+    (() => renderPagination(initPage, pages), [initPage, pageNumber]);
 
   const { disablePrevious, disableNext } = useMemo<{ disablePrevious: boolean; disableNext: boolean }>(() => ({
     disablePrevious: previousSelectedPage!.data.page === pages[0].data.page,

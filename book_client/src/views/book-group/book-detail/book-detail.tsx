@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { JSX, useSyncExternalStore } from 'react';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
@@ -7,19 +8,18 @@ import {
   loadAllCategory,
   shouldRevalidateBookLoader
 } from './fetcher';
-import store, { CurrentStoreType } from '../storage';
+import store, { CurrentStoreType } from 'store/book';
 import BlockerProvider from './blocker-context';
 import './style.scss';
-const { subscribe, getSnapshot, updateStep } = store;
 
 function BookDetail(): JSX.Element {
-  const { step, disableStep }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { step, disableStep }: CurrentStoreType  = useSyncExternalStore(store.subscribe, store.getSnapshot);
 
   return (
     <BlockerProvider>
       <Stepper
         stepNumber={3}
-        onSwitch={updateStep}
+        onSwitch={store.updateStep}
         activeStep={step}
         disableStep={disableStep}
         className="book-detail-stepper">

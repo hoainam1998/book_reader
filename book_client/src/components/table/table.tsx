@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   CSSProperties,
   Children,
@@ -102,7 +103,12 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
       </div>
       { totalPageNumber > 0 &&
         <div className="table-footer">
-          <Select<number> value={pageSize} onChange={pageSizeChange} options={options} name="page-size" selectClass="page-size" />
+          <Select<number>
+            value={pageSize}
+            onChange={pageSizeChange}
+            options={options}
+            name="page-size"
+            selectClass="page-size" />
           <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
         </div>
       }

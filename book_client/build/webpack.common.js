@@ -3,7 +3,6 @@ const svgToMiniDataURI = require('mini-svg-data-uri');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { DefinePlugin } = require('webpack');
-const path = require('path');
 const { getResolvePath, getAssetPath } = require('./utils.js');
 const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
 const { dev } = require('../config');
@@ -12,7 +11,7 @@ const { dev } = require('../config');
 // if it exist, then app is running by docker.
 const env = {
   'process.env': JSON.stringify(dev),
-  ...Boolean(process.env.BASE_URL) ? {
+  ...process.env.BASE_URL ? {
     'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL)
   } : {}
 };
@@ -47,7 +46,9 @@ module.exports = {
       'interfaces': getResolvePath('../src/interfaces'),
       'hooks': getResolvePath('../src/hooks'),
       'services': getResolvePath('../src/services'),
-      'storage': getResolvePath('../src/storage')
+      'storage': getResolvePath('../src/storage'),
+      'store': getResolvePath('../src/store'),
+      'paths': getResolvePath('../src/router/paths.ts'),
     }
   },
   module: {

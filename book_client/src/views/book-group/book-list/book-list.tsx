@@ -8,7 +8,7 @@ import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { bookPagination, getBookDetail } from './fetcher';
-import store from '../storage';
+import store from 'store/book';
 import './style.scss';
 const { updateData } = store;
 

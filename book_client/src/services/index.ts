@@ -2,7 +2,7 @@ import Api from '../axios';
 import type { AxiosResponse } from '../axios';
 
 export type RequestBody = {
-  query: string;
+  query?: string;
   [key: string]: any;
 } | FormData;
 

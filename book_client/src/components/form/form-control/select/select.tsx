@@ -25,6 +25,7 @@ type SelectPropsType<T, R> = {
   labelClass?: string;
   selectClass?: string;
   label?: string;
+  // eslint-disable-next-line no-unused-vars
   onChange: (value: T) => void;
 } & Omit<Partial<FieldValidateProps<T>>, 'onChange'>;
 
@@ -65,7 +66,8 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
   return (
     <FormControl name={name} label={label || ''} labelClass={labelClass} className={className} errors={errors}>
       <div className={clsx('select-wrapper', selectClass)}>
-        <select name={name} id={name} className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
+        <select name={name} id={name}
+        className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
           value={value} onChange={(event) => onChange(event.target.value as T)} data-testid="select">
           {
             optionsFormatted.map((option, index) =>

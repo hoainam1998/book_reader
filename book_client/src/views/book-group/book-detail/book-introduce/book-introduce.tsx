@@ -2,7 +2,7 @@ import { JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } 
 import Quill, { QuillOptions } from 'quill';
 import { Op } from 'quill/core';
 import Button from 'components/button/button';
-import store, { CurrentStoreType } from '../../storage';
+import store, { CurrentStoreType } from 'store/book';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
 import useModalNavigation from '../useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';

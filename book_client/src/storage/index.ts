@@ -18,6 +18,13 @@ export type BookInfoType = {
   };
 };
 
+export type UserLogin = {
+  name: string;
+  email: string;
+  avatar: string;
+  mfaEnable: boolean;
+};
+
 class LocalStorage<T> {
   private readonly _name: string;
 
@@ -41,3 +48,5 @@ class LocalStorage<T> {
 export const StepStorage = new LocalStorage<number>('step');
 export const DisableStepStorage = new LocalStorage<number | false>('disable-step');
 export const BookInfoStorage = new LocalStorage<BookInfoType>('book-info');
+export const UserStorage = new LocalStorage<UserLogin>('user');
+export const ApiKeyStorage = new LocalStorage<string>('api-key');

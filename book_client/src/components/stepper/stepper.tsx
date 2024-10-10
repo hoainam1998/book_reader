@@ -13,12 +13,13 @@ import { clsx, customError } from 'utils';
 import './style.scss';
 
 type StepperPropsType = {
+  // eslint-disable-next-line no-unused-vars
   onSwitch: (step: number) => void;
   stepNumber: number;
   className?: string;
   activeStep: number;
   disableStep: number | false;
-  children: React.ReactElement | React.ReactElement[];
+  children: ReactElement | ReactElement[];
 };
 
 type StepType = {
@@ -30,8 +31,12 @@ type StepType = {
 };
 
 type StepContentPropsType = {
-  children: React.ReactElement;
+  children: ReactElement;
   step: number;
+};
+
+export function StepContent({ children }: StepContentPropsType): JSX.Element {
+  return children;
 };
 
 const isStep = (child: ReactElement): boolean => {
@@ -40,11 +45,14 @@ const isStep = (child: ReactElement): boolean => {
     && child.props.step > 0;
 };
 
-export function StepContent({ children }: StepContentPropsType): JSX.Element {
-  return children;
-};
-
-function Stepper({ stepNumber, className, children, activeStep, disableStep, onSwitch }: StepperPropsType): JSX.Element {
+function Stepper({
+  stepNumber,
+  className,
+  children,
+  activeStep,
+  disableStep,
+  onSwitch
+}: StepperPropsType): JSX.Element {
   const stepsInit = useMemo<StepType[]>(() => {
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({
@@ -80,7 +88,7 @@ function Stepper({ stepNumber, className, children, activeStep, disableStep, onS
     const uniqueStep: number[] = [];
 
     return (Children.toArray(children) as ReactElement[])
-      .sort((a, _): number => isStep(a) ? -1 : 1)
+      .sort((a): number => isStep(a) ? -1 : 1)
       .map(child => {
         if (isStep(child)) {
           const order: number = child.props.step - 1;
@@ -103,8 +111,7 @@ function Stepper({ stepNumber, className, children, activeStep, disableStep, onS
       .sort((a, b): number => a.step - b.step)
       .map(({ child, isStepComponent, step }) => !isStepComponent
         ? stepValidate(<StepContent step={step}>{child}</StepContent>, uniqueStep)
-        : stepValidate(child, uniqueStep))
-      [step - 1];
+        : stepValidate(child, uniqueStep))[step - 1];
   }, [children, step]);
 
   const onSwitchStep = useCallback((idx: number): void => {

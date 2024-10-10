@@ -7,6 +7,8 @@ import Category, { loadInitCategory } from 'views/category-group/category';
 import BookDetail, { loadAllCategory, shouldRevalidateBookLoader } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import ApiError from 'components/error/api-error/api-error';
+import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
+import { LoginRequire, Logged  } from '../guard';
 import path from './paths';
 
 export type RoutePropsUnion = Omit<RouteProps, 'children'> & {
@@ -20,11 +22,15 @@ const routes: RoutePropsUnion[] = [
   },
   {
     path: path.LOGIN,
-    element: <Login />
+    element: <Logged><Login /></Logged>
+  },
+  {
+    path: path.OTP,
+    element: <LoginRequire><VerifyOtp /></LoginRequire>
   },
   {
     path: path.HOME,
-    element: <Home />,
+    element: <LoginRequire><Home /></LoginRequire>,
     handle: {
       crumb: (match: UIMatch) =>
         <Link key={match.pathname} to={match.pathname}>

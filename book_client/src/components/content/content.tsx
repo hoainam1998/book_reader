@@ -4,6 +4,7 @@ import Footer from 'components/footer/footer';
 import './style.scss';
 
 type Handle = {
+  // eslint-disable-next-line no-unused-vars
   crumb?: (match: UIMatch) => JSX.Element;
 };
 

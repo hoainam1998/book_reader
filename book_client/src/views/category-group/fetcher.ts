@@ -55,7 +55,7 @@ export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
   return handlePromise(CategoryService.graphql('delete', body));
 };
 
-export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
+export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> | null => {
   const url: URL = new URL(request.url);
   const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');

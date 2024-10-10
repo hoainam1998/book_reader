@@ -99,7 +99,7 @@ function Input({
   }, [inputType]);
 
   useEffect(() => {
-    if (value !== (null && undefined) && type === 'file') {
+    if (value !== null && value !== undefined && type === 'file') {
       if (Array.isArray(value)) {
         if (value.every(file => file instanceof File)) {
           const dataTransfer = new DataTransfer();

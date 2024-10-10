@@ -2,7 +2,7 @@ import { JSX } from 'react';
 import { NavLink } from 'react-router-dom';
 import List from 'components/list/list';
 import { clsx } from 'utils';
-import path from '../../router/paths';
+import path from 'paths';
 import './style.scss';
 
 type NavLinkPropsType = {
