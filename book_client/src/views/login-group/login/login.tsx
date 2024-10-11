@@ -4,7 +4,7 @@ import LoginWrapper from 'components/login-wrapper/login-wrapper';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import useForm, { RuleType } from 'hooks/useForm';
-import { required, email } from 'hooks/useValidate';
+import { required, email, matchPattern } from 'hooks/useValidate';
 import auth from 'store/auth';
 import { login } from './fetcher';
 import path from 'paths';
@@ -23,7 +23,10 @@ const state: LoginFieldType = {
 
 const rules: RuleType<LoginFieldType> = {
   email: { required, email },
-  password: { required }
+  password: {
+    required,
+    matchPattern: matchPattern(/([A-Za-z0-9@$]{8})/g, 'Format password is wrong!')
+  }
 };
 
 const formId: string = 'login-form';

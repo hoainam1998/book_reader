@@ -9,7 +9,7 @@ export type ErrorFieldInfo = {
   max?: number;
 };
 
-export type ValidateName = 'required' | 'maxLength';
+export type ValidateName = 'required' | 'maxLength' | 'email' | 'matchPattern';
 
 export type ValidateErrorInfo = {
   [key: string]: ErrorFieldInfo | boolean | number | Function | Array<string> | undefined;
@@ -34,8 +34,10 @@ export type ValidateInfo = {
 };
 
 export type ValidateFunction = (
-  ...args: (string | number | (<T>(state: T) => boolean))[]
+  ...args: (string | number | RegExp | (<T>(state: T) => boolean))[]
 ) => ValidateProcess | ValidateInfo;
+
+const BUILTIN_VALIDATOR: string[] = ['required', 'maxLength', 'email', 'matchPattern'];
 
 const customValidate = (validateCallback: any): ValidateProcess =>
   (currentValue: string) => validateCallback(currentValue);
@@ -78,11 +80,23 @@ export const email: ValidateFunction =
   <T>(currentValue: any, state: T, field: string) => {
     const message: string = args[0] ? args[0] as string: '';
     // I copy this regex at https://github.com/logaretm/vee-validate/blob/main/packages/rules/src/email.ts
-    const emailRE = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\\-]*\.)+[A-Z]{2,}$/i;
+    const emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\\-]*\.)+[A-Z]{2,}$/i;
 
     return {
-      error: currentValue ? !emailRE.test(currentValue) : false,
+      error: currentValue ? !emailRegex.test(currentValue) : false,
       message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is not valid!`,
+    };
+  };
+
+export const matchPattern: ValidateFunction =
+  (...args) =>
+  <T>(currentValue: any, state: T, field: string) => {
+    const pattern: RegExp = args[0] as RegExp;
+    const message: string = args[1] ? args[1] as string : '';
+
+    return {
+      error: currentValue ? currentValue.search(pattern) < 0 : false,
+      message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is not match with pattern!`,
     };
   };
 
@@ -180,7 +194,7 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
         .reduce(
           (obj: Record<string, ValidateFunction | ValidateProcess>, [validateName, validateInfo]: [string, R]) => {
           if (validateInfo instanceof Function) {
-            if (['required', 'maxLength', 'email'].includes(validateName)) {
+            if (BUILTIN_VALIDATOR.includes(validateName)) {
               obj[validateName] = validateInfo as ValidateFunction | ValidateProcess;
             } else {
               obj[validateName] = customValidate(validateInfo);
