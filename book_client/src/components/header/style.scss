@@ -23,3 +23,32 @@
     font-size: 14px;
   }
 }
+
+.menu-dropdown {
+  position: fixed;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  border-radius: 4px;
+
+  .menu-content {
+    border-radius: 4px;
+    & > li {
+      overflow: hidden;
+      padding: 5px 10px;
+      border-bottom: 1px solid $black-color;
+      cursor: pointer;
+      font-size: 14px;
+      color: $title-pop-up-color;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+
+      &:hover {
+        color: $primary-button-color;
+      }
+
+      &:last-of-type {
+        border: none;
+      }
+    }
+  }
+}

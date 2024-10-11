@@ -11,12 +11,16 @@ import useComponentDidMount from 'hooks/useComponentDidMount';
 import path from 'paths';
 import auth from 'store/auth';
 import './style.scss';
+const { subscribe, getSnapshot } = store;
 
 function VerifyOtp(): JSX.Element {
+  const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
+  if (!userLogin) {
+    return <></>;
+  }
+  const { email } = userLogin;
   const inputRef = useRef<InputRefType>(null);
   const navigate = useNavigate();
-  const { subscribe, getSnapshot } = store;
-  const { email }: UserLogin = useSyncExternalStore(subscribe, getSnapshot);
 
   const _sendOtp = useCallback(() => {
     sendOtp(email)

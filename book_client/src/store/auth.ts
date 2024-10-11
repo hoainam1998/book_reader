@@ -3,7 +3,7 @@ import { UserLogin, ApiKeyStorage, UserStorage } from 'storage';
 
 const user: UserLogin = UserStorage.getItem();
 
-class AuthStore extends Store<UserLogin> {
+class AuthStore extends Store<UserLogin | null> {
   private isLogged: boolean = !!user;
 
   constructor() {
@@ -26,6 +26,13 @@ class AuthStore extends Store<UserLogin> {
     UserStorage.setItem(user);
     this.CurrentStore = user;
     this.isLogged = true;
+    this.emitChange();
+  }
+
+  logout(): void {
+    UserStorage.delete();
+    this.CurrentStore = null;
+    this.isLogged = false;
     this.emitChange();
   }
 }
