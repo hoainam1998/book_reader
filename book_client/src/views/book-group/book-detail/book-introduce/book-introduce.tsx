@@ -4,10 +4,18 @@ import { Op } from 'quill/core';
 import Button from 'components/button/button';
 import store, { CurrentStoreType } from 'store/book';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
-import useModalNavigation from '../useModalNavigation';
+import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import './style.scss';
-const { subscribe, getSnapshot, updateStep, updateDisableStep, updateData, updateConditionNavigate } = store;
+const {
+  subscribe,
+  getSnapshot,
+  updateStep,
+  updateDisableStep,
+  updateData,
+  updateConditionNavigate,
+  deleteAllStorage
+} = store;
 
 const editSelector: string = 'book-introduce-editor';
 
@@ -44,7 +52,7 @@ function BookIntroduce(): JSX.Element {
   const [quill, setQuill] = useState<Quill | null>(null);
   const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
-  useModalNavigation();
+  useModalNavigation({ onLeaveAction: deleteAllStorage });
 
   const name: string = useMemo((): string => {
     if (data && Object.hasOwn(data, 'name')) {

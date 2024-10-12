@@ -7,10 +7,14 @@ import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-
 import Switch from 'components/form/form-control/switch/switch';
 import Button from 'components/button/button';
 import useForm, { RuleType } from 'hooks/useForm';
+import useModalNavigation from 'hooks/useModalNavigation';
 import { required, email } from 'hooks/useValidate';
 import { addUser, loadUserDetail, updateUser } from '../fetcher';
 import { convertBase64ToSingleFile } from 'utils';
+import BlockerProvider from 'contexts/blocker';
+import paths from 'paths';
 import './style.scss';
+import { AxiosResponse } from 'axios';
 
 type UserType = {
   firstName: string;
@@ -39,30 +43,35 @@ const rules: RuleType<UserType> = {
 const formId: string = 'user_form';
 
 function UserDetail(): JSX.Element {
-  const {
-    firstName,
-    lastName,
-    avatar,
-    email,
-    mfa,
-    handleSubmit,
-    validate,
-  } = useForm<UserType, RuleType<UserType>>(state, rules, formId);
+  const { firstName, lastName, avatar, email, mfa, reset, handleSubmit, validate } = useForm<
+    UserType,
+    RuleType<UserType>
+  >(state, rules, formId);
   const loaderData = useLoaderData() as any;
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const onSubmit= useCallback((formData: FormData) => {
+  const UserForm = useCallback(({ children }: { children: JSX.Element }): JSX.Element => {
+    useModalNavigation({ onLeaveAction: reset });
+    return children;
+  }, []);
+
+  const backToUserList = useCallback(() => {
+    navigate(`${paths.HOME}/${paths.USER}`);
+  }, []);
+
+  const onSubmit = useCallback((formData: FormData) => {
     handleSubmit();
     if (!validate.error) {
-      if (id) {
-        formData.append('userId', id);
-        updateUser(formData)
-          .then(() => navigate('/home/user'));
-      } else {
-        addUser(formData)
-          .then(() => navigate('/home/user'));
-      }
+      const saveUser = (): Promise<AxiosResponse> => {
+        if (id) {
+          formData.append('userId', id);
+          return updateUser(formData);
+        } else {
+          return addUser(formData);
+        }
+      };
+      saveUser().then(backToUserList);
     }
   }, []);
 
@@ -73,41 +82,48 @@ function UserDetail(): JSX.Element {
       lastName.watch(user.lastName);
       email.watch(user.email);
       mfa.watch(user.mfaEnable);
-      convertBase64ToSingleFile(user.avatar, `${user.firstName}-${user.lastName}.png`)
-        .then(res => {
-          if (res.type.includes('image')) {
-            avatar.watch(res);
-          }
-        });
+      convertBase64ToSingleFile(user.avatar, `${user.firstName}-${user.lastName}`).then((res) => {
+        if (res.type.includes('image')) {
+          avatar.watch(res);
+        }
+      });
     }
   }, []);
 
   return (
-    <section className="user-detail">
-      <Button variant="outline" onClick={() => navigate('/home/user')}>&#8592;Back</Button>
-      <Form id={formId} onSubmit={onSubmit} className="user-form">
-        <Grid lg={2} style={{
-          marginBottom: 15,
-          gap: 17
-        }}>
-          <GridItem>
-            <Input {...firstName} label="First name" name="first_name" />
-          </GridItem>
-          <GridItem>
-            <Input {...lastName} label="Last name" name="last_name" />
-          </GridItem>
-          <GridItem>
-            <Input {...email} label="Email" type="email" name="email" />
-          </GridItem>
-          <GridItem>
-            <FileDragDropUpload multiple={false} {...avatar} label="Avatar" name="avatar" />
-          </GridItem>
-          <GridItem>
-            <Switch {...mfa} label="Mfa" name="mfa" />
-          </GridItem>
-        </Grid>
-      </Form>
-    </section>
+    <BlockerProvider isNavigate={validate.dirty}>
+      <UserForm>
+        <section className="user-detail">
+          <Button variant="outline" onClick={backToUserList}>
+            &#8592;Back
+          </Button>
+          <Form id={formId} onSubmit={onSubmit} className="user-form">
+            <Grid
+              lg={2}
+              style={{
+                marginBottom: 15,
+                gap: 17
+              }}>
+              <GridItem>
+                <Input {...firstName} label="First name" name="first_name" />
+              </GridItem>
+              <GridItem>
+                <Input {...lastName} label="Last name" name="last_name" />
+              </GridItem>
+              <GridItem>
+                <Input {...email} label="Email" type="email" name="email" />
+              </GridItem>
+              <GridItem>
+                <FileDragDropUpload multiple={false} {...avatar} label="Avatar" name="avatar" />
+              </GridItem>
+              <GridItem>
+                <Switch {...mfa} label="Mfa" name="mfa" />
+              </GridItem>
+            </Grid>
+          </Form>
+        </section>
+      </UserForm>
+    </BlockerProvider>
   );
 }
 

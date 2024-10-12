@@ -4,9 +4,10 @@ import { format } from 'date-fns';
 import Button from 'components/button/button';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
-import useModalNavigation from '../useModalNavigation';
+import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
 import { showToast, ModalSlotProps } from 'utils';
+import paths from 'paths';
 import './style.scss';
 import { CategoryListType } from '../fetcher';
 const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
@@ -80,7 +81,7 @@ function BookConclusion(): JSX.Element {
       : '';
   }, [data, categories]);
 
-  useModalNavigation({ body: bodyModal, footer: footerModal });
+  useModalNavigation({ body: bodyModal, footer: footerModal, onLeaveAction: deleteAllStorage });
 
   const openFile = useCallback((fileName: string): void => {
     window.open(`${process.env.BASE_URL}/${fileName}`, '_blank');
@@ -89,9 +90,7 @@ function BookConclusion(): JSX.Element {
   const complete = useCallback(() => {
     showToast('Add book', 'This book has been added success!');
     deleteAllStorage(true);
-    setTimeout(() => {
-      navigate('/home/book/detail');
-    }, 1000);
+    navigate(`${paths.HOME}/${paths.BOOK}`);
   }, []);
 
   useEffect(() => {

@@ -9,14 +9,15 @@ import {
   shouldRevalidateBookLoader
 } from './fetcher';
 import store, { CurrentStoreType } from 'store/book';
-import BlockerProvider from './blocker-context';
+import BlockerProvider from 'contexts/blocker';
 import './style.scss';
+const { subscribe, getSnapshot } = store;
 
 function BookDetail(): JSX.Element {
-  const { step, disableStep }: CurrentStoreType  = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const { step, disableStep, isNavigate }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   return (
-    <BlockerProvider>
+    <BlockerProvider isNavigate={isNavigate}>
       <Stepper
         stepNumber={3}
         onSwitch={store.updateStep}

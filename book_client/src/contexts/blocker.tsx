@@ -1,18 +1,16 @@
-import { JSX, createContext, useContext, ReactElement, useSyncExternalStore } from 'react';
+import { JSX, createContext, useContext, ReactElement } from 'react';
 import { Blocker, useBlocker } from 'react-router-dom';
-import store, { CurrentStoreType } from 'store/book';
-const { subscribe, getSnapshot } = store;
 
 const BlockerContext = createContext<Blocker | unknown>(null);
 
 type BlockerContextPropsType = {
   children: ReactElement;
+  isNavigate: boolean;
 };
 
 export const useBlockerContext = (): Blocker => useContext(BlockerContext) as Blocker;
 
-export default ({ children }: BlockerContextPropsType): JSX.Element => {
-  const { isNavigate }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+export default ({ children, isNavigate }: BlockerContextPropsType): JSX.Element => {
 
   const blocker: Blocker = useBlocker(({ currentLocation, nextLocation }) => {
     const currentPathname: string = currentLocation.pathname;

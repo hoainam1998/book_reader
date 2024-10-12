@@ -49,6 +49,7 @@ module.exports = {
       'storage': getResolvePath('../src/storage'),
       'store': getResolvePath('../src/store'),
       'paths': getResolvePath('../src/router/paths.ts'),
+      'contexts': getResolvePath('../src/contexts')
     }
   },
   module: {

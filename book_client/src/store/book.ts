@@ -34,37 +34,37 @@ class BookStore extends Store<CurrentStoreType> {
     super(initStore());
   }
 
-  updateStep(currentStep: number): void {
-    this.CurrentStore = { ...this.currentStore, step: currentStep };
+  updateStep = (currentStep: number): void => {
+    this.CurrentStore = { ...this.CurrentStore, step: currentStep };
     StepStorage.setItem(currentStep);
     this.emitChange();
-  }
+  };
 
-  updateDisableStep(disableStep: number | false): void {
-    this.CurrentStore = { ...this.currentStore, disableStep };
+  updateDisableStep = (disableStep: number | false): void => {
+    this.CurrentStore = { ...this.CurrentStore, disableStep };
     DisableStepStorage.setItem(disableStep);
     this.emitChange();
-  }
+  };
 
-  updateData(data: BookInfoType): void {
-    this.CurrentStore = { ...this.currentStore, data };
+  updateData = (data: BookInfoType): void => {
+    this.CurrentStore = { ...this.CurrentStore, data };
     BookInfoStorage.setItem(data);
     this.emitChange();
-  }
+  };
 
-  updateBookInfo(newStore: BookInfo): void {
+  updateBookInfo = (newStore: BookInfo): void => {
     this.updateStep(newStore.step);
     this.updateData(newStore.data);
     this.updateDisableStep(newStore.disableStep);
     this.emitChange();
-  }
+  };
 
-  updateConditionNavigate(isNavigate: boolean): void {
-    this.CurrentStore = { ...this.currentStore, isNavigate };
+  updateConditionNavigate = (isNavigate: boolean): void => {
+    this.CurrentStore = { ...this.CurrentStore, isNavigate };
     this.emitChange();
-  }
+  };
 
-  deleteAllStorage(isComplete: boolean): void {
+  deleteAllStorage = (isComplete: boolean = false): void  => {
     StepStorage.delete();
     BookInfoStorage.delete();
     DisableStepStorage.delete();
@@ -73,7 +73,7 @@ class BookStore extends Store<CurrentStoreType> {
       isComplete
     };
     this.emitChange();
-  }
+  };
 };
 
 export default new BookStore();

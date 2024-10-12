@@ -6,7 +6,7 @@ import {
   useSyncExternalStore,
   useState
 } from 'react';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useParams } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
@@ -16,14 +16,14 @@ import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-
 import Form from 'components/form/form';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
-import useModalNavigation from '../useModalNavigation';
+import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
 import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType } from 'utils';
 import './style.scss';
 
-const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate } = store;
+const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate, deleteAllStorage } = store;
 
 type CategoryOptionsType = {
   name: string;
@@ -89,11 +89,13 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
 
 function BookInformation(): JSX.Element {
   const [bookNames, setBookNames] = useState<string[]>([]);
+  const { id } = useParams();
+  const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const validateName = useCallback(
     (message: string) =>
       (currentValue: string): ErrorFieldInfo => ({
-        error: bookNames.includes(currentValue),
+        error: id ? false : bookNames.includes(currentValue),
         message
       }),
     [bookNames]
@@ -126,11 +128,14 @@ function BookInformation(): JSX.Element {
     reset
   } = useForm(state, rules, formId, [bookNames]);
 
-  const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
   const pdfRef = useRef<InputRefType>(null);
-  useModalNavigation({ onLeaveAction: reset });
+
+  const onLeave = useCallback(() => {
+    reset();
+    deleteAllStorage();
+  }, []);
 
   const onSubmit = useCallback(
     (formData: FormData): void => {
@@ -157,6 +162,8 @@ function BookInformation(): JSX.Element {
     formData && onSubmit(formData);
   }, [publishedDay.value]);
 
+  useModalNavigation({ onLeaveAction: onLeave });
+
   useEffect(() => {
     if (pdf.value instanceof File && pdfRef.current?.input) {
       const dataTransfer = new DataTransfer();
@@ -164,6 +171,10 @@ function BookInformation(): JSX.Element {
       pdfRef.current.input.files = dataTransfer.files;
     }
   }, [pdf.value]);
+
+  useEffect(() => {
+    updateConditionNavigate(validate.dirty);
+  }, [validate.dirty]);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
@@ -185,15 +196,12 @@ function BookInformation(): JSX.Element {
             if (res.type.includes('image')) {
               avatar.watch([res]);
             }
-          });
+          })
+          .catch(() => console.warn('Load image failed!'));
       }
       return () => reset();
     };
   }, []);
-
-  useEffect(() => {
-    updateConditionNavigate(validate.dirty);
-  }, [validate.dirty]);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {

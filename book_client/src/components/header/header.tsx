@@ -12,10 +12,15 @@ const bodyDOM: HTMLElement = document.body;
 const menuContainer = createElementWrapper('menu-dropdown', 'menu-dropdown');
 const defaultOffset: number = 10;
 let offsetTop: number = 0;
+let offsetLeft: number = 10;
 let hideMenu: () => void = () => {};
 
-function MenuDropdown(): JSX.Element {
-  const navigate = useNavigate();
+type MenuDropdownPropsType = {
+  // eslint-disable-next-line no-unused-vars
+  navigate: (path: string) => void;
+};
+
+function MenuDropdown({ navigate }: MenuDropdownPropsType): JSX.Element {
 
   const personalSetting = useCallback(() => {
     hideMenu();
@@ -48,21 +53,31 @@ function Header(): JSX.Element {
     return <></>;
   }
 
+  const navigate = useNavigate();
   const { avatar, name, email } = userLogin;
   const personalBoxRef = useRef<HTMLDivElement>(null);
 
-  const showMenuDropdown = useCallback(() => {
+  const backToLogin = useCallback(() => {
+    navigate(paths.LOGIN);
+  }, []);
+
+  const toggleMenuDropdown = useCallback(() => {
+    if (!bodyDOM.contains(menuContainer)) {
     menuContainer.style.top = `${offsetTop}px`;
-    menuContainer.style.right = `${defaultOffset}px`;
+    menuContainer.style.left = `${offsetLeft}px`;
     bodyDOM.appendChild(menuContainer);
     const root: Root = createRoot(menuContainer);
-    root.render(<MenuDropdown/>);
+    root.render(<MenuDropdown navigate={backToLogin} />);
     hideMenu = () => root.unmount();
+    } else {
+      hideMenu();
+    }
   }, []);
 
   useEffect(() => {
     const offsetTopInformationBox: number = personalBoxRef.current?.offsetTop as number;
     const height: number = personalBoxRef.current?.offsetHeight as number;
+    offsetLeft = personalBoxRef.current?.offsetLeft as number;
     offsetTop = offsetTopInformationBox + height + defaultOffset;
   }, []);
 
@@ -70,7 +85,7 @@ function Header(): JSX.Element {
     <header className="header">
       <img src={require('images/book.png')} alt="logo" width="40" height="40" />
       <div className="personal-information-group" ref={personalBoxRef}>
-        <Button className="button-avatar" onClick={showMenuDropdown}>
+        <Button className="button-avatar" onClick={toggleMenuDropdown}>
           <img src={avatar} alt="logo" width="30" height="30" />
         </Button>
         <div>

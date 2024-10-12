@@ -2,7 +2,7 @@ type ListenerType = (() => void)[];
 
 class Store<T> {
   protected listeners: ListenerType = [];
-  protected currentStore: T;
+  private currentStore: T;
 
   constructor(currentStore: T) {
     this.currentStore = currentStore;
@@ -10,6 +10,10 @@ class Store<T> {
 
   set CurrentStore(value: T) {
     this.currentStore = value;
+  }
+
+  get CurrentStore() {
+    return this.currentStore;
   }
 
   protected emitChange(): void {

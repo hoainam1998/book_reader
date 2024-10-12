@@ -4,7 +4,7 @@ import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { showModal, ModalSlotProps } from 'utils';
-import { useBlockerContext } from './blocker-context';
+import { useBlockerContext } from 'contexts/blocker';
 
 type ModalNavigationPropsType = {
   body?: JSX.Element | ((blocker: Blocker) => JSX.Element);

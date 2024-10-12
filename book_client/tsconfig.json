@@ -27,6 +27,7 @@
       "storage": ["src/storage"],
       "store/*": ["src/store/*"],
       "paths": ["src/router/paths.ts"],
+      "contexts/*": ["src/contexts/*"]
     }
   },
   "include": ["src", "declaration.d.ts"]
