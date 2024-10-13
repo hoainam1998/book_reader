@@ -11,6 +11,7 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
             avatar,
             email,
             mfaEnable,
+            password,
             apiKey
           }
         }

@@ -1,5 +1,5 @@
 import { JSX, useSyncExternalStore, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from 'utils';
 import Button from 'components/button/button';
@@ -16,15 +16,14 @@ let offsetLeft: number = 10;
 let hideMenu: () => void = () => {};
 
 type MenuDropdownPropsType = {
-  // eslint-disable-next-line no-unused-vars
-  navigate: (path: string) => void;
+  navigate: NavigateFunction;
 };
 
 function MenuDropdown({ navigate }: MenuDropdownPropsType): JSX.Element {
 
   const personalSetting = useCallback(() => {
     hideMenu();
-    // TODO
+    navigate(paths.PERSONAL);
   }, []);
 
   const logout = useCallback(() => {
@@ -57,17 +56,13 @@ function Header(): JSX.Element {
   const { avatar, name, email } = userLogin;
   const personalBoxRef = useRef<HTMLDivElement>(null);
 
-  const backToLogin = useCallback(() => {
-    navigate(paths.LOGIN);
-  }, []);
-
   const toggleMenuDropdown = useCallback(() => {
     if (!bodyDOM.contains(menuContainer)) {
     menuContainer.style.top = `${offsetTop}px`;
     menuContainer.style.left = `${offsetLeft}px`;
     bodyDOM.appendChild(menuContainer);
     const root: Root = createRoot(menuContainer);
-    root.render(<MenuDropdown navigate={backToLogin} />);
+    root.render(<MenuDropdown navigate={navigate} />);
     hideMenu = () => root.unmount();
     } else {
       hideMenu();

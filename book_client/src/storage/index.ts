@@ -23,6 +23,7 @@ export type UserLogin = {
   email: string;
   avatar: string;
   mfaEnable: boolean;
+  password: string;
 };
 
 class LocalStorage<T> {

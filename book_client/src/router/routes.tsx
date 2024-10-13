@@ -1,6 +1,7 @@
 import { RouteProps, Navigate, Link, UIMatch, Outlet } from 'react-router-dom';
 import Login from 'views/login-group/login/login';
 import Home from 'views/home/home';
+import Personal from 'views/personal/personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
 import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category-group/category';
@@ -27,6 +28,10 @@ const routes: RoutePropsUnion[] = [
   {
     path: path.OTP,
     element: <LoginRequire><VerifyOtp /></LoginRequire>
+  },
+  {
+    path: path.PERSONAL,
+    element: <LoginRequire><Personal /></LoginRequire>
   },
   {
     path: path.HOME,
@@ -113,7 +118,7 @@ const routes: RoutePropsUnion[] = [
             }
           },
           {
-            path: 'new',
+            path: path.NEW,
             element: <BookDetail />,
             loader: loadAllCategory,
             shouldRevalidate: shouldRevalidateBookLoader,

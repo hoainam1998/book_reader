@@ -34,6 +34,8 @@ function VerifyOtp(): JSX.Element {
         if (res.data.user.verifyOtp.verify) {
           auth.saveApiKey(res.data.user.verifyOtp.apiKey);
           navigate(path.HOME);
+        } else {
+          showToast('OTP', 'Otp code is incorrect!');
         }
       })
       .catch(() => showToast('OTP', 'Verify otp code failed!'));

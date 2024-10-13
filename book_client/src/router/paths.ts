@@ -7,4 +7,6 @@ export default Object.freeze({
   ID: ':id',
   BOOK: 'book',
   USER: 'user',
+  PERSONAL: '/personal',
+  NEW: 'new'
 });

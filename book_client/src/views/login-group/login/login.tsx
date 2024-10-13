@@ -45,7 +45,9 @@ function Login(): JSX.Element {
     if (!validate.error) {
       login(email.value, password.value)
         .then(res => {
-          auth.saveUserLogin(res.data.user.login);
+          const userLogin = { ...res.data.user.login };
+          delete userLogin.apiKey;
+          auth.saveUserLogin(userLogin);
           if (res.data.user.login.mfaEnable === false) {
             auth.saveApiKey(res.data.user.login.apiKey);
             navigate(path.HOME);
