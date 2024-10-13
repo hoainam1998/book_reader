@@ -80,10 +80,13 @@ const UserLoginInformation = new GraphQLObjectType({
     name: {
       type: GraphQLString,
     },
+    password: {
+      type: GraphQLString,
+    },
     apiKey: {
-      type: GraphQLString
-    }
-  }
+      type: GraphQLString,
+    },
+  },
 });
 
 const UserInformation = new GraphQLObjectType({
@@ -160,11 +163,11 @@ const query = new GraphQLObjectType({
       type: UserLoginInformation,
       args: {
         email: {
-          type: GraphQLString
+          type: GraphQLString,
         },
         password: {
-          type: GraphQLString
-        }
+          type: GraphQLString,
+        },
       },
       resolve: async (user, { email, password }) => {
         try {
@@ -176,27 +179,27 @@ const query = new GraphQLObjectType({
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
+      },
     },
     verifyOtp: {
       type: new GraphQLObjectType({
-        name: 'VerifyOtp',
+        name: "VerifyOtp",
         fields: {
           verify: {
-            type: GraphQLBoolean
+            type: GraphQLBoolean,
           },
           apiKey: {
-            type: GraphQLString
-          }
-        }
+            type: GraphQLString,
+          },
+        },
       }),
       args: {
         email: {
-          type: GraphQLString
+          type: GraphQLString,
         },
         otp: {
-          type: GraphQLString
-        }
+          type: GraphQLString,
+        },
       },
       resolve: async (user, { email, otp }) => {
         try {
@@ -204,8 +207,8 @@ const query = new GraphQLObjectType({
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
-    }
+      },
+    },
   },
 });
 
@@ -254,17 +257,17 @@ const mutation = new GraphQLObjectType({
         name: 'Otp',
         fields: {
           otp: {
-            type: GraphQLString
+            type: GraphQLString,
           },
           message: {
-            type: GraphQLString
-          }
-        }
+            type: GraphQLString,
+          },
+        },
       }),
       args: {
         email: {
-          type: GraphQLString
-        }
+          type: GraphQLString,
+        },
       },
       resolve: async (user, { email }) => {
         try {
@@ -273,7 +276,7 @@ const mutation = new GraphQLObjectType({
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
-      }
+      },
     },
     update: {
       type: ResponseType,
@@ -286,6 +289,44 @@ const mutation = new GraphQLObjectType({
         try {
           await user.updateUser(args.user);
           return messageCreator('Update user success!');
+        } catch (err) {
+          throw new GraphQLError(err.message, graphqlErrorOption);
+        }
+      },
+    },
+    updatePerson: {
+      type: ResponseType,
+      args: {
+        person: {
+          type: new GraphQLInputObjectType({
+            name: 'PersonInputType',
+            fields: {
+              userId: {
+                type: GraphQLID,
+              },
+              firstName: {
+                type: GraphQLString,
+              },
+              lastName: {
+                type: GraphQLString,
+              },
+              email: {
+                type: GraphQLString,
+              },
+              avatar: {
+                type: GraphQLString,
+              },
+              password: {
+                type: GraphQLString,
+              },
+            },
+          }),
+        }
+      },
+      resolve: async (user, { person }) => {
+        try {
+          await user.updatePerson(person);
+          return messageCreator('Update your personal information success!');
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }

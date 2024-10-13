@@ -43,6 +43,7 @@ class UserService {
     return this._sql.query(
       `SELECT USER_ID AS userId,
       CONCAT(user.FIRST_NAME, " ", user.LAST_NAME) AS name,
+      PASSWORD AS password,
       AVATAR AS avatar,
       MFA_ENABLE AS mfaEnable FROM USER AS user
       WHERE EMAIL = ? AND PASSWORD = ?`,
@@ -51,7 +52,7 @@ class UserService {
       if (user && user.mfaEnable === 0) {
         return {
           ...user,
-          apiKey: sign({ mfaEnable: user.mfaEnable, email: user.email  }, process.env.SECRET_KEY)
+          apiKey: sign({ userId: user.userId }, process.env.SECRET_KEY)
         };
       }
       return user;
@@ -66,8 +67,8 @@ class UserService {
 
   verifyOtpCode(email, otp) {
     return this._sql.query(
-      `SELECT EXISTS(SELECT COUNT(*) FROM USER WHERE EMAIL = ? AND OTP_CODE = ?) AS existUser;
-      SELECT MFA_ENABLE AS mfaEnable, EMAIL AS email FROM USER WHERE EMAIL = ?`, [email, otp, email])
+      `SELECT EXISTS(SELECT * FROM USER WHERE EMAIL = ? AND OTP_CODE = ?) AS existUser;
+      SELECT USER_ID AS userId, MFA_ENABLE AS mfaEnable, EMAIL AS email FROM USER WHERE EMAIL = ?`, [email, otp, email])
       .then(results => {
         const verifyResult = {
           verify: false,
@@ -78,10 +79,18 @@ class UserService {
 
         if (results[0][0].existUser === 1) {
           verifyResult.verify = true;
-          verifyResult.apiKey = sign({ mfaEnable: user.mfaEnable, email: user.email  }, process.env.SECRET_KEY)
+          verifyResult.apiKey = sign({ userId: user.userId }, process.env.SECRET_KEY)
         }
         return verifyResult;
       });
+  }
+
+  updatePerson(user) {
+    const { firstName, lastName, avatar, email, password, userId } = user;
+    return this._sql.query(
+      'UPDATE USER SET FIRST_NAME = ?, LAST_NAME = ?, AVATAR = ?, EMAIL = ?, PASSWORD = ? WHERE USER_ID = ?',
+      [firstName, lastName, avatar, email, password, userId]
+    );
   }
 
   updateUser(user) {

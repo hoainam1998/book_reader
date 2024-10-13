@@ -1,5 +1,6 @@
 const Router = require('../router.js');
 const { execute } = require('graphql');
+const { verify } = require('jsonwebtoken');
 const cors = require('cors');
 const { upload, validateQuery, validateResultExecute } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
@@ -22,8 +23,10 @@ class UserRouter extends Router {
     this.post('/delete-user', loginRequire, this._deleteUser);
     this.post('/user-detail', loginRequire, this._getUserDetail);
     this.post('/update-user', loginRequire,  this._updateUser);
-    this.post('/send-otp', this._sendOtpCode);
+    this.post('/send-otp', this.sendOtpCode);
     this.post('/update-otp', cors(corsOptionsDelegate), this._updateOtpCode);
+    this.post('/update-person', this.updatePerson);
+    this.post('/update-person-internal', cors(corsOptionsDelegate), this._updatePerson);
     this.post('/login', this._login);
     this.post('/verify-otp', this._verifyOtp);
   }
@@ -89,6 +92,26 @@ class UserRouter extends Router {
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
+  _updatePerson(req, res, next, schema) {
+    console.log('zooo');
+    const variables = {
+      userId: req.body.userId,
+      firstName: req.body.first_name,
+      lastName: req.body.last_name,
+      email: req.body.email,
+      avatar: req.body.avatar,
+      password: req.body.password
+    };
+    return execute({
+      schema,
+      document: req.body.query,
+      variableValues: { person: variables },
+    });
+  }
+
+  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @validateQuery
   _updateUser(req, res, next, schema) {
     const variables = {
       userId: req.body.userId,
@@ -143,8 +166,51 @@ class UserRouter extends Router {
     });
   }
 
-  _sendOtpCode(req, res, next, schema) {
-    const url = `${req.protocol}:${req.get("host")}${req.baseUrl}`;
+  @validateResultExecute(HTTP_CODE.OK)
+  @validateQuery
+  _updateOtpCode(req, res, next, schema) {
+    return execute({
+      schema,
+      document: req.body.query,
+      variableValues: {
+        email: req.body.email,
+      },
+    });
+  }
+
+  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  updatePerson(req, res, next, schema) {
+    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const formData = new FormData();
+    const user = verify(req.get('authorization'), process.env.SECRET_KEY);
+    const userId = user.userId;
+    formData.append('userId', userId);
+    formData.append('query',
+      `mutation UpdatePerson($person: PersonInputType) {
+        user {
+          updatePerson(person: $person) {
+            message
+          }
+        }
+      }`
+    );
+    Object.keys(req.body).forEach(key => {
+      formData.append(key, req.body[key]);
+    });
+
+    fetch(`${url}/update-person-internal`, {
+      method: 'POST',
+      body: formData
+    }).then((result) => {
+      result.json().then(json => {
+        res.status(result.status).json({ message: json.user.updatePerson.message });
+      });
+    })
+    .catch(err => res.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message }));
+  }
+
+  sendOtpCode(req, res, next, schema) {
+    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
     const body = {
       query: `
         mutation SendOtp($email: String) {
@@ -183,18 +249,6 @@ class UserRouter extends Router {
         }
       })
       .catch((err) => res.json({ message: err.message }));
-  }
-
-  @validateResultExecute(HTTP_CODE.OK)
-  @validateQuery
-  _updateOtpCode(req, res, next, schema) {
-    return execute({
-      schema,
-      document: req.body.query,
-      variableValues: {
-        email: req.body.email,
-      },
-    });
   }
 }
 
