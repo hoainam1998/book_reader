@@ -49,7 +49,8 @@ module.exports = {
       'storage': getResolvePath('../src/storage'),
       'store': getResolvePath('../src/store'),
       'paths': getResolvePath('../src/router/paths.ts'),
-      'contexts': getResolvePath('../src/contexts')
+      'contexts': getResolvePath('../src/contexts'),
+      'read-only-variables': getResolvePath('../src/read-only-variables/index.ts'),
     }
   },
   module: {

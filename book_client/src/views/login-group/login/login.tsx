@@ -9,6 +9,7 @@ import auth from 'store/auth';
 import { login } from './fetcher';
 import path from 'paths';
 import { showToast } from 'utils';
+import constants from 'read-only-variables';
 import './style.scss';
 
 type LoginFieldType = {
@@ -25,7 +26,7 @@ const rules: RuleType<LoginFieldType> = {
   email: { required, email },
   password: {
     required,
-    matchPattern: matchPattern(/([A-Za-z0-9@$]{8})/g, 'Format password is wrong!')
+    matchPattern: matchPattern(constants.PASSWORD_PATTERN, 'Format password is wrong!')
   }
 };
 

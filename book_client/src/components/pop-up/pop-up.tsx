@@ -1,4 +1,4 @@
-import { JSX, ReactNode } from 'react';
+import { JSX, ReactNode, useEffect } from 'react';
 import Button from 'components/button/button';
 import './style.scss';
 
@@ -6,9 +6,15 @@ type PopUpProps = {
   title: string;
   children: ReactNode;
   onClose: () => void;
+  updateHeight: () => void;
 };
 
-function PopUp({ onClose, title, children }: PopUpProps): JSX.Element {
+function PopUp({ title, children, onClose, updateHeight }: PopUpProps): JSX.Element {
+
+  useEffect(() => {
+    updateHeight();
+  }, []);
+
   return (
     <>
       <div className="title">{title}</div>

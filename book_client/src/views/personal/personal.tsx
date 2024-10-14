@@ -11,6 +11,7 @@ import useForm, { RuleType } from 'hooks/useForm';
 import store, { UserLogin } from 'store/auth';
 import { updatePerson } from './fetcher';
 import { convertBase64ToSingleFile } from 'utils';
+import constants from 'read-only-variables';
 import './style.scss';
 const { subscribe, getSnapshot } = store;
 
@@ -37,7 +38,7 @@ const rules: RuleType<PersonalType> = {
   avatar: { required },
   password: {
     required,
-    matchPattern: matchPattern(/([A-Za-z0-9@$]{8})/g, 'Format password is wrong!')
+    matchPattern: matchPattern(constants.PASSWORD_PATTERN, 'Format password is wrong!')
   }
 };
 
