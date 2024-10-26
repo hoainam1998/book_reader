@@ -37,7 +37,6 @@ services:
       LOCALHOST: db_c
     volumes:
       - .//book-api:/api
-      - /api/node_modules
     ports:
      - ${API_PORT}:${API_PORT}
     depends_on:

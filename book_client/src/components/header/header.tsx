@@ -84,8 +84,8 @@ function Header(): JSX.Element {
           <img src={avatar} alt="logo" width="30" height="30" />
         </Button>
         <div>
-          <span>{name}</span>
-          <p className="email">{email}</p>
+          <span data-testid="name">{name}</span>
+          <p className="email" data-testid="email">{email}</p>
         </div>
       </div>
     </header>

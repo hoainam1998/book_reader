@@ -1,4 +1,4 @@
-const mockAxios = jest.createMockFromModule('axios')
+const mockAxios = jest.createMockFromModule('axios');
 
 export default {
   post: () => new Promise(() => {}),

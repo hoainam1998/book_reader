@@ -85,9 +85,17 @@ jest.mock('../fetcher', () => {
   };
 });
 
+jest.mock('store/auth', () => {
+  return {
+    __esModule: true,
+    ApiKey: 'api key'
+  };
+});
+
 describe('Category.test', () => {
   global.URL.createObjectURL = jest.fn();
   (global.DataTransfer as typeof DataTransfer) = DataTransfer;
+
   beforeEach(() => {
     jest.spyOn(React, 'useCallback').mockImplementation((cb) => cb);
     jest.clearAllMocks();

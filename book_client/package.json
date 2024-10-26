@@ -33,7 +33,7 @@
   "scripts": {
     "start": "webpack serve --mode development --config build/webpack.dev.js",
     "build": "webpack --config build/webpack.prod.js",
-    "dev-test": "react-scripts test --watchAll=true --detectOpenHandles",
+    "dev-test": "react-scripts test --watchAll=true --detectOpenHandles a",
     "test": "react-scripts test --ci=true",
     "eject": "react-scripts eject"
   },
@@ -84,7 +84,10 @@
       "^utils(.*)$": "<rootDir>/src/utils$1",
       "^hooks(.*)$": "<rootDir>/src/hooks$1",
       "^services(.*)$": "<rootDir>/src/services$1",
-      "^images(.*)$": "<rootDir>/src/static/images$1"
+      "^images(.*)$": "<rootDir>/src/static/images$1",
+      "^store(.*)$": "<rootDir>/src/store$1",
+      "^storage(.*)$": "<rootDir>/src/storage$1",
+      "^paths(.*)$": "<rootDir>/src/router/paths$1"
     },
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!axios)"
