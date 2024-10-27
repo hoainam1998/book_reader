@@ -90,7 +90,7 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
 function BookInformation(): JSX.Element {
   const [bookNames, setBookNames] = useState<string[]>([]);
   const { id } = useParams();
-  const { data, step }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { data, step, disableStep }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
 
   const validateName = useCallback(
     (message: string) =>
@@ -148,7 +148,11 @@ function BookInformation(): JSX.Element {
         saveBookInformation(formData).then((res) => {
           const bookId: string = res.data.bookId;
           getBookDetail(bookId).then((res) =>
-            updateBookInfo({ data: { ...res.data.book.detail, bookId }, step: 2, disableStep: 3 })
+            updateBookInfo({
+              data: { ...res.data.book.detail, bookId },
+              step: 2,
+              disableStep: disableStep === false ? false : 3
+            })
           );
         });
       }

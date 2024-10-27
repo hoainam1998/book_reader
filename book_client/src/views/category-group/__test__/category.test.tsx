@@ -14,6 +14,7 @@ const generateTestingData = (total: number): any => {
   const list = Array.apply(null, Array(total)).map((_, index) => ({
     name: 'name',
     avatar: 'avatar',
+    // eslint-disable-next-line camelcase
     category_id: index + 1,
     disabled: true
   }));

@@ -15,7 +15,7 @@ export { Image };
 
 type BookInfo = {
   step: number;
-  disableStep: number;
+  disableStep: number | false;
   data: BookInfoType;
 };
 
@@ -49,6 +49,7 @@ class BookStore extends Store<CurrentStoreType> {
   updateData = (data: BookInfoType): void => {
     this.CurrentStore = { ...this.CurrentStore, data };
     BookInfoStorage.setItem(data);
+    DisableStepStorage.setItem(false);
     this.emitChange();
   };
 

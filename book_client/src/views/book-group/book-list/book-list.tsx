@@ -84,7 +84,7 @@ function BookList(): JSX.Element {
     const getBookInformation = (): void => {
       getBookDetail(bookId)
         .then(res => {
-          updateData(res.data.book.detail);
+          updateData({ ...res.data.book.detail, bookId });
           navigate(bookId);
         });
     };
@@ -107,7 +107,7 @@ function BookList(): JSX.Element {
     fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
   };
 
-  const search = useCallback((keyword: string) => {
+  const search = useCallback((keyword: string): void => {
     _keyword = keyword;
     fetchBookPagination(_pageSize, 1);
   }, []);

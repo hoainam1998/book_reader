@@ -1,5 +1,5 @@
 import Store from './store';
-import { UserLogin, ApiKeyStorage, UserStorage } from 'storage';
+import { UserLogin, ApiKeyStorage, UserStorage, LocalStorage } from 'storage';
 
 const user: UserLogin = UserStorage.getItem();
 
@@ -30,7 +30,7 @@ class AuthStore extends Store<UserLogin | null> {
   }
 
   logout(): void {
-    UserStorage.delete();
+    LocalStorage.removeAll();
     this.CurrentStore = null;
     this.isLogged = false;
     this.emitChange();

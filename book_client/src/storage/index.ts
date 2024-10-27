@@ -26,11 +26,13 @@ export type UserLogin = {
   password: string;
 };
 
-class LocalStorage<T> {
+export class LocalStorage<T> {
   private readonly _name: string;
+  static allLocalStorage: any[] = [];
 
   constructor(name: string) {
     this._name = name;
+    LocalStorage.allLocalStorage.push(this);
   }
 
   setItem(data: T): void {
@@ -43,6 +45,10 @@ class LocalStorage<T> {
 
   delete(): void {
     localStorage.removeItem(this._name);
+  }
+
+  static removeAll(): void {
+    LocalStorage.allLocalStorage.forEach(localStorage => localStorage.delete());
   }
 }
 
