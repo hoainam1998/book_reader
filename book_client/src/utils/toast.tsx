@@ -4,10 +4,10 @@ import { createElementWrapper } from './element-wrapper';
 import PopUp from 'components/pop-up/pop-up';
 
 const bodyDOM: HTMLElement = document.body;
-const popUpQueue: any[] = [];
+const popUpQueue: (() => void)[] = [];
 const defaultDuration: number = 2000;
 const spaceBetweenPopUp: number = 10;
-let timer: number = 0;
+let numberElement: number = 0;
 let popupHeight: number = 0;
 
 /**
@@ -18,21 +18,24 @@ const showToast = (title: string, children: ReactNode): void => {
   popUpContainer.dataset.testid = 'toast';
 
   const updateHeight = (): void => {
-    timer += 1;
+    numberElement = document.querySelectorAll('.pop-up').length;
     popupHeight = popUpContainer.clientHeight || 0;
-    popUpContainer.style.bottom = (timer - 1) * (popupHeight + spaceBetweenPopUp) + spaceBetweenPopUp + 'px';
+    popUpContainer.style.bottom =
+      (numberElement - 1) * (popupHeight + spaceBetweenPopUp) + spaceBetweenPopUp + 'px';
   };
 
   bodyDOM.appendChild(popUpContainer);
   const root: Root | null = createRoot(popUpContainer);
 
-  const translateBottomNextPopup = (currentPopup: any): void => {
-    const nextSibling = (currentPopup.nextElementSibling! as any);
+  const translateBottomNextPopup = (currentPopup: HTMLDivElement): void => {
+    const nextSibling = currentPopup.nextElementSibling! as HTMLDivElement;
     if (nextSibling) {
-      nextSibling!.style.bottom
-        = (+(nextSibling.style.bottom.replace(/px/, ''))
-        - (popupHeight + spaceBetweenPopUp)) + 'px';
-      translateBottomNextPopup(nextSibling);
+      const currentBottom: number = +nextSibling.style.bottom.replace(/px/, '');
+      if (currentBottom && currentBottom > 10) {
+        const bottom: number = currentBottom - (popupHeight + spaceBetweenPopUp);
+        nextSibling!.style.bottom = bottom + 'px';
+        translateBottomNextPopup(nextSibling);
+      }
     }
   };
 
@@ -51,11 +54,11 @@ const showToast = (title: string, children: ReactNode): void => {
   popUpQueue.unshift(closeToast);
 
   const removePopUp = (): void => {
-    const duration: number = popUpQueue.length * defaultDuration;
+    const duration: number = numberElement * defaultDuration;
     setTimeout(() => {
       if (popUpQueue.length === 1) return;
       const fn = popUpQueue.pop();
-      fn();
+      fn!();
       removePopUp();
     }, duration);
   };
