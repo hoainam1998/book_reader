@@ -2,11 +2,16 @@
   position: fixed;
   width: 100%;
   bottom: 0;
+  margin-top: 7px;
 
   & > span {
     float: right;
     margin-right: 100px;
     font-weight: 600;
     font-size: 14px;
+
+    @include mobile {
+      margin-right: 10px;
+    }
   }
 }

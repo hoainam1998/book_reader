@@ -1,28 +1,15 @@
 import { JSX } from 'react';
-import { Outlet, UIMatch, useMatches } from 'react-router-dom';
-import Footer from 'components/footer/footer';
+import { Outlet } from 'react-router-dom';
+import NavigationBar from 'components/navigation-bar/navigation-bar';
 import './style.scss';
 
-type Handle = {
-  // eslint-disable-next-line no-unused-vars
-  crumb?: (match: UIMatch) => JSX.Element;
-};
-
 function Content(): JSX.Element {
-  const matches = useMatches();
-
   return (
     <main className="content">
-      <nav className="navigation">
-        {
-          matches.filter((match: UIMatch) => Boolean(match.handle && (match.handle as Handle).crumb))
-            .map((match: UIMatch) => (match.handle as Handle).crumb!(match))
-        }
-      </nav>
+      <NavigationBar />
       <section className="content-box">
         <Outlet />
       </section>
-      <Footer />
     </main>
   );
 }

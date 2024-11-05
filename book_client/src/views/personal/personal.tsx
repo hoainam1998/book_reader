@@ -86,6 +86,7 @@ function Personal(): JSX.Element {
         <Form id={formId} onSubmit={onSubmit} className="user-form">
           <Grid
             lg={2}
+            sm={1}
             style={{
               marginBottom: 15,
               gap: 17

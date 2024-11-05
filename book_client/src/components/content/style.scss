@@ -35,3 +35,10 @@
     padding-right: 7px;
   }
 }
+
+.content-box {
+  @include mobile {
+    height: calc(100vh - (56px + 26px + 10px + 7px + 26px));
+    overflow-y: auto;
+  }
+}

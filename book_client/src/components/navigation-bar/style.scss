@@ -1,0 +1,28 @@
+.navigation {
+  background-color: $primary-color;
+  padding: 2px 5px;
+  color: $white-color;
+
+  &:last-child::after {
+    content: unset;
+  }
+
+  a {
+    font-weight: bold;
+    color: $white-color;
+    text-decoration: none;
+  }
+
+  a:not(:last-child) {
+    &::after {
+      content: '>';
+      text-decoration: none;
+      padding: 5px;
+    }
+  }
+
+  & > span {
+    font-size: 14px;
+    font-weight: bold;
+  }
+}

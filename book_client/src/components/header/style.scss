@@ -17,10 +17,16 @@
       width: 40px;
       background: $avatar-button-color;
     }
-  }
+    .email {
+      font-size: 14px;
 
-  .email {
-    font-size: 14px;
+      @include mobile {
+        width: 100px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+    }
   }
 }
 

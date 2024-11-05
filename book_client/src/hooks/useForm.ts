@@ -76,8 +76,8 @@ export default <T extends Object, R>(
       Object.keys(state).forEach(
         (key: string) => {
           const keyValidateObject = validateObject[key]!;
-          keyValidateObject.watch('', key);
           keyValidateObject.dirty = false;
+          keyValidateObject.watch('', key);
       });
       document.forms.namedItem(formId)?.reset();
     }

@@ -1,37 +1,47 @@
-.table {
-  width: 100%;
+.table-wrapper {
 
-  thead {
-    background-color: $primary-color;
-    color: $white-color;
-    position: sticky;
-    top: 0%;
+  .table {
     width: 100%;
 
-    tr {
-      th {
-        vertical-align: middle;
+    thead {
+      background-color: $primary-color;
+      color: $white-color;
+      position: sticky;
+      top: 0%;
+      width: 100%;
+
+      tr {
+        th {
+          vertical-align: middle;
+          padding: 5px 10px;
+          text-transform: capitalize;
+          text-align: start;
+        }
+      }
+    }
+
+    tbody {
+      td {
         padding: 5px 10px;
-        text-transform: capitalize;
-        text-align: start;
+      }
+
+      tr:nth-child(even) {
+        background-color: $table-row-even-color;
       }
     }
   }
 
-  tbody {
-    td {
-      padding: 5px 10px;
-    }
-
-    tr:nth-child(even) {
-      background: $table-row-even-color;
-    }
+  table,
+  th,
+  td {
+    border: none;
+    border-collapse: collapse;
   }
-}
 
-table, th, td {
-  border: none;
-  border-collapse: collapse;
+  .category-table {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
 }
 
 .table-footer {
@@ -41,7 +51,42 @@ table, th, td {
   align-items: center;
 }
 
-.category-table {
-  max-height: 80vh;
-  overflow-y: auto;
+.responsive-table {
+  @include mobile {
+    colgroup {
+      display: none;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      tr {
+        background-color: transparent !important;
+        border-radius: 3px;
+        margin-bottom: 7px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        display: block;
+
+        td {
+          min-width: 100%;
+          border-bottom: 1px solid $border-input-color;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &::before {
+            content: attr(data-label);
+            text-transform: capitalize;
+            font-weight: bold;
+          }
+        }
+      }
+    }
+  }
 }

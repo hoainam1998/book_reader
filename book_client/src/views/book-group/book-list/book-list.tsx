@@ -90,7 +90,7 @@ function BookList(): JSX.Element {
     };
 
     return (
-      <>
+      <div>
         <Button variant="success" onClick={getBookInformation}>
           Update
         </Button>
@@ -98,7 +98,7 @@ function BookList(): JSX.Element {
         <Button variant="dangerous" onClick={() => {}}>
           Delete
         </Button>
-      </>
+      </div>
     );
   }, []);
 
@@ -119,31 +119,37 @@ function BookList(): JSX.Element {
   return (
     <section className="book-list">
       <HeaderDashboard add={() => navigate('new')} search={search} />
-      <Table fields={fields} data={books} total={total} onLoad={fetchBookPagination} key={_keyword}>
-        <Slot<BookType>
-          name="avatar"
-          render={(slotProp) => (
-            <img height="50px" width="50px" src={slotProp.avatar} alt="book-avatar" />
-          )}/>
-        <Slot<BookType>
-          name="pdf"
-          render={(slotProp) => (
-            <Button variant="success" onClick={() => previewFile(slotProp.pdf)}>
-              Preview
-            </Button>
-          )}/>
-        <Slot<BookType>
-          name="publishedDay"
-          render={(slotProp) => format(+slotProp.publishedDay, 'dd-MM-yyyy')
-          }/>
-        <Slot<BookType>
-          name="introduce"
-          render={(slotProp) => (
-            <Button variant="success" onClick={() => previewFile(slotProp.introduce)}>
-              Preview
-            </Button>
-          )}/>
-        <Slot name="operation" render={operationSlot} />
+      <Table<BookType>
+        key={_keyword}
+        responsive
+        fields={fields}
+        data={books}
+        total={total}
+        onLoad={fetchBookPagination}>
+          <Slot<BookType>
+            name="avatar"
+            render={(slotProp) => (
+              <img height="50px" width="50px" src={slotProp.avatar} alt="book-avatar" />
+            )}/>
+          <Slot<BookType>
+            name="pdf"
+            render={(slotProp) => (
+              <Button variant="success" onClick={() => previewFile(slotProp.pdf)}>
+                Preview
+              </Button>
+            )}/>
+          <Slot<BookType>
+            name="publishedDay"
+            render={(slotProp) => format(+slotProp.publishedDay, 'dd-MM-yyyy')
+            }/>
+          <Slot<BookType>
+            name="introduce"
+            render={(slotProp) => (
+              <Button variant="success" onClick={() => previewFile(slotProp.introduce)}>
+                Preview
+              </Button>
+            )}/>
+          <Slot name="operation" render={operationSlot} />
       </Table>
     </section>
   );

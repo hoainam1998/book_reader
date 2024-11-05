@@ -85,18 +85,18 @@ function UserList(): JSX.Element {
     }, []);
 
     return (
-      <>
+      <div>
         <Button variant="success" onClick={getUserDetail}>Update</Button>
           &nbsp;&nbsp;
         <Button variant="dangerous" onClick={deleteUser}>Delete</Button>
-      </>
+      </div>
     );
   }, []);
 
   return (
     <>
       <HeaderDashboard add={navigateToDetailPage} search={search} />
-      <Table fields={fields} data={books} total={total} onLoad={fetchUser}>
+      <Table responsive fields={fields} data={books} total={total} onLoad={fetchUser}>
         <Slot<UserType> name="avatar" render={
           (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
           } />

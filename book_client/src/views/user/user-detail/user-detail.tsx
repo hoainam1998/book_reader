@@ -71,7 +71,12 @@ function UserDetail(): JSX.Element {
           return addUser(formData);
         }
       };
-      saveUser().then(backToUserList);
+      saveUser().then(() => {
+        reset();
+        setTimeout(() => {
+          backToUserList();
+        }, 100);
+      });
     }
   }, []);
 
@@ -82,11 +87,12 @@ function UserDetail(): JSX.Element {
       lastName.watch(user.lastName);
       email.watch(user.email);
       mfa.watch(user.mfaEnable);
-      convertBase64ToSingleFile(user.avatar, `${user.firstName}-${user.lastName}`).then((res) => {
-        if (res.type.includes('image')) {
-          avatar.watch(res);
-        }
-      });
+      convertBase64ToSingleFile(user.avatar, `${user.firstName}-${user.lastName}`)
+        .then((res) => {
+          if (res.type.includes('image')) {
+            avatar.watch(res);
+          }
+        });
     }
   }, []);
 
@@ -94,12 +100,13 @@ function UserDetail(): JSX.Element {
     <BlockerProvider isNavigate={validate.dirty}>
       <UserForm>
         <section className="user-detail">
-          <Button variant="outline" onClick={backToUserList}>
+          <Button variant="outline" className="back-btn" onClick={backToUserList}>
             &#8592;Back
           </Button>
           <Form id={formId} onSubmit={onSubmit} className="user-form">
             <Grid
               lg={2}
+              sm={1}
               style={{
                 marginBottom: 15,
                 gap: 17

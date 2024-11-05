@@ -8,6 +8,7 @@ import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Button from 'components/button/button';
+import List from 'components/list/list';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
 import {
@@ -41,6 +42,7 @@ const state: CategoryStateType = {
 
 let currentCategoryId: string = '';
 const formId: string = 'category-form';
+let currentOffset: number = 0;
 
 const rules: RuleType<CategoryStateType> = {
   categoryName: { required: required('fff') },
@@ -93,6 +95,7 @@ function Category(): JSX.Element {
   const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
     return promise.then(res => {
       revalidator.revalidate();
+      document.querySelector('.table-wrapper')?.scrollTo({top: currentOffset });
       return Promise.resolve(res);
     }).catch(err => Promise.reject(err));
   }, []);
@@ -136,26 +139,31 @@ function Category(): JSX.Element {
   const operationSlot = useCallback((slotProp: CategoryType): JSX.Element => {
     const { category_id, disabled } = slotProp;
 
+    const handleUpdateEvent = (e: any): void => {
+      currentOffset = e.clientY;
+      fetchCategoryDetail(category_id);
+    };
+
     return (
       <>
-        <Button variant='success' onClick={() => fetchCategoryDetail(category_id)}>Update</Button>
+        <Button variant='success' onClick={handleUpdateEvent}>Update</Button>
           &nbsp;&nbsp;
-        {!disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
+        { !disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
       </>
     );
   }, []);
 
   return (
     <Grid>
-      <GridItem lg={9}>
-        <Table fields={fields} data={data} total={total} onLoad={fetchCategory}>
+      <GridItem sm={12} lg={9}>
+        <Table fields={fields} classes="category-responsive-table" data={data} total={total} onLoad={fetchCategory}>
           <Slot<CategoryType> name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
           } />
           <Slot name="operation" render={operationSlot} />
         </Table>
       </GridItem>
-      <GridItem lg={3}>
+      <GridItem sm={12} lg={3}>
         <Form id={formId} className="category-form" submitLabel="Save" onSubmit={onSubmit}>
           <Input
             label="Category name"
@@ -175,7 +183,7 @@ function Category(): JSX.Element {
             {...avatar}
           />
           <div className="image-preview" data-testid="image-preview">
-            {previewImage.map((image, index) => <img key={index} src={image} alt="preview" />)}
+            <List<string> items={previewImage} render={(image => (<img src={image} alt="preview" />)) } />
           </div>
         </Form>
       </GridItem>

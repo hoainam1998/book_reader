@@ -7,7 +7,7 @@ $maximum-grid-column: 12;
 }
 
 @mixin grid-col($size) {
-  @for $i from 2 through $maximum-grid-column {
+  @for $i from 1 through $maximum-grid-column {
     .col-row-#{$size}-#{$i} {
       & > * {
         grid-column: #{span calc($maximum-grid-column / $i)} !important;
@@ -28,7 +28,7 @@ $maximum-grid-column: 12;
   @include grid-col('md');
 }
 
-@for $i from 2 through $maximum-grid-column {
+@for $i from 1 through $maximum-grid-column {
   .col-row-#{$i} {
     & > * {
       grid-column: #{span math.ceil(calc($maximum-grid-column / $i))};
@@ -36,6 +36,6 @@ $maximum-grid-column: 12;
   }
 
   .col-#{$i} {
-    grid-column: #{span $i} !important;
+    grid-column: #{span $i};
   }
 }

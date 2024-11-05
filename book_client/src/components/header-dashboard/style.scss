@@ -19,4 +19,16 @@
     width: 32px;
     height: 32px;
   }
+
+  @include mobile {
+    position: fixed;
+    background-color: $white-color;
+    width: 100%;
+
+    & + section {
+      & > .table-wrapper {
+        padding-top: 39px;
+      }
+    }
+  }
 }

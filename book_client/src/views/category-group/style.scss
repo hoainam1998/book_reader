@@ -21,3 +21,12 @@
 .input-class {
   width: 100%;
 }
+
+.category-responsive-table {
+  .table-wrapper:has(> &) {
+    @include mobile {
+      height: 350px;
+      overflow-y: auto;
+    }
+  }
+}

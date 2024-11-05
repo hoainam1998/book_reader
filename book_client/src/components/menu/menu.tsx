@@ -35,7 +35,7 @@ function Menu(): JSX.Element {
       <ul className="menu">
         <List<NavLinkPropsType> items={navLinks} render={({ path, label, image }) => (
           <li className="menu-item">
-            <NavLink to={path} className={({ isActive }) => clsx({'active': isActive}) }>
+            <NavLink to={path} className={({ isActive }) => clsx({ 'active': isActive }) }>
               <div className="menu-icon">
                 <img src={require(`images/${image}`)} alt="menu-icon" width="30" height="30"/>
               </div>

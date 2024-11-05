@@ -11,7 +11,9 @@ import {
 } from 'react';
 import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
+import List from 'components/list/list';
 import { isSlot } from 'components/slot/slot';
+import { clsx } from 'utils';
 import './style.scss';
 
 export type Field = {
@@ -21,24 +23,29 @@ export type Field = {
   style?: CSSProperties;
 };
 
-type TableProps = {
+type TableProps<T> = {
   fields: Field[];
   children?: ReactNode;
   total: number;
-  data: { [key: string]: any }[];
+  data: T[];
+  responsive?: boolean;
+  classes?: string;
   onLoad: (pageSize: number, pageNumber: number) => void;
 };
 
-type TableCellProps = {
+type TableCellProps<T> = {
   cells: ReactElement[];
   fields: Field[];
-  item: { [key: string]: any };
+  item: T;
 };
 
-function TableCell({ fields, cells, item }: TableCellProps): JSX.Element {
+function TableCell<T>({ fields, cells, item }: TableCellProps<T>): JSX.Element {
   const childrenList: JSX.Element[] = fields.map(field => {
     const slot: ReactElement | undefined = cells.find(cell => isSlot(field.key, cell));
-    return slot ? <td>{slot.props.render(item)}</td> : <td>{item[field.key]}</td>;
+    const label: string = field.label || field.key;
+    return slot
+    ? <td data-label={label}>{slot.props.render(item)}</td>
+    :<td data-label={label}>{item[field.key as keyof T] as ReactNode}</td>;
   });
   return <>{childrenList.map((children, index) => <Fragment key={index}>{children}</Fragment>)}</>;
 }
@@ -60,7 +67,7 @@ const options = [
   },
 ];
 
-function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Element {
+function Table<T>({ fields, children, data, total, classes, responsive, onLoad }: TableProps<T>): JSX.Element {
 
   const totalPageNumber = useMemo<number>(() => {
     const pages: number = total / pageSize;
@@ -80,24 +87,27 @@ function Table({ fields, children, data, total, onLoad }: TableProps): JSX.Eleme
 
   return (
     <section>
-      <div className="category-table">
-        <table className="table">
+      <div className="table-wrapper">
+        <table className={clsx('table', responsive && 'responsive-table', classes)}>
           <colgroup>
-            { fields.map((field, index) => (<col key={index} width={field.width}/>)) }
+            <List<Field> items={fields} render={(field) => (<col width={field.width}/>)} />
           </colgroup>
           <thead>
             <tr>
-              { fields.map((field, index) => (<th key={index} style={field.style}>{field.label || field.key}</th>)) }
+              <List<Field> items={fields} render={(field) =>
+                (<th style={field.style}>{field.label || field.key}</th>)} />
             </tr>
           </thead>
           <tbody>
-            {
-              data.map((item, index) => (
-                <tr key={index} data-testid={`row-${index}`}>
-                  <TableCell item={item} fields={fields} cells={Children.toArray(children) as ReactElement[]} />
-                </tr>
-              ))
-            }
+            <List<T> items={data} render={(item, index) =>
+              <tr data-testid={`row-${index}`}>
+                <TableCell<T>
+                item={item}
+                fields={fields}
+                cells={Children.toArray(children) as ReactElement[]}
+                />
+              </tr>
+            } />
           </tbody>
         </table>
       </div>
