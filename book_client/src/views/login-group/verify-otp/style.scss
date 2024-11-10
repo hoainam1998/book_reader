@@ -1,4 +1,10 @@
 .verify-otp {
+  .otp-un-grid-fieldset-wrapper {
+    grid-template-columns: unset;
+    gap: unset;
+    justify-content: center;
+  }
+
   .otp-box {
     text-align: center;
 

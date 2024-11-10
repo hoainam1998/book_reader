@@ -118,6 +118,7 @@ function Table<T>({ fields, children, data, total, classes, responsive, onLoad }
             onChange={pageSizeChange}
             options={options}
             name="page-size"
+            className="un-grid"
             selectClass="page-size" />
           <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
         </div>

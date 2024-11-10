@@ -1,8 +1,18 @@
 .category-form {
   margin: 0 20px;
 
+  @include mobile {
+    margin: 0 7px;
+  }
+
   .category-form-control {
     margin-bottom: 7px;
+
+    @include mobile {
+      label {
+        margin: 0;
+      }
+    }
   }
 }
 
@@ -25,7 +35,7 @@
 .category-responsive-table {
   .table-wrapper:has(> &) {
     @include mobile {
-      height: 350px;
+      height: 330px;
       overflow-y: auto;
     }
   }

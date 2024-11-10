@@ -56,7 +56,7 @@ function VerifyOtp(): JSX.Element {
   return (
     <LoginWrapper>
       <div className="verify-otp">
-        <Input label="" name="otp" type="number" inputClass="otp-box" ref={inputRef} />
+        <Input name="otp" type="number" inputClass="otp-box" className="otp-un-grid-fieldset-wrapper" ref={inputRef} />
         <div className="btn-group">
           <Button variant="outline" onClick={verify}>Verify</Button>
           <Button variant="success" onClick={reSend}>Re-send</Button>

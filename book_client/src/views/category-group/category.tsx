@@ -172,6 +172,12 @@ function Category(): JSX.Element {
             name="name"
             type="text"
             {...categoryName}
+            labelColumnSize={{
+              lg: 12
+            }}
+            inputColumnSize={{
+              lg: 12
+            }}
           />
           <Input
             label="Avatar"
@@ -181,6 +187,12 @@ function Category(): JSX.Element {
             onInput={fileChange}
             type="file"
             {...avatar}
+            labelColumnSize={{
+              lg: 12
+            }}
+            inputColumnSize={{
+              lg: 12
+            }}
           />
           <div className="image-preview" data-testid="image-preview">
             <List<string> items={previewImage} render={(image => (<img src={image} alt="preview" />)) } />

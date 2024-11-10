@@ -63,8 +63,30 @@ function Login(): JSX.Element {
   return (
     <LoginWrapper>
       <Form id={formId} onSubmit={onSubmit} submitLabel="Login">
-        <Input {...email} label="Email" type="email" name="email" className="fieldset-class" />
-        <Input {...password} label="Password" type="password" name="password" className="fieldset-class" />
+        <Input
+          {...email}
+          labelColumnSize={{
+            lg: 12,
+          }}
+          inputColumnSize={{
+            lg: 12
+          }}
+          label="Email"
+          type="email"
+          name="email"
+          className="fieldset-class" />
+        <Input
+          {...password}
+          label="Password"
+          type="password"
+          name="password"
+          className="fieldset-class"
+          labelColumnSize={{
+            lg: 12,
+          }}
+          inputColumnSize={{
+            lg: 12
+          }} />
       </Form>
     </LoginWrapper>
   );

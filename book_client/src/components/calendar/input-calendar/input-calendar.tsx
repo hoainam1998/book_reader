@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useMemo, JSX, Ref } from 'react';
-import FormControl from 'components/form/form-control/form-control';
+import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { format } from 'date-fns';
 import { clsx } from 'utils';
 import './style.scss';
@@ -9,17 +9,12 @@ type InputCalendarRect = {
 };
 
 type InputCalendarProps = {
-  label: string;
-  className?: string;
-  labelClass?: string;
   inputClass?: string;
-  name: string;
   value: number | null;
-  errors: string[];
   error: boolean;
   onFocus: () => void;
   onOpen: () => void;
-};
+} & Omit<FormControlProps, 'children'>;
 
 function InputCalendar({
   name,
@@ -30,6 +25,8 @@ function InputCalendar({
   errors,
   error,
   value,
+  labelColumnSize,
+  inputColumnSize,
   onFocus,
   onOpen
   }: InputCalendarProps, ref: Ref<InputCalendarRect>): JSX.Element {
@@ -39,7 +36,15 @@ function InputCalendar({
   useImperativeHandle(ref, () => ({ rect: inputCalendarRef.current!.rect as DOMRect }), []);
 
   return (
-    <FormControl<InputCalendarRect> name={name} label={label} className={className} labelClass={labelClass} errors={errors} ref={inputCalendarRef}>
+    <FormControl<InputCalendarRect>
+    name={name}
+    label={label}
+    className={className}
+    labelClass={labelClass}
+    errors={errors}
+    labelColumnSize={labelColumnSize}
+    inputColumnSize={inputColumnSize}
+    ref={inputCalendarRef}>
       <div className={clsx('input-calendar custom-input', { 'error-input': error })} onClick={onOpen}>
         <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass)}
           autoComplete="off" onFocus={onFocus} value={dateFormatted} />

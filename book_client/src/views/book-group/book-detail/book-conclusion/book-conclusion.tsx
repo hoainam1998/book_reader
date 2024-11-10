@@ -2,6 +2,7 @@ import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback, ReactElemen
 import { Blocker, useLoaderData, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Button from 'components/button/button';
+import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from 'hooks/useModalNavigation';
@@ -24,11 +25,11 @@ const FieldHightLightBox = ({
   children
 }: FieldHightLightBoxPropsType): JSX.Element => {
   return (
-    <div className="field-hight_light-box">
+    <div className="field-hight-light-box">
       <div className="label-badge">
         <span className="badge">{label}</span>
       </div>
-      <span>{value}</span>
+      <span className="field-information">{value}</span>
       {children}
     </div>
   );
@@ -100,14 +101,14 @@ function BookConclusion(): JSX.Element {
   if (data) {
     return (
       <section className="book-conclusion">
-        <div className="information-section">
-          <div className="avatar-box">
+        <Grid>
+          <GridItem sm={12} lg={3} className="avatar-box">
             <span className="field-name">Avatar</span>
             <div className="avatar image-box">
               { data && data.avatar && (<img src={data.avatar} alt="avatar" />)}
             </div>
-          </div>
-          <div className="image-box-wrapper">
+          </GridItem>
+          <GridItem sm={12} lg={6} className="image-box-wrapper">
             <span className="field-name">Images</span>
             <div className="image-selected image-box">
               {data && (
@@ -117,39 +118,41 @@ function BookConclusion(): JSX.Element {
                 />
               )}
             </div>
-          </div>
-          <ul className="information-detail">
-            <li>
-              <FieldHightLightBox label="Name" value={data.name} />
-            </li>
-            <li>
-              <FieldHightLightBox label="Pdf" value={data.pdf}>
-                <Button onClick={() => openFile(data.pdf)} className="preview" variant="success">
-                  Preview
-                </Button>
-              </FieldHightLightBox>
-            </li>
-            <li>
-              <FieldHightLightBox label="Publish Time" value={data.publishedTime} />
-            </li>
-            <li>
-              <FieldHightLightBox label="Publish Day" value={publishedDay} />
-            </li>
-            <li>
-              <FieldHightLightBox label="Category" value={category} />
-            </li>
-            <li>
-              <FieldHightLightBox label="Introduce" value={data.introduce!.html}>
-                <Button
-                  onClick={() => openFile(data.introduce!.html)}
-                  className="preview"
-                  variant="success">
+          </GridItem>
+          <GridItem sm={12} lg={3}>
+            <ul className="information-detail">
+              <li>
+                <FieldHightLightBox label="Name" value={data.name} />
+              </li>
+              <li>
+                <FieldHightLightBox label="Pdf" value={data.pdf}>
+                  <Button onClick={() => openFile(data.pdf)} className="preview" variant="success">
                     Preview
-                </Button>
-              </FieldHightLightBox>
-            </li>
-          </ul>
-        </div>
+                  </Button>
+                </FieldHightLightBox>
+              </li>
+              <li>
+                <FieldHightLightBox label="Publish Time" value={data.publishedTime} />
+              </li>
+              <li>
+                <FieldHightLightBox label="Publish Day" value={publishedDay} />
+              </li>
+              <li>
+                <FieldHightLightBox label="Category" value={category} />
+              </li>
+              <li>
+                <FieldHightLightBox label="Introduce" value={data.introduce!.html}>
+                  <Button
+                    onClick={() => openFile(data.introduce!.html)}
+                    className="preview"
+                    variant="success">
+                      Preview
+                  </Button>
+                </FieldHightLightBox>
+              </li>
+            </ul>
+          </GridItem>
+        </Grid>
         <Button onClick={complete} variant="submit" className="btn-complete">
           Complete
         </Button>

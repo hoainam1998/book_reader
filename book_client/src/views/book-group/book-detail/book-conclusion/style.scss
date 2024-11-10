@@ -3,16 +3,19 @@ $information-section-height: 400px;
 .book-conclusion {
   padding: 30px;
 
-  .information-section {
-    display: flex;
-    gap: 30px;
+  @include mobile {
+    padding: 7px;
   }
 
   .avatar-box {
-    flex-basis: 20%;
     .avatar {
       height: 400px;
+      padding: 10px;
       margin-top: 10px;
+
+      @include mobile {
+        height: 300px;
+      }
 
       & > img {
         width: 100%;
@@ -22,24 +25,27 @@ $information-section-height: 400px;
   }
 
   .image-box-wrapper {
-    flex-basis: 50%;
-
     .image-selected {
       height: $information-section-height;
       margin-top: 10px;
       display: flex;
+      flex-wrap: wrap;
       padding: 10px;
       gap: 10px;
 
       & > img {
+        box-sizing: border-box;
         height: calc(100% / 2);
-        width: calc(100% / 4);
+        width: calc(100% / 5);
+
+        @include mobile {
+          width: calc(100% / 2) - 2;
+        }
       }
     }
   }
 
   .information-detail {
-    flex-basis: 30%;
     margin-top: 30px;
     height: $information-section-height;
     display: flex;
@@ -55,22 +61,33 @@ $information-section-height: 400px;
   }
 }
 
-.field-hight_light-box {
+.field-hight-light-box {
+  position: relative;
   border-radius: 4px;
-  border: 2px solid #feca57;
+  border: 2px solid $badge-color;
   padding: 10px;
   width: 100%;
   min-height: 40px;
   display: flex;
 
   .label-badge {
-    flex-basis: 30%;
+    position: absolute;
+    top: -2px;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 14px;
+  }
+
+  .field-information {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow-x: hidden;
+    flex-basis: 73%;
   }
 
   & .badge {
-    border-radius: 40px;
-    background-color: #feca57;
-    color: $white-color;
-    padding: 2px 15px;
+    background-color: $white-color;
+    color: $badge-color;
+    padding: 0 5px;
   }
 }

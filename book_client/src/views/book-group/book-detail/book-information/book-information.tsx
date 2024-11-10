@@ -222,75 +222,108 @@ function BookInformation(): JSX.Element {
       onSubmit={bookInformationFormSubmit}
       className="book-information">
       <Grid>
-        <GridItem lg={3}>
+        <GridItem sm={12} lg={3}>
           <Input
             {...name}
             label="Name"
             name="name"
-            labelClass="name-label"
-            inputClass="name-input"
-          />
+            labelColumnSize= {{
+              lg: 3
+            }}
+            inputColumnSize={{
+              lg: 9
+            }}/>
         </GridItem>
-        <GridItem lg={3}>
+        <GridItem sm={12} lg={3}>
           <Input
             {...pdf}
             type="file"
             accept=".pdf"
             label="Pdf file"
             name="pdf"
-            labelClass="pdf-label"
-            inputClass="pdf-input"
             ref={pdfRef}
+            labelColumnSize= {{
+              lg: 3
+            }}
+            inputColumnSize={{
+              lg: 9
+            }}
           />
         </GridItem>
-        <GridItem lg={2}>
+        <GridItem sm={12} lg={2}>
           <Input
             {...publishedTime}
             type="number"
             min="1"
             label="Published time"
-            labelClass="published-time-label"
-            inputClass="published-time-input"
             name="publishedTime"
+            labelColumnSize= {{
+              lg: 5
+            }}
+            inputColumnSize={{
+              lg: 7
+            }}
           />
         </GridItem>
-        <GridItem lg={2}>
+        <GridItem sm={12} lg={2}>
           <Calendar
             {...publishedDay}
             labelClass="label"
             inputClass="input"
             label="Publish day"
             name="publishedDay"
+            labelColumnSize= {{
+              lg: 4
+            }}
+            inputColumnSize={{
+              lg: 8
+            }}
           />
         </GridItem>
-        <GridItem lg={2}>
+        <GridItem sm={12} lg={2}>
           <Select<string, CategoryOptionsType>
             {...categoryId}
             label="Category"
-            labelClass="category-id-label"
-            selectClass="category-id-input"
             placeholder="Please select category!"
             labelField="name"
             valueField="category_id"
             name="categoryId"
             options={categories}
+            labelColumnSize= {{
+              lg: 3
+            }}
+            inputColumnSize={{
+              lg: 9
+            }}
           />
         </GridItem>
-        <GridItem lg={3}>
+        <GridItem sm={12} lg={3}>
           <FileDragDropUpload
             {...avatar}
             multiple={false}
             name="avatar"
             label="Avatar"
             className="image-select-box"
+            labelColumnSize= {{
+              lg: 12
+            }}
+            inputColumnSize={{
+              lg: 12
+            }}
           />
         </GridItem>
-        <GridItem lg={9}>
+        <GridItem sm={12} lg={9}>
           <FileDragDropUpload
             {...images}
             name="images"
             label="Images"
             className="image-select-box"
+            labelColumnSize= {{
+              lg: 12
+            }}
+            inputColumnSize={{
+              lg: 12
+            }}
           />
         </GridItem>
       </Grid>

@@ -14,6 +14,7 @@ import {
   useCallback
 } from 'react';
 import FormControl from '../form-control';
+import type { FormControlProps } from '../form-control';
 import { clsx, customError } from 'utils';
 import './style.scss';
 
@@ -23,13 +24,8 @@ export type InputRefType = {
 
 type InputPropsType = {
   type?: string;
-  label: string;
-  className?: string;
-  labelClass?: string;
   inputClass?: string;
-  name: string;
   value?: string | number | File | File [];
-  errors?: string[];
   error?: boolean;
   accept?: string;
   multiple?: boolean;
@@ -39,7 +35,7 @@ type InputPropsType = {
   onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
   onBlur?: (value: number | string) => void;
-};
+} & Omit<FormControlProps, 'children'>;
 
 function Input({
   type = 'text',
@@ -55,6 +51,8 @@ function Input({
   className,
   labelClass,
   inputClass,
+  labelColumnSize,
+  inputColumnSize,
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
@@ -123,20 +121,27 @@ function Input({
   }, [value, type]);
 
   return (
-    <FormControl name={name} label={label} className={className} labelClass={labelClass} errors={errors}>
-      <div className={clsx('input-wrapper', inputClass)}>
-        <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-          type={inputType} {...specificPropInput} multiple={multiple}
-          min={min} ref={inputRef} data-testid={`input-${name}`}
-          onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
-        {
-          type === 'password' &&
-          <button onClick={toggleChangeInputType} className="eye-button">
-            <img src={require('images/icons/eye.svg')} alt="eye-icon" />
-          </button>
-        }
-        {limitCharacter && <p className="limit">{limitCharacter}</p>}
-      </div>
+    <FormControl
+      labelColumnSize={labelColumnSize}
+      inputColumnSize={inputColumnSize}
+      name={name}
+      label={label}
+      className={className}
+      labelClass={labelClass}
+      errors={errors}>
+        <div className={clsx('input-wrapper', inputClass)}>
+          <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
+            type={inputType} {...specificPropInput} multiple={multiple}
+            min={min} ref={inputRef} data-testid={`input-${name}`}
+            onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
+          {
+            type === 'password' &&
+            <button onClick={toggleChangeInputType} className="eye-button">
+              <img src={require('images/icons/eye.svg')} alt="eye-icon" />
+            </button>
+          }
+          {limitCharacter && <p className="limit">{ limitCharacter }</p>}
+        </div>
     </FormControl>
   );
 }

@@ -1,6 +1,6 @@
 import { Children, ReactElement, JSX, useMemo } from 'react';
 import { isSlot } from 'components/slot/slot';
-import FormControl from 'components/form/form-control/form-control';
+import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { FieldValidateProps } from 'hooks/useForm';
 import { clsx } from 'utils';
 import './style.scss';
@@ -20,14 +20,12 @@ type SelectPropsType<T, R> = {
   valueField?: keyof R;
   labelField?: keyof R;
   children?: ReactElement;
-  name: string;
-  className?: string;
-  labelClass?: string;
   selectClass?: string;
-  label?: string;
   // eslint-disable-next-line no-unused-vars
   onChange: (value: T) => void;
-} & Omit<Partial<FieldValidateProps<T>>, 'onChange'>;
+}
+& Omit<Partial<FieldValidateProps<T>>, 'onChange'>
+& FormControlProps;
 
 function Select<T extends string | number | readonly string[] | undefined, R extends OptionPrototype<T> = {}>
 ({
@@ -44,6 +42,8 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
   selectClass,
   error = false,
   errors = [],
+  inputColumnSize,
+  labelColumnSize,
   onChange
 }: SelectPropsType<T, R>): JSX.Element {
   const hasChildren: boolean = Children.count(children) > 0;
@@ -64,28 +64,35 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
   }, [placeholder]);
 
   return (
-    <FormControl name={name} label={label || ''} labelClass={labelClass} className={className} errors={errors}>
-      <div className={clsx('select-wrapper', selectClass)}>
-        <select name={name} id={name}
-        className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
-          value={value} onChange={(event) => onChange(event.target.value as T)} data-testid="select">
-          {
-            optionsFormatted.map((option, index) =>
-              <option
-                data-testid={`option-${index + 1}`}
-                key={index}
-                value={option[valueField || 'value'] as T}
-                className={option.class}
-                disabled={option.disabled}>
-                  {
-                    hasChildren && isSlot('default', optionSlot)
-                    ? optionSlot!.props.render(option)
-                    : option[labelField || 'label']
-                  }
-              </option>)
-          }
-        </select>
-      </div>
+    <FormControl
+      name={name}
+      label={label || ''}
+      labelClass={labelClass}
+      className={className}
+      errors={errors}
+      inputColumnSize={inputColumnSize}
+      labelColumnSize={labelColumnSize}>
+        <div className={clsx('select-wrapper', selectClass)}>
+          <select name={name} id={name}
+          className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
+            value={value} onChange={(event) => onChange(event.target.value as T)} data-testid="select">
+            {
+              optionsFormatted.map((option, index) =>
+                <option
+                  data-testid={`option-${index + 1}`}
+                  key={index}
+                  value={option[valueField || 'value'] as T}
+                  className={option.class}
+                  disabled={option.disabled}>
+                    {
+                      hasChildren && isSlot('default', optionSlot)
+                      ? optionSlot!.props.render(option)
+                      : option[labelField || 'label']
+                    }
+                </option>)
+            }
+          </select>
+        </div>
     </FormControl>
   );
 }

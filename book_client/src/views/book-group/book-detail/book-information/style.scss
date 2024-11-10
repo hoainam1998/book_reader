@@ -1,9 +1,6 @@
 .book-information {
   padding: 0 10px;
 
-  .image-select-box {
-    margin: 15px 0;
-  }
 }
 
 .label {
@@ -11,41 +8,6 @@
   margin-bottom: 0 !important;
   margin-top: 4px;
   margin-right: 5px;
-}
-
-.name-label {
-  @extend .label;
-  width: 20%;
-}
-
-.published-time-label {
-  @extend .label;
-  width: 40%;
-}
-
-.name-input {
-  width: 70% !important;
-}
-
-.published-time-input {
-  width: 50% !important;
-}
-
-.pdf-input {
-  @extend .name-input;
-}
-
-.pdf-label {
-  @extend .name-label;
-}
-
-.category-id-label {
-  @extend .label;
-  width: 25%;
-}
-
-.category-id-input {
-  width: 70%;
 }
 
 .book-detail-stepper {

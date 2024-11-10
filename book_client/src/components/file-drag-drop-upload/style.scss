@@ -1,5 +1,8 @@
-$gap: 8 * 7;
-$colum-width: calc((100% - #{$gap}px) / 8);
+@function calc-columns($columnNumber: 8) {
+  $gap: 7;
+  $gaps: $columnNumber * $gap;
+  @return repeat($columnNumber, calc((100% - #{$gaps}px) / $columnNumber));
+}
 
 .file-drag-drop-upload {
   min-height: 250px;
@@ -36,9 +39,13 @@ $colum-width: calc((100% - #{$gap}px) / 8);
 
   .multiple-image-preview-wrapper {
     display: grid;
-    grid-template-columns: repeat(8, $colum-width);
+    grid-template-columns: calc-columns();
     grid-template-rows: 230px;
     grid-gap: 7px;
+
+    @include mobile {
+      grid-template-columns: calc-columns(2);
+    }
   }
 
   .single-image-preview-wrapper {

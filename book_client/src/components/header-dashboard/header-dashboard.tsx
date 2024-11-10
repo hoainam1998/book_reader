@@ -41,7 +41,11 @@ function HeaderDashboard({ add, search }: HeaderDashboardPropsType): JSX.Element
         label=""
         value={keyword}
         name="search"
+        className="un-grid"
         labelClass="label-search"
+        inputColumnSize={{
+          sm: 12
+        }}
         onChange={(e) => setClearFlag((e.target as any).value)}
         onBlur={(value) => setKeyword(value as string)} />
       {

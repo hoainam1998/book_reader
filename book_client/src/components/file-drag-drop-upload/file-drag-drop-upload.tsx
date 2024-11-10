@@ -13,7 +13,7 @@ import React, {
   ReactNode
 } from 'react';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
-import FormControl from 'components/form/form-control/form-control';
+import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { clsx } from 'utils';
 import { FieldValidateProps } from 'hooks/useForm';
 import './style.scss';
@@ -23,12 +23,11 @@ type ImageFileListType = {
 };
 
 type FileDragDropUploadType = {
-  className?: string;
-  name: string;
-  label: string;
   multiple?: boolean;
   max?: number;
-} & FieldValidateProps<File[]>;
+}
+& FieldValidateProps<File[]>
+& Omit<FormControlProps, 'children'>;
 
 function FileDragDropUpload({
   className,
@@ -39,6 +38,8 @@ function FileDragDropUpload({
   label,
   multiple,
   max,
+  labelColumnSize,
+  inputColumnSize,
   onFocus,
   onChange
 }: FileDragDropUploadType, ref: Ref<ImageFileListType>): JSX.Element {
@@ -87,7 +88,6 @@ function FileDragDropUpload({
     setImageFileList(files);
     onFocus();
     onChange(files);
-    console.log(files);
   }, []);
 
   const onDeleteFile = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number): void => {
@@ -114,37 +114,42 @@ function FileDragDropUpload({
   }, [value]);
 
   return (
-    <FormControl label={labelWithMaxLength} name={name} errors={errors}>
-      <div className={clsx('file-drag-drop-upload image-box', className, { 'error-box': error })}
-        onDragOver={onDrag}
-        onDrop={onDrop}
-        onClick={onOpenFileFolder}>
-          {imageFileList && imageFileList.length === 0 && <span className="placeholder">
-            Please drag file into hear!
-          </span>}
-          <Input
-            type="file"
-            name={name}
-            label={label}
-            value={value}
-            multiple={multiSelectFlag}
-            className="input-file-hidden"
-            onChange={onFileChanged}
-            ref={fileInput} />
-          <div className={clsx({
+    <FormControl
+      label={labelWithMaxLength}
+      name={name}
+      errors={errors}
+      inputColumnSize={inputColumnSize}
+      labelColumnSize={labelColumnSize}>
+        <div className={clsx('file-drag-drop-upload image-box', className, { 'error-box': error })}
+          onDragOver={onDrag}
+          onDrop={onDrop}
+          onClick={onOpenFileFolder}>
+            {imageFileList && imageFileList.length === 0 && <span className="placeholder">
+              Please drag file into hear!
+            </span>}
+            <Input
+              type="file"
+              name={name}
+              label={label}
+              value={value}
+              multiple={multiSelectFlag}
+              className="input-file-hidden"
+              onChange={onFileChanged}
+              ref={fileInput} />
+            <div className={clsx({
               'multiple-image-preview-wrapper': multiSelectFlag,
               'single-image-preview-wrapper': !multiSelectFlag
               })}>
-            {
-              imageFileList && imageFileList.map((file, index) => (
-                <div className="image-preview-item" key={index}>
-                  <img height="100%" width="100%" src={URL.createObjectURL(file)} alt="book-image" />
-                  <div className="delete-image" onClick={(e) => onDeleteFile(e, index)}>x</div>
-                </div>
-              ))
-            }
-          </div>
-      </div>
+              {
+                imageFileList && imageFileList.map((file, index) => (
+                  <div className="image-preview-item" key={index}>
+                    <img height="100%" width="100%" src={URL.createObjectURL(file)} alt="book-image" />
+                    <div className="delete-image" onClick={(e) => onDeleteFile(e, index)}>x</div>
+                  </div>
+                ))
+              }
+            </div>
+        </div>
     </FormControl>
   );
 }

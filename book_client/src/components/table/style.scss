@@ -1,5 +1,4 @@
 .table-wrapper {
-
   .table {
     width: 100%;
 
@@ -87,6 +86,16 @@
           }
         }
       }
+    }
+  }
+}
+
+.page-size {
+  @include mobile {
+    select {
+      height: 25px;
+      width: 70px;
+      min-width: 70px;
     }
   }
 }

@@ -1,8 +1,10 @@
+/* eslint-disable no-use-before-define */
 import {
   JSX,
   useCallback,
   useEffect,
-  useRef
+  useRef,
+  Dispatch
 } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import {
@@ -13,7 +15,14 @@ import {
 import MonthCalendar from './month-calendar/month-calendar';
 import YearCalendar from './year-calendar/year-calendar';
 import InputCalendar from './input-calendar/input-calendar';
-import DayCalendar, { CalendarReducerAction, CalendarActionType, DisableDayActionEnum } from './day-calendar/day-calendar';
+import { FormControlProps } from 'components/form/form-control/form-control';
+import
+DayCalendar,
+{
+  CalendarReducerAction,
+  CalendarActionType,
+  DisableDayActionEnum
+} from './day-calendar/day-calendar';
 import { FieldValidateProps } from 'hooks/useForm';
 import { createElementWrapper } from 'utils';
 import './style.scss';
@@ -47,11 +56,9 @@ const state = {
 };
 
 type CalendarPropsType = {
-  label: string;
-  name: string;
-  labelClass: string;
   inputClass?: string;
-} & FieldValidateProps<number | null>;
+} & FieldValidateProps<number | null>
+& Omit<FormControlProps, 'children'>;
 
 function Calendar({
   value,
@@ -61,11 +68,13 @@ function Calendar({
   error,
   labelClass,
   inputClass,
+  inputColumnSize,
+  labelColumnSize,
   onChange,
   onFocus
   }: CalendarPropsType): JSX.Element {
   const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
-  const dayCalendarRef = useRef<{ dispatch: React.Dispatch<CalendarReducerAction>, date: Date }>(null);
+  const dayCalendarRef = useRef<{ dispatch: Dispatch<CalendarReducerAction>, date: Date }>(null);
 
   const setDay = useCallback((daySelected: string): void => {
     const dateSelected: Date = setDate(dayCalendarRef.current!.date, parseInt(daySelected));
@@ -96,7 +105,10 @@ function Calendar({
   const calculateCalendarPosition = useCallback((): void => {
     const { bottom, left, height } = inputCalendarRef.current?.rect as DOMRect;
     const spaceCanDock: number = bottom + calendarHeight + (marginCalendar * 2);
-    const top: number = spaceCanDock <= browserHeight ? bottom + marginCalendar : bottom - (height + marginCalendar + calendarHeight);
+    const top: number =
+    spaceCanDock <= browserHeight
+    ? bottom + marginCalendar
+    : bottom - (height + marginCalendar + calendarHeight);
     positionCalendar.left = left;
     positionCalendar.top = top;
   }, [inputCalendarRef.current]);
@@ -174,6 +186,8 @@ function Calendar({
         label={label}
         labelClass={labelClass}
         inputClass={inputClass}
+        inputColumnSize={inputColumnSize}
+        labelColumnSize={labelColumnSize}
         onOpen={openDayCalendar}
         onFocus={onFocus}
         ref={inputCalendarRef} />

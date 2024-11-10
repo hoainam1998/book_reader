@@ -15,6 +15,7 @@ type ModalNavigationPropsType = {
 export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}): void => {
   const [isNavigation, setIsNavigation] = useState<boolean>(false);
   const blocker: Blocker = useBlockerContext();
+  const windowWidth: number = window.innerWidth;
 
   body = body instanceof Function ? body(blocker) : body;
 
@@ -77,7 +78,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
           {footer ? footer(blocker) : footerModal()}
         </>,
         title: 'Navigation warning!',
-        size: 'sm',
+        size: windowWidth >= 390 ? 'lg' :'sm',
         onClose
       });
       setIsNavigation(false);
