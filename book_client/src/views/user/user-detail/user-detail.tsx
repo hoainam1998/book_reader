@@ -111,20 +111,67 @@ function UserDetail(): JSX.Element {
                 marginBottom: 15,
                 gap: 17
               }}>
-              <GridItem>
-                <Input {...firstName} label="First name" name="first_name" />
+              <GridItem sm={12} md={6} lg={2}>
+                <Input
+                  {...firstName}
+                  label="First name"
+                  name="first_name"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
               </GridItem>
-              <GridItem>
-                <Input {...lastName} label="Last name" name="last_name" />
+              <GridItem sm={12} md={6} lg={2}>
+                <Input
+                  {...lastName}
+                  label="Last name"
+                  name="last_name"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
               </GridItem>
-              <GridItem>
-                <Input {...email} label="Email" type="email" name="email" />
+              <GridItem sm={12} md={6} lg={3}>
+                <Input
+                  {...email}
+                  label="Email"
+                  type="email"
+                  name="email"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
               </GridItem>
-              <GridItem>
-                <FileDragDropUpload multiple={false} {...avatar} label="Avatar" name="avatar" />
+              <GridItem sm={12} md={6} lg={2}>
+                <FileDragDropUpload
+                  multiple={false}
+                  {...avatar}
+                  label="Avatar"
+                  name="avatar"
+                  inputColumnSize={{
+                    lg: 12
+                  }}
+                  labelColumnSize={{
+                    lg: 12
+                  }}  />
               </GridItem>
-              <GridItem>
-                <Switch {...mfa} label="Mfa" name="mfa" />
+              <GridItem sm={12} md={6} lg={3}>
+                <Switch
+                  {...mfa}
+                  label="Mfa"
+                  name="mfa"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
               </GridItem>
             </Grid>
           </Form>

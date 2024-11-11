@@ -155,7 +155,7 @@ function Category(): JSX.Element {
 
   return (
     <Grid>
-      <GridItem sm={12} lg={9}>
+      <GridItem sm={12} md={7} lg={9}>
         <Table fields={fields} classes="category-responsive-table" data={data} total={total} onLoad={fetchCategory}>
           <Slot<CategoryType> name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
@@ -163,7 +163,7 @@ function Category(): JSX.Element {
           <Slot name="operation" render={operationSlot} />
         </Table>
       </GridItem>
-      <GridItem sm={12} lg={3}>
+      <GridItem sm={12} md={5} lg={3}>
         <Form id={formId} className="category-form" submitLabel="Save" onSubmit={onSubmit}>
           <Input
             label="Category name"

@@ -96,20 +96,68 @@ function Personal(): JSX.Element {
                 &#8592;Back
               </Button>
             </GridItem>
-            <GridItem>
-              <Input {...firstName} label="First name" name="first_name" />
+            <GridItem sm={12} lg={6}>
+              <Input
+                {...firstName}
+                label="First name"
+                name="first_name"
+                inputColumnSize={{
+                  lg: 8
+                }}
+                labelColumnSize={{
+                  lg: 4
+                }}/>
             </GridItem>
-            <GridItem>
-              <Input {...lastName} label="Last name" name="last_name" />
+            <GridItem sm={12} lg={6}>
+              <Input
+                {...lastName}
+                label="Last name"
+                name="last_name"
+                inputColumnSize={{
+                  lg: 8
+                }}
+                labelColumnSize={{
+                  lg: 4
+                }} />
             </GridItem>
-            <GridItem>
-              <Input {...email} label="Email" type="email" name="email" />
+            <GridItem sm={12} lg={6}>
+              <Input
+                {...email}
+                label="Email"
+                type="email"
+                name="email"
+                inputColumnSize={{
+                  lg: 8
+                }}
+                labelColumnSize={{
+                  lg: 4
+                }} />
             </GridItem>
-            <GridItem>
-              <FileDragDropUpload {...avatar} multiple={false} label="Avatar" name="avatar" />
+            <GridItem sm={12} lg={6}>
+              <FileDragDropUpload
+                {...avatar}
+                multiple={false}
+                label="Avatar"
+                name="avatar"
+                inputColumnSize={{
+                  lg: 8
+                }}
+                labelColumnSize={{
+                  lg: 8
+                }} />
             </GridItem>
-            <GridItem>
-              <Input {...password} label="Password" type="password" name="password" />
+            <GridItem sm={12} lg={6}>
+              <Input
+                {...password}
+                label="Password"
+                type="password"
+                name="password"
+                inputColumnSize={{
+                  lg: 8
+                }}
+                labelColumnSize={{
+                  lg: 4
+                }} />
             </GridItem>
           </Grid>
         </Form>

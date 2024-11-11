@@ -57,6 +57,11 @@ const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
             publishedDay,
             categoryId,
             avatar,
+            introduce
+              {
+                html,
+                json
+              },
             images
               {
                 image,

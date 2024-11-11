@@ -222,19 +222,21 @@ function BookInformation(): JSX.Element {
       onSubmit={bookInformationFormSubmit}
       className="book-information">
       <Grid>
-        <GridItem sm={12} lg={3}>
+        <GridItem sm={12} md={4} lg={3}>
           <Input
             {...name}
             label="Name"
             name="name"
             labelColumnSize= {{
-              lg: 3
+              lg: 3,
+              md: 12
             }}
             inputColumnSize={{
-              lg: 9
+              lg: 9,
+              md: 12
             }}/>
         </GridItem>
-        <GridItem sm={12} lg={3}>
+        <GridItem sm={12} md={5} lg={3}>
           <Input
             {...pdf}
             type="file"
@@ -243,14 +245,16 @@ function BookInformation(): JSX.Element {
             name="pdf"
             ref={pdfRef}
             labelColumnSize= {{
-              lg: 3
+              lg: 3,
+              md: 12
             }}
             inputColumnSize={{
-              lg: 9
+              lg: 9,
+              md: 12
             }}
           />
         </GridItem>
-        <GridItem sm={12} lg={2}>
+        <GridItem sm={12} md={3} lg={2}>
           <Input
             {...publishedTime}
             type="number"
@@ -258,14 +262,16 @@ function BookInformation(): JSX.Element {
             label="Published time"
             name="publishedTime"
             labelColumnSize= {{
-              lg: 5
+              lg: 5,
+              md: 12
             }}
             inputColumnSize={{
-              lg: 7
+              lg: 7,
+              md: 12
             }}
           />
         </GridItem>
-        <GridItem sm={12} lg={2}>
+        <GridItem sm={12} md={4} lg={2}>
           <Calendar
             {...publishedDay}
             labelClass="label"
@@ -273,14 +279,16 @@ function BookInformation(): JSX.Element {
             label="Publish day"
             name="publishedDay"
             labelColumnSize= {{
-              lg: 4
+              lg: 4,
+              md: 12
             }}
             inputColumnSize={{
-              lg: 8
+              lg: 8,
+              md: 12
             }}
           />
         </GridItem>
-        <GridItem sm={12} lg={2}>
+        <GridItem sm={12} md={4} lg={2}>
           <Select<string, CategoryOptionsType>
             {...categoryId}
             label="Category"
@@ -290,14 +298,16 @@ function BookInformation(): JSX.Element {
             name="categoryId"
             options={categories}
             labelColumnSize= {{
-              lg: 3
+              lg: 3,
+              md: 12
             }}
             inputColumnSize={{
-              lg: 9
+              lg: 9,
+              md: 12
             }}
           />
         </GridItem>
-        <GridItem sm={12} lg={3}>
+        <GridItem sm={12} md={4} lg={3}>
           <FileDragDropUpload
             {...avatar}
             multiple={false}
@@ -312,7 +322,7 @@ function BookInformation(): JSX.Element {
             }}
           />
         </GridItem>
-        <GridItem sm={12} lg={9}>
+        <GridItem sm={12} md={12} lg={9}>
           <FileDragDropUpload
             {...images}
             name="images"

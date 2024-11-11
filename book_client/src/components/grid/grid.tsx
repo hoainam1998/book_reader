@@ -12,6 +12,7 @@ type GridProps = ColSize & {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  order?: number | string;
 };
 
 /**
@@ -34,14 +35,14 @@ const createGridColumnClasses = (colObject: ColSize, classProperty: string = '')
   }, '').trim();
 };
 
-export const GridItem = ({ sm, md, lg, children, className }: GridProps ): JSX.Element => {
+export const GridItem = ({ sm, md, lg, order, children, className }: GridProps ): JSX.Element => {
   const colClasses: string = createGridColumnClasses({ lg, md, sm });
   return (
-    <div className={clsx(colClasses, className)}>{children}</div>
+    <div style={{ order }} className={clsx(colClasses, className)}>{children}</div>
   );
 };
 
-function Grid({ sm, md, lg, style, children, className }: GridProps): JSX.Element {
+function Grid({ sm, md, lg, style, children, className }: Omit<GridProps, 'order'>): JSX.Element {
   let rowClasses: string = createGridColumnClasses({ lg, md, sm }, 'row');
 
   const childrenCount = Children.count(children);

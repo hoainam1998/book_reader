@@ -102,13 +102,13 @@ function BookConclusion(): JSX.Element {
     return (
       <section className="book-conclusion">
         <Grid>
-          <GridItem sm={12} lg={3} className="avatar-box">
+          <GridItem sm={12} md={6} lg={3} order={1} className="avatar-box">
             <span className="field-name">Avatar</span>
             <div className="avatar image-box">
               { data && data.avatar && (<img src={data.avatar} alt="avatar" />)}
             </div>
           </GridItem>
-          <GridItem sm={12} lg={6} className="image-box-wrapper">
+          <GridItem sm={12} lg={6} order={3} className="image-box-wrapper">
             <span className="field-name">Images</span>
             <div className="image-selected image-box">
               {data && (
@@ -119,7 +119,7 @@ function BookConclusion(): JSX.Element {
               )}
             </div>
           </GridItem>
-          <GridItem sm={12} lg={3}>
+          <GridItem sm={12} md={6} lg={3} order={2}>
             <ul className="information-detail">
               <li>
                 <FieldHightLightBox label="Name" value={data.name} />
