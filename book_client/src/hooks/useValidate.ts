@@ -202,12 +202,11 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
           } else {
             const validateInfoObject = (validateInfo as ValidateInfo);
             obj[validateName] = validateInfoObject.func;
-            if (validateInfoObject.max) {
-              keyValidateInfo.max = validateInfoObject.max;
-            }
+            keyValidateInfo.max = validateInfoObject.max;
           }
           return obj;
       }, {});
+
       const validate = (value: any = state[key as keyof T]): void => {
         keyValidateInfo.error = Object.entries(validateRulePair).map(
           ([validateName, validateFunc]: [string, ValidateFunction | ValidateProcess]) => {

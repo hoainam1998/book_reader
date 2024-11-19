@@ -7,6 +7,7 @@ import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category-group/category';
 import BookDetail, { loadAllCategory, shouldRevalidateBookLoader } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
+import AuthorDetail from 'views/author-group/author-detail/author-detail';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import { LoginRequire, Logged  } from '../guard';
@@ -126,6 +127,22 @@ const routes: RoutePropsUnion[] = [
               crumb: ({ pathname }: UIMatch) =>
                 <span key={pathname}>New</span>
             }
+          }
+        ]
+      },
+      {
+        path: path.AUTHOR,
+        element: <Outlet />,
+        handle: {
+          crumb: (match: UIMatch) =>
+            <Link key={match.pathname} to={match.pathname}>
+              Author
+            </Link>
+        },
+        children: [
+          {
+            index: true,
+            element: <AuthorDetail />
           }
         ]
       }

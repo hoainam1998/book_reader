@@ -1,16 +1,9 @@
 import { Children, ReactElement, JSX, useMemo } from 'react';
 import { isSlot } from 'components/slot/slot';
-import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
+import FormControl, { FormControlProps, OptionPrototype } from 'components/form/form-control/form-control';
 import { FieldValidateProps } from 'hooks/useForm';
 import { clsx } from 'utils';
 import './style.scss';
-
-export type OptionPrototype<T> = {
-  class?: string;
-  value?: T ;
-  label?: string;
-  disabled?: boolean;
-};
 
 type OptionType<T, R> = (OptionPrototype<T> & R)[];
 
@@ -24,7 +17,7 @@ type SelectPropsType<T, R> = {
   // eslint-disable-next-line no-unused-vars
   onChange: (value: T) => void;
 }
-& Omit<Partial<FieldValidateProps<T>>, 'onChange'>
+& Omit<Partial<FieldValidateProps<T>>, 'onChange' | 'options'>
 & FormControlProps;
 
 function Select<T extends string | number | readonly string[] | undefined, R extends OptionPrototype<T> = {}>

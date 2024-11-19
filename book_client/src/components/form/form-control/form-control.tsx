@@ -9,10 +9,18 @@ type ColumnSize = {
   lg?: number;
 };
 
+export type OptionPrototype<T> = {
+  class?: string;
+  value?: T ;
+  label?: string;
+  disabled?: boolean;
+};
+
 export type FormControlProps = {
   children?: ReactElement;
   name: string;
   label?: ReactNode;
+  options?: OptionPrototype<unknown>[]
   className?: string;
   labelClass?: string;
   errors?: string[];
@@ -43,7 +51,7 @@ function FormControl<T>({
       Object.keys(inputColumnSize)
         .forEach((key: string) => {inputColumnSize[key as keyof ColumnSize] = 12; });
     }
-    return inputColumnSize || {};
+    return inputColumnSize || { lg: 8 };
   }, [inputColumnSize, label]);
 
   return (

@@ -1,12 +1,13 @@
-import { JSX, useEffect, useState, useCallback, useMemo, useSyncExternalStore } from 'react';
-import Quill, { QuillOptions } from 'quill';
+import { JSX, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import { Op } from 'quill/core';
 import Button from 'components/button/button';
 import store, { CurrentStoreType } from 'store/book';
 import { saveIntroduceFile, getBookIntroduceFile } from '../fetcher';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import useInitEditor from 'hooks/useInitEditor';
 import './style.scss';
+
 const {
   subscribe,
   getSnapshot,
@@ -18,23 +19,6 @@ const {
 } = store;
 
 const editSelector: string = 'book-introduce-editor';
-
-const options: QuillOptions = {
-  modules: {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],
-      ['link', 'image', 'video'],
-      [{ indent: '-1' }, { indent: '+1' }],
-      [{ size: ['small', false, 'large', 'huge'] }],
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ color: [] }, { background: [] }],
-      [{ font: [] }],
-      [{ align: [] }]
-    ]
-  },
-  placeholder: 'Please enter book introduce information ...',
-  theme: 'snow'
-};
 
 /**
  * Convert file path string list to promise of options. Those options will be content of quill.
@@ -49,10 +33,9 @@ const getContent = (filePath: string): Promise<Op[]> => {
 };
 
 function BookIntroduce(): JSX.Element {
-  const [quill, setQuill] = useState<Quill | null>(null);
-  const [haveContent, setHaveContent] = useState<boolean>(false);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   useModalNavigation({ onLeaveAction: deleteAllStorage });
+  const { quill, haveContent } = useInitEditor(editSelector);
 
   const name: string = useMemo((): string => {
     if (data && Object.hasOwn(data, 'name')) {
@@ -74,33 +57,13 @@ function BookIntroduce(): JSX.Element {
     });
   }, [quill]);
 
-  const quillCreator = useCallback((): void => {
-    const quillInstance = new Quill(`#${editSelector}`, options);
-    quillInstance.on('editor-change', (): void => {
-      if (quillInstance?.getLength() === 1) {
-        setHaveContent(false);
-      } else {
-        setHaveContent(true);
-      }
-    });
-    setQuill(quillInstance);
-  }, []);
-
   useEffect(() => {
     updateConditionNavigate(haveContent);
   }, [haveContent]);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
-      if (!haveFetched()) {
-        quillCreator();
-      }
-    };
-  });
-
-  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
-    return () => {
-      if (data && data.introduce && !haveFetched()) {
+      if (data && data.introduce && !haveFetched() && quill) {
         getContent(data.introduce.json)
           .then(json => quill?.setContents(json));
       }
@@ -115,7 +78,7 @@ function BookIntroduce(): JSX.Element {
       </p>
       <p className="horizontal-line" />
       <div id={editSelector} className="book-introduce-editor" />
-      {quill &&
+      { quill &&
         <Button
           onClick={onSave}
           disabled={!haveContent}

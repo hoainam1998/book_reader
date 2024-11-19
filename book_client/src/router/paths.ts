@@ -8,5 +8,6 @@ export default Object.freeze({
   BOOK: 'book',
   USER: 'user',
   PERSONAL: '/personal',
+  AUTHOR: 'author',
   NEW: 'new'
 });

@@ -1,0 +1,58 @@
+$radio-size: 18px;
+
+@function calcCheckmarkSize() {
+  @return calc($radio-size - 7px);
+}
+
+.radio-wrapper {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+
+  span {
+    // font-weight: normal;
+    font-size: 14px;
+  }
+
+  input[type="radio"] {
+    visibility: hidden;
+    width: 0;
+    height: 0;
+  }
+
+  .checkmark {
+    display: block;
+    position: relative;
+    width: $radio-size;
+    height: $radio-size;
+    background-color: $table-row-even-color;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calcCheckmarkSize();
+      height: calcCheckmarkSize();
+      background-color: $border-input-color;
+      border-radius: 50%;
+    }
+  }
+
+  input:checked ~ .checkmark {
+    background-color: $white-color;
+    border: 1px solid $primary-button-color;
+
+    &:after {
+      background-color: $primary-button-color;
+    }
+  }
+}
+
+.horizontal {
+  display: flex;
+  align-items: center;
+}
