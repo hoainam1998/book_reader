@@ -8,8 +8,10 @@ import useValidate, {
   ValidateName
 } from './useValidate';
 
-export type RuleType<T> =
-  Record<keyof T, Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>>;
+export type RuleType<T> = Record<
+  keyof T,
+  Partial<Record<ValidateName | string, ValidateFunction | ValidateProcess | ValidateInfo>>
+>;
 
 export type FieldValidateProps<T = any> = {
   value: T;
@@ -31,17 +33,18 @@ export type FormValidateProps = {
 };
 
 const validateValue = (event: ChangeEvent): any => {
-  const elementTargetValue: any =
-  (event.currentTarget as HTMLInputElement)?.value;
+  const elementTargetValue: any = (event?.currentTarget as HTMLInputElement)?.value;
 
   if (elementTargetValue === null || elementTargetValue === undefined) {
     return event;
   } else {
-    if (!elementTargetValue
-      && (event.currentTarget as HTMLInputElement)?.files
-      && (event.currentTarget as HTMLInputElement)?.files!.length > 0) {
-        const fileList = Array.from((event.currentTarget as HTMLInputElement)?.files || []);
-        return fileList[0].name;
+    if (
+      !elementTargetValue &&
+      (event.currentTarget as HTMLInputElement)?.files &&
+      (event.currentTarget as HTMLInputElement)?.files!.length > 0
+    ) {
+      const fileList = Array.from((event.currentTarget as HTMLInputElement)?.files || []);
+      return fileList[0].name;
     } else {
       return elementTargetValue;
     }
@@ -59,7 +62,7 @@ export default <T extends Object, R>(
   const formControlProps: FormValidateProps = {
     validate: validateObject,
     handleSubmit: (): void => {
-      if (!formControlProps .validate.dirty) {
+      if (!formControlProps.validate.dirty) {
         formControlProps.validate.dirty = true;
       }
       (validateObject.validate as Function)();
@@ -73,11 +76,10 @@ export default <T extends Object, R>(
     },
     reset: (): void => {
       validateObject.dirty = false;
-      Object.keys(state).forEach(
-        (key: string) => {
-          const keyValidateObject = validateObject[key]!;
-          keyValidateObject.dirty = false;
-          keyValidateObject.watch('', key);
+      Object.keys(state).forEach((key: string) => {
+        const keyValidateObject = validateObject[key]!;
+        keyValidateObject.dirty = false;
+        keyValidateObject.watch('', key);
       });
       document.forms.namedItem(formId)?.reset();
     }

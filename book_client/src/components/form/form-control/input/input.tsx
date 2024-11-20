@@ -140,7 +140,7 @@ function Input({
               <img src={require('images/icons/eye.svg')} alt="eye-icon" />
             </button>
           }
-          {limitCharacter && <p className="limit">{ limitCharacter }</p>}
+          { limitCharacter && <p className="limit">{ limitCharacter }</p> }
         </div>
     </FormControl>
   );

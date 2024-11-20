@@ -1,10 +1,11 @@
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useEffect } from 'react';
 import Grid, { GridItem } from 'components/grid/grid';
 import Input from 'components/form/form-control/input/input';
 import Form from 'components/form/form';
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import { OptionPrototype } from 'components/form/form-control/form-control';
 import Radio from 'components/form/form-control/radio/radio';
+import Editor from 'components/editor/editor';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, matchPattern, maxLength } from 'hooks/useValidate';
 import './style.scss';
@@ -15,6 +16,7 @@ type AuthorStateType = {
   avatar: File | string;
   yearOfBirth: number;
   yearOfDead: number;
+  story: string;
 };
 
 const state: AuthorStateType = {
@@ -22,15 +24,17 @@ const state: AuthorStateType = {
   sex: 0,
   avatar: '',
   yearOfBirth: 0,
-  yearOfDead: 0
+  yearOfDead: 0,
+  story: ''
 };
 
 const rules: RuleType<AuthorStateType> = {
   name: { required, maxLength: maxLength(20) },
   sex: { required },
   avatar: { required },
-  yearOfBirth: { required, matchPattern: matchPattern(/^([1-9]{4})$/) },
-  yearOfDead: { required, matchPattern: matchPattern(/^([1-9]{4})$/) }
+  yearOfBirth: { required, matchPattern: matchPattern(/^([1-9]{3,4})$/) },
+  yearOfDead: { required, matchPattern: matchPattern(/^([1-9]{3,4})$/) },
+  story: { required }
 };
 
 const formId: string = 'author-form';
@@ -53,20 +57,23 @@ function AuthorDetail(): JSX.Element  {
     avatar,
     yearOfBirth,
     yearOfDead,
+    story,
     handleSubmit,
     validate,
     reset
   } = useForm<AuthorStateType, RuleType<AuthorStateType>>(state, rules, formId);
 
-  const onSubmit = useCallback((form: FormData) => {
+  const onSubmit = useCallback((formData: FormData) => {
     handleSubmit();
 
     if (!validate.error) {
-      console.log(form);
+      console.log(formData);
     }
   }, [validate]);
 
-  console.log(name);
+  useEffect(() => {
+    return () => reset();
+  }, []);
 
   return (
     <Form id={formId} className="author-form" submitLabel="Save" onSubmit={onSubmit}>
@@ -86,7 +93,7 @@ function AuthorDetail(): JSX.Element  {
             }}
             inputColumnSize={{
               lg: 7
-            }}/>
+            }} />
         </GridItem>
         <GridItem lg={2}>
           <Input {...yearOfDead} label="Year of dead" name="yearOfDead"
@@ -103,6 +110,20 @@ function AuthorDetail(): JSX.Element  {
               lg: 12
             }}
             inputColumnSize={{
+              lg: 12
+            }} />
+        </GridItem>
+        <GridItem lg={12}>
+          <Editor
+            {...story}
+            placeholder="Enter author story..."
+            name="story"
+            label="Story"
+            className="editor-wrapper"
+            inputColumnSize={{
+              lg: 12
+            }}
+            labelColumnSize={{
               lg: 12
             }} />
         </GridItem>

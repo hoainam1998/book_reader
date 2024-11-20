@@ -164,6 +164,7 @@ const objectValidate: ErrorInfo = {
 
 const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = []): ErrorInfo => {
   const setError = useState<{[key: string]: boolean}>({})[1];
+  const setMax = useState<{[key: string]: number | undefined}>({})[1];
   const [value, setValue] = useState<T>(state);
   const rulesEntries: [string, R][] = Object.entries(rules as ArrayLike<R>);
   objectValidate.values = value;
@@ -203,6 +204,7 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
             const validateInfoObject = (validateInfo as ValidateInfo);
             obj[validateName] = validateInfoObject.func;
             keyValidateInfo.max = validateInfoObject.max;
+            setMax({ key: validateInfoObject.max });
           }
           return obj;
       }, {});

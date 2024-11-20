@@ -1,8 +1,8 @@
 import Quill, { QuillOptions } from 'quill';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import useComponentDidMount, { HaveLoadedFnType } from './useComponentDidMount';
 
-const options: QuillOptions = {
+const defaultOptions: QuillOptions = {
   modules: {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
@@ -15,13 +15,17 @@ const options: QuillOptions = {
       [{ align: [] }]
     ]
   },
-  placeholder: 'Please enter book introduce information ...',
+  placeholder: 'Please enter something ...',
   theme: 'snow'
 };
 
-function useInitEditor(editSelector: string) {
+function useInitEditor(editSelector: string, placeholder?: string) {
   const [quill, setQuill] = useState<Quill | null>(null);
   const [haveContent, setHaveContent] = useState<boolean>(false);
+
+  const options = useMemo<QuillOptions>(() => {
+    return placeholder ? { ...defaultOptions, placeholder } : defaultOptions;
+  }, [placeholder]);
 
   const quillCreator = useCallback((): void => {
     const quillInstance = new Quill(`#${editSelector}`, options);

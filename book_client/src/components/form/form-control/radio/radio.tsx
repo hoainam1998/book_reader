@@ -10,7 +10,18 @@ type RadioPropsType<T> = { horizontal?: boolean } & Partial<FieldValidateProps<T
 function Radio<T>({ name, value, label, options, horizontal, onChange, onFocus }: RadioPropsType<T>): JSX.Element {
 
   const defaultChecked = useCallback((radioValue: number | string): boolean => {
-    return ((typeof value === 'string') ?  parseInt(value) : value) === radioValue;
+    const transformValue = (): unknown => {
+      if ((typeof value === 'string')) {
+        if (value === '') {
+          return options![0].value;
+        } else {
+          return parseInt(value);
+        }
+      } else {
+        return value;
+      }
+    };
+    return transformValue() === radioValue;
   }, [value, options]);
 
   const radioValueChange = (e: any) => {

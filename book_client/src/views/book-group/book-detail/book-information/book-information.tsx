@@ -183,7 +183,7 @@ function BookInformation(): JSX.Element {
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
-      if (data && step === 1) {
+      if (data && step === 1 && id) {
         name.watch(data.name);
         publishedTime.watch(data.publishedTime);
         publishedDay.watch(+data.publishedDay);
