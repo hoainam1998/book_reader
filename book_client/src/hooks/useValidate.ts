@@ -70,6 +70,8 @@ export const required: ValidateFunction =
       errorObj.error = !currentValue.trim();
     } else if (Array.isArray(currentValue)) {
       errorObj.error = currentValue.length === 0;
+    } else if (typeof currentValue === 'number') {
+      errorObj.error = !Number.isInteger(currentValue);
     }
 
     return errorObj;

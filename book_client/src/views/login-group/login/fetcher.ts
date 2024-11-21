@@ -20,5 +20,5 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
     email,
     password
   };
-  return UserService.graphql('/login', body);
+  return UserService.graphql('login', body);
 };
