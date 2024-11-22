@@ -7,6 +7,7 @@ const { GraphQLObjectType, GraphQLSchema } = require('graphql');
 const startCategory = require('./modules/category/index.js');
 const startBook = require('./modules/book/index.js');
 const startUser = require('./modules/user/index.js');
+const startAuthor = require('./modules/author/index.js');
 const connectDataBase = require('./config.js');
 const FactoryRouter = require('./routes/factory.js');
 
@@ -27,13 +28,15 @@ connectDataBase().then(querySql => {
   const category = startCategory(querySql);
   const book = startBook(querySql);
   const user = startUser(querySql);
+  const author = startAuthor(querySql);
 
   const query = new GraphQLObjectType({
     name: 'Query',
     fields: {
       category: category.query,
       book: book.query,
-      user: user.query
+      user: user.query,
+      author: author.query
     }
   });
 
@@ -42,7 +45,8 @@ connectDataBase().then(querySql => {
     fields: {
       category: category.mutation,
       book: book.mutation,
-      user: user.mutation
+      user: user.mutation,
+      author: author.mutation
     }
   });
 

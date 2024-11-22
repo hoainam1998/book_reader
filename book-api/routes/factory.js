@@ -1,6 +1,7 @@
 const CategoryRouter = require('./modules/category.js');
 const BookRouter = require('./modules/book.js');
 const UserRouter = require('./modules/user.js');
+const AuthorRouter = require('./modules/author.js');
 const { PATH } = require('#constants');
 
 class RouterFactory {
@@ -17,6 +18,10 @@ class RouterFactory {
       {
         path: PATH.USER,
         route: new UserRouter(express, schema)
+      },
+      {
+        path: PATH.AUTHOR,
+        route: new AuthorRouter(express, schema)
       }
     ];
   }

@@ -1,3 +1,5 @@
+const fs = require('fs');
+const { join } = require('path');
 const sendMail = require('./sendMail');
 /**
  * Return freezed object.
@@ -9,7 +11,7 @@ const deepFreeze = (object) => {
   for (const key in object) {
     if (object[key] instanceof Object) {
       object[key] = deepFreeze(object[key]);
-    };
+    }
   }
   return Object.freeze(object);
 };
@@ -52,23 +54,50 @@ const promiseAllSettledOrder = (promiseChain, success, error) => {
           .finally(() => handlePromise(index + 1))
       );
     } else {
-      Promise.all(promises).then((results) => {
-        const messages = results.reduce((message, result) => {
-          if (result instanceof Error) {
-            message += result.message + '; ';
-          }
-          return message;
-        }, '').trim();
+      Promise.all(promises)
+        .then((results) => {
+          const messages = results
+            .reduce((message, result) => {
+              if (result instanceof Error) {
+                message += result.message + "; ";
+              }
+              return message;
+            }, '')
+            .trim();
 
-        if (messages) {
-          throw new Error(messages);
-        } else {
-          success(results);
-        }
-      }).catch(error);
+          if (messages) {
+            throw new Error(messages);
+          } else {
+            success(results);
+          }
+        })
+        .catch(error);
     }
   };
   handlePromise();
+};
+
+/**
+ * Write contents to file and save it to specific folder.
+ *
+ * @param {string} filePath - path to stored file.
+ * @param {string} success - content of file.
+ * @return {Promise<string>} promise contain file path.
+ */
+const saveFile = (filePath, content) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(
+      join(__dirname, filePath),
+      content,
+      (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(filePath);
+        }
+      }
+    );
+  });
 };
 
 module.exports = {
@@ -76,5 +105,6 @@ module.exports = {
   messageCreator,
   promiseAllSettledOrder,
   generateOtp,
-  sendMail
+  sendMail,
+  saveFile,
 };

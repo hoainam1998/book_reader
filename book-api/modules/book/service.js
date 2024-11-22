@@ -1,5 +1,6 @@
-const fs = require("fs");
-const { join } = require("path");
+const fs = require('fs');
+const { join } = require('path');
+const { saveFile } = require('#utils');
 
 class BookService {
   _sql = null;
@@ -10,31 +11,20 @@ class BookService {
 
   saveIntroduceHtmlFile(fileName, html, json, bookId) {
     const fileNameSaved = fileName.replace(/\s/, '-');
-    const saveFile = (path, content) => {
-      const filePath = `${path}/${fileNameSaved}.${path}`;
-      return new Promise((resolve, reject) => {
-        fs.writeFile(
-          join(__dirname, `../../public/${filePath}`),
-          content,
-          (err) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(filePath);
-            }
-          }
-        );
-      });
-    };
-    return Promise.all([saveFile('html', html), saveFile('json', json)]).then(
-      (result) => {
-        const introduceFilePath = result.join(",");
-        return this._sql.query(
-          'UPDATE BOOK SET INTRODUCE_FILE = ? WHERE BOOK_ID = ?',
-          [introduceFilePath, bookId]
-        );
-      }
-    );
+    const filePath = (path) => `../../public/${path}/${fileNameSaved}.${path}`;
+    return Promise.all([
+      saveFile(filePath('html'), html),
+      saveFile(filePath('json'), json)
+    ])
+      .then(
+        (result) => {
+          const introduceFilePath = result.join(',');
+          return this._sql.query(
+            'UPDATE BOOK SET INTRODUCE_FILE = ? WHERE BOOK_ID = ?',
+            [introduceFilePath, bookId]
+          );
+        }
+      );
   }
 
   saveBookInfo(book) {
