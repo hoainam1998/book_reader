@@ -1,6 +1,7 @@
-import { JSX } from 'react';
+import { JSX, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import List from 'components/list/list';
+import routes from '../../router/routes';
 import { clsx } from 'utils';
 import path from 'paths';
 import './style.scss';
@@ -11,25 +12,19 @@ type NavLinkPropsType = {
   image: string;
 };
 
-const navLinks: NavLinkPropsType[] = [
-  {
-    path: path.CATEGORY,
-    label: 'categories',
-    image: 'application.png'
-  },
-  {
-    path: path.BOOK,
-    label: 'books',
-    image: 'book.png'
-  },
-  {
-    path: path.USER,
-    label: 'users',
-    image: 'user-group.png'
-  }
-];
 
 function Menu(): JSX.Element {
+
+  const navLinks = useMemo<NavLinkPropsType[]>(() => {
+   return (routes.find(route => route.path === path.HOME)?.children || [])
+    .reduce<NavLinkPropsType[]>((links, menuItem) => {
+        if (menuItem.path) {
+          links.push({ path: menuItem.path || '', label: menuItem.name || '', image: menuItem.icon || '' });
+        }
+        return links;
+    }, []);
+  }, [routes]);
+
   return (
     <section className="menu-wrapper">
       <ul className="menu">
@@ -39,7 +34,7 @@ function Menu(): JSX.Element {
               <div className="menu-icon">
                 <img src={require(`images/${image}`)} alt="menu-icon" width="30" height="30"/>
               </div>
-              {label}
+              { label }
             </NavLink>
         </li>
         )} />

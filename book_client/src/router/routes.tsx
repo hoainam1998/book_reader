@@ -15,6 +15,8 @@ import path from './paths';
 
 export type RoutePropsUnion = Omit<RouteProps, 'children'> & {
   children?: RoutePropsUnion[];
+  name?: string;
+  icon?: string;
 };
 
 const routes: RoutePropsUnion[] = [
@@ -50,6 +52,8 @@ const routes: RoutePropsUnion[] = [
       },
       {
         path: path.CATEGORY,
+        name: 'categories',
+        icon: 'application.png',
         element: <Category />,
         handle: {
           crumb: (match: UIMatch) =>
@@ -60,6 +64,8 @@ const routes: RoutePropsUnion[] = [
       },
       {
         path: path.USER,
+        icon: 'user-group.png',
+        name: 'users',
         element: <Outlet />,
         handle: {
           crumb: (match: UIMatch) =>
@@ -95,6 +101,8 @@ const routes: RoutePropsUnion[] = [
       },
       {
         path: path.BOOK,
+        name: 'books',
+        icon: 'book.png',
         element: <Outlet />,
         handle: {
           crumb: (match: UIMatch) =>
@@ -132,6 +140,8 @@ const routes: RoutePropsUnion[] = [
       },
       {
         path: path.AUTHOR,
+        name: 'authors',
+        icon: 'writer.png',
         element: <Outlet />,
         handle: {
           crumb: (match: UIMatch) =>

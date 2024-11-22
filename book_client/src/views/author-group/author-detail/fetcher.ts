@@ -3,7 +3,7 @@ import { AuthorService } from 'services';
 
 const createAuthor = (formData: FormData): Promise<AxiosResponse> => {
   formData.append('query',
-    `query CreateAuthor($author: AuthorInformation) {
+    `mutation CreateAuthor($author: AuthorInformation) {
       author {
         create(author: $author) {
           message
