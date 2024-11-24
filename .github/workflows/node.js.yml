@@ -9,6 +9,6 @@ on:
 
 jobs:
   build:
-    uses: ./book_reader/.github/workflows/node-run.yml@v1
+    uses: .github/workflows/node-run.yml@v1
     with:
       working-directory: ./book_client
