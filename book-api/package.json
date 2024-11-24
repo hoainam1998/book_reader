@@ -4,7 +4,6 @@
   "description": "Using graphql for book collection api",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -L --exec babel-node index.js"
   },
   "author": "hoai nam",
