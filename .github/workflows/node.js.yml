@@ -8,7 +8,12 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
+  client:
     uses: ./.github/workflows/node-run.yml
     with:
       working-directory: ./book_client
+  
+  api:
+    uses: ./.github/workflows/node-run.yml
+    with:
+        working-directory: ./book-api
