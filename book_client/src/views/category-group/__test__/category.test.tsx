@@ -96,9 +96,10 @@ jest.mock('store/auth', () => {
 describe('Category.test', () => {
   global.URL.createObjectURL = jest.fn();
   (global.DataTransfer as typeof DataTransfer) = DataTransfer;
+  HTMLElement.prototype.scrollTo = () => {};
+  jest.spyOn(React, 'useCallback').mockImplementation((cb) => cb);
 
   beforeEach(() => {
-    jest.spyOn(React, 'useCallback').mockImplementation((cb) => cb);
     jest.clearAllMocks();
   });
 

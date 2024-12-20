@@ -1,10 +1,6 @@
-declare module 'react' {
-  function forwardRef<T, P = {}>(
-    render: (props: P, ref: React.Ref<T>) => JSX.Element
-  ): (props: P & React.RefAttributes<T>) => JSX.Element;
-};
-
+/* eslint-disable no-unused-vars */
 import {
+  JSX,
   useImperativeHandle,
   forwardRef,
   useReducer,
@@ -33,6 +29,7 @@ import { clsx } from 'utils';
 import { daysInWeek } from 'date-fns/constants';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';
+import List from 'components/list/list';
 import './style.scss';
 
 const firstDayOfWeekIndex: number = 0;
@@ -121,16 +118,6 @@ const initDays = (): Day[] => {
   return dayArr;
 };
 
-const calculateStateReducer = (currentDate: Date, disableDayFn?: DisableDayFn): CalendarReducerState => {
-  selectedDate = currentDate;
-  return {
-    weeks: calculateDayToShow(currentDate, disableDayFn),
-    month: monthName[getMonth(currentDate)],
-    year: getYear(currentDate),
-    date: currentDate
-  };
-};
-
 const calculateDayToShow = (dateChanged: Date, disableDayFn?: DisableDayFn): Array<Day[]> => {
   const weekArr: Array<Day[]> = [];
   // all day in a month
@@ -159,6 +146,16 @@ const calculateDayToShow = (dateChanged: Date, disableDayFn?: DisableDayFn): Arr
 
   weekArr.push(week);
   return weekArr;
+};
+
+const calculateStateReducer = (currentDate: Date, disableDayFn?: DisableDayFn): CalendarReducerState => {
+  selectedDate = currentDate;
+  return {
+    weeks: calculateDayToShow(currentDate, disableDayFn),
+    month: monthName[getMonth(currentDate)],
+    year: getYear(currentDate),
+    date: currentDate
+  };
 };
 
 const dayCalendarReduceExecute = (disableDay: DisableDayFn) =>  (
@@ -273,25 +270,26 @@ function DayCalendar<T>(
           <li>Sat</li>
         </ul>
       </li>
-      {weeks.map((week, index) => (
-        <li key={index}>
+      <List<Day[]> items={weeks} render={(week) => (
+        <li>
           <ul className="days">
-            {week.map(({ day, active, disabled }, idx) => (
-              <li key={idx}>
-                {day && (
-                  <Button
-                    key={index}
-                    disabled={disabled}
-                    className={clsx('day-btn', { 'btn-success': active })}
-                    onClick={() => onDayChange(day)}>
-                    {day}
-                  </Button>
-                )}
-              </li>
-            ))}
+            <List<Day> items={week} render={({ disabled, day, active }, idx) => (
+              <li>
+              { day && (
+                <Button
+                  key={idx}
+                  disabled={disabled}
+                  className={clsx('day-btn', { 'btn-success': active })}
+                  onClick={() => onDayChange(day)}>
+                  {day}
+                </Button>
+              ) }
+            </li>
+            )} />
           </ul>
-        </li>
-      ))}
+      </li>
+      )}>
+      </List>
     </ul>
   );
 }

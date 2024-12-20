@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { CSSProperties, JSX, useCallback, useReducer } from 'react';
 import { Root } from 'react-dom/client';
 import HeaderCalendar from '../header-calendar/header-calendar';
@@ -14,7 +15,7 @@ enum YearChangedReducerAction {
   HEAD = 'head',
 };
 
-type MonthCalendar<T> = {
+type MonthCalendarPropsType<T> = {
   position: T;
   currentMonth: number;
   currentYear: number;
@@ -23,7 +24,6 @@ type MonthCalendar<T> = {
   onMonthChange: (month: number) => void;
   onYearChange: (year: number) => void;
 };
-
 
 type YearChangedReducerActionType = {
   type: string;
@@ -57,7 +57,7 @@ function MonthCalendar<T>({
   onOpenYearCalendar,
   onMonthChange,
   onYearChange
-}: MonthCalendar<T>): JSX.Element {
+}: MonthCalendarPropsType<T>): JSX.Element {
   const [year, dispatch] = useReducer(yearChangedReducer(onYearChange), currentYear);
 
   const positionStyle: CSSProperties = {
@@ -76,13 +76,13 @@ function MonthCalendar<T>({
   return (
     <div className="month-calendar" style={positionStyle}>
       <HeaderCalendar onBackToHead={onBackToHead} onBackToLast={onBackToLast}>
-        <Button onClick={onOpenYearCalendar} className="year-btn">{year}</Button>
+        <Button onClick={onOpenYearCalendar} className="year-btn">{ year }</Button>
       </HeaderCalendar>
       {
         months.map((month, index) =>
           <Button key={index} onClick={() => onMonthChange(index)}
             className={clsx('month-btn', { 'current-month': currentMonth === index && year === currentYear })}>
-            {month}
+            { month }
           </Button>
         )
       }
