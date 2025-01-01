@@ -127,10 +127,10 @@ function Category(): JSX.Element {
     currentCategoryId = categoryId;
     getCategoryDetail(categoryId)
       .then(res => {
-        categoryName.watch(res.data.category.detail.name);
+        categoryName?.watch(res.data.category.detail.name);
         setPreviewImage([res.data.category.detail.avatar]);
       });
-  }, []);
+  }, [categoryName]);
 
   const deleteCategory = useCallback((categoryId: string): void => {
     reFetchCategory(_deleteCategory(categoryId));
@@ -151,16 +151,22 @@ function Category(): JSX.Element {
         { !disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
       </>
     );
-  }, []);
+  }, [categoryName]);
 
   return (
     <Grid>
       <GridItem sm={12} md={7} lg={9}>
-        <Table fields={fields} classes="category-responsive-table" data={data} total={total} onLoad={fetchCategory}>
-          <Slot<CategoryType> name="avatar" render={
-            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
-          } />
-          <Slot name="operation" render={operationSlot} />
+        <Table
+          fields={fields}
+          classes="category-responsive-table"
+          data={data}
+          total={total}
+          emptyMessage="Categories are not found!"
+          onLoad={fetchCategory}>
+            <Slot<CategoryType> name="avatar" render={
+              (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+            } />
+            <Slot name="operation" render={operationSlot} />
         </Table>
       </GridItem>
       <GridItem sm={12} md={5} lg={3}>

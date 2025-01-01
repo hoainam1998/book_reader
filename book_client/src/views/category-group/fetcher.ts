@@ -1,17 +1,22 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { CategoryService, RequestBody } from 'services';
-import { showToast } from 'utils';
+import { handleNotfoundApiError, showToast } from 'utils';
+
+const showToastWithName = (message: string) => showToast('Category', message);
 
 export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
   return promise.then(res => {
     res.data?.category?.create?.message &&
-      showToast('Category', res.data.category.create.message);
+    showToastWithName(res.data.category.create.message);
     res.data?.category.delete?.message &&
-      showToast('Category', res.data?.category.delete?.message);
+    showToastWithName(res.data?.category.delete?.message);
     res.data?.category.update?.message &&
-      showToast('Category', res.data?.category.update?.message);
+    showToastWithName(res.data?.category.update?.message);
     return res;
+  }).catch((error) => {
+    showToastWithName(error.response.data.message);
+    return error;
   });
 };
 
@@ -55,7 +60,7 @@ export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
   return handlePromise(CategoryService.graphql('delete', body));
 };
 
-export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> | null => {
+export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
   const url: URL = new URL(request.url);
   const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
@@ -76,5 +81,5 @@ export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<Axios
     pageSize,
     pageNumber
   };
-  return CategoryService.graphql('pagination', body);
+  return handleNotfoundApiError(CategoryService.graphql('pagination', body));
 };

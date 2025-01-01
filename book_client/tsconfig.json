@@ -28,7 +28,8 @@
       "store/*": ["src/store/*"],
       "paths": ["src/router/paths.ts"],
       "contexts/*": ["src/contexts/*"],
-      "read-only-variables": ["src/read-only-variables/index.ts"]
+      "read-only-variables": ["src/read-only-variables/index.ts"],
+      "enums": ["src/enums/index.ts"],
     }
   },
   "include": ["src", "declaration.d.ts"]

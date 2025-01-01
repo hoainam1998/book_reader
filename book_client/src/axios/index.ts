@@ -4,7 +4,7 @@ import auth from 'store/auth';
 
 const Api: AxiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
-  timeout: 30000,
+  timeout: 5000,
 });
 
 Api.interceptors.request.use((config) => {

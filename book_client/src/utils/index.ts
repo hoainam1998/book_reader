@@ -2,6 +2,7 @@ import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
 import showModal, { ModalSlotProps } from './modal';
 import { createElementWrapper } from './element-wrapper';
+import handleNotfoundApiError, { DataNotFound } from './handle-data-not-found';
 
 /**
  * Return class text from array.
@@ -10,18 +11,24 @@ import { createElementWrapper } from './element-wrapper';
  * @returns {string} - class text.
  */
 const clsx = (...classes: any[]): string => {
-  const classList: string[] = classes.map(cls => {
+  const classList: string[] = classes.map((cls) => {
     switch (typeof cls) {
       case 'object':
-        return  Object.keys(cls).reduce((classTextEmpty, key) => {
-          return (cls[key] ? classTextEmpty += `${key} ` : classTextEmpty);
-        }, '').trim();
+        return Object.keys(cls)
+          .reduce((classTextEmpty, key) => {
+            return cls[key] ? (classTextEmpty += `${key} `) : classTextEmpty;
+          }, '')
+          .trim();
       case 'string':
         return cls.trim();
-      default: return '';
+      default:
+        return '';
     }
   });
-  return classList.filter(cls => !!cls).join(' ').trim();
+  return classList
+    .filter((cls) => !!cls)
+    .join(' ')
+    .trim();
 };
 
 /**
@@ -52,9 +59,9 @@ const getExtnameFromBlobType = (blobType: string): string => {
  */
 const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
   return fetch(imageBase64String)
-    .then(res => res.blob())
-    .then(blob => {
-      if (name.search((/\.\w+/)) < 0) {
+    .then((res) => res.blob())
+    .then((blob) => {
+      if (name.search(/\.\w+/) < 0) {
         const ext: string = getExtnameFromBlobType(blob.type);
         name = `${name}${ext}`;
       }
@@ -72,5 +79,7 @@ export {
   customError,
   createElementWrapper,
   convertBase64ToSingleFile,
-  getExtnameFromBlobType
+  getExtnameFromBlobType,
+  handleNotfoundApiError,
+  DataNotFound,
 };

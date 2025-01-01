@@ -31,6 +31,7 @@ type InputPropsType = {
   multiple?: boolean;
   max?: number;
   min?: number | string;
+  disabled?: boolean;
   onChange?: <T>(event: ChangeEvent<T>) => void;
   onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
@@ -48,6 +49,7 @@ function Input({
   multiple = false,
   max,
   min,
+  disabled,
   className,
   labelClass,
   inputClass,
@@ -131,7 +133,7 @@ function Input({
       errors={errors}>
         <div className={clsx('input-wrapper', inputClass)}>
           <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-            type={inputType} {...specificPropInput} multiple={multiple}
+            type={inputType} {...specificPropInput} multiple={multiple} disabled={disabled}
             min={min} ref={inputRef} data-testid={`input-${name}`}
             onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
           {

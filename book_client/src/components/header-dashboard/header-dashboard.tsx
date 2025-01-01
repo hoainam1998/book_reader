@@ -4,12 +4,13 @@ import Input from 'components/form/form-control/input/input';
 import './style.scss';
 
 type HeaderDashboardPropsType = {
+  disabled?: boolean;
   add: () => void;
   // eslint-disable-next-line no-unused-vars
   search: (keyword: string) => void;
 };
 
-function HeaderDashboard({ add, search }: HeaderDashboardPropsType): JSX.Element {
+function HeaderDashboard({ disabled, add, search }: HeaderDashboardPropsType): JSX.Element {
   const [isClear, setIsClear] = useState<boolean>(false);
   const [disableSearchButton, setDisableSearchButton] = useState<boolean>(true);
   const [keyword, setKeyword] = useState<string>('');
@@ -46,6 +47,7 @@ function HeaderDashboard({ add, search }: HeaderDashboardPropsType): JSX.Element
         inputColumnSize={{
           sm: 12
         }}
+        disabled={disabled}
         onChange={(e) => setClearFlag((e.target as any).value)}
         onBlur={(value) => setKeyword(value as string)} />
       {

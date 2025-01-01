@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import {
+import React, {
   JSX,
   useImperativeHandle,
   forwardRef,
@@ -287,11 +287,16 @@ function DayCalendar<T>(
             </li>
             )} />
           </ul>
-      </li>
-      )}>
-      </List>
+        </li>
+        )} />
     </ul>
   );
 }
 
 export default forwardRef(DayCalendar);
+
+declare module 'react' {
+  function forwardRef<T, P = {}>(
+    render: (props: P, ref: React.Ref<T>) => JSX.Element
+  ): (props: P & React.RefAttributes<T>) => JSX.Element;
+};

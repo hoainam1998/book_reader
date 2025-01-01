@@ -11,6 +11,7 @@ import {
 } from 'react';
 import Select from 'components/form/form-control/select/select';
 import Pagination from 'components/pagination/pagination';
+import Error from 'components/error/error';
 import List from 'components/list/list';
 import { isSlot } from 'components/slot/slot';
 import { clsx } from 'utils';
@@ -28,6 +29,7 @@ type TableProps<T> = {
   children?: ReactNode;
   total: number;
   data: T[];
+  emptyMessage: string;
   responsive?: boolean;
   classes?: string;
   onLoad: (pageSize: number, pageNumber: number) => void;
@@ -67,7 +69,16 @@ const options = [
   },
 ];
 
-function Table<T>({ fields, children, data, total, classes, responsive, onLoad }: TableProps<T>): JSX.Element {
+function Table<T>({
+  fields,
+  children,
+  data,
+  total,
+  classes,
+  responsive,
+  emptyMessage,
+  onLoad
+}: TableProps<T>): JSX.Element {
 
   const totalPageNumber = useMemo<number>(() => {
     const pages: number = total / pageSize;
@@ -84,6 +95,12 @@ function Table<T>({ fields, children, data, total, classes, responsive, onLoad }
     pageNumber = currentPageNumber;
     onLoad(pageSize, pageNumber);
   }, []);
+
+  if (total === 0) {
+    return (
+      <Error image="empty" message={emptyMessage} />
+    );
+  }
 
   return (
     <section>

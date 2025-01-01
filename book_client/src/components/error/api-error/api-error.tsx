@@ -1,13 +1,11 @@
 import { JSX } from 'react';
 import { useRouteError } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import Error from 'components/error/error';
+import Error, { ImageError } from 'components/error/error';
 
 type ErrorResponseType = {
   message: string;
 };
-
-type ImageError = 'empty' | 'server-error' | 'server-disconnect';
 
 function ApiError(): JSX.Element {
   const error = useRouteError() as AxiosError;
@@ -25,7 +23,7 @@ function ApiError(): JSX.Element {
     message = (error.response?.data as ErrorResponseType)?.message || '';
   }
 
-  return (<Error<ImageError> image={image} message={message} />);
+  return (<Error image={image} message={message} />);
 }
 
 export default ApiError;

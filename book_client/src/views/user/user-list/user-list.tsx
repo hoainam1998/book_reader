@@ -96,15 +96,21 @@ function UserList(): JSX.Element {
   return (
     <>
       <HeaderDashboard add={navigateToDetailPage} search={search} />
-      <Table responsive fields={fields} data={books} total={total} onLoad={fetchUser}>
-        <Slot<UserType> name="avatar" render={
-          (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
-          } />
-        <Slot<UserType> name="mfaEnable" render={
-          (slotProp) => <Switch label="" name="mfa"
-            value={slotProp.mfaEnable} onChange={(mfaEnable) => updateMfa(slotProp.userId, mfaEnable)} />
-          } />
-        <Slot name="operation" render={operationSlot} />
+      <Table
+        responsive
+        fields={fields}
+        data={books}
+        total={total}
+        emptyMessage="Users are not found!"
+        onLoad={fetchUser}>
+          <Slot<UserType> name="avatar" render={
+            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+            } />
+          <Slot<UserType> name="mfaEnable" render={
+            (slotProp) => <Switch label="" name="mfa"
+              value={slotProp.mfaEnable} onChange={(mfaEnable) => updateMfa(slotProp.userId, mfaEnable)} />
+            } />
+          <Slot name="operation" render={operationSlot} />
       </Table>
     </>
   );

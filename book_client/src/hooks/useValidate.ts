@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, DependencyList } from 'react';
+import { useState, DependencyList, useLayoutEffect } from 'react';
 import { customError } from 'utils';
 
 export type ErrorFieldInfo = {
@@ -171,7 +171,7 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
   const rulesEntries: [string, R][] = Object.entries(rules as ArrayLike<R>);
   objectValidate.values = value;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     rulesEntries.forEach(([key, validateRule]: [string, R]) => {
       const field: ValidateErrorInfo = {
         validate: () => {},
@@ -190,7 +190,7 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
     });
   }, []);
 
-  useEffect((): void => {
+  useLayoutEffect((): void => {
     const validateFuncs: ((value: any) => void)[] = rulesEntries.map(([key, validateRule]: [string, R]) => {
       const keyValidateInfo: ValidateErrorInfo = objectValidate[key];
       const validateRulePair = Object.entries(validateRule as ArrayLike<R>)
@@ -245,7 +245,7 @@ const useValidate = <T, R>(state: T, rules: R, dependencyList: DependencyList = 
     objectValidate.validate = validateCompact(validateFuncs);
   }, dependencyList);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     objectValidate.values = value;
   }, [value]);
 

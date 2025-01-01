@@ -4,11 +4,8 @@ import Button from 'components/button/button';
 import { clsx } from 'utils';
 import './style.scss';
 
-type YearCalendarPropsType = {
-  position: {
-    left: number;
-    top: number;
-  };
+type YearCalendarPropsType<T> = {
+  position: T,
   currentYear: number;
   // eslint-disable-next-line no-unused-vars
   onYearChange: (year: number) => void;
@@ -19,7 +16,7 @@ const yearsMatrix: Array<number[]> = [
   [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029]
 ];
 
-function YearCalendar({ position, currentYear, onYearChange }: YearCalendarPropsType): JSX.Element {
+function YearCalendar<T>({ position, currentYear, onYearChange }: YearCalendarPropsType<T>): JSX.Element {
   const initYears: number[] = yearsMatrix[0].includes(currentYear) ? yearsMatrix[0] : yearsMatrix[1];
   const [years, setYears] = useState<number[]>(initYears);
   const yearRange = useMemo<string>(() => `${years[0]} - ${years[years.length - 1]}`, [years]);

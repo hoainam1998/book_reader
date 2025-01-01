@@ -1,12 +1,14 @@
 import { JSX, useMemo } from 'react';
 import './style.scss';
 
-type ErrorProps<T> = {
+export type ImageError = 'empty' | 'server-error' | 'server-disconnect';
+
+type ErrorProps = {
   message: string;
-  image: T;
+  image: ImageError;
 };
 
-function Error<T>({ message, image }: ErrorProps<T>): JSX.Element {
+function Error({ message, image }: ErrorProps): JSX.Element {
   const imagName: string = useMemo(() => `${image}.png`, [image]);
 
   return (

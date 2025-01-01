@@ -1,4 +1,4 @@
-import { JSX, useCallback, useMemo } from 'react';
+import { JSX, useCallback, useMemo, useLayoutEffect } from 'react';
 import { AxiosResponse } from 'axios';
 import { format } from 'date-fns';
 import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
@@ -8,9 +8,10 @@ import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { bookPagination, getBookDetail } from './fetcher';
+import { DataNotFound } from 'utils';
 import store from 'store/book';
 import './style.scss';
-const { updateData } = store;
+const { updateData, deleteAllStorage } = store;
 
 type BookType = {
   bookId: string;
@@ -61,21 +62,25 @@ let _pageSize: number = 10;
 
 function BookList(): JSX.Element {
   const fetcher = useFetcher();
-  const loaderData = useLoaderData() as AxiosResponse;
+  const loaderData = useLoaderData() as unknown ;
   const navigate = useNavigate();
 
   const books = useMemo<BookType[]>(() => {
     if (fetcher.data) {
       return fetcher.data.data.book.pagination.list;
+    } else if (DataNotFound.compare(loaderData)) {
+      return (loaderData as DataNotFound).Data.list;
     }
-    return loaderData?.data.book.pagination.list || [];
+    return (loaderData as AxiosResponse).data.book.pagination.list || [];
   }, [fetcher.data]);
 
   const total = useMemo<number>(() => {
     if (fetcher.data) {
       return fetcher.data.data.book.pagination.total;
+    } else if (DataNotFound.compare(loaderData)) {
+      return (loaderData as DataNotFound).Data.total;
     }
-    return loaderData?.data.book.pagination.total || 0;
+    return (loaderData as AxiosResponse).data.book.pagination.total || 0;
   }, [fetcher.data]);
 
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
@@ -116,15 +121,20 @@ function BookList(): JSX.Element {
     window.open(`${process.env.BASE_URL}/${pdf}`, '_blank');
   }, []);
 
+  useLayoutEffect(() => {
+    deleteAllStorage(true);
+  }, []);
+
   return (
     <section className="book-list">
-      <HeaderDashboard add={() => navigate('new')} search={search} />
+      <HeaderDashboard disabled={total === 0} add={() => navigate('new')} search={search} />
       <Table<BookType>
         key={_keyword}
         responsive
         fields={fields}
         data={books}
         total={total}
+        emptyMessage="Books are not found!"
         onLoad={fetchBookPagination}>
           <Slot<BookType>
             name="avatar"

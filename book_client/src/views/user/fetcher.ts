@@ -1,4 +1,5 @@
 import { AxiosResponse } from 'axios';
+import { HTTP_CODE } from 'enums';
 import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { UserService, RequestBody } from 'services';
 import { showToast } from 'utils';
@@ -121,7 +122,7 @@ export const loadInitUser = async ({
     const response = await UserService.graphql('pagination', body);
     return response;
   } catch (err: any) {
-    if (err.response.status === 404) {
+    if (err.response.status === HTTP_CODE.NOT_FOUND) {
       return redirect('new');
     }
     return err;

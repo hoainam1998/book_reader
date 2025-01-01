@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { BookService } from 'services';
+import { handleNotfoundApiError } from 'utils';
 
 export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
   const url: URL = new URL(request.url);
@@ -8,7 +9,7 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
   const keyword: string | null = url.searchParams.get('keyword');
 
-  return BookService.graphql('pagination', {
+  return handleNotfoundApiError(BookService.graphql('pagination', {
     query: `query BookPagination($pageSize: Int, $pageNumber: Int, $keyword: String) {
       book {
         pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
@@ -29,7 +30,7 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
     pageSize,
     pageNumber,
     keyword
-  });
+  }));
 };
 
 export const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {

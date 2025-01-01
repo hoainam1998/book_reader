@@ -60,7 +60,6 @@ const routes: RoutePropsUnion[] = [
             <span key={match.pathname}>Categories</span>
         },
         loader: loadInitCategory,
-        errorElement: <ApiError />
       },
       {
         path: path.USER,
