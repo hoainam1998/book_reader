@@ -8,8 +8,9 @@ const startCategory = require('./modules/category/index.js');
 const startBook = require('./modules/book/index.js');
 const startUser = require('./modules/user/index.js');
 const startAuthor = require('./modules/author/index.js');
-const connectDataBase = require('./config.js');
+const { HTTP_CODE } = require('#constants');
 const FactoryRouter = require('./routes/factory.js');
+const { PrismaClient } = require('@prisma/client');
 
 const corsOptions = {
   origin: process.env.ORIGIN_CORS,
@@ -21,14 +22,15 @@ app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(bodyParser.json());
 app.use((err, req, res, next) => {
-  res.status(500).send('Something broke!')
+  res.status(HTTP_CODE.SERVER_ERROR).send('Something broke!')
 });
 
-connectDataBase().then(querySql => {
-  const category = startCategory(querySql);
-  const book = startBook(querySql);
-  const user = startUser(querySql);
-  const author = startAuthor(querySql);
+try {
+  const prismaClient = new PrismaClient();
+  const category = startCategory(prismaClient);
+  const book = startBook(prismaClient);
+  const user = startUser(prismaClient);
+  const author = startAuthor(prismaClient);
 
   const query = new GraphQLObjectType({
     name: 'Query',
@@ -52,7 +54,8 @@ connectDataBase().then(querySql => {
 
   const schema = new GraphQLSchema({ query, mutation });
   FactoryRouter.getRoutes(express, schema).forEach(({ route, path }) => app.use(path, route.Router));
-})
-.catch(() => FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router)));
+} catch {
+  FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router))
+}
 
 app.listen(PORT, () => console.log(`GraphQl started at ${PORT}!`));

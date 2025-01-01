@@ -1,23 +1,15 @@
 const { saveFile } = require('#utils');
-const { mkdir } = require('fs/promises');
-const { join } = require('path');
+const { createFolder } = require('#utils');
+const Service = require('../service');
 
-class AuthorService {
-  _sql;
-
-  constructor(sql) {
-    this._sql = sql;
-  }
+class AuthorService extends Service {
 
   createAuthor(author) {
     const filePath = (path) => `../public/${path}/author/${author.authorId}/${author.name}.${path}`;
-    const createFolder = (path) => {
-      return mkdir(join(__dirname, `../../public/${path}/author/${author.authorId}`), { recursive: true });
-    };
 
     return Promise.all([
-      createFolder('html'),
-      createFolder('json')
+      createFolder(join(__dirname, `../../public/html/author/${author.authorId}`)),
+      createFolder(join(__dirname, `../../public/json/author/${author.authorId}`))
     ]).then(() => {
       return Promise.all([
         saveFile(filePath('html'), author.story.html),
@@ -29,17 +21,17 @@ class AuthorService {
           return listPath;
         }, []).join(', ');
 
-        return this._sql.query('INSERT INTO AUTHOR VALUES(?)', [
-          [
-            author.authorId,
-            author.name,
-            author.sex,
-            author.avatar,
-            author.yearOfBirth,
-            author.yearOfDead,
+        return this.PrismaInstance.author.create({
+          data: {
+            author_id: author.authorId,
+            name: author.name,
+            sex: author.sex === 1,
+            avatar: author.avatar,
+            year_of_birth: author.yearOfBirth,
+            year_of_dead: author.yearOfDead,
             story
-          ]
-        ]);
+          },
+        });
       });
     });
   }

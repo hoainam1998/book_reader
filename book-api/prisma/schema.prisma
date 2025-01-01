@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model author {
+  author_id     String  @id @db.VarChar(20)
+  name          String? @db.VarChar(200)
+  sex           Boolean
+  avatar        String? @db.Text
+  year_of_birth Int?
+  year_of_dead  Int?
+  story         String? @db.VarChar(255)
+}
+
+model book {
+  book_id        String        @id @db.VarChar(20)
+  name           String        @db.Text
+  pdf            String        @db.Text
+  published_day  String        @db.VarChar(20)
+  published_time Int
+  category_id    String        @db.VarChar(20)
+  introduce_file String?       @db.VarChar(255)
+  avatar         String?       @db.Text
+  category       category      @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK")
+  book_image     book_image[]
+  book_reader    book_reader[]
+
+  @@index([category_id], map: "FK_BOOK")
+}
+
+model book_author {
+  book_id   String @db.VarChar(20)
+  author_id String @db.VarChar(20)
+
+  @@id([book_id, author_id])
+  @@index([author_id], map: "AUTHOR_ID")
+}
+
+model book_image {
+  book_id String @db.VarChar(20)
+  image   String @db.Text
+  name    String @db.VarChar(250)
+  book    book   @relation(fields: [book_id], references: [book_id], onUpdate: Restrict, map: "book_image_ibfk_1")
+
+  @@id([book_id, name])
+}
+
+model book_reader {
+  user_id String @db.VarChar(20)
+  book_id String @db.VarChar(20)
+  book    book   @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_BOOK")
+  user    user   @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_USER")
+
+  @@id([user_id, book_id])
+  @@index([book_id], map: "FK_BOOK_READER_BOOK")
+}
+
+model category {
+  category_id String  @id @db.VarChar(20)
+  name        String  @db.VarChar(20)
+  avatar      String? @db.Text
+  book        book[]
+}
+
+model user {
+  user_id     String        @id @db.VarChar(20)
+  password    String        @default("namtran9") @db.VarChar(50)
+  last_name   String        @db.VarChar(200)
+  first_name  String        @db.VarChar(200)
+  avatar      String        @db.Text
+  email       String        @db.VarChar(250)
+  mfa_enable  Boolean
+  otp_code    String?       @db.VarChar(10)
+  book_reader book_reader[]
+}

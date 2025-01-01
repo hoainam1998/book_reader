@@ -1,8 +1,8 @@
 const { query, mutation } = require('./schema.js');
 const CategoryService = require('./service.js');
 
-module.exports = (querySql) => {
-  const service = new CategoryService(querySql);
+module.exports = (prisma) => {
+  const service = new CategoryService(prisma);
 
   return {
     query: {

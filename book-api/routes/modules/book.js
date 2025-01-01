@@ -57,7 +57,6 @@ class BookRouter extends Router {
   _saveBookInformation(req, res, next, schema) {
     const body = { ...req.body };
     delete body.query;
-
     return execute({
       schema, document: req.body.query, variableValues: {
         book: {

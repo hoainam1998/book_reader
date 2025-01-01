@@ -1,43 +1,61 @@
-class CategoryService {
-  _sql = null;
+const Service = require('../service');
 
-  constructor(sql) {
-    this._sql = sql;
-  }
+class CategoryService extends Service {
 
   create(category) {
-    return this._sql.query('INSERT INTO CATEGORY (category_id, name, avatar) VALUES (?)',
-      [[category.categoryId, category.name, category.avatar]]);
+    return this.PrismaInstance.category.create({
+      data: {
+        category_id: category.categoryId,
+        name: category.name,
+        avatar: category.avatar
+      },
+    });
   }
 
   all() {
-    return this._sql.query('SELECT * FROM CATEGORY');
+    return this.PrismaInstance.category.findMany();
   }
 
   pagination(pageSize, pageNumber) {
-    return this._sql.query(
-    `SELECT *, IF((SELECT COUNT(*) FROM book AS bo WHERE ca.category_id LIKE bo.category_id > 0), true, false) AS disabled
-    FROM CATEGORY as ca ORDER BY CATEGORY_ID DESC LIMIT ? OFFSET ?;
-    SELECT COUNT(*) AS total FROM CATEGORY;`,
-    [pageSize, (pageNumber - 1) * pageSize]);
+    const offset = (pageNumber - 1) * pageSize;
+    return this.PrismaInstance.$transaction([
+      this.PrismaInstance.$queryRaw`SELECT *, IF((SELECT COUNT(*) FROM book AS bo WHERE ca.category_id LIKE bo.category_id > 0), true, false) AS disabled
+      FROM CATEGORY as ca ORDER BY CATEGORY_ID DESC LIMIT ${pageSize} OFFSET ${offset};`,
+      this.PrismaInstance.$queryRaw`SELECT COUNT(*) AS total FROM CATEGORY;`
+    ]);
   }
 
   detail(id) {
-    return this._sql.query('SELECT * FROM CATEGORY WHERE CATEGORY_ID = ?', id);
+    return this.PrismaInstance.category.findFirst({
+      where: {
+        category_id: id
+      },
+    });
   }
 
   update(category) {
+    const data = {
+      name: category.name,
+    };
+
     if (category.avatar) {
-      return this._sql.query('UPDATE CATEGORY SET NAME = ?, AVATAR = ? WHERE CATEGORY_ID = ?',
-        [category.name, category.avatar, category.categoryId]);
-    } else {
-      return this._sql.query('UPDATE CATEGORY SET NAME = ? WHERE CATEGORY_ID = ?',
-        [category.name, category.categoryId]);
+      data.avatar = category.avatar;
     }
+
+    return this.PrismaInstance.category.update({
+      data,
+      where: {
+        category_id: category.categoryId
+      },
+    });
   }
 
   delete(id) {
-    return this._sql.query('DELETE FROM CATEGORY WHERE CATEGORY_ID = ?', id);
+    return this.PrismaInstance.category.delete({
+      where: {
+        category_id: id
+      },
+    });
   }
 }
 

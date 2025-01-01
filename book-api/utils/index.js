@@ -1,6 +1,7 @@
 const fs = require('fs');
-const { join } = require('path');
 const sendMail = require('./sendMail');
+const { mkdir } = require('fs/promises');
+
 /**
  * Return freezed object.
  *
@@ -78,27 +79,38 @@ const promiseAllSettledOrder = (promiseChain, success, error) => {
 };
 
 /**
+ * Create folder at specific path.
+ *
+ * @param {string} filePath - path to stored file.
+ * @return {Promise<string>} - promise contain file path.
+ */
+const createFolder = (path) => {
+  return mkdir(path, { recursive: true });
+};
+
+/**
  * Write contents to file and save it to specific folder.
  *
  * @param {string} filePath - path to stored file.
  * @param {string} success - content of file.
- * @return {Promise<string>} promise contain file path.
+ * @return {Promise<boolean>} - promise contain result.
  */
 const saveFile = (filePath, content) => {
   return new Promise((resolve, reject) => {
     fs.writeFile(
-      join(__dirname, filePath),
+      filePath,
       content,
       (err) => {
         if (err) {
           reject(err);
         } else {
-          resolve(filePath);
+          resolve(true);
         }
       }
     );
   });
 };
+
 
 module.exports = {
   deepFreeze,
@@ -107,4 +119,5 @@ module.exports = {
   generateOtp,
   sendMail,
   saveFile,
+  createFolder
 };

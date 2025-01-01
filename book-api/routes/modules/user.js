@@ -93,7 +93,6 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.CREATED)
   @validateQuery
   _updatePerson(req, res, next, schema) {
-    console.log('zooo');
     const variables = {
       userId: req.body.userId,
       firstName: req.body.first_name,
@@ -237,13 +236,9 @@ class UserRouter extends Router {
         try {
           sendMail(json.user.updateOtpCode.otp, req.body.email)
           .then(
-            () => {
-              res.json({
-                message: json.user.updateOtpCode.message,
-              });
-            }
+            () =>  res.json({ message: json.user.updateOtpCode.message })
           )
-          .catch(() => res.status(400).json(messageCreator('Send otp failed!')));
+          .catch(() => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator('Send otp failed!')));
         } catch (err) {
           throw err;
         }

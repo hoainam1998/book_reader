@@ -200,7 +200,7 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (book, args) => {
         try {
-          await book.deletePdfFile(args.book.bookId, args.book.pdf);
+          await book.deletePdfFile(args.book.bookId);
           const result = await book.updateBookInfo(args.book);
           if (result.affectedRows === 0) {
             throw new GraphQLError(`Book with id = ${args.book.bookId} not found`, graphqlNotFoundErrorOption);
@@ -263,13 +263,13 @@ const query = new GraphQLObjectType({
             return {
               ...bookDetail,
               introduce: {
-                html: html ? html : '',
-                json: json ? json: '',
+                html: html ? html.trim() : '',
+                json: json ? json.trim(): '',
               },
               images: images.map(({ image, name }) => ({ image, name }))
             };
           } else {
-            throw new GraphQLError(`Can not found book with id is ${bookId}`, graphqlNotFoundErrorOption);
+            throw new GraphQLError(`Can not found book with id is ${bookId}!`, graphqlNotFoundErrorOption);
           }
         } catch (err) {
           if (err instanceof GraphQLError) {
@@ -316,12 +316,18 @@ const query = new GraphQLObjectType({
       resolve: async (book, { pageNumber, pageSize, keyword }) => {
         try {
           const result = await book.pagination(pageSize, pageNumber, keyword);
-          if (result[0].length === 0) {
-            throw new GraphQLError('Book is empty', graphqlNotFoundErrorOption);
+          const books = result[0];
+          if (books.length === 0) {
+            const response = {
+              list: [],
+              total: 0
+            };
+            graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
+            throw new GraphQLError('Books not found!', graphqlNotFoundErrorOption);
           }
           return {
-            list: result[0].map((book) => ({ ...book, introduce: book.introduce?.split(',')[0] || '' })),
-            total: result[1][0].total
+            list: books.map((book) => ({ ...book, introduce: book.introduce?.split(',')[0] || '' })),
+            total: parseInt(result[1][0].total || 0)
           };
         } catch (err) {
           if (err instanceof GraphQLError) {

@@ -28,7 +28,7 @@ const sendMail = (otp, to) => {
       } else {
         resolve('Email sent: ' + info.response);
       }
-    })
+    });
   });
 };
 

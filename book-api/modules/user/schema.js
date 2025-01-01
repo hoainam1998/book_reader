@@ -8,7 +8,6 @@ const {
   GraphQLInputObjectType,
   GraphQLList,
 } = require('graphql');
-const { message } = require('#utils');
 const { messageCreator } = require('#utils');
 const {
   ResponseType,
@@ -133,7 +132,7 @@ const query = new GraphQLObjectType({
           }
           return {
             list: result[0],
-            total: result[1][0].total,
+            total: parseInt(result[1][0].total || 0),
           };
         } catch (err) {
           if (err instanceof GraphQLError) {

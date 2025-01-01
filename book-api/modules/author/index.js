@@ -1,8 +1,8 @@
 const AuthorService = require('./service');
 const { query, mutation } = require('./schema');
 
-module.exports = (sql) => {
-  const service = new AuthorService(sql);
+module.exports = (prisma) => {
+  const service = new AuthorService(prisma);
   return {
     query: {
       type: query,

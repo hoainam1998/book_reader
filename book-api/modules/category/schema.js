@@ -8,8 +8,9 @@ const {
   GraphQLInt,
   GraphQLBoolean
 } = require('graphql');
-const { graphqlErrorOption, ResponseType } = require('../common-schema');
+const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
 const { messageCreator } = require('#utils');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 const CategoryType = new GraphQLObjectType({
   name: 'Category',
@@ -60,12 +61,12 @@ const mutation = new GraphQLObjectType({
       ...categoryMutationDeclare,
       resolve: async (category, args) => {
         try {
-          const result = await category.create(args.category);
-          if (result.affectedRows > 0) {
-            return messageCreator('Create category success!');
-          }
-          return messageCreator('Create category fail!');
+          await category.create(args.category);
+          return messageCreator('Create category success!');
         } catch (err) {
+          if (err instanceof PrismaClientKnownRequestError) {
+            throw new GraphQLError(err.meta.cause, graphqlErrorOption);
+          }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }
@@ -74,12 +75,12 @@ const mutation = new GraphQLObjectType({
       ...categoryMutationDeclare,
       resolve: async (category, args) => {
         try {
-          const result = await category.update(args.category);
-          if (result.affectedRows > 0) {
-            return messageCreator('Update category success!');
-          }
-          return messageCreator('Update category fail!');
+          await category.update(args.category);
+          return messageCreator('Update category success!');
         } catch (err) {
+          if (err instanceof PrismaClientKnownRequestError) {
+            throw new GraphQLError(err.meta.cause, graphqlErrorOption);
+          }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }
@@ -123,11 +124,23 @@ const query = new GraphQLObjectType({
       resolve: async (category, { pageNumber, pageSize }) => {
         try {
           const result = await category.pagination(pageSize, pageNumber);
+          const categories = result[0];
+          if (categories.length === 0) {
+            const response = {
+              list: [],
+              total: 0
+            };
+            graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
+            throw new GraphQLError('Categories not found!', graphqlNotFoundErrorOption);
+          }
           return {
-            list: result[0],
-            total: result[1][0].total
+            list: categories,
+            total: parseInt(result[1][0].total || 0)
           };
         } catch (err) {
+          if (err instanceof GraphQLError) {
+            throw err;
+          }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }
@@ -141,8 +154,7 @@ const query = new GraphQLObjectType({
       },
       resolve: async (category, { categoryId }) => {
         try {
-          const categoryFound = await category.detail(categoryId);
-          return categoryFound[0];
+          return await category.detail(categoryId);
         } catch (err) {
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
@@ -157,12 +169,12 @@ const query = new GraphQLObjectType({
       },
       resolve: async (category, { categoryId }) => {
         try {
-          const result = await category.delete(categoryId);
-          if (result.affectedRows > 0) {
-            return messageCreator('Delete category success!');
-          }
-          return messageCreator('Delete category fail!');
+          await category.delete(categoryId);
+          return messageCreator('Delete category success!');
         } catch (err) {
+          if (err instanceof PrismaClientKnownRequestError) {
+            throw new GraphQLError(err.meta.cause, graphqlErrorOption);
+          }
           throw new GraphQLError(err.message, graphqlErrorOption);
         }
       }
