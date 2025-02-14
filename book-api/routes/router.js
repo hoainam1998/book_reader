@@ -1,17 +1,18 @@
 const { messageCreator } = require('#utils');
 const { HTTP_CODE } = require('#constants');
+const { endpoint } = require('#decorators');
+const Singleton = require('#services/singleton.js');
 
-class Router {
+class Router extends Singleton {
   _express = null;
   _router = null;
-  _schema = null;
 
-  constructor(express, schema) {
+  constructor(express, graphqlExecute) {
+    super(Router);
     this._express = express;
-    this._schema = schema;
     this._router = express.Router();
-    this._router.post('*', (_, res, next) => {
-      if (this._schema) {
+    this._router.all('*', (_, res, next) => {
+      if (graphqlExecute) {
         next();
       } else {
         res.status(HTTP_CODE.SERVER_ERROR)
@@ -24,21 +25,24 @@ class Router {
     return this._router;
   }
 
+  @endpoint
   post(...args) {
-    const path = args[0];
-    if (args.length === 4) {
-      const helper1 = args[1];
-      const helper2 = args[2];
-      const handle = args[3];
-      this._router.post(path, helper1, helper2, (req, res, next) => handle(req, res, next, this._schema));
-    } else if (args.length === 3) {
-      const helper = args[1];
-      const handle = args[2];
-      this._router.post(path, helper, (req, res, next) => handle(req, res, next, this._schema));
-    } else {
-      const handle = args[1];
-      this._router.post(path, (req, res, next) => handle(req, res, next, this._schema));
-    }
+    this._router.post.apply(this._router, args);
+  }
+
+  @endpoint
+  put(...args) {
+    this._router.put.apply(this._router, args);
+  }
+
+  @endpoint
+  get(...args) {
+    this._router.get.apply(this._router, args);
+  }
+
+  @endpoint
+  delete(...args) {
+    this._router.delete.apply(this._router, args);
   }
 }
 

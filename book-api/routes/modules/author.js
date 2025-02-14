@@ -1,31 +1,40 @@
 const Router = require('../router');
-const { validateQuery, validateResultExecute, upload } = require('#decorators');
+const { validateResultExecute, upload, serializer, validation } = require('#decorators');
+const authentication = require('#middlewares/auth/authentication.js');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
+const { AuthorCreate } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
-const { execute } = require('graphql');
 
 class AuthorRouter extends Router {
 
-  constructor(express, schema) {
-    super(express, schema);
-    this.post('/create-author', this.createAuthor);
+  constructor(express, graphqlExecute) {
+    super(express, graphqlExecute);
+    this.post('/create-author', authentication, this.createAuthor);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @validation(AuthorCreate, { error_message: 'Create author was failed!', groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
-  @validateQuery
-  createAuthor(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: {
-        author: {
-          authorId: Date.now().toString(),
-          name: req.body.name,
-          sex: +req.body.sex,
-          avatar: req.body.avatar,
-          yearOfBirth: +req.body.yearOfBirth,
-          yearOfDead: +req.body.yearOfDead,
-          story: {
-            html: req.body.story_html,
-            json: req.body.story_json
-          }
+  @serializer(MessageSerializerResponse)
+  createAuthor(req, res, next, self) {
+    const query = `mutation CreateAuthor($author: AuthorInformation!) {
+      author {
+        create(author: $author) {
+          message
+        }
+      }
+    }`;
+    return self.execute(query, {
+      author: {
+        authorId: Date.now().toString(),
+        name: req.body.name,
+        sex: +req.body.sex,
+        avatar: req.body.avatar,
+        yearOfBirth: +req.body.yearOfBirth,
+        yearOfDead: +req.body.yearOfDead,
+        story: {
+          html: req.body.storyHtml,
+          json: req.body.storyJson
         }
       }
     });

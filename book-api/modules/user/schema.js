@@ -7,8 +7,16 @@ const {
   GraphQLInt,
   GraphQLInputObjectType,
   GraphQLList,
+  GraphQLNonNull,
 } = require('graphql');
 const { messageCreator } = require('#utils');
+const { plainToInstance } = require('class-transformer');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const UserDTO = require('#dto/user/user.js');
+const OtpVerify = require('#dto/user/otp-verify.js');
+const OtpUpdate = require('#dto/user/otp-update.js');
+const EmailDTO = require('#dto/user/email.js');
+
 const {
   ResponseType,
   graphqlErrorOption,
@@ -31,7 +39,7 @@ const userInformationFields = {
 };
 
 const UserInformationInput = new GraphQLInputObjectType({
-  name: "UserInformationInput",
+  name: 'UserInformationInput',
   fields: {
     ...userInformationFields,
     firstName: {
@@ -124,65 +132,64 @@ const query = new GraphQLObjectType({
           type: GraphQLString,
         },
       },
-      resolve: async (user, { pageSize, pageNumber, keyword }) => {
-        try {
-          const result = await user.pagination(pageSize, pageNumber, keyword);
-          if (result[0].length === 0) {
-            throw new GraphQLError('User is empty', graphqlNotFoundErrorOption);
-          }
-          return {
-            list: result[0],
-            total: parseInt(result[1][0].total || 0),
-          };
-        } catch (err) {
-          if (err instanceof GraphQLError) {
-            throw err;
-          }
-          throw new GraphQLError(err.message, graphqlErrorOption);
+      resolve: async (user, { pageSize, pageNumber, keyword }, context) => {
+        const result = await user.pagination(pageSize, pageNumber, keyword, context);
+        if (result && result[0].length === 0) {
+          throw new GraphQLError('User is empty', graphqlNotFoundErrorOption);
         }
+
+        return {
+          list: plainToInstance(UserDTO, result[0]),
+          total: result[1]
+        };
       },
+    },
+    emails: {
+      type: new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      resolve: async (user) => {
+        const emails = await user.getAllEmail();
+        if (emails && emails.length === 0) {
+          throw new GraphQLError('Email user is empty', graphqlNotFoundErrorOption);
+        }
+        return plainToInstance(EmailDTO, emails).map(({ email }) => email);
+      }
     },
     detail: {
       type: UserInformationUpdate,
       args: {
         userId: {
-          type: GraphQLID,
+          type: new GraphQLNonNull(GraphQLID),
         },
       },
-      resolve: async (user, { userId }) => {
-        try {
-          const userDetail = await user.getUserDetail(userId);
-          return userDetail[0];
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
+      resolve: async (user, { userId }, context) => {
+        const userDetail = await user.getUserDetail(userId, context);
+        if (!userDetail) {
+          throw new GraphQLError('Can not found user!', graphqlNotFoundErrorOption);
         }
+        return plainToInstance(UserDTO, userDetail);
       },
     },
     login: {
       type: UserLoginInformation,
       args: {
         email: {
-          type: GraphQLString,
+          type: new GraphQLNonNull(GraphQLString),
         },
         password: {
-          type: GraphQLString,
+          type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (user, { email, password }) => {
-        try {
-          const userLogin = await user.login(email, password);
-          if (userLogin) {
-            return { ...userLogin, email };
-          }
-          throw new GraphQLError('Can not found user', graphqlNotFoundErrorOption);
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
+      resolve: async (user, { email, password }, context) => {
+        const userLogin = await user.login(email, password, context);
+        if (userLogin) {
+          return plainToInstance(UserDTO, userLogin);
         }
+        throw new GraphQLError('Can not found user!', graphqlNotFoundErrorOption);
       },
     },
     verifyOtp: {
       type: new GraphQLObjectType({
-        name: "VerifyOtp",
+        name: 'VerifyOtp',
         fields: {
           verify: {
             type: GraphQLBoolean,
@@ -194,19 +201,16 @@ const query = new GraphQLObjectType({
       }),
       args: {
         email: {
-          type: GraphQLString,
+          type: new GraphQLNonNull(GraphQLString),
         },
         otp: {
-          type: GraphQLString,
+          type: new GraphQLNonNull(GraphQLString),
         },
       },
       resolve: async (user, { email, otp }) => {
-        try {
-          return await user.verifyOtpCode(email, otp);
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
-      },
+        const result = await user.verifyOtpCode(email, otp);
+        return plainToInstance(OtpVerify, result);;
+      }
     },
   },
 });
@@ -218,37 +222,27 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         user: {
-          type: UserInformationInput,
+          type: new GraphQLNonNull(UserInformationInput),
         },
       },
       resolve: async (user, args) => {
-        try {
-          await user.addUser(args.user);
-          return messageCreator('Add user success!');
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+        await user.addUser(args.user);
+        return messageCreator('Add user success!');
       },
     },
     updateMfaState: {
       type: ResponseType,
       args: {
         userId: {
-          type: GraphQLID,
+          type: new GraphQLNonNull(GraphQLID),
         },
         mfaEnable: {
-          type: GraphQLBoolean,
+          type: new GraphQLNonNull(GraphQLBoolean),
         },
       },
       resolve: async (user, { userId, mfaEnable }) => {
-        try {
-          await user.updateMfaState(mfaEnable, userId);
-          return messageCreator(
-            `Update mfs state for user_id = ${userId} success!`
-          );
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+          const { email } = await user.updateMfaState(mfaEnable, userId);
+          return messageCreator(`Update mfa state for email: ${email} success!`);
       },
     },
     updateOtpCode: {
@@ -265,39 +259,41 @@ const mutation = new GraphQLObjectType({
       }),
       args: {
         email: {
-          type: GraphQLString,
+          type: new GraphQLNonNull(GraphQLString),
         },
       },
       resolve: async (user, { email }) => {
-        try {
-          const otp = await user.updateOtpCode(email);
-          return { ...messageCreator('Otp code has sent to your email!'), otp };
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+        const otp = await user.updateOtpCode(email);
+        return plainToInstance(OtpUpdate, { ...messageCreator('Otp code has sent to your email!'), otp });
       },
     },
     update: {
       type: ResponseType,
       args: {
         user: {
-          type: UserInformationInput,
+          type: new GraphQLNonNull(UserInformationInput),
         },
       },
       resolve: async (user, args) => {
-        try {
-          await user.updateUser(args.user);
-          return messageCreator('Update user success!');
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+        await user.updateUser(args.user);
+        return messageCreator('Update user success!');
       },
     },
     updatePerson: {
-      type: ResponseType,
+      type: new GraphQLObjectType({
+        name: 'UpdatePersonResponse',
+        fields: {
+          message: {
+            type: GraphQLString
+          },
+          reLoginFlag: {
+            type: GraphQLBoolean
+          }
+        }
+      }),
       args: {
         person: {
-          type: new GraphQLInputObjectType({
+          type: new GraphQLNonNull(new GraphQLInputObjectType({
             name: 'PersonInputType',
             fields: {
               userId: {
@@ -319,16 +315,15 @@ const mutation = new GraphQLObjectType({
                 type: GraphQLString,
               },
             },
-          }),
+          })),
         }
       },
       resolve: async (user, { person }) => {
-        try {
-          await user.updatePerson(person);
-          return messageCreator('Update your personal information success!');
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+        const personalInfo = await user.updatePerson(person);
+        return {
+          ...messageCreator('Update your personal information success!'),
+          ...personalInfo
+        };
       },
     },
     delete: {
@@ -340,12 +335,15 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (user, { userId }) => {
         try {
-          await user.deleteUser(userId);
+          const { email } = await user.deleteUser(userId);
           return messageCreator(
-            `Delete user with user_id = ${userId} success!`
+            `Delete user with email = ${email} success!`
           );
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
+        } catch (error) {
+          if (error instanceof PrismaClientKnownRequestError) {
+            throw new GraphQLError(error.meta.cause, graphqlErrorOption);
+          }
+          throw error;
         }
       },
     },

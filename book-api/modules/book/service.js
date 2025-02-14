@@ -1,8 +1,7 @@
 const fs = require('fs');
 const { join } = require('path');
 const { saveFile } = require('#utils');
-const { Prisma } = require('@prisma/client');
-const Service = require('../service');
+const Service = require('#services/prisma.js');
 
 class BookService extends Service {
 
@@ -29,46 +28,39 @@ class BookService extends Service {
   }
 
   saveBookInfo(book) {
-    const { name, pdf, publishedTime, publishedDay, categoryId, bookId } = book;
+    const { name, avatar, publishedTime, publishedDay, categoryId, bookId } = book;
     return this.PrismaInstance.book.create({
       data: {
         book_id: bookId,
         name,
-        pdf,
+        avatar,
         published_day: publishedDay,
         published_time: publishedTime,
         category_id: categoryId
       },
-    });
+    }).then(() => {
+      return this.PrismaInstance.book_image.createMany({
+        data: book.images.map(img => {
+          img = { ...img, book_id: img.bookId };
+          delete img.bookId;
+          return img;
+        })
+      }).catch(error => { throw error; });
+    }).catch(error =>  { throw error; });
   }
 
-  saveBookAvatar(avatar, bookId) {
+  savePdfFile(bookId, pdf) {
     return this.PrismaInstance.book.update({
       where: {
         book_id: bookId
       },
       data: {
-        avatar
-      },
-    });
-  };
-
-  saveBookImages(images, bookId, name) {
-    const imagesRecord = images.reduce((arr, image, index) => {
-      arr.push({
-        name: name[index],
-        book_id: bookId,
-        image
-      });
-      return arr;
-    }, []);
-
-    return this.PrismaInstance.book_image.createMany({
-      data: imagesRecord,
+        pdf
+      }
     });
   }
 
-  deletePdfFile(bookId) {
+  deletePdfFile(bookId, name) {
     return this.PrismaInstance.book.findFirst({
       where: {
         book_id: bookId
@@ -78,16 +70,18 @@ class BookService extends Service {
       },
     })
     .then((result) => {
+      const oldPdfFile = `pdf/${name}.pdf`
       if (result) {
-        const filePath = join(__dirname, `../../public/${result.pdf}`);
-        try {
-          fs.unlinkSync(filePath);
-          return true;
-        } catch (err) {
-          throw err;
+        if (result.pdf !== oldPdfFile) {
+          const filePath = join(__dirname, `../../public/${result.pdf}`);
+          try {
+            fs.unlinkSync(filePath);
+          } catch (err) {
+            throw err;
+          }
         }
       } else {
-          throw new Error('Can not found pdf file!');
+        throw new Error('Can not found pdf file!');
       }
     });
   }
@@ -102,7 +96,6 @@ class BookService extends Service {
       },
     })
     .then((result) => {
-       console.log('result delete intro', result);
       if (result && result.introduce_file) {
         const filePath = result.introduce_file.split(',');
         const htmlFilePath = filePath[0].trim();
@@ -120,7 +113,7 @@ class BookService extends Service {
         };
         return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
       }
-      return true;
+      throw new Error('Can not found introduce file!');
     });
   }
 
@@ -145,47 +138,79 @@ class BookService extends Service {
         published_day: publishedDay,
         category_id: categoryId,
       },
+    })
+    .then(() => {
+      return this.PrismaInstance.book_image.deleteMany({
+        where: {
+          book_id: bookId
+        }
+      })
+      .then(() => {
+        return this.PrismaInstance.book_image.createMany({
+          data: book.images.map(img => {
+            img = { ...img, book_id: img.bookId };
+            delete img.bookId;
+            return img;
+          })
+        }).catch(error => { throw error; });
+      }).catch(error => { throw error; });
+    })
+    .catch(error =>  { throw error; });
+  }
+
+  getBookDetail(bookId, select) {
+    return this.PrismaInstance.book.findUnique({
+      where: {
+        book_id: bookId
+      },
+      select
     });
   }
 
-  getBookDetail(bookId) {
-    return this.PrismaInstance.$transaction([
-      this.PrismaInstance.$queryRaw
-        `SELECT name, pdf,
-        PUBLISHED_TIME AS publishedTime,
-        PUBLISHED_DAY AS publishedDay,
-        CATEGORY_ID AS categoryId,
-        INTRODUCE_FILE AS introduce,
-        AVATAR AS avatar FROM BOOK WHERE BOOK_ID = ${bookId};`,
-      this.PrismaInstance.$queryRaw`SELECT image, name FROM BOOK_IMAGE WHERE BOOK_ID = ${bookId};`
-    ]);
-  }
-
   getAllName() {
-    return this.PrismaInstance.$queryRaw`SELECT NAME AS name FROM BOOK;`;
+    return this.PrismaInstance.book.findMany({
+      select: {
+        name: true
+      }
+    });
   }
 
-  pagination(pageSize, pageNumber, keyword) {
-    const sqlQuery =
-    Prisma.sql`SELECT
-    BOOK_ID AS bookId,
-    NAME AS name,
-    PDF AS pdf,
-    PUBLISHED_DAY AS publishedDay,
-    PUBLISHED_TIME AS publishedTime,
-    (SELECT NAME FROM CATEGORY WHERE CATEGORY_ID = book.CATEGORY_ID) AS category,
-    INTRODUCE_FILE AS introduce,
-    AVATAR AS avatar FROM BOOK AS book`;
+  pagination(pageSize, pageNumber, keyword, select) {
     const offset = (pageNumber - 1) * pageSize;
     if (keyword) {
       return this.PrismaInstance.$transaction([
-        this.PrismaInstance.$queryRaw`${sqlQuery} WHERE NAME LIKE %${keyword}% ORDER BY BOOK_ID DESC LIMIT ${pageSize} OFFSET ${offset};`,
-        this.PrismaInstance.$queryRaw`SELECT COUNT(*) AS total FROM BOOK WHERE NAME LIKE %${keyword}%;`
+        this.PrismaInstance.book.findMany({
+          take: pageSize,
+          skip: offset,
+          where: {
+            name: {
+              contains: keyword
+            }
+          },
+          orderBy: {
+            book_id: 'desc',
+          },
+          select
+        }),
+        this.PrismaInstance.book.count({
+          where: {
+            name: {
+              contains: keyword
+            }
+          }
+        }),
       ]);
     }
     return this.PrismaInstance.$transaction([
-      this.PrismaInstance.$queryRaw`${sqlQuery} ORDER BY BOOK_ID DESC LIMIT ${pageSize} OFFSET ${offset};`,
-      this.PrismaInstance.$queryRaw`SELECT COUNT(*) AS total FROM BOOK;`,
+      this.PrismaInstance.book.findMany({
+        take: pageSize,
+          skip: offset,
+          orderBy: {
+            book_id: 'desc',
+          },
+          select
+      }),
+      this.PrismaInstance.book.count(),
     ]);
   };
 }

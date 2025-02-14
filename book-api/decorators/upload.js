@@ -1,6 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
+const { convertFileToBase64 } = require('#utils');
+const Logger = require('#services/logger.js');
 
 const storage = multer.memoryStorage();
 
@@ -31,9 +33,9 @@ UPLOAD_MODE
  * Return upload file helper decorator.
  *
  * @param {UPLOAD_MODE} - mode name (single, array, fields).
- * @param {String} - field name.
- * @param {Number} - maximum files.
- * @returns {Function} - upload decorator function.
+ * @param {string} - field name.
+ * @param {number} - maximum files.
+ * @returns {function} - upload decorator function.
  */
 module.exports = (mode, fields, maxCount) => {
   const uploadHandle = upload[mode](fields, maxCount);
@@ -44,16 +46,24 @@ module.exports = (mode, fields, maxCount) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
+          Logger.error('Upload file', err.message);
           response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
           switch (mode) {
             case UPLOAD_MODE.SINGLE:
-              args[0].body[fields] = request.file ?
-                `data:${request.file.mimetype};base64,${request.file.buffer.toString('base64')}`
+              args[0].body[fields] = request.file
+                ? convertFileToBase64(request.file)
                 : request.body[fields];
               break;
             case UPLOAD_MODE.ARRAY:
-              args[0].body[fields] = request.files.map(file => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`);
+              args[0].body[fields] = request.files.map(file => convertFileToBase64(file));
+              break;
+            case UPLOAD_MODE.FIELDS:
+              fields.forEach(({ name }) => {
+                if (request.files[name]) {
+                  request.body[name] = request.files[name].map(file => convertFileToBase64(file));
+                }
+              });
               break;
             default:
               break;

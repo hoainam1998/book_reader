@@ -6,16 +6,19 @@ const {
   GraphQLID,
   GraphQLError,
   GraphQLInt,
-  GraphQLBoolean
+  GraphQLBoolean,
+  GraphQLNonNull
 } = require('graphql');
+const { plainToInstance } = require('class-transformer');
 const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
 const { messageCreator } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const { CategoriesDTO, CategoryDTO } = require('#dto/category/category.js');
 
 const CategoryType = new GraphQLObjectType({
   name: 'Category',
   fields: {
-    category_id: {
+    categoryId: {
       type: GraphQLID
     },
     name: {
@@ -94,11 +97,12 @@ const query = new GraphQLObjectType({
     all: {
       type: new GraphQLList(CategoryType),
       resolve: async (category) => {
-        try {
-          return await category.all();
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
+        const categories = await category.all();
+        if (categories.length === 0) {
+          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
+          throw new GraphQLError('Categories not found!', graphqlNotFoundErrorOption );
         }
+        return plainToInstance(CategoryDTO, categories, { excludePrefixes: ['avatar'] });
       },
     },
     pagination: {
@@ -115,56 +119,40 @@ const query = new GraphQLObjectType({
       }),
       args: {
         pageNumber: {
-          type: GraphQLInt
+          type: new GraphQLNonNull(GraphQLInt)
         },
         pageSize: {
-          type: GraphQLInt
+          type: new GraphQLNonNull(GraphQLInt)
         }
       },
       resolve: async (category, { pageNumber, pageSize }) => {
-        try {
           const result = await category.pagination(pageSize, pageNumber);
+          const response = {
+            list: plainToInstance(CategoriesDTO, result[0]),
+            total: parseInt(result[1] || 0)
+          };
           const categories = result[0];
           if (categories.length === 0) {
-            const response = {
-              list: [],
-              total: 0
-            };
             graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
             throw new GraphQLError('Categories not found!', graphqlNotFoundErrorOption);
           }
-          return {
-            list: categories,
-            total: parseInt(result[1][0].total || 0)
-          };
-        } catch (err) {
-          if (err instanceof GraphQLError) {
-            throw err;
-          }
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+          return response;
       }
     },
     detail: {
       type: CategoryType,
       args: {
         categoryId: {
-          type: GraphQLID
+          type: new GraphQLNonNull(GraphQLID),
         }
       },
-      resolve: async (category, { categoryId }) => {
-        try {
-          return await category.detail(categoryId);
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
-      }
+      resolve: async (category, { categoryId }, context) => await category.detail(categoryId, context)
     },
     delete: {
       type: ResponseType,
       args: {
         categoryId: {
-          type: GraphQLID
+          type: new GraphQLNonNull(GraphQLID)
         }
       },
       resolve: async (category, { categoryId }) => {
@@ -175,7 +163,7 @@ const query = new GraphQLObjectType({
           if (err instanceof PrismaClientKnownRequestError) {
             throw new GraphQLError(err.meta.cause, graphqlErrorOption);
           }
-          throw new GraphQLError(err.message, graphqlErrorOption);
+          throw err;
         }
       }
     }

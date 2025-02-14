@@ -4,23 +4,20 @@ const {
 } = require('graphql');
 const { HTTP_CODE } = require('#constants');
 
-export const graphqlErrorOption = {
-  extensions: {
-    code: 'BAD_REQUEST',
-    http: {
-      status: HTTP_CODE.BAD_REQUEST,
+const createGraphqlError = (code) => {
+  return {
+    extensions: {
+      code,
+      http: {
+        status: HTTP_CODE[code],
+      }
     }
-  }
+  };
 };
 
-export const graphqlNotFoundErrorOption = {
-  extensions: {
-    code: 'NOT_FOUND',
-    http: {
-      status: HTTP_CODE.NOT_FOUND,
-    }
-  }
-};
+export const graphqlErrorOption = createGraphqlError('BAD_REQUEST');
+
+export const graphqlNotFoundErrorOption = createGraphqlError('NOT_FOUND');
 
 export const ResponseType = new GraphQLObjectType({
   name: 'Response',

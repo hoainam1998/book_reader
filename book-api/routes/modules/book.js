@@ -1,196 +1,356 @@
 const Router = require('../router.js');
 const multer = require('multer');
-const { execute } = require('graphql');
-const path = require('path');
-const cors = require('cors');
 const {
-  validateQuery,
   validateResultExecute,
   uploadPdf,
-  upload
+  upload,
+  serializer,
+  validation
 } = require('#decorators');
-const loginRequire = require('#auth/login-require');
-const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
-const { messageCreator, promiseAllSettledOrder } = require('#utils');
-const formable = multer();
-const cpUpload = formable.fields([
+const authentication = require('#middlewares/auth/authentication.js');
+const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { promiseAll, getExtName, createFile, fetchHelper, messageCreator } = require('#utils');
+const { BookPagination } = require('#dto/book/book-in.js');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
+const { AllBookName, BookCreatedResponse, BookDetailResponse, BookPaginationResponse } = require('#dto/book/book-out.js');
+const { BookCreate, BookSave, BookFileCreated, PdfFileSaved, BookDetail, IntroduceHTMLFileSave } = require('#dto/book/book-in.js');
+const cpUpload = multer().fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 },
   { name: 'avatar', maxCount: 1 }
 ]);
 
-const corsOptionsDelegate = (req, callback) => {
-  const corsOptions = {
-    origin: `${req.protocol}://${req.get('host')}`
+const filterResponse = (promise) =>
+  promise.then(async data => {
+    const result = { ...await data.json(), status: data.status };
+    if (data.status === HTTP_CODE.CREATED) {
+      return result;
+    }
+    return Promise.reject(result);
+  });
+
+const createBookFormData = (req, bookId = Date.now()) => {
+  const pdf = req.files.pdf[0];
+  const avatar = req.files.avatar[0];
+  const images = req.files.images;
+
+  const bookForm = Object.entries(req.body).reduce((formData, [key, value]) => {
+    formData.append(key, value);
+    return formData;
+  }, new FormData);
+
+  !req.body.bookId && bookForm.append('bookId', bookId);
+  bookForm.append('avatar', createFile(avatar), avatar.originalname);
+  images.forEach((image, index) => {
+    bookForm.append('images', createFile(image), image.originalname);
+    bookForm.append('imageNames', `${req.body.name}${index + 1}${getExtName(image)}`);
+  });
+
+  const pdfForm = new FormData();
+  pdfForm.append('bookId', bookId);
+  pdfForm.append('name', req.body.name);
+  pdfForm.append('pdf', createFile(pdf), pdf.originalname);
+
+  return {
+    book: bookForm,
+    pdf: pdfForm
   };
-  callback(null, corsOptions);
 };
 
 class BookRouter extends Router {
-  constructor(express, schema) {
-    super(express, schema);
-    this.post('/save-introduce', loginRequire, this._saveIntroduceHtmlFile);
-    this.post('/get-all-book-name', loginRequire, this._getAllBookName);
-    this.post('/save-book', cors(corsOptionsDelegate), this._saveBookInformation);
-    this.post('/save-images', cors(corsOptionsDelegate), this._saveImages);
-    this.post('/save-avatar', cors(corsOptionsDelegate), this._saveBookAvatar);
-    this.post('/detail', loginRequire, this._getBookDetail);
-    this.post('/save-book-info', loginRequire, cpUpload, this._processSaveBookInformation);
-    this.post('/pagination', loginRequire, this._paginationBook);
+  constructor(express, graphqlExecute) {
+    super(express, graphqlExecute);
+    this.post('/save-introduce', authentication, this._saveIntroduceHtmlFile);
+    this.put('/update-introduce', authentication, this._updateIntroduceHtmlFile);
+    this.get('/book-name', authentication, this._getAllBookName);
+    this.post('/save-book-info', allowInternalCall, this._saveBookInfo);
+    this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
+    this.post('/save-pdf', allowInternalCall, this._savePdf);
+    this.put('/update-pdf', allowInternalCall, this._updatePdf);
+    this.post('/detail', this._getBookDetail);
+    this.post('/create-book', authentication, cpUpload, this._createBookInformation);
+    this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
+    this.post('/pagination', authentication, this._paginationBook);
   }
 
+  @validation(IntroduceHTMLFileSave, { error_message: 'Save introduce file was failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
-  @validateQuery
-  _saveIntroduceHtmlFile(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: {
-        html: req.body.html,
-        name: req.body.fileName,
-        json: req.body.json,
-        bookId: req.body.bookId
+  @serializer(MessageSerializerResponse)
+  _saveIntroduceHtmlFile(req, res, next, self) {
+    const query = `mutation SaveIntroduce($html: String!, $json: String!, $name: String!, $bookId: ID!) {
+      book {
+        saveIntroduce(html: $html, json: $json, name: $name, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+    return self.execute(query, {
+      html: req.body.html,
+      name: req.body.fileName,
+      json: req.body.json,
+      bookId: req.body.bookId
+    });
+  }
+
+  @validation(IntroduceHTMLFileSave, { error_message: 'Update introduce file was failed!' })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updateIntroduceHtmlFile(req, res, next, self) {
+    const query = `mutation UpdateIntroduce($html: String!, $json: String!, $name: String!, $bookId: ID!) {
+      book {
+        updateIntroduce(html: $html, json: $json, name: $name, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+    return self.execute(query, {
+      html: req.body.html,
+      name: req.body.fileName,
+      json: req.body.json,
+      bookId: req.body.bookId
+    });
+  }
+
+  @validation(BookDetail, { error_message: 'Get book information failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(BookDetailResponse)
+  _getBookDetail(req, res, next, self) {
+    const query = `query GetBookDetail($bookId: ID!) {
+      book {
+        detail(bookId: $bookId) ${
+          req.body.query
+        }
+      }
+    }`;
+    return self.execute(query, { bookId: req.body.bookId }, req.body.query);
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AllBookName)
+  _getAllBookName(req, res, next, self) {
+    const query = `query GetAllBookName {
+      book {
+        names
+      }
+    }`;
+    return self.execute(query);
+  }
+
+  @validation(BookPagination, { error_message: 'Load books failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(BookPaginationResponse)
+  _paginationBook(req, res, next, self) {
+    const query = `query BookPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
+      book {
+        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
+          list ${
+            req.body.query
+          },
+          total
+        }
+      }
+    }`;
+    return self.execute(query,
+      {
+        pageNumber: req.body.pageNumber,
+        pageSize: req.body.pageSize,
+        keyword: req.body.keyword
+      },
+      req.body.query
+    );
+  }
+
+  @upload(UPLOAD_MODE.FIELDS, [
+    {
+      name: 'avatar',
+      maxCount: 1,
+    },
+    {
+      name: 'images',
+      maxCount: 8
+    }
+  ])
+  @validation(BookCreate, { error_message: 'Create book information failed!' })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _saveBookInfo(req, res, next, self) {
+    const query = `mutation SaveBookInformation($book: BookInformationInput!) {
+      book {
+        saveBookInfo(book: $book) {
+            message
+          }
+        }
+      }`;
+
+    const images = req.body.images.map((image, index) => ({
+      image,
+      name: req.body.imageNames[index],
+      bookId: req.body.bookId,
+    }));
+
+    delete req.body.imageNames;
+
+    return self.execute(query, {
+      book: {
+        ...req.body,
+        avatar: req.body.avatar[0],
+        images,
+        publishedTime: +req.body.publishedTime
+      }
+    });
+  }
+
+  @upload(UPLOAD_MODE.FIELDS, [
+    {
+      name: 'avatar',
+      maxCount: 1,
+    },
+    {
+      name: 'images',
+      maxCount: 8
+    }
+  ])
+  @validation(BookCreate, { error_message: 'Update book information failed!' })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updateBookInfo(req, res, next, self) {
+    const query = `mutation UpdateBookInformation($book: BookInformationInput!) {
+      book {
+        updateBookInfo(book: $book) {
+            message
+          }
+        }
+      }`;
+
+    const images = req.body.images.map((image, index) => ({
+      image,
+      name: req.body.imageNames[index],
+      bookId: req.body.bookId,
+    }));
+
+    delete req.body.imageNames;
+
+    return self.execute(query, {
+      book: {
+        ...req.body,
+        avatar: req.body.avatar[0],
+        images,
+        publishedTime: +req.body.publishedTime
       }
     });
   }
 
   @uploadPdf('pdf')
+  @validation(PdfFileSaved, { error_message: 'Save pdf file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
-  @validateQuery
-  _saveBookInformation(req, res, next, schema) {
-    const body = { ...req.body };
-    delete body.query;
-    return execute({
-      schema, document: req.body.query, variableValues: {
-        book: {
-          ...body,
-          publishedTime: +req.body.publishedTime
+  @serializer(MessageSerializerResponse)
+  _savePdf(req, res, next, self) {
+    const query = `mutation SavePdf($bookId: ID!, $pdf: String!) {
+      book {
+        savePdfFile(bookId: $bookId, pdf: $pdf) {
+          message
         }
       }
+    }`;
+
+    return self.execute(query, {
+      bookId: req.body.bookId,
+      pdf: req.body.pdf
     });
   }
 
-  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @uploadPdf('pdf')
+  @validation(PdfFileSaved, { error_message: 'Update pdf file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
-  @validateQuery
-  _saveBookAvatar(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: {
-        bookId: req.body.bookId,
-        avatar: req.body.avatar
+  @serializer(MessageSerializerResponse)
+  _updatePdf(req, res, next, self) {
+    const query = `mutation UpdatePdf($bookId: ID!, $pdf: String!, $name: String!) {
+      book {
+        updatePdfFile(bookId: $bookId, pdf: $pdf, name: $name) {
+          message
+        }
       }
+    }`;
+
+    return self.execute(query, {
+      bookId: req.body.bookId,
+      pdf: req.body.pdf,
+      name: req.body.name
     });
   }
 
-  @upload(UPLOAD_MODE.ARRAY, 'images')
-  @validateResultExecute(HTTP_CODE.CREATED)
-  @validateQuery
-  _saveImages(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: {
-        images: req.body.images,
-        bookId: req.body.bookId,
-        name: req.body.name
+  @validation(
+    [
+      {
+        validate_class: BookSave,
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY
+      },
+      {
+        validate_class: BookFileCreated,
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.FILES,
       }
-    });
-  }
-
-  @validateResultExecute(HTTP_CODE.OK)
-  @validateQuery
-  _getBookDetail(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: { bookId: req.body.bookId } });
-  }
-
-  @validateResultExecute(HTTP_CODE.OK)
-  @validateQuery
-  _getAllBookName(req, res, next, schema) {
-    return execute({ schema, document: req.body.query });
-  }
-
-  @validateResultExecute(HTTP_CODE.OK)
-  @validateQuery
-  _paginationBook(req, res, next, schema) {
-    return execute({ schema, document: req.body.query, variableValues: {
-        pageNumber: req.body.pageNumber,
-        pageSize: req.body.pageSize,
-        keyword: req.body.keyword
-      }
-    });
-  }
-
-  _processSaveBookInformation(req, res, next, schema) {
-    const pdf = req.files.pdf[0];
-    const avatar = req.files.avatar[0];
-    const images = req.files.images;
-    const bookId = req.body.bookId || Date.now();
-    const formDataBookInfo = new FormData();
-    const formDataBookImages = new FormData();
-    const formDataBookAvatar = new FormData();
-    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
-    const message = req.body.bookId ? 'Update book information success!' : 'Save book information success!';
-
-    Object.keys(req.body).forEach(key => {
-      if (!formDataBookInfo.has(key)) {
-        formDataBookInfo.append(key, req.body[key]);
-      }
-    });
-
-    formDataBookInfo.append('pdf', new File([pdf.buffer], pdf.originalname), pdf.originalname);
-    formDataBookAvatar.append('avatar', new File([avatar.buffer], avatar.originalname, { type: avatar.mimetype }), avatar.originalname);
-    formDataBookAvatar.append(
-      'query',
-      'mutation UpdateBookAvatar($avatar: String, $bookId: ID) { book { saveBookAvatar(avatar: $avatar, bookId: $bookId) { message } } }'
-    );
-
-    if (req.body.bookId) {
-      formDataBookInfo.append('query', 'mutation UpdateBookInformation($book: BookInformationInput) { book { updateBookInfo(book: $book) { message } } }');
-      formDataBookImages.append(
-        'query',
-        'mutation UpdateBookImages($images: [String], $bookId: ID, $name: [String]) { book { updateBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
-      );
-    } else {
-      formDataBookInfo.append('query', 'mutation SaveBookInformation($book: BookInformationInput) { book { saveBookInfo(book: $book) { message } } }');
-      formDataBookImages.append(
-        'query',
-        'mutation SaveBookImages($images: [String], $bookId: ID, $name: [String]) { book { saveBookImages(images: $images, bookId: $bookId, name: $name) { message } } }'
-      );
-    }
-
-    images.forEach((image, index) => {
-      formDataBookImages.append('images', new File([image.buffer], pdf.originalname, { type: image.mimetype }), image.originalname);
-      formDataBookImages.append('name', `${req.body.name}${index + 1}${path.extname(image.originalname)}`);
-    });
-
-    formDataBookImages.append('bookId', bookId);
-    formDataBookAvatar.append('bookId', bookId);
-    if (!formDataBookInfo.has('bookId')) {
-      formDataBookInfo.append('bookId', bookId);
-    }
-
-    const fetchHelper = (path, body) => fetch(`${url}/${path}`, { method: 'POST', body });
-
-    const promiseFetchBookData = (fetchHandler, name) => {
-      return fetchHandler
-        .then(async saveBookInfoResponse => {
-          if (saveBookInfoResponse.status === HTTP_CODE.CREATED) {
-            return saveBookInfoResponse;
-          } else {
-            const { message } = await saveBookInfoResponse.json();
-            throw new Error(`[${name}] ${message}`);
-          }
-        })
-        .catch(err => {
-          throw new Error(err.message);
-        });
-    };
-
-    promiseAllSettledOrder([
-      () => promiseFetchBookData(fetchHelper('save-book', formDataBookInfo), 'Book information'),
-      () => promiseFetchBookData(fetchHelper('save-avatar', formDataBookAvatar), 'Book avatar'),
-      () => promiseFetchBookData(fetchHelper('save-images', formDataBookImages), 'Book images'),
     ],
-    () => {
-      res.status(HTTP_CODE.OK).json({
-        ...messageCreator(message),
-        bookId
-      });
-    },
-    err => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message)));
+    {
+      error_message: 'Create book failed!',
+      groups: ['create']
+    }
+  )
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(BookCreatedResponse)
+  _createBookInformation(req, res, next, self) {
+    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const bookId = Date.now();
+    const { book, pdf } = createBookFormData(req, bookId);
+
+    return promiseAll([
+      () => filterResponse(fetchHelper(`${url}/save-book-info`, 'POST', book)),
+      () => filterResponse(fetchHelper(`${url}/save-pdf`, 'POST', pdf)),
+    ])
+    .then(results => {
+      if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
+        return Promise.reject('Create book failed!');
+      }
+      return {
+        ...messageCreator('Book created success!'),
+        bookId: bookId.toString()
+      };
+    });
+  }
+
+  @validation(
+    [
+      {
+        validate_class: BookSave,
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY
+      },
+      {
+        validate_class: BookFileCreated,
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.FILES,
+      },
+    ],
+    {
+      error_message: 'Update book failed!',
+      groups: ['update']
+    }
+  )
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(BookCreatedResponse)
+  _updateBookInformation(req, res, next, self) {
+    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const bookId = req.body.bookId;
+    const { book, pdf } = createBookFormData(req, bookId);
+
+    return promiseAll([
+      () => filterResponse(fetchHelper(`${url}/update-book-info`, 'PUT', book)),
+      () => filterResponse(fetchHelper(`${url}/update-pdf`, 'PUT', pdf)),
+    ])
+    .then(results => {
+      if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
+        return Promise.reject('Update book failed!');
+      }
+      return messageCreator('Update book success!');
+    });
   }
 }
 

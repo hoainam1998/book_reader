@@ -1,4 +1,4 @@
-const Service = require('../service');
+const Service = require('#services/prisma.js');
 
 class CategoryService extends Service {
 
@@ -19,18 +19,30 @@ class CategoryService extends Service {
   pagination(pageSize, pageNumber) {
     const offset = (pageNumber - 1) * pageSize;
     return this.PrismaInstance.$transaction([
-      this.PrismaInstance.$queryRaw`SELECT *, IF((SELECT COUNT(*) FROM book AS bo WHERE ca.category_id LIKE bo.category_id > 0), true, false) AS disabled
-      FROM CATEGORY as ca ORDER BY CATEGORY_ID DESC LIMIT ${pageSize} OFFSET ${offset};`,
-      this.PrismaInstance.$queryRaw`SELECT COUNT(*) AS total FROM CATEGORY;`
+      this.PrismaInstance.category.findMany({
+        take: pageSize,
+        skip: offset,
+        orderBy: {
+          category_id: 'desc',
+        },
+        include: {
+          _count: {
+            select: { book: true },
+          },
+        },
+      }),
+      this.PrismaInstance.category.count()
     ]);
   }
 
-  detail(id) {
+  detail(id, select) {
     return this.PrismaInstance.category.findFirst({
       where: {
         category_id: id
       },
-    });
+      select
+    })
+    .then((category) => ({ ...category, categoryId: category.category_id }));
   }
 
   update(category) {

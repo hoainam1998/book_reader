@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const { HTTP_CODE } = require('#constants');
+const Logger = require('#services/logger.js');
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {
@@ -28,8 +29,8 @@ const upload = multer({
 /**
  * Return upload pdf file helper decorator.
  *
- * @param {String} field - field name.
- * @returns {Function} - upload decorator function.
+ * @param {string} field - field name.
+ * @returns {function} - upload decorator function.
  */
 module.exports = (field) => {
   const uploadHandle = upload.single(field);
@@ -40,9 +41,10 @@ module.exports = (field) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
+          Logger.error('Upload Pdf', err.message);
           response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
-          request.body[field] = request.file ? `${field}/${request.file.filename}` : '';
+          request.body[field] = request.file ? `${field}/${request.file.filename}` : undefined;
           originalMethod.apply(null, args);
         }
       });

@@ -1,12 +1,15 @@
 const fs = require('fs');
+const path = require('path');
 const sendMail = require('./sendMail');
 const { mkdir } = require('fs/promises');
+const { plainToInstance } = require('class-transformer');
+const MessageResponse = require('#dto/common/message-response.js');
 
 /**
  * Return freezed object.
  *
- * @param {object} object - constant object.
- * @returns {object} - freezed object.
+ * @param {Object} object - constant object.
+ * @returns {Object} - freezed object.
  */
 const deepFreeze = (object) => {
   for (const key in object) {
@@ -21,9 +24,9 @@ const deepFreeze = (object) => {
  * Return message response object.
  *
  * @param {string} message - message.
- * @returns {object} - message object.
+ * @returns {Object} - message object.
  */
-const messageCreator = (message) => ({ message });
+const messageCreator = (message) => plainToInstance(MessageResponse, { message });
 
 /**
  * Return otp code.
@@ -39,50 +42,10 @@ const generateOtp = () => {
 };
 
 /**
- * Handle multiple promise by order.
- *
- * @param {Promise[]} promiseChain - list promise sorted by call order.
- * @param {Function} success - callback for then promise.
- * @param {Function} error - callback for catch promise.
- */
-const promiseAllSettledOrder = (promiseChain, success, error) => {
-  const promises = [];
-  const handlePromise = (index = 0) => {
-    if (index < promiseChain.length) {
-      promises.push(
-        promiseChain[index]()
-          .catch((err) => err)
-          .finally(() => handlePromise(index + 1))
-      );
-    } else {
-      Promise.all(promises)
-        .then((results) => {
-          const messages = results
-            .reduce((message, result) => {
-              if (result instanceof Error) {
-                message += result.message + "; ";
-              }
-              return message;
-            }, '')
-            .trim();
-
-          if (messages) {
-            throw new Error(messages);
-          } else {
-            success(results);
-          }
-        })
-        .catch(error);
-    }
-  };
-  handlePromise();
-};
-
-/**
  * Create folder at specific path.
  *
  * @param {string} filePath - path to stored file.
- * @return {Promise<string>} - promise contain file path.
+ * @return {Promise<string>} promise contain file path.
  */
 const createFolder = (path) => {
   return mkdir(path, { recursive: true });
@@ -93,7 +56,7 @@ const createFolder = (path) => {
  *
  * @param {string} filePath - path to stored file.
  * @param {string} success - content of file.
- * @return {Promise<boolean>} - promise contain result.
+ * @return {Promise<string>} - promise contain file path.
  */
 const saveFile = (filePath, content) => {
   return new Promise((resolve, reject) => {
@@ -104,20 +67,116 @@ const saveFile = (filePath, content) => {
         if (err) {
           reject(err);
         } else {
-          resolve(true);
+          resolve(path.resolve(filePath));
         }
       }
     );
   });
 };
 
+/**
+ * Parse graphql select object to selected string.
+ *
+ * @param {Object} graphqlSelectObject - ex({ userId: true, name: true, json: { field1: true, field2: false } }).
+ * @return {string} select formatted to string - ex({ userId, name, json: { field1 } }).
+ */
+const graphqlQueryParser = (select) => {
+  const queryParser = (selected, tab = 0) => {
+    const tabs = Array(tab ? tab + 1 : tab).fill(' ').join('');
+    const queryStr = Object.keys(selected).reduce((query, key) => {
+      if (selected[key]) {
+        if (tab) {
+          query += `${tabs} ${key}\n`;
+        } else {
+          query += ` ${key}\n`;
+        }
+
+        if (typeof selected[key] === 'object') {
+          query += queryParser(selected[key], tab > 0 ? tab + 2 : tab + 1);
+        }
+      }
+      return query;
+    }, '');
+    return `${tabs}{\n${queryStr.trimEnd()}\n${tabs}}`;
+  };
+  return queryParser(select);
+};
+
+/**
+ * Get final result from graphql result.
+ *
+ * @param {Object} generator - The graphql response (ex: data { user: { email, apiKey } } to { email, apiKey }).
+ * @return {Object} The final result.
+ */
+const getGraphqlFinalData = (data) => {
+  if (data && typeof data === 'object') {
+    const keys = Object.keys(data);
+    if (keys.length > 0) {
+      if (keys.length > 1) {
+        return data;
+      } else {
+        if (typeof data[keys[0]] !== 'object') {
+          return data;
+        }
+        return getGraphqlFinalData(data[keys[0]]);
+      }
+    }
+    return data;
+  }
+  return data;
+};
+
+/**
+ * Get final result from generator function return.
+ *
+ * @param {Object} generator - The generator result.
+ * @return {Object} The final result.
+ */
+const getGeneratorFunctionData = (generator) => {
+  if (generator && generator.next) {
+    let finalResult;
+    let done = false;
+    while (!done) {
+      const context = generator.next();
+      if (context.value instanceof Promise) {
+        finalResult = context.value;
+      }
+      done = context.done;
+    }
+    return finalResult;
+  }
+  return generator;
+};
+
+const convertFileToBase64 = (file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+
+const getExtName = (file) => path.extname(file.originalname);
+
+const createFile = (file) => new File([file.buffer], file.originalname, { type: file.mimetype });
+
+const fetchHelper = (url, method, body) => fetch(url, { method, body });
+
+async function promiseAll(promisesFn) {
+  const arr = [];
+  for (const fn of promisesFn) {
+    arr.push(await fn());
+  }
+  return arr;
+};
 
 module.exports = {
   deepFreeze,
   messageCreator,
-  promiseAllSettledOrder,
   generateOtp,
   sendMail,
   saveFile,
-  createFolder
+  createFolder,
+  graphqlQueryParser,
+  getGraphqlFinalData,
+  getGeneratorFunctionData,
+  convertFileToBase64,
+  getExtName,
+  createFile,
+  fetchHelper,
+  promiseAll,
 };

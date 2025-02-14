@@ -20,7 +20,7 @@ model author {
 model book {
   book_id        String        @id @db.VarChar(20)
   name           String        @db.Text
-  pdf            String        @db.Text
+  pdf            String?       @db.Text
   published_day  String        @db.VarChar(20)
   published_time Int
   category_id    String        @db.VarChar(20)

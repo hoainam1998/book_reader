@@ -26,7 +26,7 @@ const sendMail = (otp, to) => {
       if (error) {
         reject(error);
       } else {
-        resolve('Email sent: ' + info.response);
+        resolve(`Email sent: ${info.response}`);
       }
     });
   });

@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLError, GraphQLInputObjectType } = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLError, GraphQLInputObjectType, GraphQLNonNull } = require('graphql');
 const { graphqlErrorOption, ResponseType } = require('../common-schema');
 const { messageCreator } = require('#utils');
 
@@ -18,7 +18,7 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         author: {
-          type: new GraphQLInputObjectType({
+          type: new GraphQLNonNull(new GraphQLInputObjectType({
             name: 'AuthorInformation',
             fields: {
               authorId: {
@@ -53,16 +53,12 @@ const mutation = new GraphQLObjectType({
                 })
               }
             }
-          }),
+          })),
         }
       },
       resolve: async (service, { author }) => {
-        try {
-          await service.createAuthor(author);
-          return messageCreator('Author create success!');
-        } catch (error) {
-          throw new GraphQLError(error.message, graphqlErrorOption);
-        }
+        await service.createAuthor(author);
+        return messageCreator('Author create success!');
       }
     }
   }

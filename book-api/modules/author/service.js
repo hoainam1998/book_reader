@@ -1,23 +1,25 @@
 const { saveFile } = require('#utils');
 const { createFolder } = require('#utils');
-const Service = require('../service');
+const { join } = require('path');
+const Service = require('#services/prisma.js');
 
 class AuthorService extends Service {
 
   createAuthor(author) {
-    const filePath = (path) => `../public/${path}/author/${author.authorId}/${author.name}.${path}`;
+    const filePath = (extName, path) => `${path}/${author.name}.${extName}`;
 
     return Promise.all([
       createFolder(join(__dirname, `../../public/html/author/${author.authorId}`)),
       createFolder(join(__dirname, `../../public/json/author/${author.authorId}`))
-    ]).then(() => {
-      return Promise.all([
-        saveFile(filePath('html'), author.story.html),
-        saveFile(filePath('json'), author.story.json)
-      ]).then((paths) => {
-
+    ]).then((urls) => {
+      const extNames = ['html', 'json'];
+      const promise = urls.map((url, index) => saveFile(filePath(extNames[index], url), author.story.html));
+      return Promise.all(promise).then((paths) => {
         const story = paths.reduce((listPath, currentPath) => {
-          listPath.push(currentPath.match(/(\/([\w\.]+)){4}$/gm)[0]);
+          const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
+          if (relativePath) {
+            listPath.push(relativePath.replace(/\\/gm, '/'));
+          }
           return listPath;
         }, []).join(', ');
 

@@ -15,6 +15,7 @@
 *.pdf
 /db
 package-lock.json
+/prisma/migrations
 
 # misc
 .DS_Store
