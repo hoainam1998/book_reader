@@ -8,7 +8,7 @@ const { messageCreator } = require('#utils');
  * @param {Object} req - express request.
  * @param {Object} res - express response.
  * @param {Object} next - next function.
- * @return - by next middleware if pass, otherwise unauthorized json response.
+ * @return - by next middleware if pass, otherwise return unauthorized json response.
  */
 const loginRequire = (req, res, next) => {
   const authorization = req.get('authorization');

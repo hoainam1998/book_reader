@@ -3,7 +3,7 @@ const { HTTP_CODE } = require('#constants');
 const { messageCreator } = require('#utils');
 
 /**
- * Checking user have login yet.
+ * Checking user have login yet and passed mfa session.
  *
  * @param {Object} req - express request.
  * @param {Object} res - express response.
@@ -16,7 +16,7 @@ const authentication = (req, res, next) => {
     // verify token
     const user = verify(authorization, process.env.SECRET_KEY);
     if (user && user.userId) {
-      // if user already login, then switch to next middleware.
+      // if user already passed mfa, then switch to next middleware.
       return next();
     } else {
       // else return unauthorized message

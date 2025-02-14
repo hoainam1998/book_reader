@@ -1,5 +1,5 @@
 const { execute } = require('graphql');
-const { validateExecuteQuery } = require("#decorators");
+const { validateExecuteQuery } = require('#decorators');
 
 class GraphqlExecute {
   _prismaField;
@@ -7,6 +7,7 @@ class GraphqlExecute {
   /**
   * Create graphql execute service class.
   * @param {object} schema - The schema.
+  * @param {class} PrismaField - PrismaField class.
   */
   constructor(schema, PrismaField) {
     this._schema = schema;

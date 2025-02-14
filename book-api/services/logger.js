@@ -17,6 +17,7 @@ class Logger {
 
   /**
   * Create logger service class.
+  *
   * @param {string} name - The name of context.
   */
   constructor(name) {
@@ -25,6 +26,7 @@ class Logger {
 
   /**
   * Private function writing message.
+  *
   * @param {string} level - The kind of console (ex: log, warn, log, error).
   * @param {string} message - The message to logging.
   */

@@ -145,7 +145,7 @@ const endpoint = (target) => {
 /**
  * Inject graphql execute service to current router object.
  *
- * @param {Object} - information of current router class.
+ * @param {class} target - router class.
  * @returns {class} - new class extend from target object.
  */
 const graphqlExecuteWrapper = (target) => {
@@ -174,7 +174,7 @@ const graphqlExecuteWrapper = (target) => {
 /**
  * Inject logger service to current router object.
  *
- * @param {Object} - information of current router class.
+ * @param {class} target - router class.
  * @returns {class} - new class extend from target object.
  */
 const loggerWrapper = (target) => {
@@ -202,7 +202,7 @@ const loggerWrapper = (target) => {
 /**
  * Serializing response according pattern class.
  *
- * @param {class} - serializer class.
+ * @param {class} serializerClass - serializer class.
  * @returns {Object} - new target object.
  */
 const serializer = (serializerClass) => {
@@ -213,6 +213,8 @@ const serializer = (serializerClass) => {
       if (!(finalResult instanceof Error)) {
         if (finalResult instanceof Promise) {
           return finalResult.then(value => {
+            // convert value into the instance serializerClass, if response not include in instance,
+            // then value is deserialization value, and they will directly throw.
             const { response } = plainToInstance(serializerClass, value);
             return response ?? value;
           });
@@ -225,6 +227,12 @@ const serializer = (serializerClass) => {
   };
 };
 
+/**
+ * Validation incoming request data.
+ *
+ * @param {...*} args - The parameters.
+ * @returns {Function} - decorator function.
+ */
 const validation = (...args) => {
   const validateInfo = args[0];
   const options = args[1];
@@ -237,16 +245,30 @@ const validation = (...args) => {
       const response = args[1];
 
       try {
+        // it is flag will be determinate, origin method will run or not.
         let lastRun = true;
         const { groups, request_data_passed_type, error_message } = options || {};
         let errorMessage = 'Something is not expected. Please try again or contact my admin!';
+        // error_message was provided, append it into default error message.
         if (error_message) {
           errorMessage = `${error_message} \n${errorMessage}`;
         }
+
+        /**
+         * Validate helper.
+         *
+         * @param {string} type - Request data type (ex: files, params, body...)
+         * @param {class} validateClass - validate class
+         */
         const validating = (type, validateClass) => {
           if (request[type] && Object.keys(request[type]).length) {
+            // convert request incoming data to instance validate class.
+            // all validate class extended by Validator, therefor it owned validated method
+            // run validate method with parameter, return errors array
             const errorsValidated = plainToInstance(validateClass, request[type]).validate(groups)?.errors;
+            // error is empty, skip
             if (errorsValidated.length) {
+              // update lastRun flag, and return bad request response.
               if (lastRun) {
                 lastRun = false;
               }
@@ -258,6 +280,12 @@ const validation = (...args) => {
           }
         };
 
+        /**
+         * Validate by request data type passed.
+         *
+         * @param {class} validateClass - The validate class.
+         * @param {string} requestDataPassedType - Request data type (ex: files, params, body...)
+         */
         const handleByType = (validateClass, requestDataPassedType) => {
           switch (requestDataPassedType) {
             case PARAM:
@@ -275,6 +303,8 @@ const validation = (...args) => {
           }
         };
 
+        // validateInfo will be array to validate multiple request data passed type, or will be object
+        // In case validateInfo is object, default request data passed type will be 'body'
         if (Array.isArray(validateInfo)) {
           validateInfo.forEach(({ validate_class, request_data_passed_type }) => {
             handleByType(validate_class, request_data_passed_type);
@@ -290,6 +320,7 @@ const validation = (...args) => {
 
         lastRun && originMethod.apply(this, args);
       } catch (error) {
+        // if any error, return server error.
         Logger.error('Validation', error.message);
         return response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
       }

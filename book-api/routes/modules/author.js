@@ -5,8 +5,17 @@ const MessageSerializerResponse = require('#dto/common/message-serializer-respon
 const { AuthorCreate } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
+/**
+ * Organize author routes.
+ * @extends Router
+ */
 class AuthorRouter extends Router {
-
+  /**
+  * Create authorRouter instance.
+  *
+  * @param {object} express - The express object.
+  * @param {object} graphqlExecute - The graphql execute instance.
+  */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/create-author', authentication, this.createAuthor);

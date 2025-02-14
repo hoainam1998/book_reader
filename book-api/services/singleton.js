@@ -4,7 +4,7 @@
 class Singleton {
   /**
   * Create singleton class.
-  * @param {singleClass} x - The single class.
+  * @param {singleClass} singleClass - The single class.
   */
   constructor(singleClass) {
     // if single class is instant, it will throw error.

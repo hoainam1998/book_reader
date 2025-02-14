@@ -49,6 +49,7 @@ module.exports = (mode, fields, maxCount) => {
           Logger.error('Upload file', err.message);
           response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
         } else {
+          // run by mode, and convert file to base64 string.
           switch (mode) {
             case UPLOAD_MODE.SINGLE:
               args[0].body[fields] = request.file

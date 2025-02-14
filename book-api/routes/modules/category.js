@@ -7,7 +7,17 @@ const { CategoryPaginationResponse, CategoryDetailResponse, AllCategoryResponse 
 const { CategoryDetailValidator, AllCategory } = require('#dto/category/category-in.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 
+/**
+ * Organize category routes.
+ * @extends Router
+ */
 class CategoryRouter extends Router {
+  /**
+  * Create categoryRouter instance.
+  *
+  * @param {object} express - The express object.
+  * @param {object} graphqlExecute - The graphql execute instance.
+  */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/all', authentication, this._getAll);

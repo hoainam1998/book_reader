@@ -58,7 +58,17 @@ const createBookFormData = (req, bookId = Date.now()) => {
   };
 };
 
+/**
+ * Organize book routes.
+ * @extends Router
+ */
 class BookRouter extends Router {
+  /**
+  * Create bookRouter instance.
+  *
+  * @param {object} express - The express object.
+  * @param {object} graphqlExecute - The graphql execute instance.
+  */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/save-introduce', authentication, this._saveIntroduceHtmlFile);

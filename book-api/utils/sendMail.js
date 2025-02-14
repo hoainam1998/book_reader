@@ -1,5 +1,11 @@
 const nodemailer = require('nodemailer');
 
+/**
+ * Return freezed object.
+ *
+ * @param {string} otp - The otp code.
+ * @returns {Promise<string>} - The promise result.
+ */
 const sendMail = (otp, to) => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMPT_HOST,
@@ -17,7 +23,7 @@ const sendMail = (otp, to) => {
     to: to,
     subject: 'Your OTP',
     html: `
-      <h2>Your OTP code are: ${otp}
+      <h2>Your OTP code are: ${otp}</h2>
     `,
   };
 

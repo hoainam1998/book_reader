@@ -148,14 +148,53 @@ const getGeneratorFunctionData = (generator) => {
   return generator;
 };
 
+/**
+ * Convert file to base64 image file string.
+ *
+ * @param {File} file - The file object.
+ * @return {string} The image base64 string.
+ */
 const convertFileToBase64 = (file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
 
+/**
+ * Get extension name of file.
+ *
+ * @param {File} file - The file object.
+ * @return {string} The extension name.
+ */
 const getExtName = (file) => path.extname(file.originalname);
 
+/**
+ * Convert a multer file to new file.
+ *
+ * @param {Object} multerFile - The multerFile object.
+ * @return {File} The file object.
+ */
 const createFile = (file) => new File([file.buffer], file.originalname, { type: file.mimetype });
 
-const fetchHelper = (url, method, body) => fetch(url, { method, body });
+/**
+ * Fetch helper to call api internally.
+ *
+ * @param {...*} args - The parameters for fetch api function.
+ * @return {Promise} The promise result.
+ */
+const fetchHelper = (...args) => {
+  let headers;
+  const url = args[0];
+  const method = args[1];
+  headers = args.length === 4 ? args[2] : headers;
+  const body = args.length === 4 ? args[3] : args[2];
 
+  return fetch(url, { method, headers, body });
+};
+
+/**
+ * Download data from the specified URL.
+ *
+ * @async
+ * @param {[Promise]} promises - The array of promises.
+ * @return {Promise<[*]>} The promise result.
+ */
 async function promiseAll(promisesFn) {
   const arr = [];
   for (const fn of promisesFn) {

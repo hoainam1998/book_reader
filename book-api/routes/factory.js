@@ -9,7 +9,17 @@ const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user.j
 const AuthorRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/author.js')));
 const { PATH } = require('#constants');
 
+/**
+* Organize all router instance.
+*/
 class RouterFactory {
+  /**
+  * Return all router instance.
+  *
+  * @static
+  * @param {object} express - The express object.
+  * @param {GraphQLSchema} schema - The graphql schema instance.
+  */
   static getRoutes(express, schema) {
     return [
       {

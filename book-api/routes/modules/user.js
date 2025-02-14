@@ -2,7 +2,7 @@ const Router = require('../router.js');
 const { verify } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
-const { sendMail, messageCreator } = require('#utils');
+const { sendMail, messageCreator, fetchHelper } = require('#utils');
 const loginRequire = require('#middlewares/auth/login-require.js');
 const authentication = require('#middlewares/auth/authentication.js');
 const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
@@ -13,12 +13,31 @@ const {
   OtpUpdateResponse,
   EmailsResponse,
   UserDetailResponse,
-  PersonUpdateResponse
+  PersonUpdateResponse,
 } = require('#dto/user/user-out.js');
-const { UserPaginationInput, Login, OtpVerify, OtpUpdate, MfaUpdate, UserDetail, UserUpdate, UserDelete } = require('#dto/user/user-in.js');
+const {
+  UserPaginationInput,
+  Login,
+  OtpVerify,
+  OtpUpdate,
+  MfaUpdate,
+  UserDetail,
+  UserUpdate,
+  UserDelete,
+} = require('#dto/user/user-in.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 
+/**
+ * Organize user routes.
+ * @extends Router
+ */
 class UserRouter extends Router {
+  /**
+  * Create userRouter instance.
+  *
+  * @param {object} express - The express object.
+  * @param {object} graphqlExecute - The graphql execute instance.
+  */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/add', authentication, this._addUser);
@@ -258,16 +277,18 @@ class UserRouter extends Router {
     return self.execute(query);
   }
 
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
   sendOtpCode(req, res, next, self) {
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
 
-    fetch(`${url}/update-otp`, {
-      method: 'POST',
-      headers: {
+    return fetchHelper(`${url}/update-otp`,
+      'POST',
+      {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(req.body),
-    })
+      JSON.stringify(req.body)
+    )
     .then(async (response) => {
       if (![HTTP_CODE.OK, HTTP_CODE.CREATED].includes(response.status)) {
         return Promise.reject(await response.json());
@@ -275,18 +296,8 @@ class UserRouter extends Router {
       return response.json();
     })
     .then((json) => {
-      try {
-        const { otp, message } = json;
-        sendMail(otp, req.body.email)
-          .then(() => res.status(HTTP_CODE.OK).json(messageCreator(message)))
-          .catch(() => res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator('Send otp failed!')));
-      } catch (err) {
-        throw err;
-      }
-    })
-    .catch((error) => {
-      self.Logger.error(error.message);
-      return res.status(500).json({ message: 'Internal server error!' });
+      const { otp, message } = json;
+      return sendMail(otp, req.body.email).then(() => messageCreator(message));
     });
   }
 }
