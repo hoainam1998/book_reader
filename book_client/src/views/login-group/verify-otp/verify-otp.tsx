@@ -24,15 +24,16 @@ function VerifyOtp(): JSX.Element {
 
   const _sendOtp = useCallback(() => {
     sendOtp(email)
-      .then(res => showToast('OTP', res.data.message));
+      .then(res => showToast('OTP', res.data.message))
+      .catch(error => showToast('Send OTP error', error.response.data.message));
   }, []);
 
   const verify = useCallback((): void => {
     const otp: string | undefined = inputRef.current?.input?.value;
     verifyOtp(email, otp as string)
       .then((res) => {
-        if (res.data.user.verifyOtp.verify) {
-          auth.saveApiKey(res.data.user.verifyOtp.apiKey);
+        if (res.data.verify) {
+          auth.saveApiKey(res.data.apiKey);
           navigate(path.HOME);
         } else {
           showToast('OTP', 'Otp code is incorrect!');

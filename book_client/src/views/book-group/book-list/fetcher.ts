@@ -9,53 +9,43 @@ export const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosRe
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
   const keyword: string | null = url.searchParams.get('keyword');
 
-  return handleNotfoundApiError(BookService.graphql('pagination', {
-    query: `query BookPagination($pageSize: Int, $pageNumber: Int, $keyword: String) {
-      book {
-        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
-          list {
-            bookId,
-            name,
-            pdf,
-            publishedTime,
-            publishedDay,
-            category,
-            introduce,
-            avatar
-          },
-          total
-        }
-      }
-    }`,
-    pageSize,
-    pageNumber,
-    keyword
-  }));
+  return handleNotfoundApiError(
+    BookService.post('pagination', {
+      query: {
+        bookId: true,
+        name: true,
+        pdf: true,
+        publishedTime: true,
+        publishedDay: true,
+        category: true,
+        introduce: true,
+        avatar: true
+      },
+      pageSize,
+      pageNumber,
+      keyword
+    })
+  );
 };
 
-export const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
-  return BookService.graphql('detail', {
-    query: `query GetBookDetail($bookId: ID)
-      {
-        book {
-          detail(bookId: $bookId) {
-            name,
-            pdf,
-            publishedTime,
-            publishedDay,
-            categoryId,
-            avatar,
-            introduce {
-              html,
-              json
-            },
-            images {
-              image,
-              name
-            }
-          }
-        }
-      }`,
+export const getBookDetail = (bookId: string): Promise<AxiosResponse> => {
+  return BookService.post('detail', {
+    query: {
+      name: true,
+      pdf: true,
+      publishedTime: true,
+      publishedDay: true,
+      categoryId: true,
+      avatar: true,
+      introduce: {
+        html: true,
+        json: true
+      },
+      images: {
+        image: true,
+        name: true
+      }
+    },
     bookId
   });
 };

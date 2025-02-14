@@ -18,15 +18,16 @@ import {
   updateCategory,
   deleteCategory as _deleteCategory
 } from './fetcher';
+import { convertBase64ToSingleFile, showToast } from 'utils';
 import './style.scss';
 
-type CategoryDetailType = {
+export type CategoryDetailType = {
   name: string;
   avatar: string
 };
 
 type CategoryType = {
-  category_id: string;
+  categoryId: string;
   disabled: boolean;
 } & CategoryDetailType;
 
@@ -79,8 +80,8 @@ function Category(): JSX.Element {
     }
   ];
 
-  const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.category.pagination?.list || [];
-  const total: number = (loaderData as AxiosResponse)?.data?.category.pagination?.total || 0;
+  const data: CategoryType[] = (loaderData as AxiosResponse)?.data?.list || [];
+  const total: number = (loaderData as AxiosResponse)?.data?.total || 0;
 
   const fileChange = useCallback(<T, >(event: FormEvent<T>): void => {
     const files: FileList | null = (event.target as HTMLInputElement).files;
@@ -95,7 +96,7 @@ function Category(): JSX.Element {
   const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
     return promise.then(res => {
       revalidator.revalidate();
-      document.querySelector('.table-wrapper')?.scrollTo({top: currentOffset });
+      document.querySelector('.table-wrapper')?.scrollTo({ top: currentOffset });
       return Promise.resolve(res);
     }).catch(err => Promise.reject(err));
   }, []);
@@ -127,9 +128,12 @@ function Category(): JSX.Element {
     currentCategoryId = categoryId;
     getCategoryDetail(categoryId)
       .then(res => {
-        categoryName?.watch(res.data.category.detail.name);
-        setPreviewImage([res.data.category.detail.avatar]);
-      });
+        convertBase64ToSingleFile(res.data.avatar, 'avatar')
+          .then(image => avatar.watch([image]));
+        categoryName?.watch(res.data.name);
+        setPreviewImage([res.data.avatar]);
+      })
+      .catch(error => showToast('Category', error.response.data.message));
   }, [categoryName]);
 
   const deleteCategory = useCallback((categoryId: string): void => {
@@ -137,18 +141,18 @@ function Category(): JSX.Element {
   }, []);
 
   const operationSlot = useCallback((slotProp: CategoryType): JSX.Element => {
-    const { category_id, disabled } = slotProp;
+    const { categoryId, disabled } = slotProp;
 
     const handleUpdateEvent = (e: any): void => {
       currentOffset = e.clientY;
-      fetchCategoryDetail(category_id);
+      fetchCategoryDetail(categoryId);
     };
 
     return (
       <>
         <Button variant='success' onClick={handleUpdateEvent}>Update</Button>
           &nbsp;&nbsp;
-        { !disabled && <Button variant='dangerous' onClick={() => deleteCategory(category_id)}>Delete</Button> }
+        { !disabled && <Button variant='dangerous' onClick={() => deleteCategory(categoryId)}>Delete</Button> }
       </>
     );
   }, [categoryName]);

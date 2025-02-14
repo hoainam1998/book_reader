@@ -1,11 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const svgToMiniDataURI = require('mini-svg-data-uri');
+const sass = require('sass');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const { DefinePlugin } = require('webpack');
 const { getResolvePath, getAssetPath } = require('./utils.js');
 const { OUTPUT_DIR, PUBLIC, PUBLIC_PATH } = require('./config.js');
 const { dev } = require('../config');
+const breakPoint = require('../src/static/js/break-point.js');
 
 // process.env.BASE_URL at here was config by docker,
 // if it exist, then app is running by docker.
@@ -82,7 +84,7 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              sourceMap: true
+              sourceMap: true,
             }
           },
           {
@@ -93,6 +95,14 @@ module.exports = {
               @use "sass:math";
               @import "src/static/scss/_colors.scss";
               @import "src/static/scss/_responsive.scss";`,
+              sassOptions: {
+                functions: {
+                  'getResponsiveBreakpoint($key)': function(key) {
+                    const point = key.getValue();
+                    return new sass.types.String(`${breakPoint[point] || 0}px`);
+                  }
+                }
+              }
             },
           }
         ]

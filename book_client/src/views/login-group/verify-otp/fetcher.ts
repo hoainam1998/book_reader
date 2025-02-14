@@ -2,24 +2,24 @@ import { AxiosResponse } from 'axios';
 import { RequestBody, UserService } from 'services';
 
 export const sendOtp = (email: string): Promise<AxiosResponse> => {
-  return UserService.graphql('/send-otp', { email });
+  return UserService.post('send-otp', {
+    email,
+    query: {
+      message: true,
+      otp: true
+    }
+  });
 };
 
 export const verifyOtp = (email: string, otp: string): Promise<AxiosResponse> => {
   const body: RequestBody = {
-    query:
-    `query VerifyOTP($email: String, $otp: String) {
-      user {
-        verifyOtp(email: $email, otp: $otp) {
-          verify,
-          apiKey
-        }
-      }
-    }
-    `,
     email,
-    otp
+    otp,
+    query: {
+      verify: true,
+      apiKey: true
+    }
   };
 
-  return UserService.graphql('/verify-otp', body);
+  return UserService.post('verify-otp', body);
 };

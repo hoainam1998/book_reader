@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from './element-wrapper';
-import Modal, { ModalSlotProps } from 'components/modal/modal';
+import Modal, { ModalSlotProps, ModalSize } from 'components/modal/modal';
 
 const bodyDOM: HTMLElement = document.body;
 const modalContainer: HTMLDivElement = createElementWrapper('modal-container', 'modal-container');
@@ -9,7 +9,7 @@ const modalContainer: HTMLDivElement = createElementWrapper('modal-container', '
 type ModalUtilProps = {
   children: ReactNode | ReactNode[];
   title: string;
-  size?: string;
+  size?: ModalSize;
   onOpen?: () => void;
   onClose?: () => void;
 };

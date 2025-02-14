@@ -1,4 +1,4 @@
-import { DependencyList, useEffect, EffectCallback } from 'react';
+import { DependencyList, useLayoutEffect, EffectCallback } from 'react';
 
 export type HaveLoadedFnType = () => boolean;
 
@@ -22,10 +22,10 @@ export type HaveLoadedFnType = () => boolean;
  * Execute code when jsx rendered.
  * @param {executeCallback} executeFn - execute callback function.
  * @param {DependencyList} dependencyList - dependencies similar DependencyList useEffect Hook.
- * Note: useEffect called twice time by strict mode,
+ * Note: useLayoutEffect called twice time by strict mode,
  * therefore I create a hook to execute code only once.
  */
-const useComponentDidMount = (
+const useComponentWillMount = (
   // eslint-disable-next-line no-unused-vars
   executeFn: (updateHaveFetchedFlag: () => boolean) => EffectCallback,
   dependencyList: DependencyList = []
@@ -36,7 +36,7 @@ const useComponentDidMount = (
     return !haveFetched;
   };
   const effectCallback: EffectCallback = executeFn(updateHaveFetchedFlag);
-  useEffect(effectCallback, dependencyList);
+  useLayoutEffect(effectCallback, dependencyList);
 };
 
-export default useComponentDidMount;
+export default useComponentWillMount;

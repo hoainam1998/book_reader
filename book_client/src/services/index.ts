@@ -1,20 +1,36 @@
 import Api from '../axios';
-import type { AxiosResponse } from '../axios';
+import type { AxiosResponse, AxiosRequestConfig } from '../axios';
+
+interface IQueryType {
+  [key: string]: boolean | IQueryType;
+}
 
 export type RequestBody = {
-  query?: string;
+  query?: IQueryType ;
   [key: string]: any;
 } | FormData;
 
 class Service {
-  private readonly url: string;
+  private readonly _url: string;
 
   constructor(url: string) {
-    this.url = url;
+    this._url = url;
   }
 
-  graphql(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse> {
-    return Api.post(`${this.url}/${subUrl}`, requestBody);
+  post(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse> {
+    return Api.post(`${this._url}/${subUrl}`, requestBody);
+  }
+
+  put(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse> {
+    return Api.put(`${this._url}/${subUrl}`, requestBody);
+  }
+
+  get(subUrl: string) {
+    return Api.get(`${this._url}/${subUrl}`);
+  }
+
+  delete(subUrl: string, options?: AxiosRequestConfig<any>): Promise<AxiosResponse> {
+    return Api.delete(`${this._url}/${subUrl}`, options);
   }
 }
 

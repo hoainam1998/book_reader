@@ -5,7 +5,7 @@ import Personal from 'views/personal/personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
 import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category-group/category';
-import BookDetail, { loadAllCategory, shouldRevalidateBookLoader } from 'views/book-group/book-detail/book-detail';
+import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail from 'views/author-group/author-detail/author-detail';
 import ApiError from 'components/error/api-error/api-error';
@@ -55,6 +55,7 @@ const routes: RoutePropsUnion[] = [
         name: 'categories',
         icon: 'application.png',
         element: <Category />,
+        errorElement: <ApiError alignCenter />,
         handle: {
           crumb: (match: UIMatch) =>
             <span key={match.pathname}>Categories</span>
@@ -113,13 +114,13 @@ const routes: RoutePropsUnion[] = [
           {
             index: true,
             element: <BookList />,
-            loader: bookPagination
+            loader: bookPagination,
+            errorElement: <ApiError alignCenter />
           },
           {
             path: path.ID,
             element: <BookDetail />,
             loader: loadAllCategory,
-            shouldRevalidate: shouldRevalidateBookLoader,
             handle: {
               crumb: ({ pathname, params }: UIMatch) =>
                 <span key={pathname}>{params.id}</span>
@@ -129,7 +130,6 @@ const routes: RoutePropsUnion[] = [
             path: path.NEW,
             element: <BookDetail />,
             loader: loadAllCategory,
-            shouldRevalidate: shouldRevalidateBookLoader,
             handle: {
               crumb: ({ pathname }: UIMatch) =>
                 <span key={pathname}>New</span>

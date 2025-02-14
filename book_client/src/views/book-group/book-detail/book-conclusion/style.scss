@@ -90,4 +90,15 @@ $information-section-height: 400px;
     color: $badge-color;
     padding: 0 5px;
   }
+
+  .category-display {
+    display: flex;
+    align-items: center;
+
+    & > .avatar {
+      height: 40px;
+      width: 40px;
+      margin-right: 15px;
+    }
+  }
 }

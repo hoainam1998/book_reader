@@ -1,4 +1,4 @@
-import { JSX, useCallback, useSyncExternalStore, useEffect } from 'react';
+import { JSX, useCallback, useSyncExternalStore, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BlockerProvider from 'contexts/blocker';
 import Grid, { GridItem } from 'components/grid/grid';
@@ -9,10 +9,12 @@ import Button from 'components/button/button';
 import { required, email, matchPattern } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
 import store, { UserLogin } from 'store/auth';
+import path from 'paths';
 import { updatePerson } from './fetcher';
-import { convertBase64ToSingleFile } from 'utils';
+import { convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
 import './style.scss';
+import useModalNavigation from 'hooks/useModalNavigation';
 const { subscribe, getSnapshot } = store;
 
 type PersonalType = {
@@ -45,22 +47,39 @@ const rules: RuleType<PersonalType> = {
 const formId: string = 'personal-form';
 
 function Personal(): JSX.Element {
+  const [reLogin, setReLogin] = useState<boolean>(false);
   const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
   const navigate = useNavigate();
-  const { firstName, lastName, avatar, email, password, handleSubmit, validate } = useForm<
+  const { firstName, lastName, avatar, email, password, handleSubmit, validate, reset } = useForm<
     PersonalType,
     RuleType<PersonalType>
   >(state, rules, formId);
 
   const backToPrevious = useCallback((event: any) => {
     event.preventDefault();
-    navigate(-1);
+    navigate(path.HOME);
+  }, []);
+
+  const PersonalForm = useCallback(({ children }: { children: JSX.Element }): JSX.Element => {
+    useModalNavigation({ onLeaveAction: reset });
+    return children;
   }, []);
 
   const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
     if (!validate.error) {
-      updatePerson(formData);
+      updatePerson(formData)
+        .then((res) => {
+          showToast('Update your information', res.data.message);
+          if (res.data.reLoginFlag) {
+            setReLogin(true);
+            store.logout();
+            setTimeout(() => {
+              navigate(path.LOGIN);
+            }, 200);
+          }
+        })
+        .catch((err) => showToast('Personal', err.response.data.message));
     }
   }, []);
 
@@ -81,87 +100,89 @@ function Personal(): JSX.Element {
   }, []);
 
   return (
-    <BlockerProvider isNavigate={validate.dirty}>
-      <section className="personal">
-        <Form id={formId} onSubmit={onSubmit} className="user-form">
-          <Grid
-            lg={2}
-            sm={1}
-            style={{
-              marginBottom: 15,
-              gap: 17
-            }}>
-            <GridItem lg={12}>
-              <Button variant="outline" onClick={backToPrevious}>
-                &#8592;Back
-              </Button>
-            </GridItem>
-            <GridItem sm={12} lg={6}>
-              <Input
-                {...firstName}
-                label="First name"
-                name="first_name"
-                inputColumnSize={{
-                  lg: 8
-                }}
-                labelColumnSize={{
-                  lg: 4
-                }}/>
-            </GridItem>
-            <GridItem sm={12} lg={6}>
-              <Input
-                {...lastName}
-                label="Last name"
-                name="last_name"
-                inputColumnSize={{
-                  lg: 8
-                }}
-                labelColumnSize={{
-                  lg: 4
-                }} />
-            </GridItem>
-            <GridItem sm={12} lg={6}>
-              <Input
-                {...email}
-                label="Email"
-                type="email"
-                name="email"
-                inputColumnSize={{
-                  lg: 8
-                }}
-                labelColumnSize={{
-                  lg: 4
-                }} />
-            </GridItem>
-            <GridItem sm={12} lg={6}>
-              <FileDragDropUpload
-                {...avatar}
-                multiple={false}
-                label="Avatar"
-                name="avatar"
-                inputColumnSize={{
-                  lg: 8
-                }}
-                labelColumnSize={{
-                  lg: 8
-                }} />
-            </GridItem>
-            <GridItem sm={12} lg={6}>
-              <Input
-                {...password}
-                label="Password"
-                type="password"
-                name="password"
-                inputColumnSize={{
-                  lg: 8
-                }}
-                labelColumnSize={{
-                  lg: 4
-                }} />
-            </GridItem>
-          </Grid>
-        </Form>
-      </section>
+    <BlockerProvider isNavigate={validate.dirty && !reLogin}>
+      <PersonalForm>
+        <section className="personal">
+          <Form id={formId} onSubmit={onSubmit} className="user-form hight-light form-size">
+            <Grid
+              lg={2}
+              sm={1}
+              style={{
+                marginBottom: 15,
+                gap: 17
+              }}>
+              <GridItem lg={12}>
+                <Button variant="outline" onClick={backToPrevious}>
+                  &#8592;Back
+                </Button>
+              </GridItem>
+              <GridItem sm={12} lg={6}>
+                <Input
+                  {...firstName}
+                  label="First name"
+                  name="firstName"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }}/>
+              </GridItem>
+              <GridItem sm={12} lg={6}>
+                <Input
+                  {...lastName}
+                  label="Last name"
+                  name="lastName"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
+              </GridItem>
+              <GridItem sm={12} lg={6}>
+                <Input
+                  {...email}
+                  label="Email"
+                  type="email"
+                  name="email"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
+              </GridItem>
+              <GridItem sm={12} lg={6}>
+                <FileDragDropUpload
+                  {...avatar}
+                  multiple={false}
+                  label="Avatar"
+                  name="avatar"
+                  inputColumnSize={{
+                    lg: 12
+                  }}
+                  labelColumnSize={{
+                    lg: 12
+                  }} />
+              </GridItem>
+              <GridItem sm={12} lg={6}>
+                <Input
+                  {...password}
+                  label="Password"
+                  type="password"
+                  name="password"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
+              </GridItem>
+            </Grid>
+          </Form>
+        </section>
+      </PersonalForm>
     </BlockerProvider>
   );
 }

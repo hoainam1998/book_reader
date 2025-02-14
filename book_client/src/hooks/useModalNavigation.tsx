@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { useCallback, JSX, useEffect, useState } from 'react';
+import { useCallback, JSX, useEffect, useState, useMemo } from 'react';
 import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { showModal, ModalSlotProps } from 'utils';
+import { tablet, desktop, extra } from '../static/js/break-point';
 import { useBlockerContext } from 'contexts/blocker';
+import { ModalSize } from 'components/modal/modal';
 
 type ModalNavigationPropsType = {
   body?: JSX.Element | ((blocker: Blocker) => JSX.Element);
@@ -16,6 +18,15 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
   const [isNavigation, setIsNavigation] = useState<boolean>(false);
   const blocker: Blocker = useBlockerContext();
   const windowWidth: number = window.innerWidth;
+  const size = useMemo<ModalSize>(() => {
+    if (windowWidth >= tablet && windowWidth < desktop) {
+      return ModalSize.MEDIUM;
+    } else if (windowWidth >= extra) {
+      return ModalSize.SMALL;
+    } else {
+      return ModalSize.LARGE;
+    }
+  }, [windowWidth]);
 
   body = body instanceof Function ? body(blocker) : body;
 
@@ -78,7 +89,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
           {footer ? footer(blocker) : footerModal()}
         </>,
         title: 'Navigation warning!',
-        size: windowWidth >= 390 ? 'lg' :'sm',
+        size,
         onClose
       });
       setIsNavigation(false);

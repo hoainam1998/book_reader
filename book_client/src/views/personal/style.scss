@@ -4,4 +4,14 @@
   align-items: center;
   flex-direction: column;
   padding: 20px;
+
+  & > .form-size {
+    width: 45%;
+  }
+
+  & > .hight-light {
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  }
 }

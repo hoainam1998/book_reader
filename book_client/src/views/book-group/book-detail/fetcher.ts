@@ -1,116 +1,97 @@
 import { AxiosResponse } from 'axios';
 import { CategoryService, BookService, RequestBody } from 'services';
-import { StepStorage } from 'storage';
 
-export type CategoryListType = {
-  data: {
-    category: {
-      all: {
-        name: string;
-        category_id: string;
-      }[]
+const loadAllCategory = (): Promise<AxiosResponse> => {
+  return CategoryService.post('all', {
+    query: {
+      name: true,
+      categoryId: true
     }
-  };
-};
-
-const shouldRevalidateBookLoader = (): boolean => {
-  return [1, 3].includes((StepStorage.getItem() || 1));
-};
-
-const loadAllCategory = (): Promise<AxiosResponse | CategoryListType> => {
-  if (shouldRevalidateBookLoader()) {
-    const body: RequestBody = {
-      query: `query AllCategory {
-        category {
-          all {
-            name,
-            category_id
-          }
-        }
-      }`
-    };
-    return CategoryService.graphql('all', body);
-  }
-  const defaultCategoryList: CategoryListType = {
-    data: {
-      category: {
-        all: []
-      }
-    }
-  };
-  return Promise.resolve(defaultCategoryList);
+  });
 };
 
 const saveBookInformation = (formData: FormData): Promise<AxiosResponse> => {
-  return BookService.graphql('save-book-info', formData);
+  return BookService.post('create-book', formData);
 };
 
-const getBookDetail = (bookId: string): Promise<AxiosResponse> =>  {
-  return BookService.graphql('detail', {
-    query: `query GetBookDetail($bookId: ID)
-      {
-        book {
-          detail(bookId: $bookId) {
-            name,
-            pdf,
-            publishedTime,
-            publishedDay,
-            categoryId,
-            avatar,
-            introduce
-              {
-                html,
-                json
-              },
-            images
-              {
-                image,
-                name
-              }
-            }
-          }
-        }`,
+const updateBookInformation = (formData: FormData): Promise<AxiosResponse> => {
+  return BookService.put('update-book', formData);
+};
+
+const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Promise<AxiosResponse> => {
+  let select: RequestBody = {
+    name: true,
+    pdf: true,
+    publishedTime: true,
+    publishedDay: true,
+    categoryId: true,
+    avatar: true,
+    images: {
+      image: true,
+      name: true
+    }
+  };
+
+  if (includeIntroduceFieldFlag) {
+    select = {
+      ...select,
+      introduce: {
+        html: true,
+        json: true
+      }
+    };
+  }
+
+  return BookService.post('detail', {
+    query: select,
     bookId
   });
 };
 
 const getAllBookName = (): Promise<AxiosResponse> => {
-  return BookService.graphql('get-all-book-name', {
-    query: 'query GetAllBookName { book { allName } }'
-  });
+  return BookService.get('book-name');
 };
 
 const getBookIntroduceFile = (bookId: string) => {
-  return BookService.graphql('detail', {
-    query: `query GetBookDetail($bookId: ID) {
-      book {
-        detail(bookId: $bookId) {
-          introduce {
-            html,
-            json
-          }
-        }
+  return BookService.post('detail', {
+    query: {
+      introduce: {
+        html: true,
+        json: true,
       }
-    }`,
+    },
     bookId
   });
 };
 
-const saveIntroduceFile = (html: string, json: string, fileName: string, bookId: string): Promise<AxiosResponse> => {
+const saveIntroduceFile = (
+  html: string,
+  json: string,
+  fileName: string,
+  bookId: string
+): Promise<AxiosResponse> => {
   const body: RequestBody = {
-    query: `mutation BookMutation($html: String, $json: String, $name: String, $bookId: ID) {
-      book {
-        saveIntroduce(html: $html, json: $json, name: $name, bookId: $bookId) {
-          message
-        }
-      }
-    }`,
     html,
     json,
     fileName,
     bookId
   };
-  return BookService.graphql('/save-introduce', body);
+  return BookService.post('/save-introduce', body);
+};
+
+const updateIntroduceFile = (
+  html: string,
+  json: string,
+  fileName: string,
+  bookId: string
+): Promise<AxiosResponse> => {
+  const body: RequestBody = {
+    html,
+    json,
+    fileName,
+    bookId
+  };
+  return BookService.put('/update-introduce', body);
 };
 
 export {
@@ -120,5 +101,6 @@ export {
   saveIntroduceFile,
   getBookIntroduceFile,
   getAllBookName,
-  shouldRevalidateBookLoader
+  updateBookInformation,
+  updateIntroduceFile,
 };

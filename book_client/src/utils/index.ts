@@ -2,7 +2,7 @@ import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
 import showModal, { ModalSlotProps } from './modal';
 import { createElementWrapper } from './element-wrapper';
-import handleNotfoundApiError, { DataNotFound } from './handle-data-not-found';
+import handleNotfoundApiError from './handle-data-not-found';
 
 /**
  * Return class text from array.
@@ -81,5 +81,4 @@ export {
   convertBase64ToSingleFile,
   getExtnameFromBlobType,
   handleNotfoundApiError,
-  DataNotFound,
 };

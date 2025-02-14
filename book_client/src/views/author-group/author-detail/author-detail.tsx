@@ -8,6 +8,7 @@ import Radio from 'components/form/form-control/radio/radio';
 import Editor from 'components/editor/editor';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, matchPattern, maxLength } from 'hooks/useValidate';
+import { showToast } from 'utils';
 import { createAuthor } from './fetcher';
 import './style.scss';
 
@@ -68,7 +69,9 @@ function AuthorDetail(): JSX.Element  {
     handleSubmit();
 
     if (!validate.error) {
-      createAuthor(formData);
+      createAuthor(formData)
+        .then((res) => showToast('Create author', res.data.message))
+        .catch((error) => showToast('Create author', error.response.data.message));
     }
   }, [validate]);
 

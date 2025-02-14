@@ -48,7 +48,7 @@ const generateFile = (): Promise<File> => {
 
 jest.mock('services', () => {
   const { CategoryService, BookService } = jest.requireActual('services');
-  CategoryService.graphql = jest.fn().mockResolvedValue(responseData);
+  CategoryService.post = jest.fn().mockResolvedValue(responseData);
   return {
     __esModule: true,
     CategoryService,

@@ -8,7 +8,6 @@ import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { bookPagination, getBookDetail } from './fetcher';
-import { DataNotFound } from 'utils';
 import store from 'store/book';
 import './style.scss';
 const { updateData, deleteAllStorage } = store;
@@ -62,25 +61,21 @@ let _pageSize: number = 10;
 
 function BookList(): JSX.Element {
   const fetcher = useFetcher();
-  const loaderData = useLoaderData() as unknown ;
+  const loaderData = useLoaderData() as unknown;
   const navigate = useNavigate();
 
   const books = useMemo<BookType[]>(() => {
     if (fetcher.data) {
-      return fetcher.data.data.book.pagination.list;
-    } else if (DataNotFound.compare(loaderData)) {
-      return (loaderData as DataNotFound).Data.list;
+      return fetcher.data.data.list;
     }
-    return (loaderData as AxiosResponse).data.book.pagination.list || [];
+    return (loaderData as AxiosResponse).data.list || [];
   }, [fetcher.data]);
 
   const total = useMemo<number>(() => {
     if (fetcher.data) {
-      return fetcher.data.data.book.pagination.total;
-    } else if (DataNotFound.compare(loaderData)) {
-      return (loaderData as DataNotFound).Data.total;
+      return fetcher.data.data.total;
     }
-    return (loaderData as AxiosResponse).data.book.pagination.total || 0;
+    return (loaderData as AxiosResponse).data.total || 0;
   }, [fetcher.data]);
 
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
@@ -88,8 +83,8 @@ function BookList(): JSX.Element {
 
     const getBookInformation = (): void => {
       getBookDetail(bookId)
-        .then(res => {
-          updateData({ ...res.data.book.detail, bookId });
+        .then((res) => {
+          updateData({ ...res.data, bookId });
           navigate(bookId);
         });
     };
@@ -144,7 +139,7 @@ function BookList(): JSX.Element {
           <Slot<BookType>
             name="pdf"
             render={(slotProp) => (
-              <Button variant="success" onClick={() => previewFile(slotProp.pdf)}>
+              <Button variant="success" disabled={!slotProp.pdf} onClick={() => previewFile(slotProp.pdf)}>
                 Preview
               </Button>
             )}/>
@@ -155,7 +150,7 @@ function BookList(): JSX.Element {
           <Slot<BookType>
             name="introduce"
             render={(slotProp) => (
-              <Button variant="success" onClick={() => previewFile(slotProp.introduce)}>
+              <Button variant="success" disabled={!slotProp.introduce} onClick={() => previewFile(slotProp.introduce)}>
                 Preview
               </Button>
             )}/>

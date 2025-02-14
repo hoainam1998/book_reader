@@ -1,4 +1,5 @@
-import { JSX, useCallback, useEffect } from 'react';
+import { JSX, useCallback, useEffect, useState } from 'react';
+import { AxiosResponse } from 'axios';
 import { useNavigate, useLoaderData, useParams } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
@@ -8,13 +9,13 @@ import Switch from 'components/form/form-control/switch/switch';
 import Button from 'components/button/button';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
-import { required, email } from 'hooks/useValidate';
-import { addUser, loadUserDetail, updateUser } from '../fetcher';
-import { convertBase64ToSingleFile } from 'utils';
+import { required, email as emailValidate, ErrorFieldInfo } from 'hooks/useValidate';
+import { addUser, loadUserDetail, updateUser, getAllEmail } from '../fetcher';
+import { convertBase64ToSingleFile, showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
 import paths from 'paths';
 import './style.scss';
-import { AxiosResponse } from 'axios';
+import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 
 type UserType = {
   firstName: string;
@@ -32,24 +33,41 @@ const state: UserType = {
   mfa: true
 };
 
-const rules: RuleType<UserType> = {
-  email: { required, email },
-  firstName: { required },
-  lastName: { required },
-  avatar: { required },
-  mfa: {}
-};
-
 const formId: string = 'user_form';
 
 function UserDetail(): JSX.Element {
-  const { firstName, lastName, avatar, email, mfa, reset, handleSubmit, validate } = useForm<
-    UserType,
-    RuleType<UserType>
-  >(state, rules, formId);
+  const [emails, setEmails] = useState<string[]>([]);
   const loaderData = useLoaderData() as any;
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const emailDuplicateValidate = useCallback(
+    (message: string,) =>
+      (currentValue: string): ErrorFieldInfo => {
+        return {
+          error: id ? false : emails.includes(currentValue),
+          message
+        };
+      },
+    [emails]
+  );
+
+  const rules: RuleType<UserType> = {
+    email: {
+      required,
+      emailValidate,
+      emailDuplicateValidate: emailDuplicateValidate('Email is duplicate!')
+    },
+    firstName: { required },
+    lastName: { required },
+    avatar: { required },
+    mfa: {}
+  };
+
+  const { firstName, lastName, avatar, email, mfa, reset, handleSubmit, validate } = useForm<
+    UserType,
+    RuleType<UserType>
+  >(state, rules, formId, [emails]);
 
   const UserForm = useCallback(({ children }: { children: JSX.Element }): JSX.Element => {
     useModalNavigation({ onLeaveAction: reset });
@@ -62,8 +80,13 @@ function UserDetail(): JSX.Element {
 
   const onSubmit = useCallback((formData: FormData) => {
     handleSubmit();
+
     if (!validate.error) {
       const saveUser = (): Promise<AxiosResponse> => {
+        if (!formData.has('mfa')) {
+          formData.append('mfa', 'false');
+        }
+
         if (id) {
           formData.append('userId', id);
           return updateUser(formData);
@@ -71,18 +94,19 @@ function UserDetail(): JSX.Element {
           return addUser(formData);
         }
       };
-      saveUser().then(() => {
-        reset();
-        setTimeout(() => {
-          backToUserList();
-        }, 100);
-      });
+
+      saveUser()
+        .then(() => {
+          reset();
+          setTimeout(() => backToUserList(), 100);
+        })
+        .catch((error) => showToast('User', error.response.data.message));
     }
   }, []);
 
   useEffect(() => {
     if (loaderData) {
-      const user = loaderData.data.user.detail;
+      const user = loaderData.data;
       firstName.watch(user.firstName);
       lastName.watch(user.lastName);
       email.watch(user.email);
@@ -94,6 +118,16 @@ function UserDetail(): JSX.Element {
           }
         });
     }
+  }, []);
+
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched()) {
+        getAllEmail()
+          .then(res => setEmails(res.data))
+          .catch(() => setEmails([]));
+      }
+    };
   }, []);
 
   return (
@@ -115,7 +149,7 @@ function UserDetail(): JSX.Element {
                 <Input
                   {...firstName}
                   label="First name"
-                  name="first_name"
+                  name="firstName"
                   inputColumnSize={{
                     lg: 8
                   }}
@@ -127,7 +161,7 @@ function UserDetail(): JSX.Element {
                 <Input
                   {...lastName}
                   label="Last name"
-                  name="last_name"
+                  name="lastName"
                   inputColumnSize={{
                     lg: 8
                   }}

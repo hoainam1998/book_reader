@@ -1,26 +1,6 @@
 import { AxiosError, AxiosResponse } from 'axios';
 import { HTTP_CODE } from 'enums';
 
-type DataNotFoundType = {
-  list: any[];
-  total: number;
-};
-
-export class DataNotFound {
-  private data: DataNotFoundType;
-  constructor(data: DataNotFoundType) {
-    this.data = data;
-  }
-
-  static compare(value: any): boolean {
-    return value instanceof DataNotFound;
-  }
-
-  get Data() {
-    return this.data;
-  }
-}
-
 /**
  * Handle response when api called with status 404
  *
@@ -30,7 +10,7 @@ export class DataNotFound {
 const handleNotfoundApiError = (promiseApiCalled: Promise<AxiosResponse>): Promise<any> => {
   return promiseApiCalled.catch((error: AxiosError<any, any>) => {
     if ((error.response as any).status === HTTP_CODE.NOT_FOUND) {
-      return Promise.resolve(new DataNotFound((error.response as any).data));
+      return Promise.resolve((error.response as any).data);
     }
     throw error;
   });

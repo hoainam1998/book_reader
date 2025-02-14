@@ -6,6 +6,7 @@ import type { Field } from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Switch from 'components/form/form-control/switch/switch';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
+import { showToast } from 'utils';
 import { loadInitUser, updateMfaState, deleteUser as _deleteUser } from '../fetcher';
 
 let _keyword: string = '';
@@ -26,8 +27,8 @@ function UserList(): JSX.Element {
   const navigate = useNavigate();
   const responseData = fetcher.data || loaderData;
 
-  const books: UserType[] = responseData.data?.user?.pagination?.list || [];
-  const total: number = responseData.data?.user?.pagination?.total || 0;
+  const users: UserType[] = responseData.data?.list || [];
+  const total: number = responseData.data?.total || 0;
 
   const fields: Field[] = [
     {
@@ -75,14 +76,16 @@ function UserList(): JSX.Element {
 
   const operationSlot = useCallback((slotProp: UserType): JSX.Element => {
     const { userId } = slotProp;
+
     const getUserDetail = useCallback((): void => {
       navigate(userId);
-    }, []);
+    }, [userId]);
 
     const deleteUser = useCallback((): void => {
       _deleteUser(userId).
-        then(() => fetchUser(_pageSize, 1));
-    }, []);
+        then(() => fetchUser(_pageSize, 1))
+        .catch((res) => showToast('User', res.response.data.message));
+    }, [userId]);
 
     return (
       <div>
@@ -99,7 +102,7 @@ function UserList(): JSX.Element {
       <Table
         responsive
         fields={fields}
-        data={books}
+        data={users}
         total={total}
         emptyMessage="Users are not found!"
         onLoad={fetchUser}>

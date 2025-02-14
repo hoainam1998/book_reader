@@ -37,6 +37,7 @@ function Login(): JSX.Element {
     email,
     password,
     handleSubmit,
+    reset,
     validate
   } = useForm<LoginFieldType, RuleType<LoginFieldType>>(state, rules, formId);
   const navigate = useNavigate();
@@ -46,17 +47,18 @@ function Login(): JSX.Element {
     if (!validate.error) {
       login(email.value, password.value)
         .then(res => {
-          const userLogin = { ...res.data.user.login };
+          const userLogin = { ...res.data };
           delete userLogin.apiKey;
           auth.saveUserLogin(userLogin);
-          if (res.data.user.login.mfaEnable === false) {
-            auth.saveApiKey(res.data.user.login.apiKey);
+          auth.saveApiKey(res.data.apiKey);
+          if (res.data.mfaEnable === false) {
             navigate(path.HOME);
           } else {
             navigate(path.OTP);
           }
         })
-        .catch(error => showToast('OTP', error.response.data.message));
+        .catch(error => showToast('OTP', error.response.data.message))
+        .finally(reset);
     }
   }, [email.value, password.value]);
 

@@ -53,10 +53,10 @@ function Editor({
       errors={errors}>
         <div className={clsx({ 'error-input': error }, 'editor')}>
           <div id={editorId} className={className} />
-          <input type="hidden" name={`${name}_html`} value={value} />
-          { quill && <input type="hidden" name={`${name}_json`} value={JSON.stringify(quill.getContents())} /> }
+          <input type="hidden" name={`${name}Html`} value={value} />
+          { quill && <input type="hidden" name={`${name}Json`} value={JSON.stringify(quill.getContents())} /> }
         </div>
-      </FormControl>
+    </FormControl>
   );
 }
 

@@ -103,7 +103,7 @@ function Input({
       if (Array.isArray(value)) {
         if (value.every(file => file instanceof File)) {
           const dataTransfer = new DataTransfer();
-          value.map(v => dataTransfer.items.add(v));
+          value.forEach(v => dataTransfer.items.add(v));
           inputRef.current!.files = dataTransfer.files;
         }
       } else if (value instanceof File) {
@@ -138,9 +138,9 @@ function Input({
             onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
           {
             type === 'password' &&
-            <button onClick={toggleChangeInputType} className="eye-button">
-              <img src={require('images/icons/eye.svg')} alt="eye-icon" />
-            </button>
+              <button onClick={toggleChangeInputType} className="eye-button">
+                <img src={require('images/icons/eye.svg')} alt="eye-icon" />
+              </button>
           }
           { limitCharacter && <p className="limit">{ limitCharacter }</p> }
         </div>

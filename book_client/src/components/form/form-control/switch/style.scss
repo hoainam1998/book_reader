@@ -20,7 +20,7 @@
     }
 
     &:checked + .slider {
-      background-color: #2196f3;
+      background-color: $switch-checked;
     }
   }
 
@@ -31,7 +31,7 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-color: #ccc;
+    background-color: $switch-background;
     border-radius: 30px;
     @extend .transition;
 
@@ -42,7 +42,7 @@
       width: 14px;
       left: 3px;
       bottom: 3px;
-      background-color: white;
+      background-color: $white-color;
       border-radius: 50%;
       @extend .transition;
     }

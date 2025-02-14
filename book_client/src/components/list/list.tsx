@@ -7,7 +7,7 @@ type ListPropsType<T> = {
 };
 
 function List<T>({ items, render }: ListPropsType<T>): JSX.Element {
-  const childrenList: JSX.Element[] = items.map((item, index) => (
+  const childrenList: JSX.Element[] = (items || []).map((item, index) => (
     <Fragment key={index}>{ render(item, index) }</Fragment>
   ));
 

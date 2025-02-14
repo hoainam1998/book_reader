@@ -19,9 +19,9 @@ import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
-import { getBookDetail, saveBookInformation, getAllBookName } from '../fetcher';
+import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation } from '../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
-import { convertBase64ToSingleFile, getExtnameFromBlobType } from 'utils';
+import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import './style.scss';
 
 const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate, deleteAllStorage } = store;
@@ -130,7 +130,7 @@ function BookInformation(): JSX.Element {
   } = useForm(state, rules, formId, [bookNames]);
 
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
-  const categories: CategoryOptionsType[] = loaderData?.data.category.all || [];
+  const categories: CategoryOptionsType[] = loaderData?.data || [];
   const pdfRef = useRef<InputRefType>(null);
 
   const onLeave = useCallback(() => {
@@ -141,21 +141,25 @@ function BookInformation(): JSX.Element {
   const onSubmit = useCallback(
     (formData: FormData): void => {
       handleSubmit();
+      let promiseResult: Promise<AxiosResponse>;
 
       if (!validate.error) {
         if (data?.bookId) {
           formData.append('bookId', data.bookId);
+          promiseResult = updateBookInformation(formData);
+        } else {
+          promiseResult = saveBookInformation(formData);
         }
-        saveBookInformation(formData).then((res) => {
-          const bookId: string = res.data.bookId;
-          getBookDetail(bookId).then((res) =>
+        promiseResult.then((res) => {
+          const bookId: string = data.bookId || res.data.bookId;
+          getBookDetail(bookId, !!data.bookId).then((res) =>
             updateBookInfo({
-              data: { ...res.data.book.detail, bookId },
+              data: { ...res.data, bookId },
               step: 2,
               disableStep: disableStep === false ? false : 3
             })
           );
-        });
+        }).catch((err) => showToast('Save book information', err.response.data.message));
       }
     },
     [validate.error]
@@ -204,14 +208,14 @@ function BookInformation(): JSX.Element {
           })
           .catch(() => console.warn('Load image failed!'));
       }
-      return () => reset();
+      return reset;
     };
   }, []);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        getAllBookName().then((res) => setBookNames(res.data.book.allName));
+        getAllBookName().then((res) => setBookNames(res.data));
       }
     };
   }, []);
@@ -295,7 +299,7 @@ function BookInformation(): JSX.Element {
             label="Category"
             placeholder="Please select category!"
             labelField="name"
-            valueField="category_id"
+            valueField="categoryId"
             name="categoryId"
             options={categories}
             labelColumnSize= {{

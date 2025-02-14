@@ -1,5 +1,13 @@
-import { JSX, useSyncExternalStore, useMemo, useEffect, useCallback, ReactElement } from 'react';
-import { Blocker, useLoaderData, useNavigate } from 'react-router-dom';
+import {
+  JSX,
+  useSyncExternalStore,
+  useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  ReactElement
+} from 'react';
+import { Blocker, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Button from 'components/button/button';
 import Grid, { GridItem } from 'components/grid/grid';
@@ -10,7 +18,9 @@ import store, { CurrentStoreType, Image } from 'store/book';
 import { showToast, ModalSlotProps } from 'utils';
 import paths from 'paths';
 import './style.scss';
-import { CategoryListType } from '../fetcher';
+import { getCategoryDetail } from 'views/category-group/fetcher';
+import type { CategoryDetailType } from 'views/category-group/category';
+import useComponentWillMount, { HaveLoadedFnType } from 'hooks/useComponentWillMount';
 const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
 
 type FieldHightLightBoxPropsType = {
@@ -31,6 +41,20 @@ const FieldHightLightBox = ({
       </div>
       <span className="field-information">{value}</span>
       {children}
+    </div>
+  );
+};
+
+const CategoryHightLightBox = ({ name, avatar }: CategoryDetailType): JSX.Element => {
+  return (
+    <div className="field-hight-light-box">
+      <div className="label-badge">
+        <span className="badge">Category</span>
+      </div>
+      <div className="category-display">
+        <img className="avatar" src={avatar} alt="avatar" />
+        <span className="field-information">{name}</span>
+      </div>
     </div>
   );
 };
@@ -65,22 +89,13 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 };
 
 function BookConclusion(): JSX.Element {
+  const [category, setCategory] = useState<CategoryDetailType>({ name: '', avatar: ''});
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const navigate = useNavigate();
-  const loaderData = useLoaderData() as CategoryListType;
   const publishedDay: string = useMemo(
     () => (data && data.publishedDay ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
     [data]
   );
-
-  const categories: CategoryListType['data']['category']['all'] =
-    loaderData.data.category.all || [];
-
-  const category: string = useMemo(() => {
-    return data
-      ? categories.find((categoryItem) => categoryItem.category_id === data.categoryId)?.name || ''
-      : '';
-  }, [data, categories]);
 
   useModalNavigation({ body: bodyModal, footer: footerModal, onLeaveAction: deleteAllStorage });
 
@@ -97,6 +112,18 @@ function BookConclusion(): JSX.Element {
   useEffect(() => {
     updateConditionNavigate(!data);
   }, [data]);
+
+  useComponentWillMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched()) {
+        if (Object.hasOwn(data, 'categoryId') && data.categoryId) {
+          getCategoryDetail(data.categoryId)
+            .then((res) => setCategory(res.data))
+            .catch(() => setCategory({ name: '', avatar: '' }));
+        }
+      }
+    };
+  }, []);
 
   if (data) {
     return (
@@ -138,7 +165,7 @@ function BookConclusion(): JSX.Element {
                 <FieldHightLightBox label="Publish Day" value={publishedDay} />
               </li>
               <li>
-                <FieldHightLightBox label="Category" value={category} />
+                <CategoryHightLightBox {...category} />
               </li>
               <li>
                 <FieldHightLightBox label="Introduce" value={data.introduce!.html}>

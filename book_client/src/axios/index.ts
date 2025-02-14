@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { showLoading, hideLoading } from 'utils';
 import auth from 'store/auth';
 
@@ -25,7 +25,8 @@ Api.interceptors.response.use((config) => {
 });
 
 export type {
-  AxiosResponse
+  AxiosResponse,
+  AxiosRequestConfig,
 };
 
 export default Api;

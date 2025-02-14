@@ -58,12 +58,15 @@ function Header(): JSX.Element {
 
   const toggleMenuDropdown = useCallback(() => {
     if (!bodyDOM.contains(menuContainer)) {
-    menuContainer.style.top = `${offsetTop}px`;
-    menuContainer.style.left = `${offsetLeft}px`;
-    bodyDOM.appendChild(menuContainer);
-    const root: Root = createRoot(menuContainer);
-    root.render(<MenuDropdown navigate={navigate} />);
-    hideMenu = () => root.unmount();
+      menuContainer.style.top = `${offsetTop}px`;
+      menuContainer.style.left = `${offsetLeft}px`;
+      bodyDOM.appendChild(menuContainer);
+      const root: Root = createRoot(menuContainer);
+      root.render(<MenuDropdown navigate={navigate} />);
+      hideMenu = () => {
+        root.unmount();
+        bodyDOM.removeChild(menuContainer);
+      };
     } else {
       hideMenu();
     }

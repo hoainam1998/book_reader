@@ -1,5 +1,5 @@
-$tablet-width: 768px;
-$desktop-width: 1024px;
+$tablet-width: getResponsiveBreakpoint('tablet');
+$desktop-width: getResponsiveBreakpoint('desktop');
 
 @mixin tablet {
   @media (min-width: $tablet-width) and (max-width: $desktop-width) {
