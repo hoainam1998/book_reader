@@ -1,25 +1,25 @@
-import { JSX, useSyncExternalStore, useCallback, useRef, useEffect } from 'react';
+import { JSX, useSyncExternalStore, useCallback, useRef, CSSProperties } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from 'utils';
 import Button from 'components/button/button';
 import store, { UserLogin } from 'store/auth';
 import paths from 'paths';
+import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 const { getSnapshot, subscribe } = store;
 import './style.scss';
 
 const bodyDOM: HTMLElement = document.body;
 const menuContainer = createElementWrapper('menu-dropdown', 'menu-dropdown');
 const defaultOffset: number = 10;
-let offsetTop: number = 0;
-let offsetLeft: number = 10;
 let hideMenu: () => void = () => {};
 
 type MenuDropdownPropsType = {
   navigate: NavigateFunction;
+  onPositionChange: () => CSSProperties;
 };
 
-function MenuDropdown({ navigate }: MenuDropdownPropsType): JSX.Element {
+function MenuDropdown({ navigate, onPositionChange }: MenuDropdownPropsType): JSX.Element {
 
   const personalSetting = useCallback(() => {
     hideMenu();
@@ -32,8 +32,10 @@ function MenuDropdown({ navigate }: MenuDropdownPropsType): JSX.Element {
     navigate(paths.LOGIN);
   }, []);
 
+  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
+
   return (
-    <ul className="menu-content">
+    <ul className="menu-content" style={position}>
       <li onClick={personalSetting}>
         <img src={require('images/icons/person.svg')} width="20" height="20" alt="personal" />
         Personal
@@ -56,13 +58,26 @@ function Header(): JSX.Element {
   const { avatar, name, email } = userLogin;
   const personalBoxRef = useRef<HTMLDivElement>(null);
 
+  const calculateMenuPosition = useCallback(() => {
+    if (personalBoxRef.current) {
+      const offsetTopInformationBox: number = personalBoxRef.current.offsetTop;
+      const height: number = personalBoxRef.current.offsetHeight;
+      return {
+        left: personalBoxRef.current?.offsetLeft,
+        top: offsetTopInformationBox + height + defaultOffset
+      };
+    }
+    return {
+      left: 10,
+      top: 0
+    };
+  }, [personalBoxRef.current]);
+
   const toggleMenuDropdown = useCallback(() => {
     if (!bodyDOM.contains(menuContainer)) {
-      menuContainer.style.top = `${offsetTop}px`;
-      menuContainer.style.left = `${offsetLeft}px`;
       bodyDOM.appendChild(menuContainer);
       const root: Root = createRoot(menuContainer);
-      root.render(<MenuDropdown navigate={navigate} />);
+      root.render(<MenuDropdown navigate={navigate} onPositionChange={calculateMenuPosition} />);
       hideMenu = () => {
         root.unmount();
         bodyDOM.removeChild(menuContainer);
@@ -70,13 +85,6 @@ function Header(): JSX.Element {
     } else {
       hideMenu();
     }
-  }, []);
-
-  useEffect(() => {
-    const offsetTopInformationBox: number = personalBoxRef.current?.offsetTop as number;
-    const height: number = personalBoxRef.current?.offsetHeight as number;
-    offsetLeft = personalBoxRef.current?.offsetLeft as number;
-    offsetTop = offsetTopInformationBox + height + defaultOffset;
   }, []);
 
   return (
