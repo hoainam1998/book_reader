@@ -4,6 +4,7 @@ import { Root } from 'react-dom/client';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';;
 import { clsx } from 'utils';
+import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 import './style.scss';
 
 const months: string[] = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -15,14 +16,14 @@ enum YearChangedReducerAction {
   HEAD = 'head',
 };
 
-type MonthCalendarPropsType<T> = {
-  position: T;
+type MonthCalendarPropsType = {
   currentMonth: number;
   currentYear: number;
   docker: Root;
   onOpenYearCalendar: () => void;
   onMonthChange: (month: number) => void;
   onYearChange: (year: number) => void;
+  onPositionChange: () => CSSProperties;
 };
 
 type YearChangedReducerActionType = {
@@ -50,20 +51,15 @@ const yearChangedReducer =
   }
 };
 
-function MonthCalendar<T>({
-  position,
+function MonthCalendar({
   currentMonth,
   currentYear,
   onOpenYearCalendar,
   onMonthChange,
-  onYearChange
-}: MonthCalendarPropsType<T>): JSX.Element {
+  onYearChange,
+  onPositionChange,
+}: MonthCalendarPropsType): JSX.Element {
   const [year, dispatch] = useReducer(yearChangedReducer(onYearChange), currentYear);
-
-  const positionStyle: CSSProperties = {
-    ...position,
-    zIndex: 2000
-  };
 
   const onBackToHead = useCallback((): void => {
     dispatch({ type: YearChangedReducerAction.HEAD });
@@ -73,8 +69,13 @@ function MonthCalendar<T>({
     dispatch({ type: YearChangedReducerAction.LAST });
   }, []);
 
+  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
+  if (!Object.keys(position).length) {
+    return <></>;
+  }
+
   return (
-    <div className="month-calendar" style={positionStyle}>
+    <div className="month-calendar" style={{ ...position, zIndex: 2000 }}>
       <HeaderCalendar onBackToHead={onBackToHead} onBackToLast={onBackToLast}>
         <Button onClick={onOpenYearCalendar} className="year-btn">{ year }</Button>
       </HeaderCalendar>

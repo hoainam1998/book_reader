@@ -8,7 +8,7 @@ import React, {
   CSSProperties,
   Dispatch,
   Ref,
-  MouseEventHandler
+  MouseEventHandler,
 } from 'react';
 import {
   eachDayOfInterval,
@@ -30,6 +30,7 @@ import { daysInWeek } from 'date-fns/constants';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';
 import List from 'components/list/list';
+import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 import './style.scss';
 
 const firstDayOfWeekIndex: number = 0;
@@ -79,9 +80,8 @@ type DayCalendarRef = {
   date: Date;
 };
 
-type DayCalendarProps<T> = {
+type DayCalendarProps = {
   selectedDay: number | null;
-  position: T;
   disable?: {
     day: Date | number;
     action: DisableDayActionEnum;
@@ -89,6 +89,7 @@ type DayCalendarProps<T> = {
   onOpenMonthCalendar: () => void;
   onOpenYearCalendar: () => void;
   onDayChange: (day: string) => void;
+  onPositionChange: () => CSSProperties;
 };
 
 type Day = {
@@ -189,8 +190,15 @@ const dayCalendarReduceExecute = (disableDay: DisableDayFn) =>  (
   }
 };
 
-function DayCalendar<T>(
-  { selectedDay, position, disable, onOpenMonthCalendar, onOpenYearCalendar, onDayChange }: DayCalendarProps<T>,
+function DayCalendar(
+  {
+    selectedDay,
+    disable,
+    onOpenMonthCalendar,
+    onOpenYearCalendar,
+    onDayChange,
+    onPositionChange,
+  }: DayCalendarProps,
   ref: Ref<DayCalendarRef>
 ): JSX.Element {
   const disabledDay: DisableDayFn = (day) => {
@@ -238,13 +246,14 @@ function DayCalendar<T>(
     [date]
   );
 
-  const positionCalendar: CSSProperties = {
-    ...position,
-    zIndex: 1000
-  };
+  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
+
+  if (!Object.keys(position).length) {
+    return <></>;
+  }
 
   return (
-    <ul className="calendar-body" style={positionCalendar}>
+    <ul className="calendar-body" style={position}>
       <li>
         <HeaderCalendar
           onNext={onNext}

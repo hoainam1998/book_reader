@@ -4,9 +4,6 @@ import { format } from 'date-fns';
 import { clsx } from 'utils';
 import './style.scss';
 
-type InputCalendarRect = {
-  rect: DOMRect;
-};
 
 type InputCalendarProps = {
   inputClass?: string;
@@ -28,28 +25,32 @@ function InputCalendar({
   labelColumnSize,
   inputColumnSize,
   onFocus,
-  onOpen
-  }: InputCalendarProps, ref: Ref<InputCalendarRect>): JSX.Element {
-  const inputCalendarRef = useRef<InputCalendarRect>(null);
+  onOpen,
+  }: InputCalendarProps, ref: Ref<HTMLElement>): JSX.Element {
+  const inputCalendar = useRef<HTMLElement>(null);
   const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
 
-  useImperativeHandle(ref, () => ({ rect: inputCalendarRef.current!.rect as DOMRect }), []);
+  useImperativeHandle(
+    ref,
+    (): HTMLElement => inputCalendar.current!,
+    []
+  );
 
   return (
-    <FormControl<InputCalendarRect>
-    name={name}
-    label={label}
-    className={className}
-    labelClass={labelClass}
-    errors={errors}
-    labelColumnSize={labelColumnSize}
-    inputColumnSize={inputColumnSize}
-    ref={inputCalendarRef}>
-      <div className={clsx('input-calendar custom-input', { 'error-input': error })} onClick={onOpen}>
-        <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass)}
-          autoComplete="off" onFocus={onFocus} value={dateFormatted} />
-        <img src={require('images/icons/calendar.png')} alt="calendar-icon" />
-      </div>
+    <FormControl
+      name={name}
+      label={label}
+      className={className}
+      labelClass={labelClass}
+      errors={errors}
+      labelColumnSize={labelColumnSize}
+      inputColumnSize={inputColumnSize}
+      ref={inputCalendar}>
+        <div className={clsx('input-calendar custom-input', { 'error-input': error })} onClick={onOpen}>
+          <input name={name} id={name} type="text" readOnly className={clsx('input', inputClass)}
+            autoComplete="off" onFocus={onFocus} value={dateFormatted} />
+          <img src={require('images/icons/calendar.png')} alt="calendar-icon" />
+        </div>
     </FormControl>
   );
 }
