@@ -1,10 +1,12 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-use-before-define */
 import {
   JSX,
   useCallback,
   useEffect,
   useRef,
-  Dispatch
+  Dispatch,
+  CSSProperties
 } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import {
@@ -41,16 +43,6 @@ let calendarDocker: Root | null = null;
 let monthCalendarDocker: Root | null = null;
 let yearCalendarDocker: Root | null = null;
 
-type PositionType = {
-  left: number;
-  top: number;
-};
-
-const positionCalendar: PositionType = {
-  left: 0,
-  top: 0
-};
-
 const state = {
   day: currentDate.getTime(),
 };
@@ -73,7 +65,7 @@ function Calendar({
   onChange,
   onFocus
   }: CalendarPropsType): JSX.Element {
-  const inputCalendarRef = useRef<{ rect: DOMRect }>(null);
+  const inputCalendar = useRef<HTMLElement>(null);
   const dayCalendarRef = useRef<{ dispatch: Dispatch<CalendarReducerAction>, date: Date }>(null);
 
   const setDay = useCallback((daySelected: string): void => {
@@ -102,25 +94,35 @@ function Calendar({
     openMonthCalendar();
   }, []);
 
-  const calculateCalendarPosition = useCallback((): void => {
-    const { bottom, left, height } = inputCalendarRef.current?.rect as DOMRect;
-    const spaceCanDock: number = bottom + calendarHeight + (marginCalendar * 2);
-    const top: number =
-    spaceCanDock <= browserHeight
-    ? bottom + marginCalendar
-    : bottom - (height + marginCalendar + calendarHeight);
-    positionCalendar.left = left;
-    positionCalendar.top = top;
-  }, [inputCalendarRef.current]);
+  const calculateCalendarPosition = useCallback((): CSSProperties => {
+    if (inputCalendar.current) {
+      const { bottom, left, height } = inputCalendar.current.getBoundingClientRect();
+      const spaceCanDock: number = bottom + calendarHeight + (marginCalendar * 2);
+      const top: number =
+      spaceCanDock <= browserHeight
+      ? bottom + marginCalendar
+      : bottom - (height + marginCalendar + calendarHeight);
+      return {
+        left,
+        top,
+        zIndex: 1000
+      };
+    }
+    return {
+      left: 0,
+      top : 0,
+      zIndex: 1000
+    };
+  }, [inputCalendar.current]);
 
   const openYearCalendar = useCallback((): void => {
     if (!bodyDOM.contains(yearCalendarDockerDOM)) {
       bodyDOM.appendChild(yearCalendarDockerDOM);
       yearCalendarDocker = createRoot(yearCalendarDockerDOM);
       yearCalendarDocker.render(
-        <YearCalendar<PositionType>
+        <YearCalendar
           currentYear={selectedYear}
-          position={positionCalendar}
+          onPositionChange={calculateCalendarPosition}
           onYearChange={setYearSelected} />
       );
     }
@@ -131,11 +133,11 @@ function Calendar({
       bodyDOM.appendChild(calendarDockerDOM);
       calendarDocker = createRoot(calendarDockerDOM);
       calendarDocker.render(
-        <DayCalendar<PositionType>
-          position={positionCalendar}
+        <DayCalendar
           onOpenMonthCalendar={openMonthCalendar}
           onOpenYearCalendar={openYearCalendar}
           onDayChange={setDay}
+          onPositionChange={calculateCalendarPosition}
           selectedDay={value}
           disable={
             {
@@ -154,14 +156,14 @@ function Calendar({
       bodyDOM.appendChild(monthCalendarDockerDOM);
       monthCalendarDocker = createRoot(monthCalendarDockerDOM);
       monthCalendarDocker.render(
-        <MonthCalendar<PositionType>
+        <MonthCalendar
           currentYear={selectedYear}
           currentMonth={currentMonthIndex}
           docker={monthCalendarDocker}
           onMonthChange={setMonthSelected}
           onOpenYearCalendar={openYearCalendar}
           onYearChange={setYear}
-          position={positionCalendar} />
+          onPositionChange={calculateCalendarPosition} />
       );
     }
   }, [value]);
@@ -171,10 +173,6 @@ function Calendar({
       state.day = value;
     }
   }, [value]);
-
-  useEffect(() => {
-    calculateCalendarPosition();
-  }, []);
 
   return (
     <section className="calendar-wrapper">
@@ -190,7 +188,7 @@ function Calendar({
         labelColumnSize={labelColumnSize}
         onOpen={openDayCalendar}
         onFocus={onFocus}
-        ref={inputCalendarRef} />
+        ref={inputCalendar} />
     </section>
   );
 }

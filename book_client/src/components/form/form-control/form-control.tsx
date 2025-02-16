@@ -1,4 +1,14 @@
-import { JSX, ReactElement, forwardRef, useRef, useImperativeHandle, useMemo, Ref, ReactNode } from 'react';
+/* eslint-disable no-unused-vars */
+import {
+  JSX,
+  ReactElement,
+  forwardRef,
+  useRef,
+  useMemo,
+  Ref,
+  ReactNode,
+  useImperativeHandle,
+} from 'react';
 import { GridItem } from 'components/grid/grid';
 import { clsx } from 'utils';
 import './style.scss';
@@ -25,10 +35,10 @@ export type FormControlProps = {
   labelClass?: string;
   errors?: string[];
   labelColumnSize?: ColumnSize,
-  inputColumnSize?: ColumnSize
+  inputColumnSize?: ColumnSize,
 };
 
-function FormControl<T>({
+function FormControl({
   label,
   name,
   children,
@@ -36,13 +46,13 @@ function FormControl<T>({
   className,
   labelClass,
   labelColumnSize,
-  inputColumnSize
-}: FormControlProps, ref: Ref<T>): JSX.Element {
+  inputColumnSize,
+}: FormControlProps, ref: Ref<HTMLElement>): JSX.Element {
   const fieldsetRef = useRef<HTMLFieldSetElement>(null);
 
   useImperativeHandle(
     ref,
-    (): T => ({ rect: fieldsetRef.current!.getBoundingClientRect() }) as T,
+    (): HTMLElement => fieldsetRef.current!,
     []
   );
 

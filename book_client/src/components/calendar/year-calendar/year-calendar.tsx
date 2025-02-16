@@ -1,14 +1,15 @@
 import { JSX, useState, useMemo, useCallback, CSSProperties } from 'react';
 import HeaderCalendar from '../header-calendar/header-calendar';
 import Button from 'components/button/button';
+import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 import { clsx } from 'utils';
 import './style.scss';
 
-type YearCalendarPropsType<T> = {
-  position: T,
+type YearCalendarPropsType = {
   currentYear: number;
   // eslint-disable-next-line no-unused-vars
   onYearChange: (year: number) => void;
+  onPositionChange: () => CSSProperties;
 };
 
 const yearsMatrix: Array<number[]> = [
@@ -16,22 +17,22 @@ const yearsMatrix: Array<number[]> = [
   [2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029]
 ];
 
-function YearCalendar<T>({ position, currentYear, onYearChange }: YearCalendarPropsType<T>): JSX.Element {
+function YearCalendar({ currentYear, onYearChange, onPositionChange }: YearCalendarPropsType): JSX.Element {
   const initYears: number[] = yearsMatrix[0].includes(currentYear) ? yearsMatrix[0] : yearsMatrix[1];
   const [years, setYears] = useState<number[]>(initYears);
   const yearRange = useMemo<string>(() => `${years[0]} - ${years[years.length - 1]}`, [years]);
-
-  const positionCalendar: CSSProperties = {
-    ...position,
-    zIndex: 3000
-  };
 
   const onRangeYearChange = useCallback((index: number): void => {
     setYears(yearsMatrix[index]);
   }, []);
 
+  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
+  if (!Object.keys(position).length) {
+    return <></>;
+  }
+
   return (
-    <div className="year-calendar" style={positionCalendar}>
+    <div className="year-calendar" style={{ ...position, zIndex: 3000 }}>
       <HeaderCalendar onBackToHead={() => onRangeYearChange(0)} onBackToLast={() => onRangeYearChange(1)}>
         <span className="year-range">{yearRange}</span>
       </HeaderCalendar>
