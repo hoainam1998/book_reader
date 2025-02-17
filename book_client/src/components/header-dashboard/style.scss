@@ -1,8 +1,12 @@
 .header-dashboard {
+  position: sticky;
+  top: 89px;
+  z-index: 1000;
   display: flex;
   align-items: center;
-  margin-bottom: 7px;
+  padding: 7px;
   gap: 7px;
+  background-color: $white-color;
 
   .add-new {
     font-weight: bold;
@@ -22,9 +26,7 @@
 
   @include mobile {
     position: fixed;
-    background-color: $white-color;
     width: 100%;
-
     & + section {
       & > .table-wrapper {
         padding-top: 39px;

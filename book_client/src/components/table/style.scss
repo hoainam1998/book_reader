@@ -6,7 +6,7 @@
       background-color: $primary-color;
       color: $white-color;
       position: sticky;
-      top: 0%;
+      z-index: 1000;
       width: 100%;
 
       tr {
@@ -36,11 +36,6 @@
     border: none;
     border-collapse: collapse;
   }
-
-  .category-table {
-    max-height: 80vh;
-    overflow-y: auto;
-  }
 }
 
 .table-footer {
@@ -48,6 +43,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: sticky;
+  bottom: 26px;
+  background-color: $white-color;
+  padding: 7px 5px;
 }
 
 .responsive-table {
@@ -83,6 +84,7 @@
             content: attr(data-label);
             text-transform: capitalize;
             font-weight: bold;
+            width: 30%;
           }
         }
       }

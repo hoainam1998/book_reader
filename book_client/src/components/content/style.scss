@@ -1,44 +1,14 @@
 .content {
   width: 100%;
+  margin-top: 63px;
+  margin-bottom: 26px;
 
-  .navigation {
-    background-color: $primary-color;
-    padding: 2px 5px;
-    color: $white-color;
-
-    &:last-child::after {
-      content: unset;
-    }
-
-    a {
-      font-weight: bold;
-      color: $white-color;
-      text-decoration: none;
-    }
-
-    a:not(:last-child) {
-      &::after {
-        content: '>';
-        text-decoration: none;
-        padding: 5px;
-      }
-    }
-
-    & > span {
-      font-size: 14px;
-      font-weight: bold;
-    }
+  @include mobile {
+    width: calc(100vw - 48px);
   }
 
   &-box {
-    margin-top: 10px;
     padding-right: 7px;
-  }
-}
-
-.content-box {
-  @include mobile {
-    height: calc(100vh - (56px + 26px + 10px + 7px + 26px));
-    overflow-y: auto;
+    padding-bottom: 10px;
   }
 }

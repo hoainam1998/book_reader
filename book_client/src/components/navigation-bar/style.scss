@@ -1,28 +1,36 @@
-.navigation {
-  background-color: $primary-color;
-  padding: 2px 5px;
-  color: $white-color;
+.navigation-wrapper {
+  position: sticky;
+  z-index: 1000;
+  top: 63px;
+  padding-bottom: 10px;
+  background-color: $white-color;
 
-  &:last-child::after {
-    content: unset;
-  }
-
-  a {
-    font-weight: bold;
+  .navigation {
+    background-color: $primary-color;
+    padding: 2px 5px;
     color: $white-color;
-    text-decoration: none;
-  }
 
-  a:not(:last-child) {
-    &::after {
-      content: '>';
-      text-decoration: none;
-      padding: 5px;
+    &:last-child::after {
+      content: unset;
     }
-  }
 
-  & > span {
-    font-size: 14px;
-    font-weight: bold;
+    a {
+      font-weight: bold;
+      color: $white-color;
+      text-decoration: none;
+    }
+
+    a:not(:last-child) {
+      &::after {
+        content: '>';
+        text-decoration: none;
+        padding: 5px;
+      }
+    }
+
+    & > span {
+      font-size: 14px;
+      font-weight: bold;
+    }
   }
 }

@@ -1,60 +1,69 @@
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: $primary-color;
-  color: $white-color;
-  padding: 7.5px 20px;
-  margin-bottom: 7px;
+.header-wrapper {
+  position: fixed;
+  z-index: 1000;
+  width: 100vw;
+  top: 0;
+  padding-bottom: 7px;
+  background-color: $white-color;
 
-  .personal-information-group {
+  .header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    background-color: $primary-color;
+    color: $white-color;
+    padding: 7.5px 20px;
 
-    .button-avatar {
-      height: 40px;
-      width: 40px;
-      background: $avatar-button-color;
-    }
-    .email {
-      font-size: 14px;
+    .personal-information-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
 
-      @include mobile {
-        width: 100px;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
+      .button-avatar {
+        height: 40px;
+        width: 40px;
+        background: $avatar-button-color;
+      }
+
+      .email {
+        font-size: 14px;
+
+        @include mobile {
+          width: 100px;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
       }
     }
   }
-}
 
-.menu-dropdown {
-  .menu-content {
-    border-radius: 4px;
-    position: fixed;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-    border-radius: 4px;
-    background-color: $white-color;
+  .menu-dropdown {
+    .menu-content {
+      border-radius: 4px;
+      position: fixed;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+      border-radius: 4px;
+      background-color: $white-color;
 
-    & > li {
-      overflow: hidden;
-      padding: 5px 10px;
-      border-bottom: 1px solid $black-color;
-      cursor: pointer;
-      font-size: 14px;
-      color: $title-pop-up-color;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      & > li {
+        overflow: hidden;
+        padding: 5px 10px;
+        border-bottom: 1px solid $black-color;
+        cursor: pointer;
+        font-size: 14px;
+        color: $title-pop-up-color;
+        display: flex;
+        align-items: center;
+        gap: 5px;
 
-      &:hover {
-        color: $primary-button-color;
-      }
+        &:hover {
+          color: $primary-button-color;
+        }
 
-      &:last-of-type {
-        border: none;
+        &:last-of-type {
+          border: none;
+        }
       }
     }
   }
