@@ -7,6 +7,7 @@ import {
   ReactNode,
   JSX,
   useMemo,
+  useRef,
   useCallback,
 } from 'react';
 import Select from 'components/form/form-control/select/select';
@@ -15,6 +16,7 @@ import Error from 'components/error/error';
 import List from 'components/list/list';
 import { isSlot } from 'components/slot/slot';
 import { clsx } from 'utils';
+import { tablet } from '../../static/js/break-point';
 import './style.scss';
 
 export type Field = {
@@ -79,7 +81,8 @@ function Table<T>({
   emptyMessage,
   onLoad
 }: TableProps<T>): JSX.Element {
-
+  const windowWidth: number = window.innerWidth;
+  const tableRef = useRef<HTMLTableElement>(null);
   const totalPageNumber = useMemo<number>(() => {
     const pages: number = total / pageSize;
     return Number.isInteger(pages) ? pages : Math.floor(pages) + 1;
@@ -102,14 +105,21 @@ function Table<T>({
     );
   }
 
+  const top: number = useMemo<number>(() => {
+    if (windowWidth <= tablet) {
+      return 0;
+    }
+    return tableRef.current?.offsetTop || 0;
+  }, [windowWidth, tableRef.current]);
+
   return (
     <section>
       <div className="table-wrapper">
-        <table className={clsx('table', responsive && 'responsive-table', classes)}>
+        <table className={clsx('table', responsive && 'responsive-table', classes)} ref={tableRef}>
           <colgroup>
             <List<Field> items={fields} render={(field) => (<col width={field.width}/>)} />
           </colgroup>
-          <thead>
+          <thead style={{ top }}>
             <tr>
               <List<Field> items={fields} render={(field) =>
                 (<th style={field.style}>{field.label || field.key}</th>)} />

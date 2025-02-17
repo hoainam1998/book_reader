@@ -1,13 +1,15 @@
-.user-form {
-  margin: auto;
+.user-detail {
+  .user-form {
+    margin: auto;
+
+    @include mobile {
+      width: 100%;
+    }
+  }
 
   @include mobile {
-    width: 100%;
-  }
-}
-
-@include mobile {
-  .back-btn {
-    margin-bottom: 7px;
+    .back-btn {
+      margin-bottom: 7px;
+    }
   }
 }

@@ -35,7 +35,7 @@
 .category-responsive-table {
   .table-wrapper:has(> &) {
     @include mobile {
-      height: 360px;
+      height: 320px;
       overflow-y: auto;
     }
   }

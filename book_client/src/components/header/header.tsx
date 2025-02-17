@@ -88,15 +88,17 @@ function Header(): JSX.Element {
   }, []);
 
   return (
-    <header className="header">
-      <img src={require('images/book.png')} alt="logo" width="40" height="40" />
-      <div className="personal-information-group" ref={personalBoxRef}>
-        <Button className="button-avatar" onClick={toggleMenuDropdown}>
-          <img src={avatar} alt="logo" width="30" height="30" />
-        </Button>
-        <div>
-          <span data-testid="name">{name}</span>
-          <p className="email" data-testid="email">{email}</p>
+    <header className="header-wrapper">
+      <div className="header">
+        <img src={require('images/book.png')} alt="logo" width="40" height="40" />
+        <div className="personal-information-group" ref={personalBoxRef}>
+          <Button className="button-avatar" onClick={toggleMenuDropdown}>
+            <img src={avatar} alt="logo" width="30" height="30" />
+          </Button>
+          <div>
+            <span data-testid="name">{name}</span>
+            <p className="email" data-testid="email">{email}</p>
+          </div>
         </div>
       </div>
     </header>

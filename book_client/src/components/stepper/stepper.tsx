@@ -3,6 +3,7 @@ import {
   useState,
   useEffect,
   useMemo,
+  useRef,
   JSX,
   ReactElement,
   JSXElementConstructor,
@@ -19,6 +20,7 @@ type StepperPropsType = {
   className?: string;
   activeStep: number;
   disableStep: number | false;
+  sticky?: boolean;
   children: ReactElement | ReactElement[];
 };
 
@@ -51,8 +53,11 @@ function Stepper({
   children,
   activeStep,
   disableStep,
+  sticky,
   onSwitch
 }: StepperPropsType): JSX.Element {
+  const stepRef = useRef<HTMLDivElement>(null);
+
   const stepsInit = useMemo<StepType[]>(() => {
     return Array.apply(null, Array(stepNumber))
       .map((_, index) => ({
@@ -123,6 +128,8 @@ function Stepper({
     setStep(switchedStep);
   }, [steps]);
 
+  const top: number = useMemo<number>(() => stepRef.current?.offsetTop || 0, [stepRef.current]);
+
   useEffect(() => {
     if (activeStep <= 0) {
       throw customError('Step must start equal 1!');
@@ -134,7 +141,7 @@ function Stepper({
 
   return (
     <>
-      <div className={clsx('stepper', className)}>
+      <div className={clsx('stepper', className, sticky && 'position-sticky')} style={{ top }} ref={stepRef}>
         <List<StepType> items={steps} render={({ step, active, disabled, last, stepped }, index) =>
           <>
             <div className={clsx('step-point', { 'active': active, 'disabled': disabled })}

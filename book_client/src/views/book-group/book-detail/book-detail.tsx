@@ -10,6 +10,7 @@ import {
 } from './fetcher';
 import store, { CurrentStoreType } from 'store/book';
 import BlockerProvider from 'contexts/blocker';
+import './style.scss';
 const { subscribe, getSnapshot, updateDisableStep, updateStep } = store;
 
 function BookDetail(): JSX.Element {
@@ -32,6 +33,7 @@ function BookDetail(): JSX.Element {
         onSwitch={updateStep}
         activeStep={step}
         disableStep={disableStep}
+        sticky
         className="book-detail-stepper">
           <StepContent step={1}>
             <BookInformation />

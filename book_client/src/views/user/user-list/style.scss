@@ -1,0 +1,7 @@
+.email-col {
+  @include mobile {
+    width: 70%;
+    font-size: 14px;
+    text-align: end;
+  }
+}

@@ -8,6 +8,7 @@ import Switch from 'components/form/form-control/switch/switch';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import { showToast } from 'utils';
 import { loadInitUser, updateMfaState, deleteUser as _deleteUser } from '../fetcher';
+import './style.scss';
 
 let _keyword: string = '';
 let _pageSize: number = 10;
@@ -108,6 +109,9 @@ function UserList(): JSX.Element {
         onLoad={fetchUser}>
           <Slot<UserType> name="avatar" render={
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+            } />
+          <Slot<UserType> name="email" render={
+            (slotProp) => <div className="line-clamp email-col">{slotProp.email}</div>
             } />
           <Slot<UserType> name="mfaEnable" render={
             (slotProp) => <Switch label="" name="mfa"
