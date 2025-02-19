@@ -51,12 +51,12 @@
     font-size: 15px;
   }
 
-  .body {
+  &-body {
     @extend .flex-align-center;
     margin-top: auto;
     margin-bottom: 5px;
 
-    .content {
+    .pop-up-content {
       @extend .flex-align-center;
       min-height: 50px;
       padding: 5px;

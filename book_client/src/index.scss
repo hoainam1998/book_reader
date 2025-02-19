@@ -80,12 +80,12 @@ button {
 
 .position-sticky {
   position: sticky;
-  z-index: 1000;
+  z-index: 99;
 }
 
 .position-fixed {
   position: fixed;
-  z-index: 1000;
+  z-index: 999;
 }
 
 .line-clamp {

@@ -119,7 +119,7 @@ function Table<T>({
           <colgroup>
             <List<Field> items={fields} render={(field) => (<col width={field.width}/>)} />
           </colgroup>
-          <thead style={{ top }}>
+          <thead style={{ top }} className="position-sticky">
             <tr>
               <List<Field> items={fields} render={(field) =>
                 (<th style={field.style}>{field.label || field.key}</th>)} />

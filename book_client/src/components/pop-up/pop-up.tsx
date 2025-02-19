@@ -18,8 +18,8 @@ function PopUp({ title, children, onClose, updateHeight }: PopUpProps): JSX.Elem
   return (
     <>
       <div className="title">{title}</div>
-      <div className="body">
-        <div className="content">
+      <div className="pop-up-body">
+        <div className="pop-up-content">
           {children}
         </div>
         <div className="btn-cancel-wrapper">
