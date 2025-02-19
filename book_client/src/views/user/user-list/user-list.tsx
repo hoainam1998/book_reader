@@ -6,6 +6,7 @@ import type { Field } from 'components/table/table';
 import Slot from 'components/slot/slot';
 import Switch from 'components/form/form-control/switch/switch';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
+import Tooltip from 'components/tooltip/tooltip';
 import { showToast } from 'utils';
 import { loadInitUser, updateMfaState, deleteUser as _deleteUser } from '../fetcher';
 import './style.scss';
@@ -111,7 +112,7 @@ function UserList(): JSX.Element {
             (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
             } />
           <Slot<UserType> name="email" render={
-            (slotProp) => <div className="line-clamp email-col">{slotProp.email}</div>
+            (slotProp) => <Tooltip className="email-col"><div className="line-clamp">{slotProp.email}</div></Tooltip>
             } />
           <Slot<UserType> name="mfaEnable" render={
             (slotProp) => <Switch label="" name="mfa"

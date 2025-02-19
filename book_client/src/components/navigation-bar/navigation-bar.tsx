@@ -11,7 +11,7 @@ function NavigationBar(): JSX.Element {
   const matches = useMatches();
 
   return (
-    <section className="navigation-wrapper">
+    <section className="navigation-wrapper position-sticky">
       <nav className="navigation">
         {
           matches.filter((match: UIMatch) => Boolean(match.handle && (match.handle as Handle).crumb))

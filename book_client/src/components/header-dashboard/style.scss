@@ -1,7 +1,5 @@
 .header-dashboard {
-  position: sticky;
-  top: 89px;
-  z-index: 1000;
+  top: 97px;
   display: flex;
   align-items: center;
   padding: 7px;
@@ -25,12 +23,6 @@
   }
 
   @include mobile {
-    position: fixed;
     width: 100%;
-    & + section {
-      & > .table-wrapper {
-        padding-top: 39px;
-      }
-    }
   }
 }

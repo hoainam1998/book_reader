@@ -4,7 +4,6 @@
   min-width: 50px;
 
   .menu {
-    position: fixed;
     top: 63px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     background: $primary-color;
@@ -13,7 +12,6 @@
     transition: ease 0.5s;
     box-sizing: border-box;
     overflow-x: hidden;
-    z-index: 2000;
 
     &:hover {
       width: 200px;

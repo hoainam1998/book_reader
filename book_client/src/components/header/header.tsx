@@ -3,6 +3,7 @@ import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from 'utils';
 import Button from 'components/button/button';
+import Tooltip from 'components/tooltip/tooltip';
 import store, { UserLogin } from 'store/auth';
 import paths from 'paths';
 import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
@@ -50,6 +51,7 @@ function MenuDropdown({ navigate, onPositionChange }: MenuDropdownPropsType): JS
 
 function Header(): JSX.Element {
   const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
+
   if (!userLogin) {
     return <></>;
   }
@@ -97,7 +99,9 @@ function Header(): JSX.Element {
           </Button>
           <div>
             <span data-testid="name">{name}</span>
-            <p className="email" data-testid="email">{email}</p>
+            <Tooltip>
+              <p className="email" data-tooltip={email} data-testid="email">{email}</p>
+            </Tooltip>
           </div>
         </div>
       </div>

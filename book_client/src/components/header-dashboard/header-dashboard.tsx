@@ -1,4 +1,4 @@
-import { JSX, useCallback, useState, useRef } from 'react';
+import { JSX, useCallback, useState, useRef, useMemo } from 'react';
 import Button from 'components/button/button';
 import Input from 'components/form/form-control/input/input';
 import './style.scss';
@@ -11,6 +11,7 @@ type HeaderDashboardPropsType = {
 };
 
 function HeaderDashboard({ disabled, add, search }: HeaderDashboardPropsType): JSX.Element {
+  const headerRef = useRef<HTMLDivElement>(null);
   const [isClear, setIsClear] = useState<boolean>(false);
   const [disableSearchButton, setDisableSearchButton] = useState<boolean>(true);
   const [keyword, setKeyword] = useState<string>('');
@@ -35,8 +36,12 @@ function HeaderDashboard({ disabled, add, search }: HeaderDashboardPropsType): J
     setDisableSearchButton(!value.trim());
   }, []);
 
+  const top: number | string = useMemo<number | string>(() => {
+    return headerRef.current?.offsetTop || 'unset';
+  }, [headerRef.current]);
+
   return (
-    <div className="header-dashboard">
+    <div className="header-dashboard position-sticky" ref={headerRef} style={{ top }}>
       <Button variant="success" className="add-new" onClick={add}>+New</Button>
       <Input
         label=""
