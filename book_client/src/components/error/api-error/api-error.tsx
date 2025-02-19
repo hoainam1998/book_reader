@@ -16,16 +16,20 @@ function ApiError({ alignCenter }: ApiErrorPropsType): JSX.Element {
   let image: ImageError = 'empty';
   let message: string = '';
 
-  if (error.code === 'ERR_NETWORK') {
-    image = 'server-disconnect';
-    message = 'Server disconnect. Please contact my admin!';
-  } else {
-    switch(error.response?.status) {
-      case 500: image = 'server-error'; break;
-      case 400: image = 'bad-request'; break;
-      default: image = 'empty'; break;
+  if (error instanceof AxiosError) {
+    if (error.code === 'ERR_NETWORK') {
+      image = 'server-disconnect';
+      message = 'Server disconnect. Please contact my admin!';
+    } else {
+      switch(error.response?.status) {
+        case 500: image = 'server-error'; break;
+        case 400: image = 'bad-request'; break;
+        default: image = 'empty'; break;
+      }
+      message = (error.response?.data as ErrorResponseType)?.message || '';
     }
-    message = (error.response?.data as ErrorResponseType)?.message || '';
+  } else {
+    throw error;
   }
 
   return (<Error center={alignCenter} image={image} message={message} />);

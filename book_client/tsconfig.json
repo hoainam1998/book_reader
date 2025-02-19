@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
@@ -30,6 +31,7 @@
       "contexts/*": ["src/contexts/*"],
       "read-only-variables": ["src/read-only-variables/index.ts"],
       "enums": ["src/enums/index.ts"],
+      "decorators": ["src/decorators/index.ts"],
     }
   },
   "include": ["src", "declaration.d.ts"]

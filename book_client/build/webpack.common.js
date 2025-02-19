@@ -54,6 +54,7 @@ module.exports = {
       'contexts': getResolvePath('../src/contexts'),
       'read-only-variables': getResolvePath('../src/read-only-variables/index.ts'),
       'enums': getResolvePath('../src/enums/index.ts'),
+      'decorators': getResolvePath('../src/decorators/index.ts'),
     }
   },
   module: {
