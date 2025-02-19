@@ -88,7 +88,8 @@
       "^images(.*)$": "<rootDir>/src/static/images$1",
       "^store(.*)$": "<rootDir>/src/store$1",
       "^storage(.*)$": "<rootDir>/src/storage$1",
-      "^paths(.*)$": "<rootDir>/src/router/paths$1"
+      "^paths(.*)$": "<rootDir>/src/router/paths$1",
+      "^enums$": "<rootDir>/src/enums/index.ts"
     },
     "transformIgnorePatterns": [
       "<rootDir>/node_modules/(?!axios)"

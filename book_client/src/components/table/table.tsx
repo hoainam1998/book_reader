@@ -8,6 +8,7 @@ import {
   JSX,
   useMemo,
   useRef,
+  useEffect,
   useCallback,
 } from 'react';
 import Select from 'components/form/form-control/select/select';
@@ -54,7 +55,8 @@ function TableCell<T>({ fields, cells, item }: TableCellProps<T>): JSX.Element {
   return <>{childrenList.map((children, index) => <Fragment key={index}>{children}</Fragment>)}</>;
 }
 
-let pageSize = 10;
+const DEFAULT_PAGESIZE: number = 10;
+let pageSize = DEFAULT_PAGESIZE;
 let pageNumber = 1;
 const options = [
   {
@@ -111,6 +113,12 @@ function Table<T>({
     }
     return tableRef.current?.offsetTop || 0;
   }, [windowWidth, tableRef.current]);
+
+  useEffect(() => {
+    return () => {
+      pageSize = DEFAULT_PAGESIZE;
+    };
+  }, []);
 
   return (
     <section>
