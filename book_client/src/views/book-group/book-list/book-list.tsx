@@ -9,6 +9,7 @@ import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { bookPagination, getBookDetail } from './fetcher';
 import store from 'store/book';
+import { openFile } from 'utils';
 import './style.scss';
 const { updateData, deleteAllStorage } = store;
 
@@ -56,6 +57,7 @@ const fields: Field[] = [
     }
   }
 ];
+
 let _keyword: string = '';
 let _pageSize: number = 10;
 
@@ -112,10 +114,6 @@ function BookList(): JSX.Element {
     fetchBookPagination(_pageSize, 1);
   }, []);
 
-  const previewFile = useCallback((pdf: string): void => {
-    window.open(`${process.env.BASE_URL}/${pdf}`, '_blank');
-  }, []);
-
   useLayoutEffect(() => {
     deleteAllStorage(true);
   }, []);
@@ -139,7 +137,7 @@ function BookList(): JSX.Element {
           <Slot<BookType>
             name="pdf"
             render={(slotProp) => (
-              <Button variant="success" disabled={!slotProp.pdf} onClick={() => previewFile(slotProp.pdf)}>
+              <Button variant="success" disabled={!slotProp.pdf} onClick={() => openFile(slotProp.pdf)}>
                 Preview
               </Button>
             )}/>
@@ -150,7 +148,7 @@ function BookList(): JSX.Element {
           <Slot<BookType>
             name="introduce"
             render={(slotProp) => (
-              <Button variant="success" disabled={!slotProp.introduce} onClick={() => previewFile(slotProp.introduce)}>
+              <Button variant="success" disabled={!slotProp.introduce} onClick={() => openFile(slotProp.introduce)}>
                 Preview
               </Button>
             )}/>

@@ -69,6 +69,15 @@ const convertBase64ToSingleFile = (imageBase64String: string, name: string): Pro
     });
 };
 
+/**
+ * Open a file on new page.
+ *
+ * @param {string} file - The file path.
+ */
+const openFile = (file: string): void => {
+  window.open(`${process.env.BASE_URL}/${file}`, '_blank');
+};
+
 export type { ModalSlotProps };
 export {
   clsx,
@@ -81,4 +90,5 @@ export {
   convertBase64ToSingleFile,
   getExtnameFromBlobType,
   handleNotfoundApiError,
+  openFile,
 };

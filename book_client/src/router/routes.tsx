@@ -8,6 +8,7 @@ import Category, { loadInitCategory } from 'views/category-group/category';
 import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail from 'views/author-group/author-detail/author-detail';
+import AuthorList, { authorPagination } from 'views/author-group/author-list/author';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import { LoginRequire, Logged  } from '../guard';
@@ -150,9 +151,19 @@ const routes: RoutePropsUnion[] = [
         },
         children: [
           {
+            path: path.NEW,
+            element: <AuthorDetail />,
+            handle: {
+              crumb: ({ pathname }: UIMatch) =>
+                <span key={pathname}>New</span>
+            }
+          },
+          {
             index: true,
-            element: <AuthorDetail />
-          }
+            element: <AuthorList />,
+            loader: authorPagination,
+            errorElement: <ApiError alignCenter />
+          },
         ]
       }
     ]
