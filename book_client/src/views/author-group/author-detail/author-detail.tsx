@@ -34,8 +34,8 @@ const rules: RuleType<AuthorStateType> = {
   name: { required, maxLength: maxLength(20) },
   sex: { required },
   avatar: { required },
-  yearOfBirth: { required, matchPattern: matchPattern(/^([1-9]{3,4})$/) },
-  yearOfDead: { required, matchPattern: matchPattern(/^([1-9]{3,4})$/) },
+  yearOfBirth: { required, matchPattern: matchPattern(/^[1-2][0-9]{3}$/) },
+  yearOfDead: { required, matchPattern: matchPattern(/^[1-2][0-9]{3}$/) },
   story: { required }
 };
 
