@@ -3,6 +3,7 @@ const GraphqlExecute = require('#services/graphql-execute.js');
 const UserPrismaField = require('#services/prisma-fields/user.js');
 const CategoryPrismaField = require('#services/prisma-fields/category.js');
 const BookPrismaField = require('#services/prisma-fields/book.js');
+const AuthorPrismaField = require('#services/prisma-fields/author.js');
 const CategoryRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/category.js')));
 const BookRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/book.js')));
 const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user.js')));
@@ -36,7 +37,7 @@ class RouterFactory {
       },
       {
         path: PATH.AUTHOR,
-        route: new AuthorRouter(express, new GraphqlExecute(schema, UserPrismaField))
+        route: new AuthorRouter(express, new GraphqlExecute(schema, AuthorPrismaField))
       }
     ];
   }

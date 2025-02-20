@@ -5,6 +5,45 @@ const Service = require('#services/prisma.js');
 
 class AuthorService extends Service {
 
+  pagination(pageSize, pageNumber, keyword, select) {
+    const offset = (pageNumber - 1) * pageSize;
+    if (keyword) {
+      return this.PrismaInstance.$transaction([
+        this.PrismaInstance.author.findMany({
+          take: pageSize,
+          skip: offset,
+          where: {
+            name: {
+              contains: keyword
+            }
+          },
+          orderBy: {
+            author_id: 'desc',
+          },
+          select
+        }),
+        this.PrismaInstance.author.count({
+          where: {
+            name: {
+              contains: keyword
+            }
+          }
+        }),
+      ]);
+    }
+    return this.PrismaInstance.$transaction([
+      this.PrismaInstance.author.findMany({
+        take: pageSize,
+          skip: offset,
+          orderBy: {
+            author_id: 'desc',
+          },
+          select
+      }),
+      this.PrismaInstance.author.count(),
+    ]);
+  }
+
   createAuthor(author) {
     const filePath = (extName, path) => `${path}/${author.name}.${extName}`;
 
