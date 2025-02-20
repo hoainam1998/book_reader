@@ -5,7 +5,10 @@ const {
   IsNumeric,
   IsId,
   IsBase64Image,
-  IsObject,
+  IsRangeContain,
+  IsPositive,
+  IsGraphqlSelect,
+  IsOptional,
 } = require('#decorators/validators');
 
 const AuthorCreate = (validators, className) => {
@@ -51,7 +54,33 @@ const AuthorCreate = (validators, className) => {
     storyJson;
   }, className);
 };
+const AuthorPagination = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsRangeContain([10, 30, 50], 'Page size must in [10, 30, 50]!'),
+      IsPositive('Page size must be positive number!')
+    )
+    pageSize;
+
+    @validators(
+      IsPositive('Page number must be positive number!')
+    )
+    pageNumber;
+
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+
+    @validators(
+      IsOptional(),
+      IsString('keyword must be string!')
+    )
+    keyword;
+  }, className);
+};
 
 module.exports = {
-  AuthorCreate: Validation(AuthorCreate)
+  AuthorCreate: Validation(AuthorCreate),
+  AuthorPagination: Validation(AuthorPagination),
 };

@@ -212,7 +212,7 @@ class BookService extends Service {
       }),
       this.PrismaInstance.book.count(),
     ]);
-  };
+  }
 }
 
 module.exports = BookService;

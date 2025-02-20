@@ -2,7 +2,8 @@ const Router = require('../router');
 const { validateResultExecute, upload, serializer, validation } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const { AuthorCreate } = require('#dto/author/author-in.js');
+const { AuthorPaginationResponse } = require('#dto/author/author-out.js');
+const { AuthorCreate, AuthorPagination } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
@@ -18,14 +19,15 @@ class AuthorRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-author', authentication, this.createAuthor);
+    this.post('/create-author', authentication, this._createAuthor);
+    this.post('/pagination', authentication, this._pagination);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validation(AuthorCreate, { error_message: 'Create author was failed!', groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  createAuthor(req, res, next, self) {
+  _createAuthor(req, res, next, self) {
     const query = `mutation CreateAuthor($author: AuthorInformation!) {
       author {
         create(author: $author) {
@@ -47,6 +49,29 @@ class AuthorRouter extends Router {
         }
       }
     });
+  }
+
+  @validation(AuthorPagination, { error_message: 'Load authors failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AuthorPaginationResponse)
+  _pagination(req, res, next, self) {
+    const query = `query AuthorPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
+      author {
+        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
+          list ${
+            req.body.query
+          },
+          total
+        }
+      }
+    }`;
+    return self.execute(query,
+    {
+      pageSize: req.body.pageSize,
+      pageNumber: req.body.pageNumber,
+      keyword: req.body.keyword
+    },
+    req.body.query)
   }
 }
 
