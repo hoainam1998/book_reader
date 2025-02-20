@@ -15,7 +15,7 @@ import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
-import { showToast, ModalSlotProps } from 'utils';
+import { showToast, ModalSlotProps, openFile } from 'utils';
 import paths from 'paths';
 import './style.scss';
 import { getCategoryDetail } from 'views/category-group/fetcher';
@@ -98,10 +98,6 @@ function BookConclusion(): JSX.Element {
   );
 
   useModalNavigation({ body: bodyModal, footer: footerModal, onLeaveAction: deleteAllStorage });
-
-  const openFile = useCallback((fileName: string): void => {
-    window.open(`${process.env.BASE_URL}/${fileName}`, '_blank');
-  }, []);
 
   const complete = useCallback(() => {
     showToast('Add book', 'This book has been added success!');
