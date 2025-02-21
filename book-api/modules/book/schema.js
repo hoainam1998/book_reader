@@ -9,7 +9,7 @@ const {
   GraphQLNonNull,
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
-const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
+const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
 const PaginationResponse = require('#dto/common/pagination-response.js');
 const BookDTO = require('#dto/book/book.js');
 const BookDetailDTO = require('#dto/book/book-detail.js');
@@ -248,13 +248,9 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (book, { images, bookId, name }) => {
-        try {
-          await book.deleteImages(bookId);
-          await book.saveBookImages(images, bookId, name);
-          return messageCreator('Book images has been updated!');
-        } catch (err) {
-          throw new GraphQLError(err.message, graphqlErrorOption);
-        }
+        await book.deleteImages(bookId);
+        await book.saveBookImages(images, bookId, name);
+        return messageCreator('Book images has been updated!');
       }
     }
   }

@@ -54,6 +54,7 @@ const AuthorCreate = (validators, className) => {
     storyJson;
   }, className);
 };
+
 const AuthorPagination = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
@@ -80,7 +81,22 @@ const AuthorPagination = (validators, className) => {
   }, className);
 };
 
+const AuthorDetail = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsId('authorId must be a numeric and contain 13 character!')
+    )
+    authorId;
+
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
+
 module.exports = {
   AuthorCreate: Validation(AuthorCreate),
   AuthorPagination: Validation(AuthorPagination),
+  AuthorDetail: Validation(AuthorDetail),
 };

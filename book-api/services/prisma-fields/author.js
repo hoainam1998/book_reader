@@ -12,7 +12,7 @@ class AuthorPrismaField extends PrismaField {
     sex: 'sex',
     yearOfBirth: 'year_of_birth',
     yearOfDead: 'year_of_dead',
-    storyFile: 'story'
+    storyFile: 'story',
   };
 }
 

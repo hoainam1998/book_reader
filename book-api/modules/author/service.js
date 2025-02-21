@@ -44,6 +44,15 @@ class AuthorService extends Service {
     ]);
   }
 
+  getAuthorDetail(authorId, select) {
+    return this.PrismaInstance.author.findUnique({
+      where: {
+        author_id: authorId
+      },
+      select
+    });
+  }
+
   createAuthor(author) {
     const filePath = (extName, path) => `${path}/${author.name}.${extName}`;
 
@@ -52,7 +61,10 @@ class AuthorService extends Service {
       createFolder(join(__dirname, `../../public/json/author/${author.authorId}`))
     ]).then((urls) => {
       const extNames = ['html', 'json'];
-      const promise = urls.map((url, index) => saveFile(filePath(extNames[index], url), author.story.html));
+      const promise = urls.map((url, index) => {
+        const extName = extNames[index];
+        saveFile(filePath(extName, url), author.story[extName]);
+      });
       return Promise.all(promise).then((paths) => {
         const story = paths.reduce((listPath, currentPath) => {
           const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
