@@ -44,6 +44,7 @@ function BookIntroduce(): JSX.Element {
     } else {
       promiseResult = saveIntroduceFile(html, json, name, data.bookId);
     }
+
     promiseResult.then(() => {
       getBookIntroduceFile(data.bookId).then((res) => {
         updateData({ ...data, introduce: res.data });

@@ -20,11 +20,11 @@ function BookDetail(): JSX.Element {
   const { id } = useParams();
 
   useEffect(() => {
-    if (navigation.state === 'loading') {
+    if (['idle', 'loading'].includes(navigation.state)) {
       updateDisableStep(id ? false : 2);
       updateStep(1);
     }
-  }, []);
+  }, [navigation.state]);
 
   return (
     <BlockerProvider isNavigate={isNavigate}>
