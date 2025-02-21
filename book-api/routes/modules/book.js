@@ -84,7 +84,7 @@ class BookRouter extends Router {
     this.post('/pagination', authentication, this._paginationBook);
   }
 
-  @validation(IntroduceHTMLFileSave, { error_message: 'Save introduce file was failed!' })
+  @validation(IntroduceHTMLFileSave, { error_message: 'Saving introduce file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _saveIntroduceHtmlFile(req, res, next, self) {
@@ -103,7 +103,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(IntroduceHTMLFileSave, { error_message: 'Update introduce file was failed!' })
+  @validation(IntroduceHTMLFileSave, { error_message: 'Updating introduce file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateIntroduceHtmlFile(req, res, next, self) {
@@ -122,7 +122,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(BookDetail, { error_message: 'Get book information failed!' })
+  @validation(BookDetail, { error_message: 'Getting book information failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(BookDetailResponse)
   _getBookDetail(req, res, next, self) {
@@ -147,7 +147,7 @@ class BookRouter extends Router {
     return self.execute(query);
   }
 
-  @validation(BookPagination, { error_message: 'Load books failed!' })
+  @validation(BookPagination, { error_message: 'Loading books failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(BookPaginationResponse)
   _paginationBook(req, res, next, self) {
@@ -181,7 +181,7 @@ class BookRouter extends Router {
       maxCount: 8
     }
   ])
-  @validation(BookCreate, { error_message: 'Create book information failed!' })
+  @validation(BookCreate, { error_message: 'Creating book information failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _saveBookInfo(req, res, next, self) {
@@ -221,7 +221,7 @@ class BookRouter extends Router {
       maxCount: 8
     }
   ])
-  @validation(BookCreate, { error_message: 'Update book information failed!' })
+  @validation(BookCreate, { error_message: 'Updating book information failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateBookInfo(req, res, next, self) {
@@ -252,7 +252,7 @@ class BookRouter extends Router {
   }
 
   @uploadPdf('pdf')
-  @validation(PdfFileSaved, { error_message: 'Save pdf file failed!' })
+  @validation(PdfFileSaved, { error_message: 'Saving pdf file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _savePdf(req, res, next, self) {
@@ -271,7 +271,7 @@ class BookRouter extends Router {
   }
 
   @uploadPdf('pdf')
-  @validation(PdfFileSaved, { error_message: 'Update pdf file failed!' })
+  @validation(PdfFileSaved, { error_message: 'Updating pdf file failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updatePdf(req, res, next, self) {
@@ -357,9 +357,9 @@ class BookRouter extends Router {
     ])
     .then(results => {
       if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
-        return Promise.reject('Update book failed!');
+        return Promise.reject('Updating book failed!');
       }
-      return messageCreator('Update book success!');
+      return messageCreator('Updating book success!');
     });
   }
 }

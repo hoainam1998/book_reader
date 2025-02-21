@@ -2,8 +2,8 @@ const Router = require('../router');
 const { validateResultExecute, upload, serializer, validation } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const { AuthorPaginationResponse } = require('#dto/author/author-out.js');
-const { AuthorCreate, AuthorPagination } = require('#dto/author/author-in.js');
+const { AuthorPaginationResponse, AuthorDetailResponse } = require('#dto/author/author-out.js');
+const { AuthorCreate, AuthorPagination, AuthorDetail } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
@@ -21,10 +21,11 @@ class AuthorRouter extends Router {
     super(express, graphqlExecute);
     this.post('/create-author', authentication, this._createAuthor);
     this.post('/pagination', authentication, this._pagination);
+    this.post('/detail', authentication, this._getAuthorDetail);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(AuthorCreate, { error_message: 'Create author was failed!', groups: ['create'] })
+  @validation(AuthorCreate, { error_message: 'Creating author failed!', groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _createAuthor(req, res, next, self) {
@@ -51,7 +52,25 @@ class AuthorRouter extends Router {
     });
   }
 
-  @validation(AuthorPagination, { error_message: 'Load authors failed!' })
+  @validation(AuthorDetail, { error_message: 'Getting author details failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AuthorDetailResponse)
+  _getAuthorDetail(req, res, next, self) {
+    const query = `query AuthorDetail($authorId: ID!) {
+      author {
+        detail(authorId: $authorId) ${
+          req.body.query
+        }
+      }
+    }`;
+    return self.execute(query,
+    {
+      authorId: req.body.authorId
+    },
+    req.body.query);
+  }
+
+  @validation(AuthorPagination, { error_message: 'Loading authors information failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AuthorPaginationResponse)
   _pagination(req, res, next, self) {
@@ -71,7 +90,7 @@ class AuthorRouter extends Router {
       pageNumber: req.body.pageNumber,
       keyword: req.body.keyword
     },
-    req.body.query)
+    req.body.query);
   }
 }
 

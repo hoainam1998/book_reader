@@ -36,15 +36,18 @@ class PrismaField extends Singleton {
         let fieldFound = fields.findLast((f, index) => {
           return index < indexOfCurrentField && parents.includes(f);
         });
+
         if (fieldFound) {
           if (Object.hasOwn(this._fields, fieldFound)) {
             fieldFound = this._fields[fieldFound].as ? this._fields[fieldFound].as : fieldFound;
           }
+
           const selected = select[fieldFound] || {};
           selected.select = { ...(selected.select || {}), [fieldIndex]: true };
           select[fieldFound] = selected;
         }
       }
+      console.log(select);
     };
 
     const selectSql = fields.reduce((select, current) => {
@@ -54,14 +57,16 @@ class PrismaField extends Singleton {
         if (typeof this._fields[current] === 'object'
           && !Array.isArray(this._fields[current])
           && this._fields[current] !== null) {
-            if (Object.hasOwn(this._fields[current], 'as')) {
-              const alias = this._fields[current].as;
-              if (!Object.hasOwn(select, alias)) {
-                delete this._fields[current].as;
-                select[alias] = this._fields[current];
+            if (!Object.hasOwn(this._fields[current], 'child')) {
+              if (Object.hasOwn(this._fields[current], 'as')) {
+                const alias = this._fields[current].as;
+                if (!Object.hasOwn(select, alias)) {
+                  delete this._fields[current].as;
+                  select[alias] = this._fields[current];
+                }
+              } else {
+                select[current] = this._fields[current];
               }
-            } else {
-              select[current] = this._fields[current];
             }
         } else if (Array.isArray(this._fields[current])) {
           this._fields[current].forEach(field => select[field] = true);
