@@ -1,4 +1,7 @@
-import { JSX, useCallback, useEffect } from 'react';
+import { JSX, useCallback, useState } from 'react';
+import { AxiosResponse } from 'axios';
+import { useLoaderData } from 'react-router-dom';
+import { Op } from 'quill/core';
 import Grid, { GridItem } from 'components/grid/grid';
 import Input from 'components/form/form-control/input/input';
 import Form from 'components/form/form';
@@ -8,8 +11,10 @@ import Radio from 'components/form/form-control/radio/radio';
 import Editor from 'components/editor/editor';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, matchPattern, maxLength } from 'hooks/useValidate';
-import { showToast } from 'utils';
-import { createAuthor } from './fetcher';
+import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils';
+import { createAuthor, loadAuthorDetail } from './fetcher';
+import constants from 'read-only-variables';
 import './style.scss';
 
 type AuthorStateType = {
@@ -41,18 +46,12 @@ const rules: RuleType<AuthorStateType> = {
 
 const formId: string = 'author-form';
 
-const sexOptions: OptionPrototype<number>[] = [
-  {
-    label: 'Male',
-    value: 0
-  },
-  {
-    label: 'Female',
-    value: 1
-  }
-];
+const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) => ({ label, value: index }));
 
 function AuthorDetail(): JSX.Element  {
+  const [jsonStory, setJsonStory] = useState<Promise<Op[]> | null>(null);
+  const loaderData = useLoaderData() as AxiosResponse;
+
   const {
     name,
     sex,
@@ -65,7 +64,7 @@ function AuthorDetail(): JSX.Element  {
     reset
   } = useForm<AuthorStateType, RuleType<AuthorStateType>>(state, rules, formId);
 
-  const onSubmit = useCallback((formData: FormData) => {
+  const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
 
     if (!validate.error) {
@@ -75,9 +74,23 @@ function AuthorDetail(): JSX.Element  {
     }
   }, [validate]);
 
-  useEffect(() => {
-    return () => reset();
-  }, []);
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (loaderData) {
+        const author = loaderData.data;
+        name.watch(author.name);
+        sex.watch(author.sex);
+        yearOfBirth.watch(author.yearOfBirth);
+        yearOfDead.watch(author.yearOfDead);
+        convertBase64ToSingleFile(author.avatar, author.name)
+          .then(image => avatar.watch(image));
+        if (!haveFetched()) {
+          setJsonStory(getJsonFileContent(author.storyFile.json));
+        }
+      }
+      return reset;
+    };
+  }, [loaderData]);
 
   return (
     <Form id={formId} className="author-form" submitLabel="Save" onSubmit={onSubmit}>
@@ -120,6 +133,7 @@ function AuthorDetail(): JSX.Element  {
         <GridItem lg={12}>
           <Editor
             {...story}
+            json={jsonStory}
             placeholder="Enter author story..."
             name="story"
             label="Story"
@@ -136,4 +150,5 @@ function AuthorDetail(): JSX.Element  {
   );
 }
 
+export { loadAuthorDetail };
 export default AuthorDetail;

@@ -7,6 +7,7 @@ import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '..
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import useInitEditor from 'hooks/useInitEditor';
+import { getJsonFileContent } from 'utils';
 import './style.scss';
 
 const {
@@ -20,18 +21,6 @@ const {
 } = store;
 
 const editSelector: string = 'book-introduce-editor';
-
-/**
- * Convert file path string list to promise of options. Those options will be content of quill.
- *
- * @param {string} filePath - file path to json file contain options
- * @returns {Promise<Op[]>} - promise options.
- */
-const getContent = (filePath: string): Promise<Op[]> => {
-  return fetch(`${process.env.BASE_URL}/${filePath}`)
-    .then(res => res.json())
-    .then(json => json);
-};
 
 function BookIntroduce(): JSX.Element {
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
@@ -71,8 +60,8 @@ function BookIntroduce(): JSX.Element {
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (data && data.introduce && !haveFetched() && quill) {
-        getContent(data.introduce.json)
-          .then(json => quill?.setContents(json));
+        getJsonFileContent<Op[]>(data.introduce.json)
+          .then(json => quill.setContents(json));
       }
     };
   }, [quill, data]);
