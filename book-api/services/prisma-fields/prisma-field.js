@@ -47,7 +47,6 @@ class PrismaField extends Singleton {
           select[fieldFound] = selected;
         }
       }
-      console.log(select);
     };
 
     const selectSql = fields.reduce((select, current) => {
