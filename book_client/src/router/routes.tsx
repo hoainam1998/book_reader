@@ -7,8 +7,8 @@ import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category-group/category';
 import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
-import AuthorDetail from 'views/author-group/author-detail/author-detail';
-import AuthorList, { authorPagination } from 'views/author-group/author-list/author';
+import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail/author-detail';
+import AuthorList, { authorPagination } from 'views/author-group/author-list/author-list';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import { LoginRequire, Logged  } from '../guard';
@@ -151,6 +151,12 @@ const routes: RoutePropsUnion[] = [
         },
         children: [
           {
+            index: true,
+            element: <AuthorList />,
+            loader: authorPagination,
+            errorElement: <ApiError alignCenter />
+          },
+          {
             path: path.NEW,
             element: <AuthorDetail />,
             handle: {
@@ -159,10 +165,13 @@ const routes: RoutePropsUnion[] = [
             }
           },
           {
-            index: true,
-            element: <AuthorList />,
-            loader: authorPagination,
-            errorElement: <ApiError alignCenter />
+            path: path.ID,
+            element: <AuthorDetail />,
+            loader: loadAuthorDetail,
+            handle: {
+              crumb: ({ pathname, params }: UIMatch) =>
+                <span key={pathname}>{params.id}</span>
+            }
           },
         ]
       }

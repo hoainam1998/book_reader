@@ -2,8 +2,10 @@ import { JSX, useCallback, useEffect } from 'react';
 import useInitEditor from 'hooks/useInitEditor';
 import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { FieldValidateProps } from 'hooks/useForm';
+import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { clsx } from 'utils';
 import './style.scss';
+import { Op } from 'quill/core';
 const editorId = 'editor';
 
 type EditorPropsType = {
@@ -11,6 +13,7 @@ type EditorPropsType = {
   // eslint-disable-next-line no-unused-vars
   onChange: (value: string) => void;
   placeholder?: string;
+  json?: Promise<Op[]>;
 }
 & FormControlProps
 & Omit<Partial<FieldValidateProps<string>>, 'onInput' | 'onChange' | 'options'>;
@@ -25,6 +28,7 @@ function Editor({
   error,
   placeholder,
   value,
+  json,
   onChange,
   onFocus
   }: EditorPropsType): JSX.Element {
@@ -35,14 +39,19 @@ function Editor({
   }, [quill]);
 
   useEffect(() => {
-    quill?.on('text-change', () => {
-      editorOnChange();
-    });
-
-    quill?.on('selection-change', () => {
-      onFocus!();
-    });
+    quill?.on('text-change', editorOnChange);
+    quill?.on('selection-change', onFocus!);
   }, [quill]);
+
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched()) {
+        if (json && quill) {
+          json.then(jsonContent => quill?.setContents(jsonContent));
+        }
+      }
+    };
+  }, [json, quill]);
 
   return (
     <FormControl

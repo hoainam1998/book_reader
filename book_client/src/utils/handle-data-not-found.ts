@@ -9,8 +9,8 @@ import { HTTP_CODE } from 'enums';
  */
 const handleNotfoundApiError = (promiseApiCalled: Promise<AxiosResponse>): Promise<any> => {
   return promiseApiCalled.catch((error: AxiosError<any, any>) => {
-    if ((error.response as any).status === HTTP_CODE.NOT_FOUND) {
-      return Promise.resolve((error.response as any).data);
+    if ((error.response as AxiosResponse).status === HTTP_CODE.NOT_FOUND) {
+      return Promise.resolve(error.response);
     }
     throw error;
   });

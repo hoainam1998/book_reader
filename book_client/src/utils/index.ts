@@ -2,6 +2,7 @@ import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
 import showModal, { ModalSlotProps } from './modal';
 import { createElementWrapper } from './element-wrapper';
+import { convertBase64ToSingleFile, openFile, getExtnameFromBlobType, getJsonFileContent } from './file-handle';
 import handleNotfoundApiError from './handle-data-not-found';
 
 /**
@@ -39,46 +40,8 @@ const clsx = (...classes: any[]): string => {
  */
 const customError = (message: string) => new Error(`[Custom Error] ${message}`);
 
-/**
- * Return extension from blob type.
- *
- * @param {string} blobType - base64 string present image.
- * @returns {string} - extension name.
- */
-const getExtnameFromBlobType = (blobType: string): string => {
-  const matches: RegExpMatchArray | null = blobType.match(/(\/\w+)/);
-  return matches ? matches[0].replace('/', '.') : '';
-};
-
-/**
- * Return promise of file from base64 string.
- *
- * @param {string} imageBase64String - base64 string present image.
- * @param {string} name - file name.
- * @returns {Promise<File>} - promise file.
- */
-const convertBase64ToSingleFile = (imageBase64String: string, name: string): Promise<File> => {
-  return fetch(imageBase64String)
-    .then((res) => res.blob())
-    .then((blob) => {
-      if (name.search(/\.\w+/) < 0) {
-        const ext: string = getExtnameFromBlobType(blob.type);
-        name = `${name}${ext}`;
-      }
-      return new File([blob], name, { type: blob.type });
-    });
-};
-
-/**
- * Open a file on new page.
- *
- * @param {string} file - The file path.
- */
-const openFile = (file: string): void => {
-  window.open(`${process.env.BASE_URL}/${file}`, '_blank');
-};
-
 export type { ModalSlotProps };
+
 export {
   clsx,
   showToast,
@@ -91,4 +54,5 @@ export {
   getExtnameFromBlobType,
   handleNotfoundApiError,
   openFile,
+  getJsonFileContent,
 };

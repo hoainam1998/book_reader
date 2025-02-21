@@ -63,7 +63,7 @@ function AuthorList(): JSX.Element {
 
   const authors = useMemo<AuthorType[]>(() => {
     if (fetcher.data) {
-       return fetcher.data.data.list;
+      return fetcher.data.data.list;
     }
     return (loaderData as AxiosResponse).data.list || [];
   }, [fetcher.data]);
@@ -78,13 +78,9 @@ function AuthorList(): JSX.Element {
   const operationSlot = useCallback((slotProp: AuthorType): JSX.Element => {
     const { authorId } = slotProp;
 
-    const getAuthorInformation = (): void => {
-      console.log(authorId);
-    };
-
     return (
       <div>
-        <Button variant="success" onClick={getAuthorInformation}>
+        <Button variant="success" onClick={() => navigate(authorId)}>
           Update
         </Button>
         &nbsp;&nbsp;
