@@ -7,6 +7,7 @@ class AuthorService extends Service {
 
   pagination(pageSize, pageNumber, keyword, select) {
     const offset = (pageNumber - 1) * pageSize;
+
     if (keyword) {
       return this.PrismaInstance.$transaction([
         this.PrismaInstance.author.findMany({
@@ -61,10 +62,12 @@ class AuthorService extends Service {
       createFolder(join(__dirname, `../../public/json/author/${author.authorId}`))
     ]).then((urls) => {
       const extNames = ['html', 'json'];
+
       const promise = urls.map((url, index) => {
         const extName = extNames[index];
-        saveFile(filePath(extName, url), author.story[extName]);
+        return saveFile(filePath(extName, url), author.story[extName]);
       });
+
       return Promise.all(promise).then((paths) => {
         const story = paths.reduce((listPath, currentPath) => {
           const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
