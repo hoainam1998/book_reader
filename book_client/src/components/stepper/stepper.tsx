@@ -67,7 +67,7 @@ function Stepper({
         stepped: index <= activeStep - 2,
         disabled: disableStep === false ? disableStep : index >= disableStep - 1
       }));
-  }, [stepNumber, activeStep]);
+  }, [stepNumber, activeStep, disableStep]);
 
   const [steps, setSteps] = useState<StepType[]>(stepsInit);
   const [step, setStep] = useState<number>(1);
@@ -137,7 +137,7 @@ function Stepper({
       setStep(activeStep);
       setSteps(stepsInit);
     }
-  }, [activeStep]);
+  }, [activeStep, disableStep]);
 
   return (
     <>
