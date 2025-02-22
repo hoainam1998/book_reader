@@ -1,6 +1,6 @@
 import { JSX, useCallback, useState } from 'react';
 import { AxiosResponse } from 'axios';
-import { useLoaderData } from 'react-router-dom';
+import { useLoaderData, useParams, useNavigate } from 'react-router-dom';
 import { Op } from 'quill/core';
 import Grid, { GridItem } from 'components/grid/grid';
 import Input from 'components/form/form-control/input/input';
@@ -13,8 +13,9 @@ import useForm, { RuleType } from 'hooks/useForm';
 import { required, matchPattern, maxLength } from 'hooks/useValidate';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils';
-import { createAuthor, loadAuthorDetail } from './fetcher';
+import { createAuthor, loadAuthorDetail, updateAuthor } from './fetcher';
 import constants from 'read-only-variables';
+import path from 'paths';
 import './style.scss';
 
 type AuthorStateType = {
@@ -51,6 +52,8 @@ const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) =
 function AuthorDetail(): JSX.Element  {
   const [jsonStory, setJsonStory] = useState<Promise<Op[]> | null>(null);
   const loaderData = useLoaderData() as AxiosResponse;
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const {
     name,
@@ -67,10 +70,29 @@ function AuthorDetail(): JSX.Element  {
   const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
 
+    const navigateToAuthorList = (): void => {
+      setTimeout(() => {
+        navigate(`${path.HOME}/${path.AUTHOR}`);
+      }, 200);
+    };
+
     if (!validate.error) {
-      createAuthor(formData)
-        .then((res) => showToast('Create author', res.data.message))
-        .catch((error) => showToast('Create author', error.response.data.message));
+      if (id) {
+        formData.append('authorId', id);
+        updateAuthor(formData)
+          .then((res) => {
+            showToast('Update author', res.data.message);
+            navigateToAuthorList();
+          })
+          .catch((error) => showToast('Update author', error.response.data.message));
+      } else {
+        createAuthor(formData)
+          .then((res) => {
+            showToast('Create author', res.data.message);
+            navigateToAuthorList();
+          })
+          .catch((error) => showToast('Create author', error.response.data.message));
+      }
     }
   }, [validate]);
 

@@ -168,6 +168,7 @@ const routes: RoutePropsUnion[] = [
             path: path.ID,
             element: <AuthorDetail />,
             loader: loadAuthorDetail,
+            errorElement: <ApiError alignCenter />,
             handle: {
               crumb: ({ pathname, params }: UIMatch) =>
                 <span key={pathname}>{params.id}</span>

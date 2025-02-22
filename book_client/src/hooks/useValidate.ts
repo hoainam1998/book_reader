@@ -97,7 +97,7 @@ export const matchPattern: ValidateFunction =
     const message: string = args[1] ? args[1] as string : '';
 
     return {
-      error: currentValue ? currentValue.search(pattern) < 0 : false,
+      error: currentValue ? currentValue.toString().search(pattern) < 0 : false,
       message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)} is not match with pattern!`,
     };
   };
