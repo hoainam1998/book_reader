@@ -1,5 +1,5 @@
 const { saveFile } = require('#utils');
-const { createFolder } = require('#utils');
+const { createFolder, deleteFile } = require('#utils');
 const { join } = require('path');
 const Service = require('#services/prisma.js');
 
@@ -51,6 +51,55 @@ class AuthorService extends Service {
         author_id: authorId
       },
       select
+    });
+  }
+
+  deleteStoryFile(authorId) {
+    return this.PrismaInstance.author.findUnique({
+      where: {
+        author_id: authorId
+      },
+      select: {
+        story: true
+      }
+    }).then(author => {
+      if (author) {
+        const storyFile = author.story.split(', ');
+        const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
+        const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
+        return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
+      }
+      return author;
+    });
+  }
+
+  updateAuthor(author) {
+    const filePath = (extName) => `${join(__dirname, `../../public/${extName}/author/${author.authorId}`)}/${author.name}.${extName}`;
+    const htmlSave = saveFile(filePath('html'), author.story.html);
+    const jsonSave = saveFile(filePath('json'), author.story.json);
+
+    return Promise.all([htmlSave, jsonSave]).then((paths) => {
+      const story = paths.reduce((listPath, currentPath) => {
+        const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
+        if (relativePath) {
+          listPath.push(relativePath.replace(/\\/gm, '/'));
+        }
+        return listPath;
+      }, []).join(', ');
+
+      return this.PrismaInstance.author.update({
+        where: {
+          author_id: author.authorId
+        },
+        data: {
+          name: author.name,
+          sex: author.sex === 1,
+          avatar: author.avatar,
+          year_of_birth: author.yearOfBirth,
+          year_of_dead: author.yearOfDead,
+          story
+        },
+      });
     });
   }
 

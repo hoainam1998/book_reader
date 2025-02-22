@@ -3,7 +3,7 @@ const { validateResultExecute, upload, serializer, validation } = require('#deco
 const authentication = require('#middlewares/auth/authentication.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 const { AuthorPaginationResponse, AuthorDetailResponse } = require('#dto/author/author-out.js');
-const { AuthorCreate, AuthorPagination, AuthorDetail } = require('#dto/author/author-in.js');
+const { AuthorSave, AuthorPagination, AuthorDetail } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
@@ -19,13 +19,14 @@ class AuthorRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-author', authentication, this._createAuthor);
+    this.post('/create', authentication, this._createAuthor);
     this.post('/pagination', authentication, this._pagination);
     this.post('/detail', authentication, this._getAuthorDetail);
+    this.put('/update', authentication, this._updateAuthor);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(AuthorCreate, { error_message: 'Creating author failed!', groups: ['create'] })
+  @validation(AuthorSave, { error_message: 'Creating author failed!', groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _createAuthor(req, res, next, self) {
@@ -39,6 +40,34 @@ class AuthorRouter extends Router {
     return self.execute(query, {
       author: {
         authorId: Date.now().toString(),
+        name: req.body.name,
+        sex: +req.body.sex,
+        avatar: req.body.avatar,
+        yearOfBirth: +req.body.yearOfBirth,
+        yearOfDead: +req.body.yearOfDead,
+        story: {
+          html: req.body.storyHtml,
+          json: req.body.storyJson
+        }
+      }
+    });
+  }
+
+  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @validation(AuthorSave, { error_message: 'Updating author failed!', groups: ['update'] })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updateAuthor(req, res, next, self) {
+    const query = `mutation UpdateAuthor($author: AuthorInformation!) {
+      author {
+        update(author: $author) {
+          message
+        }
+      }
+    }`;
+    return self.execute(query, {
+      author: {
+        authorId: req.body.authorId,
         name: req.body.name,
         sex: +req.body.sex,
         avatar: req.body.avatar,

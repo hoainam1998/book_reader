@@ -34,6 +34,43 @@ const COMMON_AUTHOR_FIELDS = {
   },
 };
 
+const AUTHOR_INPUT_TYPE = new GraphQLNonNull(new GraphQLInputObjectType({
+  name: 'AuthorInformation',
+  fields: {
+    authorId: {
+      type: GraphQLString
+    },
+    name: {
+      type: GraphQLString
+    },
+    sex: {
+      type: GraphQLInt
+    },
+    avatar: {
+      type: GraphQLString
+    },
+    yearOfBirth: {
+      type: GraphQLInt
+    },
+    yearOfDead: {
+      type: GraphQLInt
+    },
+    story: {
+      type: new GraphQLInputObjectType({
+        name: 'StoryInput',
+        fields: {
+          html: {
+            type: GraphQLString
+          },
+          json: {
+            type: GraphQLString
+          }
+        }
+      })
+    }
+  }
+}));
+
 const query = new GraphQLObjectType({
   name: 'AuthorQuery',
   fields: {
@@ -138,49 +175,37 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         author: {
-          type: new GraphQLNonNull(new GraphQLInputObjectType({
-            name: 'AuthorInformation',
-            fields: {
-              authorId: {
-                type: GraphQLString
-              },
-              name: {
-                type: GraphQLString
-              },
-              sex: {
-                type: GraphQLInt
-              },
-              avatar: {
-                type: GraphQLString
-              },
-              yearOfBirth: {
-                type: GraphQLInt
-              },
-              yearOfDead: {
-                type: GraphQLInt
-              },
-              story: {
-                type: new GraphQLInputObjectType({
-                  name: 'StoryInput',
-                  fields: {
-                    html: {
-                      type: GraphQLString
-                    },
-                    json: {
-                      type: GraphQLString
-                    }
-                  }
-                })
-              }
-            }
-          })),
+          type: AUTHOR_INPUT_TYPE
         }
       },
       resolve: async (service, { author }) => {
         await service.createAuthor(author);
-        return messageCreator('Author create success!');
+        return messageCreator('The author created success!');
       }
-    }
+    },
+    update: {
+      type: ResponseType,
+      args: {
+        author: {
+          type: AUTHOR_INPUT_TYPE
+        }
+      },
+      resolve: async (service, { author }) => {
+        try {
+          const result = await service.deleteStoryFile(author.authorId);
+          if (result) {
+            await service.updateAuthor(author);
+            return messageCreator('The author updated success!');
+          }
+          throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
+        } catch (error) {
+          if (error instanceof PrismaClientKnownRequestError) {
+            throw new GraphQLError(error.meta.cause, graphqlErrorOption);
+          }
+          throw error;
+        }
+      }
+    },
   }
 });
 

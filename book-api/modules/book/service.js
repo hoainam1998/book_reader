@@ -1,6 +1,6 @@
 const fs = require('fs');
 const { join } = require('path');
-const { saveFile } = require('#utils');
+const { saveFile, deleteFile } = require('#utils');
 const Service = require('#services/prisma.js');
 
 class BookService extends Service {
@@ -98,19 +98,8 @@ class BookService extends Service {
     .then((result) => {
       if (result && result.introduce_file) {
         const filePath = result.introduce_file.split(',');
-        const htmlFilePath = filePath[0].trim();
-        const jsonFilePath = filePath[1].trim();
-        const deleteFile = (filePath) => {
-          return new Promise((resolve, reject) => {
-            fs.unlink(join(__dirname, `../../public/${filePath}`), (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(true);
-              }
-            });
-          });
-        };
+        const htmlFilePath = join(__dirname, `../../public/${filePath[0].trim()}`);
+        const jsonFilePath = join(__dirname, `../../public/${filePath[1].trim()}`);
         return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
       }
       throw new Error('Can not found introduce file!');
