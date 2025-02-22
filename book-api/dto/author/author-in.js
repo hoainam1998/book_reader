@@ -11,7 +11,7 @@ const {
   IsOptional,
 } = require('#decorators/validators');
 
-const AuthorCreate = (validators, className) => {
+const AuthorSave = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
       IsId('authorId must be a numeric and contain 13 character!', { groups: ['update'] })
@@ -96,7 +96,7 @@ const AuthorDetail = (validators, className) => {
 };
 
 module.exports = {
-  AuthorCreate: Validation(AuthorCreate),
+  AuthorSave: Validation(AuthorSave),
   AuthorPagination: Validation(AuthorPagination),
   AuthorDetail: Validation(AuthorDetail),
 };

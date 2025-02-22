@@ -189,7 +189,7 @@ const fetchHelper = (...args) => {
 };
 
 /**
- * Download data from the specified URL.
+ * Run all promise.
  *
  * @async
  * @param {[Promise]} promises - The array of promises.
@@ -201,6 +201,25 @@ async function promiseAll(promisesFn) {
     arr.push(await fn());
   }
   return arr;
+};
+
+/**
+ * Delete file asynchronous.
+ *
+ * @async
+ * @param {string} filePath - The file path.
+ * @return {Promise<[*]>} The promise result.
+ */
+const deleteFile = (filePath) => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(true);
+      }
+    });
+  });
 };
 
 module.exports = {
@@ -218,4 +237,5 @@ module.exports = {
   createFile,
   fetchHelper,
   promiseAll,
+  deleteFile,
 };
