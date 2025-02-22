@@ -119,6 +119,9 @@ function Input({
       }
     } else {
       inputRef.current!.value = value as string;
+      if (type !== 'file') {
+        setTargetValue(value as string);
+      }
     }
   }, [value, type]);
 
