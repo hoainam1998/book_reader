@@ -3,7 +3,11 @@ import { LoaderFunctionArgs } from 'react-router-dom';
 import { AuthorService } from 'services';
 
 export const createAuthor = (formData: FormData): Promise<AxiosResponse> => {
-  return AuthorService.post('create-author', formData);
+  return AuthorService.post('create', formData);
+};
+
+export const updateAuthor = (formData: FormData): Promise<AxiosResponse> => {
+  return AuthorService.put('update', formData);
 };
 
 export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse> | null => {
