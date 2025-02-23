@@ -45,6 +45,12 @@ class AuthorService extends Service {
     ]);
   }
 
+  getAllAuthor(select) {
+    return this.PrismaInstance.author.findMany({
+      select
+    });
+  }
+
   getAuthorDetail(authorId, select) {
     return this.PrismaInstance.author.findUnique({
       where: {
