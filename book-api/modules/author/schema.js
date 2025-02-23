@@ -71,6 +71,19 @@ const AUTHOR_INPUT_TYPE = new GraphQLNonNull(new GraphQLInputObjectType({
   }
 }));
 
+const AUTHOR_LIST = new GraphQLList(new GraphQLObjectType({
+  name: 'AuthorPaginationList',
+  fields: {
+    authorId: {
+      type: GraphQLID
+    },
+    ...COMMON_AUTHOR_FIELDS,
+    storyFile: {
+      type: GraphQLString,
+    }
+  }
+}));
+
 const query = new GraphQLObjectType({
   name: 'AuthorQuery',
   fields: {
@@ -119,18 +132,7 @@ const query = new GraphQLObjectType({
         name: 'AuthorPagination',
         fields: {
           list: {
-            type: new GraphQLList(new GraphQLObjectType({
-              name: 'AuthorPaginationList',
-              fields: {
-                authorId: {
-                  type: GraphQLID
-                },
-                ...COMMON_AUTHOR_FIELDS,
-                storyFile: {
-                  type: GraphQLString,
-                }
-              }
-            }))
+            type: AUTHOR_LIST
           },
           total: {
             type: GraphQLInt
@@ -163,6 +165,17 @@ const query = new GraphQLObjectType({
           list: plainToInstance(AuthorDTO, authors),
           total: parseInt(result[1] || 0)
         });
+      }
+    },
+    all: {
+      type: AUTHOR_LIST,
+      resolve: async (author, _, context) => {
+        const authors = await author.getAllAuthor(context);
+        if (authors.length === 0) {
+          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
+          throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
+        }
+        return plainToInstance(AuthorDTO, authors);
       }
     }
   }

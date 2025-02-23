@@ -2,8 +2,8 @@ const Router = require('../router');
 const { validateResultExecute, upload, serializer, validation } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const { AuthorPaginationResponse, AuthorDetailResponse } = require('#dto/author/author-out.js');
-const { AuthorSave, AuthorPagination, AuthorDetail } = require('#dto/author/author-in.js');
+const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out.js');
+const { AuthorSave, AuthorPagination, AuthorDetail, AllAuthor } = require('#dto/author/author-in.js');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
@@ -23,6 +23,7 @@ class AuthorRouter extends Router {
     this.post('/pagination', authentication, this._pagination);
     this.post('/detail', authentication, this._getAuthorDetail);
     this.put('/update', authentication, this._updateAuthor);
+    this.post('/all', authentication, this._getAllAuthor);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
@@ -121,6 +122,26 @@ class AuthorRouter extends Router {
     },
     req.body.query);
   }
+
+  @validation(AllAuthor, { error_message: 'Loading authors failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AllAuthorResponse)
+  _getAllAuthor(req, res, next, self) {
+    const query = `query AllAuthor {
+      author {
+        all ${
+          req.body.query
+        }
+      }
+    }`;
+
+    return self.execute(
+      query,
+      null,
+      req.body.query
+    );
+  }
+
 }
 
 module.exports = AuthorRouter;
