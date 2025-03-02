@@ -38,6 +38,7 @@ class AuthorRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, {
       author: {
         authorId: Date.now().toString(),
@@ -66,6 +67,7 @@ class AuthorRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, {
       author: {
         authorId: req.body.authorId,
@@ -93,6 +95,7 @@ class AuthorRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query,
     {
       authorId: req.body.authorId
@@ -114,6 +117,7 @@ class AuthorRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query,
     {
       pageSize: req.body.pageSize,
