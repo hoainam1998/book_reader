@@ -4,7 +4,7 @@ import {
   useRef,
   useEffect,
   useSyncExternalStore,
-  useState
+  useState,
 } from 'react';
 import { useLoaderData, useParams } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
@@ -15,11 +15,12 @@ import { OptionPrototype } from 'components/form/form-control/form-control';
 import Select from 'components/form/form-control/select/select';
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Form from 'components/form/form';
+import SelectGroup from 'components/form/form-control/select-group/select-group';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
-import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation } from '../fetcher';
+import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAllAuthor } from '../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import './style.scss';
@@ -39,6 +40,13 @@ type BookStateType = {
   categoryId: string;
   avatar: File | null;
   images: File[] | null;
+  authors: string[];
+};
+
+type AuthorSelectType = {
+  authorId: string;
+  avatar: string;
+  name: string;
 };
 
 const formId: string = 'book-detail-form';
@@ -50,7 +58,8 @@ const state: BookStateType = {
   publishedTime: null,
   categoryId: '',
   avatar: null,
-  images: null
+  images: null,
+  authors: [],
 };
 
 /**
@@ -89,6 +98,8 @@ const convertFilePathToFile = (filePath: string, name: string): Promise<File> =>
 };
 
 function BookInformation(): JSX.Element {
+  const pdfRef = useRef<InputRefType>(null);
+  const [authorsList, setAuthorsList] = useState<AuthorSelectType[]>([]);
   const [bookNames, setBookNames] = useState<string[]>([]);
   const { id } = useParams();
   const { data, step, disableStep }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
@@ -113,7 +124,8 @@ function BookInformation(): JSX.Element {
     publishedTime: { required },
     categoryId: { required },
     avatar: { required },
-    images: { required, maxLength: maxLength(8) }
+    images: { required, maxLength: maxLength(8) },
+    authors: { required, maxLength: maxLength(5) }
   };
 
   const {
@@ -124,6 +136,7 @@ function BookInformation(): JSX.Element {
     pdf,
     images,
     avatar,
+    authors,
     handleSubmit,
     validate,
     reset
@@ -131,9 +144,18 @@ function BookInformation(): JSX.Element {
 
   const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
   const categories: CategoryOptionsType[] = loaderData?.data || [];
-  const pdfRef = useRef<InputRefType>(null);
 
-  const onLeave = useCallback(() => {
+  const authorInfoShowing = ({ avatar, name }: AuthorSelectType): JSX.Element => {
+
+    return (
+      <div className="author-select-wrapper">
+        <img src={avatar} alt="avatar"/>
+        <span>{name}</span>
+      </div>
+    );
+  };
+
+  const onLeave = useCallback((): void => {
     reset();
     deleteAllStorage();
   }, []);
@@ -215,7 +237,11 @@ function BookInformation(): JSX.Element {
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        getAllBookName().then((res) => setBookNames(res.data));
+        getAllAuthor()
+          .then((res) => setAuthorsList(res.data))
+          .catch(() => setAuthorsList([]));
+        getAllBookName()
+          .then((res) => setBookNames(res.data));
       }
     };
   }, []);
@@ -340,6 +366,24 @@ function BookInformation(): JSX.Element {
               lg: 12
             }}
           />
+        </GridItem>
+        <GridItem sm={12} md={12} lg={12}>
+          <SelectGroup<AuthorSelectType>
+            {...authors}
+            name="authors"
+            label="Authors"
+            items={authorsList}
+            values={authors.value}
+            labelField='name'
+            valueField='authorId'
+            showingElement={authorInfoShowing}
+            placeholder='Please choosing an author!'
+            labelColumnSize= {{
+              lg: 12
+            }}
+            inputColumnSize={{
+              lg: 12
+            }}/>
         </GridItem>
       </Grid>
     </Form>

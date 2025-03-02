@@ -93,3 +93,53 @@ button {
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.select-disabled {
+  font-style: italic;
+  color: $placeholder;
+}
+
+// select style.
+.select {
+  padding: 0 5px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 100px;
+  width: 100%;
+  border-color: $border-input-color;
+
+  & > option:disabled {
+    @extend .select-disabled;
+  }
+
+  & > option:not(& > option:disabled) {
+    color: initial !important;
+    font-style: normal;
+  }
+}
+
+.placeholder {
+  @extend .select-disabled;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 2px;
+    display: block;
+    height: 20px;
+    width: 28px;
+    background-color: $white-color;
+    z-index: 1;
+    pointer-events: auto;
+    background-image: url('images/icons/arrow-down.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}

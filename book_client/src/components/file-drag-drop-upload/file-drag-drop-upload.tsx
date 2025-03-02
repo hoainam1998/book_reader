@@ -4,13 +4,13 @@ import React, {
   useCallback,
   useMemo,
   useState,
-  useEffect,
   useRef,
   ChangeEvent,
   useImperativeHandle,
   forwardRef,
   Ref,
-  ReactNode
+  ReactNode,
+  useLayoutEffect
 } from 'react';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
 import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
@@ -74,6 +74,7 @@ function FileDragDropUpload({
       files = Array.from(event.dataTransfer.files)
         .filter(file => file.type.includes('image'));
     }
+
     setImageFileList(files);
     onFocus();
     onChange(files);
@@ -103,7 +104,7 @@ function FileDragDropUpload({
 
   useImperativeHandle(ref, (): ImageFileListType => ({ files: imageFileList }), [imageFileList]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (value) {
       if (Array.isArray(value)) {
         setImageFileList(value);
