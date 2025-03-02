@@ -67,7 +67,7 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
       labelColumnSize={labelColumnSize}>
         <div className={clsx('select-wrapper', selectClass)}>
           <select name={name} id={name}
-          className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
+            className={clsx('select custom-input', { 'error-input': error, 'placeholder': !value })}
             value={value} onChange={(event) => onChange(event.target.value as T)} data-testid="select">
             {
               optionsFormatted.map((option, index) =>

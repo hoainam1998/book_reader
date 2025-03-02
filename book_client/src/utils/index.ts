@@ -40,6 +40,23 @@ const clsx = (...classes: any[]): string => {
  */
 const customError = (message: string) => new Error(`[Custom Error] ${message}`);
 
+/**
+ * Generating unique string id.
+ *
+ * @returns {string} - The id string.
+ */
+const stringRandom = () => {
+  const CHARACTERS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+
+  for (let i = 0; i < 12; i++) {
+    const randomId = Math.floor(Math.random() * CHARACTERS.length);
+    result += CHARACTERS.charAt(randomId);
+  }
+
+  return result;
+};
+
 export type { ModalSlotProps };
 
 export {
@@ -55,4 +72,5 @@ export {
   handleNotfoundApiError,
   openFile,
   getJsonFileContent,
+  stringRandom,
 };

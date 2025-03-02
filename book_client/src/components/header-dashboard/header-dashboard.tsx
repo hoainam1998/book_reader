@@ -55,13 +55,13 @@ function HeaderDashboard({ disabled, add, search }: HeaderDashboardPropsType): J
         disabled={disabled}
         onChange={(e) => setClearFlag((e.target as any).value)}
         onBlur={(value) => setKeyword(value as string)} />
-      {
-        !isClear
-        ?<Button variant="outline" className="btn-search"
-          disabled={disableSearchButton} onClick={_search}>&#128270;</Button>
-        :<Button variant="outline" className="btn-search" onClick={clear}>&#x2715;</Button>
-      }
-  </div>
+        {
+          !isClear
+          ?<Button variant="outline" className="btn-search"
+            disabled={disableSearchButton} onClick={_search}>&#128270;</Button>
+          :<Button variant="outline" className="btn-search" onClick={clear}>&#x2715;</Button>
+        }
+    </div>
   );
 }
 

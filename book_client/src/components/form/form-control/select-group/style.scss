@@ -1,0 +1,36 @@
+.select-group {
+  border: 3px dashed $title-pop-up-color;
+  border-radius: 4px;
+  padding: 7px 7px 0;
+
+  .select-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin: 10px 0;
+  }
+
+  .select-size {
+    width: 100%;
+  }
+
+  .clear {
+    margin-left: 7px;
+  }
+
+  .select-group-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    justify-content: space-between;
+    padding: 4px 7px;
+    border: 1.5px solid $border-input-color;
+    border-radius: 4px;
+
+    .del-select-item {
+      width: 25px;
+      height: 25px;
+      line-height: 15px;
+    }
+  }
+}

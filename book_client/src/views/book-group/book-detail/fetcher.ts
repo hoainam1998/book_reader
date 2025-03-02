@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { CategoryService, BookService, RequestBody } from 'services';
+import { CategoryService, BookService, AuthorService, RequestBody } from 'services';
 
 const loadAllCategory = (): Promise<AxiosResponse> => {
   return CategoryService.post('all', {
@@ -50,6 +50,16 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
 
 const getAllBookName = (): Promise<AxiosResponse> => {
   return BookService.get('book-name');
+};
+
+const getAllAuthor = (): Promise<AxiosResponse> => {
+  return AuthorService.post('all', {
+    query: {
+      authorId: true,
+      avatar: true,
+      name: true
+    }
+  });
 };
 
 const getBookIntroduceFile = (bookId: string) => {
@@ -103,4 +113,5 @@ export {
   getAllBookName,
   updateBookInformation,
   updateIntroduceFile,
+  getAllAuthor,
 };
