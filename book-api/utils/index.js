@@ -109,7 +109,7 @@ const graphqlQueryParser = (select) => {
  * @return {Object} The final result.
  */
 const getGraphqlFinalData = (data) => {
-  if (data && typeof data === 'object') {
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
     const keys = Object.keys(data);
     if (keys.length > 0) {
       if (keys.length > 1) {

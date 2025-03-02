@@ -2,6 +2,7 @@ const { saveFile } = require('#utils');
 const { createFolder, deleteFile } = require('#utils');
 const { join } = require('path');
 const Service = require('#services/prisma.js');
+const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
 class AuthorService extends Service {
 
@@ -86,7 +87,7 @@ class AuthorService extends Service {
 
     return Promise.all([htmlSave, jsonSave]).then((paths) => {
       const story = paths.reduce((listPath, currentPath) => {
-        const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
+        const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
         if (relativePath) {
           listPath.push(relativePath.replace(/\\/gm, '/'));
         }
@@ -125,7 +126,7 @@ class AuthorService extends Service {
 
       return Promise.all(promise).then((paths) => {
         const story = paths.reduce((listPath, currentPath) => {
-          const relativePath = currentPath.match(/(\\([\w\.]+)){4}$/gm)[0];
+          const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
           if (relativePath) {
             listPath.push(relativePath.replace(/\\/gm, '/'));
           }

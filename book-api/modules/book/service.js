@@ -8,6 +8,7 @@ class BookService extends Service {
   saveIntroduceHtmlFile(fileName, html, json, bookId) {
     const fileNameSaved = fileName.replace(/\s/, '-');
     const filePath = (filePath) => join(__dirname, `../../public/${filePath}/${fileNameSaved}.${filePath}`);
+
     return Promise.all([
       saveFile(filePath('html'), html),
       saveFile(filePath('json'), json)
