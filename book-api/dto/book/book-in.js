@@ -1,6 +1,5 @@
 const { classCreator, Validation } = require('../helper.js');
 const { Validator } = require('#services/validator.js');
-
 const {
   IsString,
   IsOptional,
@@ -76,7 +75,7 @@ const BookCreate = (validators, className) => {
     avatar;
 
     @validators(
-      IsArray('images must be an array!'),
+      IsArray('string', 'images must be an array!'),
       IsBase64Image('images must be files!'),
     )
     images;
@@ -135,6 +134,11 @@ const BookSave = (validators, className) => {
       IsId('categoryId must be numeric string and contains 13 character')
     )
     categoryId;
+
+    @validators(
+      IsArray('string', 'authors must be an array!')
+    )
+    authors;
   }, className);
 };
 
@@ -151,7 +155,7 @@ const BookFileCreated = (validators, className) => {
     avatar;
 
     @validators(
-      IsArray('images must be an array!'),
+      IsArray('object', 'images must be an array!'),
       IsMulterFile('images must be files!'),
     )
     images;
@@ -196,6 +200,16 @@ const IntroduceHTMLFileSave = (validators, className) => {
   }, className);
 };
 
+
+const BookAuthors = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsArray('object', 'authors must be an array!'),
+    )
+    authors;
+  }, className);
+};
+
 module.exports = {
   BookPagination: Validation(BookPagination),
   BookCreate: Validation(BookCreate),
@@ -204,4 +218,5 @@ module.exports = {
   PdfFileSaved: Validation(PdfFileSaved),
   BookDetail: Validation(BookDetail),
   IntroduceHTMLFileSave: Validation(IntroduceHTMLFileSave),
+  BookAuthors: Validation(BookAuthors),
 };

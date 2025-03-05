@@ -9,6 +9,7 @@ const isMulterFile = validate((value) => {
   if (Array.isArray(value)) {
     return value.some(v => checkMulterFile(v));
   }
+
   return checkMulterFile(value);
 });
 

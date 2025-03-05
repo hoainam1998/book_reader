@@ -252,6 +252,33 @@ const mutation = new GraphQLObjectType({
         await book.saveBookImages(images, bookId, name);
         return messageCreator('Book images has been updated!');
       }
+    },
+    saveBookAuthor: {
+      type: ResponseType,
+      args: {
+        authors: {
+          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(new GraphQLInputObjectType({
+            name: 'BookAuthor',
+            fields: {
+              bookId: {
+                type: GraphQLID
+              },
+              authorId: {
+                type: GraphQLID
+              }
+            }
+          })))),
+        }
+      },
+      resolve: async (book, { authors }) => {
+        const authorList = authors.reduce((authorListMapping, author) => {
+          authorListMapping.push({ author_id: author.authorId, book_id: author.bookId });
+          return authorListMapping;
+        }, []);
+
+        await book.saveBookAuthor(authorList);
+        return messageCreator('Create book authors success!');
+      }
     }
   }
 });

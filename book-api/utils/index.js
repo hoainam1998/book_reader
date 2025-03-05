@@ -136,15 +136,17 @@ const getGeneratorFunctionData = (generator) => {
   if (generator && generator.next) {
     let finalResult;
     let done = false;
+
     while (!done) {
       const context = generator.next();
-      if (context.value instanceof Promise) {
+      if (context.value instanceof Promise || Object.hasOwn(context.value || {}, 'errors')) {
         finalResult = context.value;
       }
       done = context.done;
     }
     return finalResult;
   }
+
   return generator;
 };
 
@@ -175,8 +177,8 @@ const createFile = (file) => new File([file.buffer], file.originalname, { type: 
 /**
  * Fetch helper to call api internally.
  *
- * @param {...*} args - The parameters for fetch api function.
- * @return {Promise} The promise result.
+ * @param {[ url: string, method: string, header: Object | undefined, body: Object ]} args - The fetch api props.
+ * @return {Promise} - The promise result.
  */
 const fetchHelper = (...args) => {
   let headers;

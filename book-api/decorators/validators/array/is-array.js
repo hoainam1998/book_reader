@@ -18,7 +18,7 @@ const isArray = (value, type, message) => {
   }
 };
 
-const IsArray = (type, message, options) => {
+const IsArray = (type = undefined, message, options) => {
   if (options) {
     return {
       groups: options.groups,
