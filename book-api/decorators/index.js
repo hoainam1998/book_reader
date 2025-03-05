@@ -4,6 +4,7 @@ const uploadPdf = require('./upload-pdf-file.js');
 const { HTTP_CODE, INTERNAL_ERROR_MESSAGE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, getGeneratorFunctionData, graphqlQueryParser } = require('#utils');
 const { plainToInstance } = require('class-transformer');
+const { Validator } = require('#services/validator.js');
 const Logger = require('#services/logger.js');
 
 /**
@@ -230,8 +231,11 @@ const serializer = (serializerClass) => {
 /**
  * Validation incoming request data.
  *
- * @param {...*} args - The parameters.
- * @returns {Function} - decorator function.
+ * @param {[
+ *  validationInfo: Validator | [{ validate_class: Validator, request_data_passed_type: REQUEST_DATA_PASSED_TYPE }]
+ *  options: { error_message: string, groups: [string] }
+ * ]} args - The validation props.
+ * @returns {Function} - The decorator function.
  */
 const validation = (...args) => {
   const validateInfo = args[0];

@@ -14,7 +14,7 @@ const { promiseAll, getExtName, createFile, fetchHelper, messageCreator } = requ
 const { BookPagination } = require('#dto/book/book-in.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 const { AllBookName, BookCreatedResponse, BookDetailResponse, BookPaginationResponse } = require('#dto/book/book-out.js');
-const { BookCreate, BookSave, BookFileCreated, PdfFileSaved, BookDetail, IntroduceHTMLFileSave } = require('#dto/book/book-in.js');
+const { BookCreate, BookSave, BookFileCreated, PdfFileSaved, BookDetail, IntroduceHTMLFileSave, BookAuthors } = require('#dto/book/book-in.js');
 const cpUpload = multer().fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 },
@@ -34,9 +34,15 @@ const createBookFormData = (req, bookId = Date.now()) => {
   const pdf = req.files.pdf[0];
   const avatar = req.files.avatar[0];
   const images = req.files.images;
+  let authors = [];
 
   const bookForm = Object.entries(req.body).reduce((formData, [key, value]) => {
-    formData.append(key, value);
+    if (key === 'authors') {
+      authors = value.map((authorId) => ({ authorId, bookId }));
+    } else {
+      formData.append(key, value);
+    }
+
     return formData;
   }, new FormData);
 
@@ -54,7 +60,8 @@ const createBookFormData = (req, bookId = Date.now()) => {
 
   return {
     book: bookForm,
-    pdf: pdfForm
+    pdf: pdfForm,
+    authors
   };
 };
 
@@ -78,7 +85,8 @@ class BookRouter extends Router {
     this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
     this.post('/save-pdf', allowInternalCall, this._savePdf);
     this.put('/update-pdf', allowInternalCall, this._updatePdf);
-    this.post('/detail', this._getBookDetail);
+    this.post('/create-book-authors', allowInternalCall, this._createBookAuthors);
+    this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
     this.post('/pagination', authentication, this._paginationBook);
@@ -95,6 +103,7 @@ class BookRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, {
       html: req.body.html,
       name: req.body.fileName,
@@ -114,6 +123,7 @@ class BookRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, {
       html: req.body.html,
       name: req.body.fileName,
@@ -133,6 +143,7 @@ class BookRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, { bookId: req.body.bookId }, req.body.query);
   }
 
@@ -144,6 +155,7 @@ class BookRouter extends Router {
         names
       }
     }`;
+
     return self.execute(query);
   }
 
@@ -161,6 +173,7 @@ class BookRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query,
       {
         pageNumber: req.body.pageNumber,
@@ -290,11 +303,29 @@ class BookRouter extends Router {
     });
   }
 
+  @validation(BookAuthors, { error_message: 'Create book authors failed!' })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _createBookAuthors(req, res, next, self) {
+    const query = `mutation CreateBookAuthor($authors: [BookAuthor!]!) {
+      book {
+        saveBookAuthor(authors: $authors) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(
+      query,
+      { authors: req.body.authors }
+    );
+  }
+
   @validation(
     [
       {
         validate_class: BookSave,
-        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY,
       },
       {
         validate_class: BookFileCreated,
@@ -311,16 +342,22 @@ class BookRouter extends Router {
   _createBookInformation(req, res, next, self) {
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
     const bookId = Date.now();
-    const { book, pdf } = createBookFormData(req, bookId);
+    const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
       () => filterResponse(fetchHelper(`${url}/save-book-info`, 'POST', book)),
       () => filterResponse(fetchHelper(`${url}/save-pdf`, 'POST', pdf)),
+      () => filterResponse(fetchHelper(`${url}/create-book-authors`, 'POST', {
+          'Content-Type': 'application/json'
+        },
+        JSON.stringify({ authors }))
+      ),
     ])
     .then(results => {
       if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
         return Promise.reject('Create book failed!');
       }
+
       return {
         ...messageCreator('Book created success!'),
         bookId: bookId.toString()

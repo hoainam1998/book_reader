@@ -203,6 +203,12 @@ class BookService extends Service {
       this.PrismaInstance.book.count(),
     ]);
   }
+
+  saveBookAuthor(authors) {
+    return this.PrismaInstance.book_author.createMany({
+      data: authors
+    });
+  }
 }
 
 module.exports = BookService;
