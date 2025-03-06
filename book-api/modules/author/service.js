@@ -46,9 +46,18 @@ class AuthorService extends Service {
     ]);
   }
 
-  getAllAuthor(select) {
+  getAuthors(authorIds, select) {
+    const conditions = authorIds ? {
+      where: {
+        author_id: {
+          in: [authorIds].flat()
+        }
+      }
+    }: {};
+
     return this.PrismaInstance.author.findMany({
-      select
+      select,
+      ...conditions
     });
   }
 

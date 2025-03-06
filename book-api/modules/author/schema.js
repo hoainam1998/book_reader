@@ -167,10 +167,15 @@ const query = new GraphQLObjectType({
         });
       }
     },
-    all: {
+    filter: {
       type: AUTHOR_LIST,
-      resolve: async (author, _, context) => {
-        const authors = await author.getAllAuthor(context);
+      args: {
+        authorIds: {
+          type: new GraphQLList(GraphQLString)
+        }
+      },
+      resolve: async (author, { authorIds }, context) => {
+        const authors = await author.getAuthors(authorIds, context);
         if (authors.length === 0) {
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
           throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);

@@ -36,6 +36,9 @@ class BookDetailDTO extends BookDTO {
   @Exclude()
   published_time;
 
+  @Exclude()
+  book_author;
+
   @Type(() => Number)
   get publishedTime() {
     return this.published_time;
@@ -70,6 +73,11 @@ class BookDetailDTO extends BookDTO {
   get images() {
     return this.book_image;
   };
+
+  @Type(() => [String])
+  get authors() {
+    return this.book_author.map((author) => author.author_id);
+  }
 }
 
 module.exports = BookDetailDTO;

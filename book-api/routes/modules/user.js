@@ -46,7 +46,7 @@ class UserRouter extends Router {
     this.delete('/delete-user/:id', authentication, this._deleteUser);
     this.post('/user-detail', authentication, this._getUserDetail);
     this.put('/update-user', authentication, this._updateUser);
-    this.post('/send-otp', loginRequire, this.sendOtpCode);
+    this.post('/send-otp', loginRequire, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.put('/update-person', authentication, this._updatePerson);
     this.post('/login', this._login);
@@ -279,7 +279,7 @@ class UserRouter extends Router {
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
-  sendOtpCode(req, res, next, self) {
+  _sendOtpCode(req, res, next, self) {
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
 
     return fetchHelper(`${url}/update-otp`,

@@ -60,8 +60,9 @@ class PrismaField extends Singleton {
               if (Object.hasOwn(this._fields[current], 'as')) {
                 const alias = this._fields[current].as;
                 if (!Object.hasOwn(select, alias)) {
-                  delete this._fields[current].as;
-                  select[alias] = this._fields[current];
+                  const currentFieldObj = {...this._fields[current]};
+                  delete currentFieldObj.as;
+                  select[alias] = currentFieldObj;
                 }
               } else {
                 select[current] = this._fields[current];
