@@ -2,7 +2,7 @@ import Api from '../axios';
 import type { AxiosResponse, AxiosRequestConfig } from '../axios';
 import { formatSubUrl } from 'decorators';
 
-interface IQueryType {
+export interface IQueryType {
   [key: string]: boolean | IQueryType;
 }
 

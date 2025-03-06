@@ -1,5 +1,7 @@
 import { AxiosResponse } from 'axios';
-import { CategoryService, BookService, AuthorService, RequestBody } from 'services';
+import { LoaderFunctionArgs } from 'react-router-dom';
+import { CategoryService, BookService, AuthorService, RequestBody, IQueryType } from 'services';
+import { handleNotfoundApiError } from 'utils';
 
 const loadAllCategory = (): Promise<AxiosResponse> => {
   return CategoryService.post('all', {
@@ -29,7 +31,8 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
     images: {
       image: true,
       name: true
-    }
+    },
+    authors: true
   };
 
   if (includeIntroduceFieldFlag) {
@@ -52,13 +55,18 @@ const getAllBookName = (): Promise<AxiosResponse> => {
   return BookService.get('book-name');
 };
 
-const getAllAuthor = (): Promise<AxiosResponse> => {
-  return AuthorService.post('all', {
-    query: {
-      authorId: true,
-      avatar: true,
-      name: true
-    }
+const getAuthors = (authorIds?: string[], query?: IQueryType): Promise<AxiosResponse> => {
+  const queries = query
+  ? query
+  : {
+    authorId: true,
+    avatar: true,
+    name: true
+  };
+
+  return AuthorService.post('filter', {
+    query: queries,
+    authorIds,
   });
 };
 
@@ -86,7 +94,7 @@ const saveIntroduceFile = (
     fileName,
     bookId
   };
-  return BookService.post('/save-introduce', body);
+  return BookService.post('save-introduce', body);
 };
 
 const updateIntroduceFile = (
@@ -101,11 +109,37 @@ const updateIntroduceFile = (
     fileName,
     bookId
   };
-  return BookService.put('/update-introduce', body);
+  return BookService.put('update-introduce', body);
+};
+
+const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
+  const url: URL = new URL(request.url);
+  const pageSize: number = parseInt(url.searchParams.get('pageSize') || '10');
+  const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
+  const keyword: string | null = url.searchParams.get('keyword');
+
+  return handleNotfoundApiError(
+    BookService.post('pagination', {
+      query: {
+        bookId: true,
+        name: true,
+        pdf: true,
+        publishedTime: true,
+        publishedDay: true,
+        category: true,
+        introduce: true,
+        avatar: true
+      },
+      pageSize,
+      pageNumber,
+      keyword
+    })
+  );
 };
 
 export {
   loadAllCategory,
+  bookPagination,
   saveBookInformation,
   getBookDetail,
   saveIntroduceFile,
@@ -113,5 +147,5 @@ export {
   getAllBookName,
   updateBookInformation,
   updateIntroduceFile,
-  getAllAuthor,
+  getAuthors,
 };

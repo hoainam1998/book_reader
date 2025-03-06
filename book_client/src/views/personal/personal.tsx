@@ -102,7 +102,7 @@ function Personal(): JSX.Element {
   return (
     <BlockerProvider isNavigate={validate.dirty && !reLogin}>
       <PersonalForm>
-        <section className="personal">
+        <section className="personal flex-center">
           <Form id={formId} onSubmit={onSubmit} className="user-form hight-light form-size">
             <Grid
               lg={2}
@@ -116,7 +116,7 @@ function Personal(): JSX.Element {
                   &#8592;Back
                 </Button>
               </GridItem>
-              <GridItem sm={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}>
                 <Input
                   {...firstName}
                   label="First name"
@@ -128,7 +128,7 @@ function Personal(): JSX.Element {
                     lg: 4
                   }}/>
               </GridItem>
-              <GridItem sm={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}>
                 <Input
                   {...lastName}
                   label="Last name"
@@ -140,7 +140,7 @@ function Personal(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}>
                 <Input
                   {...email}
                   label="Email"
@@ -153,7 +153,7 @@ function Personal(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}>
                 <FileDragDropUpload
                   {...avatar}
                   multiple={false}
@@ -166,7 +166,7 @@ function Personal(): JSX.Element {
                     lg: 12
                   }} />
               </GridItem>
-              <GridItem sm={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}>
                 <Input
                   {...password}
                   label="Password"

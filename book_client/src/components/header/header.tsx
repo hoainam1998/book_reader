@@ -35,8 +35,12 @@ function MenuDropdown({ navigate, onPositionChange }: MenuDropdownPropsType): JS
 
   const position = useUpdatePositionAcrossWindowSize(onPositionChange);
 
+  if (!Object.keys(position).length) {
+    return <></>;
+  }
+
   return (
-    <ul className="menu-content" style={position}>
+    <ul className="menu-content position-fixed" style={position}>
       <li onClick={personalSetting}>
         <img src={require('images/icons/person.svg')} width="20" height="20" alt="personal" />
         Personal

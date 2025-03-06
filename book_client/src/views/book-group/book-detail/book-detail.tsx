@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { JSX, useEffect, useSyncExternalStore } from 'react';
+import { JSX, useLayoutEffect, useSyncExternalStore } from 'react';
 import { useParams, useNavigation } from 'react-router-dom';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
@@ -7,11 +7,11 @@ import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
 import {
   loadAllCategory
-} from './fetcher';
+} from '../fetcher';
 import store, { CurrentStoreType } from 'store/book';
 import BlockerProvider from 'contexts/blocker';
 import './style.scss';
-const { subscribe, getSnapshot, updateDisableStep, updateStep } = store;
+const { subscribe, getSnapshot, updateDisableStep, updateStep, deleteAllStorage } = store;
 
 function BookDetail(): JSX.Element {
   const navigation = useNavigation();
@@ -19,11 +19,19 @@ function BookDetail(): JSX.Element {
     = useSyncExternalStore(subscribe, getSnapshot);
   const { id } = useParams();
 
-  useEffect(() => {
-    if (['idle', 'loading'].includes(navigation.state)) {
-      updateDisableStep(id ? false : 2);
-      updateStep(1);
-    }
+  useLayoutEffect(() => {
+    let timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      if (navigation.state === 'loading') {
+        updateDisableStep(2);
+        updateStep(1);
+      } else if (navigation.state === 'idle') {
+        updateDisableStep(id ? false : 2);
+        updateStep(step);
+      }
+    }, 100);
+
   }, [navigation.state]);
 
   return (
