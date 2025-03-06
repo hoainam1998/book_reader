@@ -124,6 +124,9 @@ const BookInformationType = new GraphQLObjectType({
           }
         }
       })
+    },
+    authors: {
+      type: new GraphQLNonNull(new GraphQLList(GraphQLString))
     }
   }
 });

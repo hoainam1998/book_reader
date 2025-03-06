@@ -24,15 +24,19 @@ class Validator extends Singleton {
     *
     * @param {Function} validateFn - The validator function.
     * @param {*} value - The current value.
+    * @param {boolean} isOptional - If value is option and value is valid, it will be validate, otherwise nothing run .
     * @param {object} results - The validate result.
     * @param {Array} errors - The error array.
     */
-    const validating = (validateFn, value, results, errors) => {
-      const result = validateFn(value);
-      if (result) {
-        results.errors.push(result);
-        errors.push(result);
-      };
+    const validating = (validateFn, value, isOptional, results, errors) => {
+      if ((isOptional && value) || !isOptional) {
+        const result = validateFn(value);
+
+        if (result) {
+          results.errors.push(result);
+          errors.push(result);
+        };
+      }
     };
 
     if (this.validators) {
@@ -42,7 +46,7 @@ class Validator extends Singleton {
         // adding validate result by key in result object.
         results[key] = {
           // loop through all validator
-          errors: this.validators[name][key].reduce((errors, validator) => {
+          errors: this.validators[name][key].validatorsFn.reduce((errors, validator) => {
             // if validator is object
             if (typeof validator === 'object' && validateGroups && validateGroups.length) {
               // separate validator to groups and validator function.
@@ -55,11 +59,11 @@ class Validator extends Singleton {
               const isDuplicate = groupNames.filter(
                 (groupName, index, array) => array.indexOf(groupName) !== index && array.lastIndexOf(groupName) === index).length;
               if (isDuplicate) {
-                validating(validateFn, this[key], results, errors);
+                validating(validateFn, this[key], this.validators[name][key].isOptional, results, errors);
               }
             } else if (typeof validator === 'function') {
               // if validator is not object, it is validator function.
-              validating(validator, this[key], results, errors);
+              validating(validator, this[key], this.validators[name][key].isOptional, results, errors);
             }
             return errors;
           }, []),
@@ -78,13 +82,9 @@ class Validator extends Singleton {
 */
 const validation = (cls) => {
   return (...validatorsFn) => {
-    // if using IsOptional for this key, then all validator function will be ignore.
-    if (validatorsFn.some(validateInfo => typeof validateInfo === 'object' && validateInfo.isOptional)) {
-      validatorsFn = [];
-    } else {
-      // else those validator function will run, except IsOptional
-      validatorsFn = validatorsFn.filter(validateInfo => !(typeof validateInfo === 'object' && Object.hasOwn(validateInfo, 'isOptional')));
-    }
+    let isOptional = validatorsFn.some(validateInfo => typeof validateInfo === 'object' && validateInfo.isOptional);
+    isOptional = validatorsFn.every(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
+    validatorsFn = validatorsFn.filter(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
     // adding validator object into validator instance.
     // all validator function in this object will be run validate method.
     return (target) => {
@@ -92,7 +92,10 @@ const validation = (cls) => {
         ...Validator.prototype.validators,
         [cls]: {
           ...(cls && !!Validator.prototype.validators ? Validator.prototype.validators[cls] : {}),
-          [target.key]: validatorsFn,
+          [target.key]: {
+            isOptional: !isOptional,
+            validatorsFn,
+          }
         }
       };
     };

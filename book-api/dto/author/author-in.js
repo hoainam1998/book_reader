@@ -9,6 +9,7 @@ const {
   IsPositive,
   IsGraphqlSelect,
   IsOptional,
+  IsArray,
 } = require('#decorators/validators');
 
 const AuthorSave = (validators, className) => {
@@ -95,8 +96,14 @@ const AuthorDetail = (validators, className) => {
   }, className);
 };
 
-const AllAuthor = (validators, className) => {
+const AuthorFilter = (validators, className) => {
   return classCreator(class extends Validator {
+    @validators(
+      IsOptional(),
+      IsArray('string', 'authorIds must be an string array')
+    )
+    authorIds;
+
     @validators(
       IsGraphqlSelect('Value of field must be boolean!')
     )
@@ -108,5 +115,5 @@ module.exports = {
   AuthorSave: Validation(AuthorSave),
   AuthorPagination: Validation(AuthorPagination),
   AuthorDetail: Validation(AuthorDetail),
-  AllAuthor: Validation(AllAuthor),
+  AuthorFilter: Validation(AuthorFilter),
 };

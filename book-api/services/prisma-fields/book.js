@@ -23,6 +23,12 @@ class BookPrismaField extends PrismaField {
       as: 'book_image',
       child: ['image', 'name']
     },
+    authors: {
+      as: 'book_author',
+      select: {
+        author_id: true
+      }
+    }
   };
 }
 
