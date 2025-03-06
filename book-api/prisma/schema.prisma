@@ -15,6 +15,7 @@ model author {
   year_of_birth Int?
   year_of_dead  Int?
   story         String? @db.VarChar(255)
+  book_author   book_author[]
 }
 
 model book {
@@ -29,6 +30,7 @@ model book {
   category       category      @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK")
   book_image     book_image[]
   book_reader    book_reader[]
+  book_author    book_author[]
 
   @@index([category_id], map: "FK_BOOK")
 }
@@ -36,9 +38,11 @@ model book {
 model book_author {
   book_id   String @db.VarChar(20)
   author_id String @db.VarChar(20)
+  book      book   @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_AUTHOR_BOOK")
+  author    author @relation(fields: [author_id], references: [author_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_AUTHOR_BOOK_AUTHOR")
 
   @@id([book_id, author_id])
-  @@index([author_id], map: "AUTHOR_ID")
+  @@index([book_id], map: "FK_BOOK_AUTHOR_BOOK")
 }
 
 model book_image {
