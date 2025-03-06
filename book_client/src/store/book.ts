@@ -20,7 +20,6 @@ type BookInfo = {
 };
 
 const disableStep: CurrentStoreType['disableStep'] = DisableStepStorage.getItem();
-console.log(disableStep);
 
 const initStore: () => CurrentStoreType = () => ({
   step: +(StepStorage.getItem() || 1),
