@@ -71,6 +71,12 @@ button {
   gap: unset !important;
 }
 
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .absolute-center {
   position: absolute;
   top: 50%;

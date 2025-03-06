@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios';
 import { Op } from 'quill/core';
 import Button from 'components/button/button';
 import store, { CurrentStoreType } from 'store/book';
-import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '../fetcher';
+import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '../../fetcher';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import useInitEditor from 'hooks/useInitEditor';

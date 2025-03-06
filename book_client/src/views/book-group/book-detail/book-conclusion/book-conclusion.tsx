@@ -5,7 +5,8 @@ import {
   useState,
   useEffect,
   useCallback,
-  ReactElement
+  ReactElement,
+  Children
 } from 'react';
 import { Blocker, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -21,12 +22,18 @@ import './style.scss';
 import { getCategoryDetail } from 'views/category-group/fetcher';
 import type { CategoryDetailType } from 'views/category-group/category';
 import useComponentWillMount, { HaveLoadedFnType } from 'hooks/useComponentWillMount';
+import { getAuthors } from 'views/book-group/fetcher';
 const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
 
 type FieldHightLightBoxPropsType = {
   label: string;
-  value: string | number;
+  value?: string | number;
   children?: ReactElement;
+};
+
+type AuthorsType = {
+  name: string;
+  avatar: string;
 };
 
 const FieldHightLightBox = ({
@@ -34,27 +41,22 @@ const FieldHightLightBox = ({
   value,
   children
 }: FieldHightLightBoxPropsType): JSX.Element => {
+  let content = <>
+    <span className="field-information">{value}</span>
+    {children}
+  </>;
+
+  if (Children.count(children)) {
+    const child = Children.only(children);
+    content = child?.props.name === 'content' ? child : content;
+  }
+
   return (
     <div className="field-hight-light-box">
       <div className="label-badge">
         <span className="badge">{label}</span>
       </div>
-      <span className="field-information">{value}</span>
-      {children}
-    </div>
-  );
-};
-
-const CategoryHightLightBox = ({ name, avatar }: CategoryDetailType): JSX.Element => {
-  return (
-    <div className="field-hight-light-box">
-      <div className="label-badge">
-        <span className="badge">Category</span>
-      </div>
-      <div className="category-display">
-        <img className="avatar" src={avatar} alt="avatar" />
-        <span className="field-information">{name}</span>
-      </div>
+      {content}
     </div>
   );
 };
@@ -68,7 +70,7 @@ const bodyModal: JSX.Element = (
 );
 
 const footerModal = (blocker: Blocker): JSX.Element => {
-  const onCloseModal = (onClose: () => void) => {
+  const onCloseModal = (onClose: () => void): void => {
     onClose();
     blocker!.reset!();
   };
@@ -90,6 +92,7 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 
 function BookConclusion(): JSX.Element {
   const [category, setCategory] = useState<CategoryDetailType>({ name: '', avatar: ''});
+  const [authors, setAuthors] = useState<AuthorsType[]>([]);
   const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
   const navigate = useNavigate();
   const publishedDay: string = useMemo(
@@ -117,6 +120,12 @@ function BookConclusion(): JSX.Element {
             .then((res) => setCategory(res.data))
             .catch(() => setCategory({ name: '', avatar: '' }));
         }
+
+        getAuthors(data.authors, {
+          name: true,
+          avatar: true
+        }).then((res) => setAuthors(res.data))
+          .catch(() => setAuthors([]));
       }
     };
   }, []);
@@ -128,7 +137,7 @@ function BookConclusion(): JSX.Element {
           <GridItem sm={12} md={6} lg={3} order={1} className="avatar-box">
             <span className="field-name">Avatar</span>
             <div className="avatar image-box">
-              { data && data.avatar && (<img src={data.avatar} alt="avatar" />)}
+              {data && data.avatar && (<img src={data.avatar} alt="avatar" />)}
             </div>
           </GridItem>
           <GridItem sm={12} lg={6} order={3} className="image-box-wrapper">
@@ -161,7 +170,14 @@ function BookConclusion(): JSX.Element {
                 <FieldHightLightBox label="Publish Day" value={publishedDay} />
               </li>
               <li>
-                <CategoryHightLightBox {...category} />
+                <FieldHightLightBox label="Category">
+                  <Slot name="content">
+                    <div className="image-field">
+                      <img className="avatar" src={category.avatar} alt="avatar" />
+                      <span className="field-information">{category.name}</span>
+                    </div>
+                  </Slot>
+                </FieldHightLightBox>
               </li>
               <li>
                 <FieldHightLightBox label="Introduce" value={data.introduce!.html}>
@@ -171,6 +187,22 @@ function BookConclusion(): JSX.Element {
                     variant="success">
                       Preview
                   </Button>
+                </FieldHightLightBox>
+              </li>
+              <li>
+                <FieldHightLightBox label="Authors" value={'author'}>
+                  <Slot name="content">
+                    <ul>
+                      <List<AuthorsType> items={authors} render={({ name, avatar }) => (
+                        <li className="box-item">
+                          <div className="image-field">
+                            <img className="avatar" src={avatar} alt="avatar" />
+                            <span className="field-information">{name}</span>
+                          </div>
+                        </li>
+                      )} />
+                    </ul>
+                  </Slot>
                 </FieldHightLightBox>
               </li>
             </ul>

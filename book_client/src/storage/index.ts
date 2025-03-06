@@ -16,6 +16,7 @@ export type BookInfoType = {
     html: string;
     json: string;
   };
+  authors: string[];
 };
 
 export type UserLogin = {

@@ -1,12 +1,10 @@
 .personal {
   height: 100vh;
-  display: flex;
-  align-items: center;
   flex-direction: column;
   padding: 20px;
 
   & > .form-size {
-    width: 45%;
+    width: 50%;
   }
 
   & > .hight-light {

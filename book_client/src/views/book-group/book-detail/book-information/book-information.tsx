@@ -20,10 +20,11 @@ import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { CurrentStoreType, Image } from 'store/book';
-import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAllAuthor } from '../fetcher';
+import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAuthors } from '../../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import './style.scss';
+import useComponentWillMount from 'hooks/useComponentWillMount';
 
 const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate, deleteAllStorage } = store;
 
@@ -173,8 +174,8 @@ function BookInformation(): JSX.Element {
           promiseResult = saveBookInformation(formData);
         }
         promiseResult.then((res) => {
-          const bookId: string = data.bookId || res.data.bookId;
-          getBookDetail(bookId, !!data.bookId).then((res) =>
+          const bookId: string = data?.bookId || res.data.bookId;
+          getBookDetail(bookId, !!data?.bookId).then((res) =>
             updateBookInfo({
               data: { ...res.data, bookId },
               step: 2,
@@ -216,6 +217,7 @@ function BookInformation(): JSX.Element {
         categoryId.watch(data.categoryId);
         pdf.watch('');
         images.watch('');
+        authors.watch(data.authors);
         if (!haveFetched()) {
           convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
             .then((res) => pdf.watch(res));
@@ -234,10 +236,10 @@ function BookInformation(): JSX.Element {
     };
   }, []);
 
-  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+  useComponentWillMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        getAllAuthor()
+        getAuthors()
           .then((res) => setAuthorsList(res.data))
           .catch(() => setAuthorsList([]));
         getAllBookName()

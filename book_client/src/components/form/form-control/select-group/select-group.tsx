@@ -64,7 +64,6 @@ function SelectGroup<T>({
   onChange,
 }: SelectGroupPropsType<T>): JSX.Element {
   const [optionSelected, setOptionSelected] = useState<Map<string, OptionType<T>>>(new Map([]));
-  const [optionChanged, setOptionChanged] = useState<number>(Date.now());
 
   const optionsWithPlaceHolder = useMemo<OptionsType<T>>(() => {
     if (items.length) {
@@ -171,6 +170,7 @@ function SelectGroup<T>({
             </div>
           : showingElementClone()
         }
+        <input type="hidden" name={name} value={selectedValue} />
         <Button variant="dangerous" className="del-select-item" onClick={deleteSelectItem}>&#10005;</Button>
       </li>
     );
@@ -233,7 +233,6 @@ function SelectGroup<T>({
       optionSelected.delete(idx);
       setOptionSelected(optionSelected);
       onOptionChanged();
-      setOptionChanged(Date.now());
     };
   },[optionSelected]);
 
@@ -242,7 +241,6 @@ function SelectGroup<T>({
       optionSelected.set(idx, option);
       setOptionSelected(optionSelected);
       onOptionChanged();
-      setOptionChanged(Date.now());
     };
   }, [optionSelected]);
 
@@ -260,7 +258,7 @@ function SelectGroup<T>({
         deleteOptionSelected: deleteOptionSelected(id),
       });
     },
-    [selectItems, optionChanged, optionSelected]);
+    [selectItems, values, optionSelected]);
 
   useLayoutEffect(() => {
     if (items.length) {

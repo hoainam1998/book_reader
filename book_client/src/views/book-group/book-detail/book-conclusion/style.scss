@@ -47,10 +47,13 @@ $information-section-height: 400px;
 
   .information-detail {
     margin-top: 30px;
-    height: $information-section-height;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    & > li:not(:first-of-type) {
+      margin-top: 10px;
+    }
   }
 
   .btn-complete {
@@ -91,7 +94,7 @@ $information-section-height: 400px;
     padding: 0 5px;
   }
 
-  .category-display {
+  .image-field {
     display: flex;
     align-items: center;
 
@@ -100,5 +103,9 @@ $information-section-height: 400px;
       width: 40px;
       margin-right: 15px;
     }
+  }
+
+  .box-item:not(:last-of-type) {
+    margin: 7px 0;
   }
 }
