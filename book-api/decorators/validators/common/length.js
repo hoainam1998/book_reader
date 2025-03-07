@@ -13,6 +13,6 @@ const Length = (limit, message, options) => {
   } else {
     return (value) => checkLength(value, limit, message);
   }
-}
+};
 
 module.exports = Length;

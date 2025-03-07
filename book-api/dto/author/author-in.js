@@ -4,12 +4,12 @@ const {
   IsString,
   IsNumeric,
   IsId,
+  IsIds,
   IsBase64Image,
   IsRangeContain,
   IsPositive,
   IsGraphqlSelect,
   IsOptional,
-  IsArray,
 } = require('#decorators/validators');
 
 const AuthorSave = (validators, className) => {
@@ -100,7 +100,7 @@ const AuthorFilter = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
       IsOptional(),
-      IsArray('string', 'authorIds must be an string array')
+      IsIds('authors must be an id or an id array!')
     )
     authorIds;
 

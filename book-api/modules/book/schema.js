@@ -279,6 +279,7 @@ const mutation = new GraphQLObjectType({
           return authorListMapping;
         }, []);
 
+        await book.deleteBookAuthor(authorList[0].authorId);
         await book.saveBookAuthor(authorList);
         return messageCreator('Create book authors success!');
       }

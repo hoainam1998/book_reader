@@ -27,6 +27,6 @@ const IsArray = (type = undefined, message, options) => {
   } else {
     return (value) => isArray(value, type, message);
   }
-}
+};
 
 module.exports = IsArray;
