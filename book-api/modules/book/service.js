@@ -209,6 +209,12 @@ class BookService extends Service {
       data: authors
     });
   }
+
+  deleteBookAuthor(bookId) {
+    return this.PrismaInstance.book_author.deleteMany({
+      book_id: bookId
+    });
+  }
 }
 
 module.exports = BookService;

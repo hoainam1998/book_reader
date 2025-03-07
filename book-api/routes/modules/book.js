@@ -38,7 +38,7 @@ const createBookFormData = (req, bookId = Date.now()) => {
 
   const bookForm = Object.entries(req.body).reduce((formData, [key, value]) => {
     if (key === 'authors') {
-      authors = value.map((authorId) => ({ authorId, bookId }));
+      authors = [value].flat().map((authorId) => ({ authorId, bookId }));
     } else {
       formData.append(key, value);
     }
@@ -85,7 +85,7 @@ class BookRouter extends Router {
     this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
     this.post('/save-pdf', allowInternalCall, this._savePdf);
     this.put('/update-pdf', allowInternalCall, this._updatePdf);
-    this.post('/create-book-authors', allowInternalCall, this._createBookAuthors);
+    this.post('/save-book-authors', allowInternalCall, this._saveBookAuthors);
     this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
@@ -306,7 +306,7 @@ class BookRouter extends Router {
   @validation(BookAuthors, { error_message: 'Create book authors failed!' })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  _createBookAuthors(req, res, next, self) {
+  _saveBookAuthors(req, res, next, self) {
     const query = `mutation CreateBookAuthor($authors: [BookAuthor!]!) {
       book {
         saveBookAuthor(authors: $authors) {
@@ -347,7 +347,7 @@ class BookRouter extends Router {
     return promiseAll([
       () => filterResponse(fetchHelper(`${url}/save-book-info`, 'POST', book)),
       () => filterResponse(fetchHelper(`${url}/save-pdf`, 'POST', pdf)),
-      () => filterResponse(fetchHelper(`${url}/create-book-authors`, 'POST', {
+      () => filterResponse(fetchHelper(`${url}/save-book-authors`, 'POST', {
           'Content-Type': 'application/json'
         },
         JSON.stringify({ authors }))
@@ -386,11 +386,16 @@ class BookRouter extends Router {
   _updateBookInformation(req, res, next, self) {
     const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
     const bookId = req.body.bookId;
-    const { book, pdf } = createBookFormData(req, bookId);
+    const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
       () => filterResponse(fetchHelper(`${url}/update-book-info`, 'PUT', book)),
       () => filterResponse(fetchHelper(`${url}/update-pdf`, 'PUT', pdf)),
+      () => filterResponse(fetchHelper(`${url}/save-book-authors`, 'POST', {
+          'Content-Type': 'application/json'
+        },
+        JSON.stringify({ authors }))
+      ),
     ])
     .then(results => {
       if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {

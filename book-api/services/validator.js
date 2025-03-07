@@ -82,8 +82,10 @@ class Validator extends Singleton {
 */
 const validation = (cls) => {
   return (...validatorsFn) => {
+    // checking whether this field is optional or not.
     let isOptional = validatorsFn.some(validateInfo => typeof validateInfo === 'object' && validateInfo.isOptional);
     isOptional = validatorsFn.every(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
+
     validatorsFn = validatorsFn.filter(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
     // adding validator object into validator instance.
     // all validator function in this object will be run validate method.

@@ -9,6 +9,7 @@ const {
   IsNumeric,
   Length,
   IsId,
+  IsIds,
   IsBase64Image,
   IsMulterFile,
   IsArray,
@@ -136,7 +137,7 @@ const BookSave = (validators, className) => {
     categoryId;
 
     @validators(
-      IsArray('string', 'authors must be an array!')
+      IsIds('authors must be an id or an id array!')
     )
     authors;
   }, className);
@@ -199,7 +200,6 @@ const IntroduceHTMLFileSave = (validators, className) => {
     fileName;
   }, className);
 };
-
 
 const BookAuthors = (validators, className) => {
   return classCreator(class extends Validator {
