@@ -1,6 +1,5 @@
 import {
   JSX,
-  useSyncExternalStore,
   useMemo,
   useState,
   useEffect,
@@ -15,7 +14,7 @@ import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from 'hooks/useModalNavigation';
-import store, { CurrentStoreType, Image } from 'store/book';
+import { Image } from 'store/book';
 import { showToast, ModalSlotProps, openFile } from 'utils';
 import paths from 'paths';
 import './style.scss';
@@ -23,7 +22,7 @@ import { getCategoryDetail } from 'views/category-group/fetcher';
 import type { CategoryDetailType } from 'views/category-group/category';
 import useComponentWillMount, { HaveLoadedFnType } from 'hooks/useComponentWillMount';
 import { getAuthors } from 'views/book-group/fetcher';
-const { updateConditionNavigate, deleteAllStorage, subscribe, getSnapshot } = store;
+import { useBookStoreContext } from 'contexts/book-store';
 
 type FieldHightLightBoxPropsType = {
   label: string;
@@ -93,7 +92,7 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 function BookConclusion(): JSX.Element {
   const [category, setCategory] = useState<CategoryDetailType>({ name: '', avatar: ''});
   const [authors, setAuthors] = useState<AuthorsType[]>([]);
-  const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { data, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
   const navigate = useNavigate();
   const publishedDay: string = useMemo(
     () => (data && data.publishedDay ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),

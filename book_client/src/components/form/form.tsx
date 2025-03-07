@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { JSX } from 'react';
+import React, { JSX, useCallback } from 'react';
 import Button from 'components/button/button';
 import { clsx } from 'utils';
 import './style.scss';
@@ -23,10 +23,10 @@ function Form({
   onSubmit
 }: FormProps): JSX.Element {
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = useCallback((event: any): void => {
     (event as Event).preventDefault();
     onSubmit(new FormData((event.target as HTMLFormElement).form));
-  };
+  }, [onSubmit]);
 
   return (
     <form id={id} className={clsx('form', className)} data-testid="form" encType="multipart/form-data">

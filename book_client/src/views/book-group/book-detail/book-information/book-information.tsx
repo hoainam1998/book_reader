@@ -3,7 +3,6 @@ import {
   useCallback,
   useRef,
   useEffect,
-  useSyncExternalStore,
   useState,
 } from 'react';
 import { useLoaderData, useParams } from 'react-router-dom';
@@ -19,14 +18,13 @@ import SelectGroup from 'components/form/form-control/select-group/select-group'
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from 'hooks/useModalNavigation';
-import store, { CurrentStoreType, Image } from 'store/book';
+import { Image } from 'store/book';
 import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAuthors } from '../../fetcher';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import './style.scss';
 import useComponentWillMount from 'hooks/useComponentWillMount';
-
-const { subscribe, getSnapshot, updateBookInfo, updateConditionNavigate, deleteAllStorage } = store;
+import { useBookStoreContext } from 'contexts/book-store';
 
 type CategoryOptionsType = {
   name: string;
@@ -103,7 +101,7 @@ function BookInformation(): JSX.Element {
   const [authorsList, setAuthorsList] = useState<AuthorSelectType[]>([]);
   const [bookNames, setBookNames] = useState<string[]>([]);
   const { id } = useParams();
-  const { data, step, disableStep }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const { data, step, updateBookInfo, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
 
   const validateName = useCallback(
     (message: string) =>
@@ -173,13 +171,14 @@ function BookInformation(): JSX.Element {
         } else {
           promiseResult = saveBookInformation(formData);
         }
+
         promiseResult.then((res) => {
           const bookId: string = data?.bookId || res.data.bookId;
           getBookDetail(bookId, !!data?.bookId).then((res) =>
             updateBookInfo({
               data: { ...res.data, bookId },
               step: 2,
-              disableStep: disableStep === false ? false : 3
+              disableStep: data?.bookId ? false : 3
             })
           );
         }).catch((err) => showToast('Save book information', err.response.data.message));

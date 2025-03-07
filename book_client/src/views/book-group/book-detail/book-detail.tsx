@@ -10,8 +10,9 @@ import {
 } from '../fetcher';
 import store, { CurrentStoreType } from 'store/book';
 import BlockerProvider from 'contexts/blocker';
+import BookStoreProvider from 'contexts/book-store';
 import './style.scss';
-const { subscribe, getSnapshot, updateDisableStep, updateStep, deleteAllStorage } = store;
+const { subscribe, getSnapshot, updateDisableStep, updateStep } = store;
 
 function BookDetail(): JSX.Element {
   const navigation = useNavigation();
@@ -36,23 +37,25 @@ function BookDetail(): JSX.Element {
 
   return (
     <BlockerProvider isNavigate={isNavigate}>
-      <Stepper
-        stepNumber={3}
-        onSwitch={updateStep}
-        activeStep={step}
-        disableStep={disableStep}
-        sticky
-        className="book-detail-stepper">
-          <StepContent step={1}>
-            <BookInformation />
-          </StepContent>
-          <StepContent step={2}>
-            <BookIntroduce />
-          </StepContent>
-          <StepContent step={3}>
-            <BookConclusion />
-          </StepContent>
-      </Stepper>
+      <BookStoreProvider>
+        <Stepper
+          stepNumber={3}
+          onSwitch={updateStep}
+          activeStep={step}
+          disableStep={disableStep}
+          sticky
+          className="book-detail-stepper">
+            <StepContent step={1}>
+              <BookInformation />
+            </StepContent>
+            <StepContent step={2}>
+              <BookIntroduce />
+            </StepContent>
+            <StepContent step={3}>
+              <BookConclusion />
+            </StepContent>
+        </Stepper>
+      </BookStoreProvider>
     </BlockerProvider>
   );
 }
