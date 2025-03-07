@@ -1,29 +1,27 @@
-import { JSX, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
+import { JSX, useEffect, useCallback, useMemo } from 'react';
 import { AxiosResponse } from 'axios';
 import { Op } from 'quill/core';
 import Button from 'components/button/button';
-import store, { CurrentStoreType } from 'store/book';
 import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '../../fetcher';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import useInitEditor from 'hooks/useInitEditor';
 import { getJsonFileContent } from 'utils';
+import { useBookStoreContext } from 'contexts/book-store';
 import './style.scss';
-
-const {
-  subscribe,
-  getSnapshot,
-  updateStep,
-  updateDisableStep,
-  updateData,
-  updateConditionNavigate,
-  deleteAllStorage
-} = store;
 
 const editSelector: string = 'book-introduce-editor';
 
 function BookIntroduce(): JSX.Element {
-  const { data }: CurrentStoreType = useSyncExternalStore(subscribe, getSnapshot);
+  const {
+    data,
+    updateStep,
+    updateDisableStep,
+    updateData,
+    updateConditionNavigate,
+    deleteAllStorage
+  } = useBookStoreContext();
+
   useModalNavigation({ onLeaveAction: deleteAllStorage });
   const { quill, haveContent } = useInitEditor(editSelector);
 
