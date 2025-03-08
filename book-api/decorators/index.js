@@ -134,8 +134,13 @@ const validateResultExecute = (httpCode) => {
 const endpoint = (target) => {
   const originMethod = target.descriptor.value;
   target.descriptor.value = function (...args) {
+    // checking if url not contain "/" at first, then "/" will be include at begin of url.
+    if (/^\/(\w|-)+/.test(args[0]) === false) {
+      args[0] = `/${args[0]}`;
+    }
+
     // get current middleware
-    let caller = args.pop();
+    const caller = args.pop();
     // re-assign with new parameter "this"(current object using this middleware).
     const handler = (req, res, next) => caller(req, res, next, this);
     originMethod.apply(this, [...args, handler]);
