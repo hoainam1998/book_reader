@@ -24,12 +24,12 @@ type ModalSlotsType = {
   footer: React.ReactNode;
 };
 
-export type ModalSlotProps = {
+export type ModalSlotPropsType = {
   onClose: () => void;
 };
 
-const slotMapping = (child: JSX.Element, onClose: ModalPropsType['onClose'], slots: ModalSlotsType ): void => {
-  const renderChild = () => (child.props.render ? child.props.render({ onClose }) : child);
+const slotMapping = (child: JSX.Element, onClose: ModalPropsType['onClose'], slots: ModalSlotsType): void => {
+  const renderChild = (): JSX.Element => (child.props.render ? child.props.render({ onClose }) : child);
 
   switch (true) {
     case isSlot('header', child): slots.header = renderChild(); break;

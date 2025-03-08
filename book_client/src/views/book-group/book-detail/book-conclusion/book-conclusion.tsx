@@ -14,15 +14,16 @@ import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
 import useModalNavigation from 'hooks/useModalNavigation';
-import { Image } from 'store/book';
-import { showToast, ModalSlotProps, openFile } from 'utils';
-import paths from 'paths';
-import './style.scss';
+import useComponentWillMount from 'hooks/useComponentWillMount';
 import { getCategoryDetail } from 'views/category-group/fetcher';
 import type { CategoryDetailType } from 'views/category-group/category';
-import useComponentWillMount, { HaveLoadedFnType } from 'hooks/useComponentWillMount';
 import { getAuthors } from 'views/book-group/fetcher';
+import { Image } from 'store/book';
+import { ModalSlotPropsType, HaveLoadedFnType } from 'interfaces';
+import { showToast, openFile } from 'utils';
 import { useBookStoreContext } from 'contexts/book-store';
+import paths from 'paths';
+import './style.scss';
 
 type FieldHightLightBoxPropsType = {
   label: string;
@@ -75,9 +76,9 @@ const footerModal = (blocker: Blocker): JSX.Element => {
   };
 
   return (
-    <Slot<ModalSlotProps>
+    <Slot<ModalSlotPropsType>
       name="footer"
-      render={({ onClose }: ModalSlotProps) => (
+      render={({ onClose }: ModalSlotPropsType) => (
         <div className="footer-navigation-modal">
           <Button variant="success"
             onClick={() => onCloseModal(onClose)}>

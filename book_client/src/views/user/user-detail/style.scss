@@ -1,6 +1,7 @@
 .user-detail {
   .user-form {
     margin: auto;
+    margin-top: 10px;
 
     @include mobile {
       width: 100%;

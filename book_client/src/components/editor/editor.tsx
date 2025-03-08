@@ -2,11 +2,12 @@ import { JSX, useCallback, useEffect } from 'react';
 import useInitEditor from 'hooks/useInitEditor';
 import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { FieldValidateProps } from 'hooks/useForm';
-import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import useComponentDidMount from 'hooks/useComponentDidMount';
+import { HaveLoadedFnType } from 'interfaces';
 import { clsx } from 'utils';
 import './style.scss';
 import { Op } from 'quill/core';
-const editorId = 'editor';
+const editorId: string = 'editor';
 
 type EditorPropsType = {
   className?: string;

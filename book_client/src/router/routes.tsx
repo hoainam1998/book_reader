@@ -12,6 +12,7 @@ import AuthorList, { authorPagination } from 'views/author-group/author-list/aut
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import { LoginRequire, Logged  } from '../guard';
+import { NavigationRouteMatchType } from 'interfaces';
 import path from './paths';
 
 export type RoutePropsUnion = Omit<RouteProps, 'children'> & {
@@ -94,8 +95,8 @@ const routes: RoutePropsUnion[] = [
             element: <UserDetail />,
             loader: loadUserDetail,
             handle: {
-              crumb: ({ pathname, params }: UIMatch) =>
-                <span key={pathname}>{params.id}</span>
+              crumb: ({ pathname, name }: NavigationRouteMatchType) =>
+                <span key={pathname}>{name}</span>
             }
           },
         ]
@@ -123,8 +124,8 @@ const routes: RoutePropsUnion[] = [
             element: <BookDetail />,
             loader: loadAllCategory,
             handle: {
-              crumb: ({ pathname, params }: UIMatch) =>
-                <span key={pathname}>{params.id}</span>
+              crumb: ({ pathname, name }: NavigationRouteMatchType) =>
+                <span key={pathname}>{name}</span>
             }
           },
           {
@@ -170,8 +171,8 @@ const routes: RoutePropsUnion[] = [
             loader: loadAuthorDetail,
             errorElement: <ApiError alignCenter />,
             handle: {
-              crumb: ({ pathname, params }: UIMatch) =>
-                <span key={pathname}>{params.id}</span>
+              crumb: ({ pathname, name }: NavigationRouteMatchType) =>
+                <span key={pathname}>{name}</span>
             }
           },
         ]

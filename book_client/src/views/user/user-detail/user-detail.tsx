@@ -1,4 +1,4 @@
-import { JSX, useCallback, useEffect, useState } from 'react';
+import { JSX, useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { AxiosResponse } from 'axios';
 import { useNavigate, useLoaderData, useParams } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
@@ -9,13 +9,15 @@ import Switch from 'components/form/form-control/switch/switch';
 import Button from 'components/button/button';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
+import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
+import useComponentDidMount from 'hooks/useComponentDidMount';
 import { required, email as emailValidate, ErrorFieldInfo } from 'hooks/useValidate';
 import { addUser, loadUserDetail, updateUser, getAllEmail } from '../fetcher';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
+import { HaveLoadedFnType } from 'interfaces';
 import paths from 'paths';
 import './style.scss';
-import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 
 type UserType = {
   firstName: string;
@@ -40,6 +42,7 @@ function UserDetail(): JSX.Element {
   const loaderData = useLoaderData() as any;
   const navigate = useNavigate();
   const { id } = useParams();
+  const user = loaderData?.data;
 
   const emailDuplicateValidate = useCallback(
     (message: string,) =>
@@ -104,9 +107,14 @@ function UserDetail(): JSX.Element {
     }
   }, []);
 
-  useEffect(() => {
-    if (loaderData) {
-      const user = loaderData.data;
+  const userName = useMemo<string>(() => {
+    return user ? `${user.firstName} ${user.lastName}` : '';
+  }, [user]);
+
+  useSetTheLastNavigateName(userName);
+
+  useLayoutEffect(() => {
+    if (user) {
       firstName.watch(user.firstName);
       lastName.watch(user.lastName);
       email.watch(user.email);

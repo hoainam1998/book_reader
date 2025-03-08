@@ -7,6 +7,7 @@
     background-color: $primary-color;
     padding: 2px 5px;
     color: $white-color;
+    text-transform: capitalize;
 
     &:last-child::after {
       content: unset;

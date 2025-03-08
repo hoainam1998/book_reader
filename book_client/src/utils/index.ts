@@ -1,6 +1,6 @@
 import showToast from './toast';
 import { showLoading, hideLoading } from './loading';
-import showModal, { ModalSlotProps } from './modal';
+import showModal from './modal';
 import { createElementWrapper } from './element-wrapper';
 import { convertBase64ToSingleFile, openFile, getExtnameFromBlobType, getJsonFileContent } from './file-handle';
 import handleNotfoundApiError from './handle-data-not-found';
@@ -56,8 +56,6 @@ const stringRandom = () => {
 
   return result;
 };
-
-export type { ModalSlotProps };
 
 export {
   clsx,

@@ -45,7 +45,7 @@ module.exports = {
       'components': getResolvePath('../src/components'),
       'images': getResolvePath('../src/static/images'),
       'views': getResolvePath('../src/views'),
-      'interfaces': getResolvePath('../src/interfaces'),
+      'interfaces': getResolvePath('../src/interfaces/index.ts'),
       'hooks': getResolvePath('../src/hooks'),
       'services': getResolvePath('../src/services'),
       'storage': getResolvePath('../src/storage'),
