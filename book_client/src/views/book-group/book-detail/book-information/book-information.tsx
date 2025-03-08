@@ -4,6 +4,7 @@ import {
   useRef,
   useEffect,
   useState,
+  useLayoutEffect,
 } from 'react';
 import { useLoaderData, useParams } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
@@ -18,13 +19,14 @@ import SelectGroup from 'components/form/form-control/select-group/select-group'
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, maxLength, ErrorFieldInfo } from 'hooks/useValidate';
 import useModalNavigation from 'hooks/useModalNavigation';
+import useComponentWillMount from 'hooks/useComponentWillMount';
+import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
+import { useBookStoreContext } from 'contexts/book-store';
 import { Image } from 'store/book';
 import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAuthors } from '../../fetcher';
-import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
+import { HaveLoadedFnType } from 'interfaces';
 import './style.scss';
-import useComponentWillMount from 'hooks/useComponentWillMount';
-import { useBookStoreContext } from 'contexts/book-store';
 
 type CategoryOptionsType = {
   name: string;
@@ -195,7 +197,9 @@ function BookInformation(): JSX.Element {
 
   useModalNavigation({ onLeaveAction: onLeave });
 
-  useEffect(() => {
+  useSetTheLastNavigateName(data?.name);
+
+  useLayoutEffect(() => {
     if (pdf.value instanceof File && pdfRef.current?.input) {
       const dataTransfer = new DataTransfer();
       dataTransfer.items.add(pdf.value);
@@ -207,7 +211,7 @@ function BookInformation(): JSX.Element {
     updateConditionNavigate(validate.dirty);
   }, [validate.dirty]);
 
-  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+  useComponentWillMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (data && step === 1 && id) {
         name.watch(data.name);

@@ -1,6 +1,7 @@
 import Quill, { QuillOptions } from 'quill';
 import { useCallback, useMemo, useState } from 'react';
-import useComponentDidMount, { HaveLoadedFnType } from './useComponentDidMount';
+import { HaveLoadedFnType } from 'interfaces';
+import useComponentDidMount from './useComponentDidMount';
 
 const defaultOptions: QuillOptions = {
   modules: {

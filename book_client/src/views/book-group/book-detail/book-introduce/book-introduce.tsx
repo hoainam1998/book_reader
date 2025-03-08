@@ -4,10 +4,11 @@ import { Op } from 'quill/core';
 import Button from 'components/button/button';
 import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '../../fetcher';
 import useModalNavigation from 'hooks/useModalNavigation';
-import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import useComponentDidMount from 'hooks/useComponentDidMount';
 import useInitEditor from 'hooks/useInitEditor';
 import { getJsonFileContent } from 'utils';
 import { useBookStoreContext } from 'contexts/book-store';
+import { HaveLoadedFnType } from 'interfaces';
 import './style.scss';
 
 const editSelector: string = 'book-introduce-editor';

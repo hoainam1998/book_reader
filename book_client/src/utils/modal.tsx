@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from './element-wrapper';
-import Modal, { ModalSlotProps, ModalSize } from 'components/modal/modal';
+import Modal, { ModalSize } from 'components/modal/modal';
 
 const bodyDOM: HTMLElement = document.body;
 const modalContainer: HTMLDivElement = createElementWrapper('modal-container', 'modal-container');
@@ -34,5 +34,4 @@ const showModal = (props: ModalUtilProps): void => {
   }
 };
 
-export type { ModalSlotProps };
 export default showModal;

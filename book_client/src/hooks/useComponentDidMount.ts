@@ -1,6 +1,5 @@
 import { DependencyList, useEffect, EffectCallback } from 'react';
-
-export type HaveLoadedFnType = () => boolean;
+import { HaveLoadedFnType } from 'interfaces';
 
 /**
  * This callback update haveFetched flag.

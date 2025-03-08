@@ -79,12 +79,7 @@ export default <T extends Object, R>(
       Object.keys(state).forEach((key: string) => {
         const keyValidateObject = validateObject[key]!;
         keyValidateObject.dirty = false;
-        const valueType = typeof state[key as keyof typeof state];
-        if (valueType === 'number') {
-          keyValidateObject.watch(0, key);
-        } else {
-          keyValidateObject.watch('', key);
-        }
+        keyValidateObject.watch('', key);
       });
       document.forms.namedItem(formId)?.reset();
     }

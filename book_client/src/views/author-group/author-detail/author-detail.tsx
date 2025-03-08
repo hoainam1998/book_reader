@@ -11,10 +11,12 @@ import Radio from 'components/form/form-control/radio/radio';
 import Editor from 'components/editor/editor';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, matchPattern, maxLength } from 'hooks/useValidate';
-import useComponentDidMount, { HaveLoadedFnType } from 'hooks/useComponentDidMount';
+import useComponentDidMount from 'hooks/useComponentDidMount';
+import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils';
 import { createAuthor, loadAuthorDetail, updateAuthor } from './fetcher';
 import constants from 'read-only-variables';
+import { HaveLoadedFnType } from 'interfaces';
 import path from 'paths';
 import './style.scss';
 
@@ -54,6 +56,7 @@ function AuthorDetail(): JSX.Element  {
   const loaderData = useLoaderData() as AxiosResponse;
   const { id } = useParams();
   const navigate = useNavigate();
+  const author = loaderData?.data;
 
   const {
     name,
@@ -96,10 +99,11 @@ function AuthorDetail(): JSX.Element  {
     }
   }, [validate]);
 
+  useSetTheLastNavigateName(author?.name);
+
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
-      if (loaderData) {
-        const author = loaderData.data;
+      if (author) {
         name.watch(author.name);
         sex.watch(author.sex);
         yearOfBirth.watch(author.yearOfBirth);
@@ -112,7 +116,7 @@ function AuthorDetail(): JSX.Element  {
       }
       return reset;
     };
-  }, [loaderData]);
+  }, [author]);
 
   return (
     <Form id={formId} className="author-form" submitLabel="Save" onSubmit={onSubmit}>

@@ -5,6 +5,7 @@ import router from './router';
 import {
   RouterProvider,
 } from 'react-router-dom';
+import LastNameNavigateBar from 'contexts/last-name-navigate-bar';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -13,7 +14,9 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <LastNameNavigateBar>
+      <RouterProvider router={router} />
+    </LastNameNavigateBar>
   </React.StrictMode>
 );
 
