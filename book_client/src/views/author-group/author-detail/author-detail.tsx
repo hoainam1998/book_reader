@@ -14,7 +14,7 @@ import { required, matchPattern, maxLength } from 'hooks/useValidate';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils';
-import { createAuthor, loadAuthorDetail, updateAuthor } from './fetcher';
+import { createAuthor, loadAuthorDetail, updateAuthor } from '../fetcher';
 import constants from 'read-only-variables';
 import { HaveLoadedFnType } from 'interfaces';
 import path from 'paths';
@@ -121,15 +121,30 @@ function AuthorDetail(): JSX.Element  {
   return (
     <Form id={formId} className="author-form" submitLabel="Save" onSubmit={onSubmit}>
       <Grid style={{ gap: 25 }}>
-        <GridItem lg={3}>
-          <Input {...name} name="name" label="Name" labelColumnSize={{
-            lg: 2
-          }} />
+        <GridItem lg={3} md={4} sm={12}>
+          <Input {...name} name="name" label="Name"
+            labelColumnSize={{
+              lg: 2
+            }}
+            inputColumnSize={{
+              lg: 10
+            }} />
         </GridItem>
-        <GridItem lg={2}>
-          <Radio {...sex} label="Sex" name="sex" horizontal options={sexOptions} />
+        <GridItem lg={2} md={4} sm={12}>
+          <Radio {...sex} label="Sex" name="sex" horizontal options={sexOptions}
+            labelColumnSize={{
+              lg: 4
+            }}
+            inputColumnSize={{
+              lg: 8
+            }} />
         </GridItem>
-        <GridItem lg={2}>
+        <GridItem lg={2} md={4} sm={12}
+          style={{
+            md: {
+              gridRow: 2
+            }
+          }}>
           <Input {...yearOfBirth} label="Year of birth" name="yearOfBirth"
             labelColumnSize={{
               lg: 5
@@ -138,16 +153,26 @@ function AuthorDetail(): JSX.Element  {
               lg: 7
             }} />
         </GridItem>
-        <GridItem lg={2}>
+        <GridItem lg={2} md={4} sm={12}
+          style={{
+            md: {
+              gridRow: 2
+            }
+          }}>
           <Input {...yearOfDead} label="Year of dead" name="yearOfDead"
-          labelColumnSize={{
-            lg: 5
-          }}
-          inputColumnSize={{
-            lg: 7
-          }} />
+            labelColumnSize={{
+              lg: 5
+            }}
+            inputColumnSize={{
+              lg: 7
+            }} />
         </GridItem>
-        <GridItem lg={3}>
+        <GridItem lg={3} md={4} sm={12}
+          style={{
+            md: {
+              gridRow: 'span 2'
+            }
+          }}>
           <FileDragDropUpload {...avatar} name="avatar" label="Avatar" multiple={false}
             labelColumnSize={{
               lg: 12

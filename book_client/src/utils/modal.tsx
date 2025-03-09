@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from './element-wrapper';
-import Modal, { ModalSize } from 'components/modal/modal';
+import Modal from 'components/modal/modal';
+import { SCREEN_SIZE } from 'enums';
 
 const bodyDOM: HTMLElement = document.body;
 const modalContainer: HTMLDivElement = createElementWrapper('modal-container', 'modal-container');
@@ -9,7 +10,7 @@ const modalContainer: HTMLDivElement = createElementWrapper('modal-container', '
 type ModalUtilProps = {
   children: ReactNode | ReactNode[];
   title: string;
-  size?: ModalSize;
+  size?: SCREEN_SIZE;
   onOpen?: () => void;
   onClose?: () => void;
 };

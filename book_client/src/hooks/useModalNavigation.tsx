@@ -7,7 +7,7 @@ import { ModalSlotPropsType } from 'interfaces';
 import { showModal } from 'utils';
 import { tablet, desktop, extra } from '../static/js/break-point';
 import { useBlockerContext } from 'contexts/blocker';
-import { ModalSize } from 'components/modal/modal';
+import { SCREEN_SIZE } from 'enums';
 
 type ModalNavigationPropsType = {
   body?: JSX.Element | ((blocker: Blocker) => JSX.Element);
@@ -19,13 +19,13 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
   const [isNavigation, setIsNavigation] = useState<boolean>(false);
   const blocker: Blocker = useBlockerContext();
   const windowWidth: number = window.innerWidth;
-  const size = useMemo<ModalSize>(() => {
+  const size = useMemo<SCREEN_SIZE>(() => {
     if (windowWidth >= tablet && windowWidth < desktop) {
-      return ModalSize.MEDIUM;
+      return SCREEN_SIZE.MEDIUM;
     } else if (windowWidth >= extra) {
-      return ModalSize.SMALL;
+      return SCREEN_SIZE.SMALL;
     } else {
-      return ModalSize.LARGE;
+      return SCREEN_SIZE.LARGE;
     }
   }, [windowWidth]);
 

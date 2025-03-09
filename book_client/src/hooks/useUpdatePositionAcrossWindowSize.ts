@@ -23,7 +23,6 @@ export default (action: () => CSSProperties): CSSProperties => {
   * Execute resize action.
   */
   const resizeEvent = () => {
-    console.log('resize');
     // clear previous timeout.
     clearTimeout(timeout);
     // delay resize action, until resize event complete.

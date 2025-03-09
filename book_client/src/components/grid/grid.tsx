@@ -1,6 +1,7 @@
-import { Children, CSSProperties, JSX, ReactNode } from 'react';
+import { Children, CSSProperties, JSX, ReactNode, useMemo } from 'react';
 import './style.scss';
 import { clsx } from 'utils';
+import { useResponsiveScreenNameSizeContext } from 'contexts/responsive-screen-size';
 
 type ColSize = {
   sm?: number;
@@ -8,11 +9,19 @@ type ColSize = {
   lg?: number;
 };
 
-type GridProps = ColSize & {
+type GridPropsType = ColSize & {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+};
+
+type GridItemPropsType = Omit<GridPropsType, 'style'> & {
   order?: number | string;
+  style?: {
+    lg?: CSSProperties;
+    md?: CSSProperties;
+    sm?: CSSProperties;
+  };
 };
 
 /**
@@ -35,17 +44,25 @@ const createGridColumnClasses = (colObject: ColSize, classProperty: string = '')
   }, '').trim();
 };
 
-export const GridItem = ({ sm, md, lg, order, children, className }: GridProps ): JSX.Element => {
+export const GridItem = ({ sm, md, lg, order, style, children, className }: GridItemPropsType): JSX.Element => {
   const colClasses: string = createGridColumnClasses({ lg, md, sm });
+  const size: string = useResponsiveScreenNameSizeContext();
+
+  const extraStyle = useMemo<CSSProperties>(() => {
+    return style ? { ...style[size as keyof typeof style]!, order } : { order };
+  }, [style, size]);
+
   return (
-    <div style={{ order }} className={clsx(colClasses, className)}>{children}</div>
+    <div style={extraStyle} className={clsx(colClasses, className)}>
+      {children}
+    </div>
   );
 };
 
-function Grid({ sm, md, lg, style, children, className }: Omit<GridProps, 'order'>): JSX.Element {
+function Grid({ sm, md, lg, style, children, className }: GridPropsType): JSX.Element {
   let rowClasses: string = createGridColumnClasses({ lg, md, sm }, 'row');
-
   const childrenCount = Children.count(children);
+
   if (!rowClasses && childrenCount > 0) {
     rowClasses = `col-row-${childrenCount}`;
   }
