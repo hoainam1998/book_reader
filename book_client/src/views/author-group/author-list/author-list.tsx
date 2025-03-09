@@ -9,7 +9,7 @@ import Button from 'components/button/button';
 import path from 'paths';
 import { openFile } from 'utils';
 import constants from 'read-only-variables';
-import { authorPagination } from './fetcher';
+import { authorPagination } from '../fetcher';
 
 type AuthorType = {
   authorId: string;

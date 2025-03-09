@@ -7,7 +7,17 @@ import './style.scss';
 
 type RadioPropsType<T> = { horizontal?: boolean } & Partial<FieldValidateProps<T>> & FormControlProps;
 
-function Radio<T>({ name, value, label, options, horizontal, onChange, onFocus }: RadioPropsType<T>): JSX.Element {
+function Radio<T>({
+  name,
+  value,
+  label,
+  options,
+  horizontal,
+  inputColumnSize,
+  labelColumnSize,
+  onChange,
+  onFocus
+}: RadioPropsType<T>): JSX.Element {
 
   const defaultChecked = useCallback((radioValue: number | string): boolean => {
     const transformValue = (): unknown => {
@@ -29,7 +39,7 @@ function Radio<T>({ name, value, label, options, horizontal, onChange, onFocus }
   };
 
   return (
-    <FormControl name={name} label={label}>
+    <FormControl name={name} label={label} inputColumnSize={inputColumnSize} labelColumnSize={labelColumnSize}>
       <ul className={clsx(horizontal && 'horizontal')}>
         <List<OptionPrototype<number>>
           items={options as OptionPrototype<number>[]}

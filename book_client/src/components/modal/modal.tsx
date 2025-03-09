@@ -3,18 +3,13 @@ import React, { Children, JSX, ReactNode } from 'react';
 import { isSlot } from 'components/slot/slot';
 import RenderCondition from 'components/render-condition/render-condition';
 import { customError, clsx } from 'utils';
+import { SCREEN_SIZE } from 'enums';
 import './style.scss';
-
-export enum ModalSize {
-  LARGE = 'lg',
-  MEDIUM = 'md',
-  SMALL = 'sm',
-}
 
 type ModalPropsType = {
   title: string;
   children: ReactNode[] | ReactNode;
-  size?: ModalSize;
+  size?: SCREEN_SIZE;
   onClose: () => void;
 };
 
@@ -39,7 +34,7 @@ const slotMapping = (child: JSX.Element, onClose: ModalPropsType['onClose'], slo
   }
 };
 
-function Modal({ onClose, children, title, size = ModalSize.MEDIUM }: ModalPropsType): JSX.Element {
+function Modal({ onClose, children, title, size = SCREEN_SIZE.MEDIUM }: ModalPropsType): JSX.Element {
   const slots: ModalSlotsType = {
     header: null,
     body: null,

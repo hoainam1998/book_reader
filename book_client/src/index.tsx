@@ -6,6 +6,7 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 import LastNameNavigateBar from 'contexts/last-name-navigate-bar';
+import ResponsiveScreenSize from 'contexts/responsive-screen-size';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -15,7 +16,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <LastNameNavigateBar>
-      <RouterProvider router={router} />
+      <ResponsiveScreenSize>
+        <RouterProvider router={router} />
+      </ResponsiveScreenSize>
     </LastNameNavigateBar>
   </React.StrictMode>
 );
