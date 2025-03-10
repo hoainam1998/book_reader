@@ -7,7 +7,7 @@ import useForm, { RuleType } from 'hooks/useForm';
 import { required, email, matchPattern } from 'hooks/useValidate';
 import auth from 'store/auth';
 import { login } from './fetcher';
-import path from 'paths';
+import path from 'router/paths';
 import { showToast } from 'utils';
 import constants from 'read-only-variables';
 import './style.scss';

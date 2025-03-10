@@ -1,9 +1,9 @@
 import { JSX, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import List from 'components/list/list';
-import routes from '../../router/routes';
+import routes from 'router/admin-routes';
 import { clsx } from 'utils';
-import path from 'paths';
+import path from 'router/paths';
 import './style.scss';
 
 type NavLinkPropsType = {

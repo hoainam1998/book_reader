@@ -11,14 +11,16 @@ const breakPoint = require('../src/static/js/break-point.js');
 
 // process.env.BASE_URL at here was config by docker,
 // if it exist, then app is running by docker.
-const env = {
-  'process.env': JSON.stringify(dev),
-  ...process.env.BASE_URL ? {
+const getEnv = (env) => {
+  return {
+    'process.env': JSON.stringify({...dev, ...env}),
+    ...process.env.BASE_URL ? {
     'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL)
-  } : {}
+    } : {}
+  };
 };
 
-module.exports = {
+module.exports = (envArgs) => ({
   entry: getResolvePath('../src/index.tsx'),
   output: {
     filename: 'js/[name].bundle.js',
@@ -32,7 +34,7 @@ module.exports = {
       favicon: getAssetPath(PUBLIC, 'book.png'),
       template: getAssetPath(PUBLIC, 'index.html')
     }),
-    new DefinePlugin(env),
+    new DefinePlugin(getEnv(envArgs)),
     new MiniCssExtractPlugin({
       filename: 'css/[name].css'
     }),
@@ -50,7 +52,7 @@ module.exports = {
       'services': getResolvePath('../src/services'),
       'storage': getResolvePath('../src/storage'),
       'store': getResolvePath('../src/store'),
-      'paths': getResolvePath('../src/router/paths.ts'),
+      'router': getResolvePath('../src/router'),
       'contexts': getResolvePath('../src/contexts'),
       'read-only-variables': getResolvePath('../src/read-only-variables/index.ts'),
       'enums': getResolvePath('../src/enums/index.ts'),
@@ -120,4 +122,4 @@ module.exports = {
       }
     ]
   }
-};
+});

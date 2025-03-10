@@ -1,4 +1,4 @@
-import { RouteProps, Navigate, Link, UIMatch, Outlet } from 'react-router-dom';
+import { Navigate, Link, UIMatch, Outlet } from 'react-router-dom';
 import Login from 'views/login-group/login/login';
 import Home from 'views/home/home';
 import Personal from 'views/personal/personal';
@@ -12,16 +12,10 @@ import AuthorList, { authorPagination } from 'views/author-group/author-list/aut
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import { LoginRequire, Logged  } from '../guard';
-import { NavigationRouteMatchType } from 'interfaces';
+import { NavigationRouteMatchType, RoutePropsUnion } from './interfaces';
 import path from './paths';
 
-export type RoutePropsUnion = Omit<RouteProps, 'children'> & {
-  children?: RoutePropsUnion[];
-  name?: string;
-  icon?: string;
-};
-
-const routes: RoutePropsUnion[] = [
+const adminRoutes: RoutePropsUnion[] = [
   {
     path: path.ROOT,
     element: <Navigate replace to={path.LOGIN} />
@@ -181,4 +175,4 @@ const routes: RoutePropsUnion[] = [
   }
 ];
 
-export default routes;
+export default adminRoutes;

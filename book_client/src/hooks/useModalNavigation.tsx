@@ -3,7 +3,7 @@ import { useCallback, JSX, useEffect, useState, useMemo } from 'react';
 import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import { ModalSlotPropsType } from 'interfaces';
+import { ModalSlotPropsType } from 'components/modal/interface';
 import { showModal } from 'utils';
 import { tablet, desktop, extra } from '../static/js/break-point';
 import { useBlockerContext } from 'contexts/blocker';

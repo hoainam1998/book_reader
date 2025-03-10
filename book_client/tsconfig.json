@@ -27,7 +27,7 @@
       "services": ["src/services"],
       "storage": ["src/storage"],
       "store/*": ["src/store/*"],
-      "paths": ["src/router/paths.ts"],
+      "router/*": ["src/router/*"],
       "contexts/*": ["src/contexts/*"],
       "read-only-variables": ["src/read-only-variables/index.ts"],
       "enums": ["src/enums/index.ts"],
