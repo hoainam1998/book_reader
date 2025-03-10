@@ -17,7 +17,7 @@ import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils'
 import { createAuthor, loadAuthorDetail, updateAuthor } from '../fetcher';
 import constants from 'read-only-variables';
 import { HaveLoadedFnType } from 'interfaces';
-import path from 'paths';
+import path from 'router/paths';
 import './style.scss';
 
 type AuthorStateType = {

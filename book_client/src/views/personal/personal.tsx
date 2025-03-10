@@ -9,7 +9,7 @@ import Button from 'components/button/button';
 import { required, email, matchPattern } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
 import store, { UserLogin } from 'store/auth';
-import path from 'paths';
+import path from 'router/paths';
 import { updatePerson } from './fetcher';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';

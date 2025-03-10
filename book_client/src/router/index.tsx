@@ -4,8 +4,9 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
 } from 'react-router-dom';
+import { RoutePropsUnion } from './interfaces';
 
-import routes, { RoutePropsUnion } from './routes';
+import routes from './admin-routes';
 
 const renderRoutes = (routes: RoutePropsUnion[]): JSX.Element[] => {
   return routes.map((route, index) => {

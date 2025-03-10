@@ -16,7 +16,7 @@ import { addUser, loadUserDetail, updateUser, getAllEmail } from '../fetcher';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
 import { HaveLoadedFnType } from 'interfaces';
-import paths from 'paths';
+import paths from 'router/paths';
 import './style.scss';
 
 type UserType = {

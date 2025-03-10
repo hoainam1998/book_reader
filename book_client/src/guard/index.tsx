@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import path from 'paths';
+import path from 'router/paths';
 import { Navigate } from 'react-router-dom';
 import auth from 'store/auth';
 

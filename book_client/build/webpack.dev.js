@@ -5,7 +5,7 @@ const portfinder = require('portfinder');
 const notifier = require('node-notifier');
 const FriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin');
 
-const devConfig = merge(common, {
+const devConfig = (env) => merge(common(env), {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
@@ -20,9 +20,10 @@ const devConfig = merge(common, {
   }
 });
 
-module.exports = () => {
+module.exports = (env) => {
+  const developmentConfig = devConfig(env);
   return new Promise((resolve, reject) => {
-    portfinder.basePort = devConfig.devServer.port;
+    portfinder.basePort = developmentConfig.devServer.port;
     portfinder.getPort(function (err, port) {
       if (err) {
         notifier.notify({
@@ -31,7 +32,7 @@ module.exports = () => {
         });
         reject(err);
       } else {
-        devConfig.plugins.push(
+        developmentConfig.plugins.push(
           new FriendlyErrorsWebpackPlugin({
             compilationSuccessInfo: {
               messages: ['You application is running here http://localhost:3000']
@@ -52,8 +53,8 @@ module.exports = () => {
           title: 'Webpack config port success.',
           message: `Your application running on ${port}`
         });
-        devConfig.devServer.port = port;
-        resolve(devConfig);
+        developmentConfig.devServer.port = port;
+        resolve(developmentConfig);
       }
     });
   });

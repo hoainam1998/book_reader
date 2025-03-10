@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 import { UIMatch, useMatches } from 'react-router-dom';
-import { NavigationRouteMatchType } from 'interfaces';
+import { NavigationRouteMatchType } from 'router/interfaces';
 import './style.scss';
 
 type Handle = {

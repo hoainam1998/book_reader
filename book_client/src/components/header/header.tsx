@@ -5,7 +5,7 @@ import { createElementWrapper } from 'utils';
 import Button from 'components/button/button';
 import Tooltip from 'components/tooltip/tooltip';
 import store, { UserLogin } from 'store/auth';
-import paths from 'paths';
+import paths from 'router/paths';
 import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 const { getSnapshot, subscribe } = store;
 import './style.scss';

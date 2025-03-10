@@ -6,7 +6,7 @@ import type { Field } from 'components/table/table';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import path from 'paths';
+import path from 'router/paths';
 import { openFile } from 'utils';
 import constants from 'read-only-variables';
 import { authorPagination } from '../fetcher';

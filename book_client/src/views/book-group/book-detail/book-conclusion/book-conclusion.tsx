@@ -13,16 +13,17 @@ import Button from 'components/button/button';
 import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
+import { ModalSlotPropsType } from 'components/modal/interface';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentWillMount from 'hooks/useComponentWillMount';
 import { getCategoryDetail } from 'views/category-group/fetcher';
 import type { CategoryDetailType } from 'views/category-group/category';
 import { getAuthors } from 'views/book-group/fetcher';
 import { Image } from 'store/book';
-import { ModalSlotPropsType, HaveLoadedFnType } from 'interfaces';
+import { HaveLoadedFnType } from 'interfaces';
 import { showToast, openFile } from 'utils';
 import { useBookStoreContext } from 'contexts/book-store';
-import paths from 'paths';
+import paths from 'router/paths';
 import './style.scss';
 
 type FieldHightLightBoxPropsType = {
