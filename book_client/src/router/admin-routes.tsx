@@ -1,5 +1,5 @@
 import { Navigate, Link, UIMatch, Outlet } from 'react-router-dom';
-import Login from 'views/login-group/login/login';
+import AdminLogin from 'views/login-group/login/admin-login/admin-login';
 import Home from 'views/home/home';
 import Personal from 'views/personal/personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
@@ -22,7 +22,7 @@ const adminRoutes: RoutePropsUnion[] = [
   },
   {
     path: path.LOGIN,
-    element: <Logged><Login /></Logged>
+    element: <Logged><AdminLogin /></Logged>
   },
   {
     path: path.OTP,

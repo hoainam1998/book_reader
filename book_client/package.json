@@ -31,7 +31,8 @@
     "webpack-merge": "^5.10.0"
   },
   "scripts": {
-    "start": "webpack serve --mode development --config build/webpack.dev.js",
+    "admin": "webpack serve --mode development --config build/webpack.dev.js",
+    "client": "webpack serve --mode development --env APP_NAME=client --config build/webpack.dev.js",
     "build": "webpack --config build/webpack.prod.js",
     "dev-test": "react-scripts test --watchAll=true --detectOpenHandles a",
     "test": "react-scripts test --ci=true",

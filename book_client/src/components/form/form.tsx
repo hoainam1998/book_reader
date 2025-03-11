@@ -10,6 +10,7 @@ type FormProps = {
   children: React.ReactElement[] | React.ReactElement;
   submitLabel?: string;
   disableSubmitButton?: boolean;
+  submitBtnClass?: string;
   // eslint-disable-next-line no-unused-vars,
   onSubmit: (formData: FormData) => void;
 };
@@ -20,6 +21,7 @@ function Form({
   className,
   submitLabel = 'Submit',
   disableSubmitButton = false,
+  submitBtnClass,
   onSubmit
 }: FormProps): JSX.Element {
 
@@ -31,8 +33,12 @@ function Form({
   return (
     <form id={id} className={clsx('form', className)} data-testid="form" encType="multipart/form-data">
       {children}
-      <Button className="btn-save" variant="submit" onClick={handleSubmit} disabled={disableSubmitButton}>
-        {submitLabel}
+      <Button
+        className={`btn-save ${submitBtnClass}`}
+        variant="submit"
+        onClick={handleSubmit}
+        disabled={disableSubmitButton}>
+          {submitLabel}
       </Button>
     </form>
   );

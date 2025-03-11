@@ -6,7 +6,10 @@ import {
 } from 'react-router-dom';
 import { RoutePropsUnion } from './interfaces';
 
-import routes from './admin-routes';
+import adminRoutes from './admin-routes';
+import clientRoutes from './client-routes';
+
+const routes: RoutePropsUnion[] = process.env.APP_NAME === 'client' ? clientRoutes : adminRoutes;
 
 const renderRoutes = (routes: RoutePropsUnion[]): JSX.Element[] => {
   return routes.map((route, index) => {
