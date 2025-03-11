@@ -1,6 +1,6 @@
 import { JSX, useCallback, useSyncExternalStore, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginWrapper from 'components/login-wrapper/login-wrapper';
+import LoginWrapper from 'views/login-group/login-wrapper/login-wrapper';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
 import Button from 'components/button/button';
 import store from 'store/auth';
