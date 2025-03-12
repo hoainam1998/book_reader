@@ -21,4 +21,18 @@
   .submit-btn-class {
     background-color: $red-client-primary-color;
   }
+
+  .forget-password-link {
+    display: block;
+    width: 100%;
+    text-align: right;
+    color: $white-color;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 10px;
+
+    &:visited {
+      color: $border-input-color;
+    }
+  }
 }

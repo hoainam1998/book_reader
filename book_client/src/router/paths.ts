@@ -9,5 +9,7 @@ export default Object.freeze({
   USER: 'user',
   PERSONAL: '/personal',
   AUTHOR: 'author',
-  NEW: 'new'
+  NEW: 'new',
+  FORGET_PASSWORD: '/forget-password',
+  RESET_PASSWORD: '/reset-password',
 });

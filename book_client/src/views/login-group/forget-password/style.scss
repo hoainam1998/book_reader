@@ -1,0 +1,16 @@
+.forget-password {
+  font-family: OpenSansMedium;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 50px;
+  min-height: 100px;
+  padding: 0 10px;
+  width: 370px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  border-radius: 5px;
+  border: 1px solid $primary-button-color;
+
+  .content-remind {
+    text-align: center;
+  }
+}
