@@ -28,7 +28,7 @@ export const useResponsiveScreenNameSizeContext
 /**
  * Return responsive screen name.
  *
- * @param {ReactElement} children - base64 string present image.
+ * @param {ReactElement} children - The children inside context provider.
  * @returns {JSX.Element} - The context provider wrapper.
  */
 export default ({ children }: ResponsiveScreenNameSizePropsType): JSX.Element => {

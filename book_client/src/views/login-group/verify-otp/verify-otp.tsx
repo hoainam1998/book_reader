@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import LoginWrapper from 'views/login-group/login-wrapper/login-wrapper';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
 import Button from 'components/button/button';
-import store from 'store/auth';
 import { UserLogin } from 'storage';
 import { sendOtp, verifyOtp } from './fetcher';
 import { showToast } from 'utils';
@@ -11,7 +10,7 @@ import useComponentDidMount from 'hooks/useComponentDidMount';
 import path from 'router/paths';
 import auth from 'store/auth';
 import './style.scss';
-const { subscribe, getSnapshot } = store;
+const { subscribe, getSnapshot } = auth;
 
 function VerifyOtp(): JSX.Element {
   const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { JSX, useCallback } from 'react';
+import { JSX, ReactElement, useCallback } from 'react';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import useForm, { RuleType } from 'hooks/useForm';
@@ -14,6 +14,7 @@ type LoginFieldType = {
 
 type LoginFormProps = {
   onLogin: (email: string, password: string, reset: () => void) => void;
+  children?: ReactElement;
   className?: string;
   submitBtnClass?: string;
 };
@@ -33,7 +34,7 @@ const rules: RuleType<LoginFieldType> = {
 
 const formId: string = 'login-form';
 
-function LoginForm({ className, submitBtnClass, onLogin }: LoginFormProps): JSX.Element {
+function LoginForm({ className, submitBtnClass, children, onLogin }: LoginFormProps): JSX.Element {
   const { email, password, handleSubmit, reset, validate } = useForm<
     LoginFieldType,
     RuleType<LoginFieldType>
@@ -74,6 +75,7 @@ function LoginForm({ className, submitBtnClass, onLogin }: LoginFormProps): JSX.
           lg: 12
         }}
       />
+      {children ?? <></>}
     </Form>
   );
 }
