@@ -18,6 +18,11 @@
   font-size: 16px;
 }
 
+.btn-submit-client {
+  @extend .btn-submit;
+  background-color: $red-client-primary-color;;
+}
+
 .btn-success {
   background-color: $button-cancel-pop-up-color;
   color: $white-color;

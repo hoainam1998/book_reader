@@ -18,7 +18,14 @@ function Button({
   disabled
 }: ButtonPropsType): JSX.Element {
   const buttonTypeClass: string = useMemo(() => {
-    return variant ? `btn-${variant}` : '';
+    if (variant) {
+      if (globalThis.isClient && variant === 'submit') {
+        return 'btn-submit-client';
+      } else {
+        return variant;
+      }
+    }
+    return '';
   }, [variant]);
 
   return (

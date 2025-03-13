@@ -5,7 +5,7 @@ type LoginWrapperPropsType = {
   children: ReactElement;
 };
 
-function LoginWrapper({ children }: LoginWrapperPropsType): JSX.Element {
+function AdminLoginWrapper({ children }: LoginWrapperPropsType): JSX.Element {
   return (
     <section className="login-wrapper">
       <img src={require('images/book.png')} className="logo" alt="logo" />
@@ -14,4 +14,4 @@ function LoginWrapper({ children }: LoginWrapperPropsType): JSX.Element {
   );
 }
 
-export default LoginWrapper;
+export default AdminLoginWrapper;

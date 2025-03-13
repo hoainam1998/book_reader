@@ -1,5 +1,6 @@
 import { JSX, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import ClientLoginWrapper from 'views/login-group/login-wrapper/client-login-wrapper/client-login-wrapper';
 import LoginForm from '../login-form/login-form';
 import auth from 'store/auth';
 import { login } from './fetcher';
@@ -28,15 +29,13 @@ function AdminLogin(): JSX.Element {
   }, []);
 
   return (
-    <section className="client-login-wrapper flex-center">
-      <div className="client-login">
-        <LoginForm className="client-login-form" submitBtnClass='submit-btn-class' onLogin={onSubmit}>
+    <ClientLoginWrapper>
+      <LoginForm className="client-login-form" onLogin={onSubmit}>
           <Link to={path.FORGET_PASSWORD} className="forget-password-link">
             Forget your password?
           </Link>
         </LoginForm>
-      </div>
-    </section>
+    </ClientLoginWrapper>
   );
 }
 
