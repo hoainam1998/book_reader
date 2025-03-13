@@ -16,7 +16,6 @@ type LoginFormProps = {
   onLogin: (email: string, password: string, reset: () => void) => void;
   children?: ReactElement;
   className?: string;
-  submitBtnClass?: string;
 };
 
 const state: LoginFieldType = {
@@ -34,7 +33,7 @@ const rules: RuleType<LoginFieldType> = {
 
 const formId: string = 'login-form';
 
-function LoginForm({ className, submitBtnClass, children, onLogin }: LoginFormProps): JSX.Element {
+function LoginForm({ className, children, onLogin }: LoginFormProps): JSX.Element {
   const { email, password, handleSubmit, reset, validate } = useForm<
     LoginFieldType,
     RuleType<LoginFieldType>
@@ -48,7 +47,7 @@ function LoginForm({ className, submitBtnClass, children, onLogin }: LoginFormPr
   }, [email.value, password.value]);
 
   return (
-    <Form id={formId} onSubmit={onSubmit} className={className} submitBtnClass={submitBtnClass} submitLabel="Login">
+    <Form id={formId} onSubmit={onSubmit} className={className} submitLabel="Login">
       <Input
         {...email}
         labelColumnSize={{

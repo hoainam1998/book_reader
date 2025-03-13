@@ -13,6 +13,8 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
+globalThis.isClient = process.env.APP_NAME === 'client';
+
 root.render(
   <React.StrictMode>
     <LastNameNavigateBar>
