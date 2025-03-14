@@ -1,6 +1,6 @@
 import { JSX, useCallback, useSyncExternalStore, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
+import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
 import Button from 'components/button/button';
 import { UserLogin } from 'storage';
@@ -54,7 +54,7 @@ function VerifyOtp(): JSX.Element {
   });
 
   return (
-    <LoginWrapper>
+    <AdminLoginWrapper>
       <div className="verify-otp">
         <Input name="otp" type="number" inputClass="otp-box" className="otp-un-grid-fieldset-wrapper" ref={inputRef} />
         <div className="btn-group">
@@ -62,7 +62,7 @@ function VerifyOtp(): JSX.Element {
           <Button variant="success" onClick={reSend}>Re-send</Button>
         </div>
       </div>
-    </LoginWrapper>
+    </AdminLoginWrapper>
   );
 }
 

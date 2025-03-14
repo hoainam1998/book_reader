@@ -12,4 +12,5 @@ export default Object.freeze({
   NEW: 'new',
   FORGET_PASSWORD: '/forget-password',
   RESET_PASSWORD: '/reset-password',
+  SIGN_UP: '/sign-up',
 });

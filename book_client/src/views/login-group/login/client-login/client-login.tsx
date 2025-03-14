@@ -29,12 +29,17 @@ function AdminLogin(): JSX.Element {
   }, []);
 
   return (
-    <ClientLoginWrapper>
+    <ClientLoginWrapper name="login">
       <LoginForm className="client-login-form" onLogin={onSubmit}>
-          <Link to={path.FORGET_PASSWORD} className="forget-password-link">
+        <div className="link-groups">
+          <Link to={path.SIGN_UP} className="navigate-link">
+            Sign up!
+          </Link>
+          <Link to={path.FORGET_PASSWORD} className="navigate-link">
             Forget your password?
           </Link>
-        </LoginForm>
+        </div>
+      </LoginForm>
     </ClientLoginWrapper>
   );
 }
