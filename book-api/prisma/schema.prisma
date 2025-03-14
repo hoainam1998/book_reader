@@ -55,12 +55,12 @@ model book_image {
 }
 
 model book_reader {
-  user_id String @db.VarChar(20)
+  reader_id String @db.VarChar(20)
   book_id String @db.VarChar(20)
   book    book   @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_BOOK")
-  user    user   @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_USER")
+  reader  reader @relation(fields: [reader_id], references: [reader_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_USER")
 
-  @@id([user_id, book_id])
+  @@id([reader_id, book_id])
   @@index([book_id], map: "FK_BOOK_READER_BOOK")
 }
 
@@ -77,8 +77,19 @@ model user {
   last_name   String        @db.VarChar(200)
   first_name  String        @db.VarChar(200)
   avatar      String        @db.Text
-  email       String        @db.VarChar(250)
+  email       String        @db.VarChar(100)
   mfa_enable  Boolean
   otp_code    String?       @db.VarChar(10)
-  book_reader book_reader[]
+}
+
+model reader {
+  reader_id                 String          @id @db.VarChar(20)
+  last_name                 String          @db.VarChar(200)
+  first_name                String          @db.VarChar(200)
+  pass_word                 String          @db.VarChar(32)
+  avatar                    String          @db.Text
+  email                     String          @db.VarChar(100)
+  reset_password_token      String          @db.Text
+  password_reset_expires    Int
+  book_reader               book_reader[]
 }
