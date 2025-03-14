@@ -45,11 +45,11 @@ function ResetPassword(): JSX.Element {
     if (!validate.error) {
       // onLogin(email.value, password.value, reset);
     }
-  }, [email.value, password.value]);
+  }, []);
 
   return (
-    <ClientLoginWrapper>
-      <Form id={formId} onSubmit={onSubmit} submitLabel="Login">
+    <ClientLoginWrapper name="reset password">
+      <Form id={formId} onSubmit={onSubmit} submitLabel="Reset">
         <Input
           {...email}
           labelColumnSize={{

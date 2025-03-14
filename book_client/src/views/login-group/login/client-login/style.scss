@@ -1,13 +1,25 @@
-.forget-password-link {
-  display: block;
-  width: 100%;
-  text-align: right;
-  color: $white-color;
-  text-decoration: none;
-  font-size: 14px;
+.link-groups {
   margin-bottom: 10px;
+  float: right;
 
-  &:visited {
-    color: $border-input-color;
+  .navigate-link {
+    text-align: right;
+    color: $white-color;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 10px;
+
+    &:first-of-type {
+      margin-left: unset;
+    }
+
+    &:visited {
+      color: $border-input-color;
+    }
+  }
+
+  &:after {
+    content: '';
+    clear: both;
   }
 }
