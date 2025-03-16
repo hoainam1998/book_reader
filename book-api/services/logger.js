@@ -36,6 +36,7 @@ class Logger {
 
   /**
   * Static function writing message.
+  * @static
   * @param {string} context - The context name.
   * @param {string} level - The kind of console (ex: log, warn, log, error).
   * @param {string} message - The message to logging.
@@ -70,6 +71,7 @@ class Logger {
 
   /**
   * Writing error log according by context name.
+  * @static
   * @param {string} context - The context name.
   * @param {string} message - The message to logging.
   */
@@ -79,6 +81,7 @@ class Logger {
 
   /**
   * Writing info log according by context name.
+  * @static
   * @param {string} context - The context name.
   * @param {string} message - The message to logging.
   */
@@ -88,6 +91,7 @@ class Logger {
 
   /**
   * Writing warn log according by context name.
+  * @static
   * @param {string} context - The context name.
   * @param {string} message - The message to logging.
   */

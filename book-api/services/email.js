@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 
+/**
+ * Class supported sending email.
+ */
 class EmailService {
   _transporter = nodemailer.createTransport({
     host: process.env.SMPT_HOST,
@@ -14,12 +17,23 @@ class EmailService {
 
   static self = new EmailService();
 
+  /**
+  * Create email service instance if it not exist.
+  */
   constructor() {
     if (EmailService.self) {
       throw new Error(`${this.constructor.name} already created!`);
     }
   }
 
+  /**
+  * Send email util.
+  *
+  * @param {string} to - The receiver.
+  * @param {string} subject - The email subject.
+  * @param {string} html - The email content.
+  * @return {Promise} - The email sent result.
+  */
   _sendEmail(to, subject, html) {
     const mailOptions = {
       from: process.env.SMPT_MAIL,
@@ -39,6 +53,13 @@ class EmailService {
     });
   }
 
+  /**
+  * Sending email attach otp code.
+  * @static
+  * @param {string} email - The receiver.
+  * @param {string} otp - The otp code.
+  * @return {Promise} - The email sent result.
+  */
   static sendOtpEmail(email, otp) {
     const subject = 'Your OTP';
     const html = `
@@ -47,6 +68,13 @@ class EmailService {
     return this.self._sendEmail(email, subject, html);
   }
 
+  /**
+  * Sending email contain reset password link.
+  * @static
+  * @param {string} email - The receiver.
+  * @param {string} link - The reset password link.
+  * @return {Promise} - The email sent result.
+  */
   static sendResetPasswordEmail(email, link) {
     const subject = 'Reset password';
     const html = `

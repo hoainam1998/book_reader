@@ -29,7 +29,7 @@ const SignUp = (validators, className) => {
 const ForgetPassword = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsEmail('firstName must be an email!')
+      IsEmail('email invalid!')
     )
     email;
 
