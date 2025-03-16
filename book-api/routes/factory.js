@@ -4,10 +4,12 @@ const UserPrismaField = require('#services/prisma-fields/user.js');
 const CategoryPrismaField = require('#services/prisma-fields/category.js');
 const BookPrismaField = require('#services/prisma-fields/book.js');
 const AuthorPrismaField = require('#services/prisma-fields/author.js');
+const ClientPrismaField = require('#services/prisma-fields/client.js');
 const CategoryRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/category.js')));
 const BookRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/book.js')));
 const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user.js')));
 const AuthorRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/author.js')));
+const ClientRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/client.js')));
 const { PATH } = require('#constants');
 
 /**
@@ -38,6 +40,10 @@ class RouterFactory {
       {
         path: PATH.AUTHOR,
         route: new AuthorRouter(express, new GraphqlExecute(schema, AuthorPrismaField))
+      },
+      {
+        path: PATH.CLIENT,
+        route: new ClientRouter(express, new GraphqlExecute(schema, ClientPrismaField))
       }
     ];
   }

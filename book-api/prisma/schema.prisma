@@ -86,10 +86,11 @@ model reader {
   reader_id                 String          @id @db.VarChar(20)
   last_name                 String          @db.VarChar(200)
   first_name                String          @db.VarChar(200)
-  pass_word                 String          @db.VarChar(32)
-  avatar                    String          @db.Text
+  password                  String          @db.VarChar(32)
+  avatar                    String?         @db.Text
   email                     String          @db.VarChar(100)
-  reset_password_token      String          @db.Text
-  password_reset_expires    Int
+  login_token               String          @db.Text
+  reset_password_token      String?         @db.Text
+  password_reset_expires    Int?
   book_reader               book_reader[]
 }
