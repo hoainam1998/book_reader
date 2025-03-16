@@ -77,9 +77,9 @@ model user {
   last_name   String        @db.VarChar(200)
   first_name  String        @db.VarChar(200)
   avatar      String        @db.Text
-  email       String        @db.VarChar(100)
+  email       String        @unique @db.VarChar(100)
   mfa_enable  Boolean
-  otp_code    String?       @db.VarChar(10)
+  otp_code    String?       @unique @db.VarChar(10)
 }
 
 model reader {
@@ -88,9 +88,9 @@ model reader {
   first_name                String          @db.VarChar(200)
   password                  String          @db.VarChar(32)
   avatar                    String?         @db.Text
-  email                     String          @db.VarChar(100)
+  email                     String          @unique @db.VarChar(100)
   login_token               String          @db.Text
   reset_password_token      String?         @db.Text
-  password_reset_expires    Int?
+  password_reset_expires    Int?            @unique
   book_reader               book_reader[]
 }

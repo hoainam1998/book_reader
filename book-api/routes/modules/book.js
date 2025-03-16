@@ -10,11 +10,31 @@ const {
 const authentication = require('#middlewares/auth/authentication.js');
 const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
-const { promiseAll, getExtName, createFile, fetchHelper, messageCreator } = require('#utils');
+const {
+  promiseAll,
+  getExtName,
+  createFile,
+  fetchHelper,
+  messageCreator,
+  getOriginInternalServerUrl
+} = require('#utils');
 const { BookPagination } = require('#dto/book/book-in.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const { AllBookName, BookCreatedResponse, BookDetailResponse, BookPaginationResponse } = require('#dto/book/book-out.js');
-const { BookCreate, BookSave, BookFileCreated, PdfFileSaved, BookDetail, IntroduceHTMLFileSave, BookAuthors } = require('#dto/book/book-in.js');
+const {
+  AllBookName,
+  BookCreatedResponse,
+  BookDetailResponse,
+  BookPaginationResponse
+} = require('#dto/book/book-out.js');
+const {
+  BookCreate,
+  BookSave,
+  BookFileCreated,
+  PdfFileSaved,
+  BookDetail,
+  IntroduceHTMLFileSave,
+  BookAuthors
+} = require('#dto/book/book-in.js');
 const cpUpload = multer().fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 },
@@ -384,7 +404,7 @@ class BookRouter extends Router {
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(BookCreatedResponse)
   _updateBookInformation(req, res, next, self) {
-    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const url = getOriginInternalServerUrl(req);
     const bookId = req.body.bookId;
     const { book, pdf, authors } = createBookFormData(req, bookId);
 

@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const sendMail = require('./sendMail');
 const { mkdir } = require('fs/promises');
 const { plainToInstance } = require('class-transformer');
 const MessageResponse = require('#dto/common/message-response.js');
@@ -175,6 +174,14 @@ const getExtName = (file) => path.extname(file.originalname);
 const createFile = (file) => new File([file.buffer], file.originalname, { type: file.mimetype });
 
 /**
+ * Return origin internal server url.
+ *
+ * @param {Express.Request} request - The express request.
+ * @return {string} - The url.
+ */
+const getOriginInternalServerUrl = (request) => `${request.protocol}:${request.get('host')}${request.baseUrl}`;
+
+/**
  * Fetch helper to call api internally.
  *
  * @param {[ url: string, method: string, header: Object | undefined, body: Object ]} args - The fetch api props.
@@ -228,16 +235,16 @@ module.exports = {
   deepFreeze,
   messageCreator,
   generateOtp,
-  sendMail,
-  saveFile,
-  createFolder,
   graphqlQueryParser,
   getGraphqlFinalData,
   getGeneratorFunctionData,
   convertFileToBase64,
   getExtName,
+  saveFile,
+  createFolder,
   createFile,
-  fetchHelper,
   promiseAll,
   deleteFile,
+  fetchHelper,
+  getOriginInternalServerUrl,
 };

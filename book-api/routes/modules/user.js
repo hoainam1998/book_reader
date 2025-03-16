@@ -2,7 +2,8 @@ const Router = require('../router.js');
 const { verify } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
-const { sendMail, messageCreator, fetchHelper } = require('#utils');
+const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
+const EmailService = require('#services/email.js');
 const loginRequire = require('#middlewares/auth/login-require.js');
 const authentication = require('#middlewares/auth/authentication.js');
 const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
@@ -280,7 +281,7 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _sendOtpCode(req, res, next, self) {
-    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const url = getOriginInternalServerUrl(req);
 
     return fetchHelper(`${url}/update-otp`,
       'POST',
@@ -297,7 +298,7 @@ class UserRouter extends Router {
     })
     .then((json) => {
       const { otp, message } = json;
-      return sendMail(otp, req.body.email).then(() => messageCreator(message));
+      return EmailService.sendOtpEmail(req.body.email, otp).then(() => messageCreator(message));
     });
   }
 }

@@ -7,14 +7,16 @@ module.exports = {
     const password = await hash(args.data.password, saltRound);
     const token = sign(
       { email: args.data.email },
-      process.env.CLIENT_SECRET_KEY
+      process.env.CLIENT_LOGIN_SECRET_KEY
     );
+
     args.data = {
       ...args.data,
       password,
       login_token: token,
       reader_id: Date.now().toString(),
     };
+
     return query(args);
   },
 };
