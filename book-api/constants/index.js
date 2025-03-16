@@ -18,7 +18,8 @@ module.exports = deepFreeze({
     CATEGORY: '/category',
     BOOK: '/book',
     USER: '/user',
-    AUTHOR: '/author'
+    AUTHOR: '/author',
+    CLIENT: '/client',
   },
   REQUEST_DATA_PASSED_TYPE: {
     PARAM: 'param',
