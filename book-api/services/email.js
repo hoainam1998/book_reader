@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 
 /**
  * Class supported sending email.
+ * @class
  */
 class EmailService {
   _transporter = nodemailer.createTransport({

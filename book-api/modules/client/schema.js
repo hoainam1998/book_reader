@@ -10,8 +10,8 @@ const {
   GraphQLNonNull,
   GraphQLFloat
 } = require('graphql');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
+const handleResolveResult = require('#utils/handleResolveResult');
+const { ResponseType } = require('../common-schema');
 const { messageCreator } = require('#utils');
 
 const mutation = new GraphQLObjectType({
@@ -34,8 +34,12 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (service, { firstName, lastName, email, password }) => {
-        await service.signUp(firstName, lastName, email, password);
-        return messageCreator('Reader signup success!');
+        return handleResolveResult(async () => {
+          await service.signUp(firstName, lastName, email, password);
+          return messageCreator('Reader signup success!');
+        }, {
+          UNIQUE_DUPLICATE: 'Email already exist!'
+        });
       }
     },
     forgetPassword: {
@@ -52,18 +56,12 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (service, { email, passwordResetToken, passwordResetExpires }) => {
-        try {
+        return handleResolveResult(async () => {
           await service.forgetPassword(email, passwordResetToken, passwordResetExpires);
           return messageCreator('Reset password link already sent to your email!');
-        } catch (err) {
-          if (err instanceof PrismaClientKnownRequestError) {
-            if (err.code === 'P2025') {
-              throw new GraphQLError('Email not found!', graphqlNotFoundErrorOption);
-            }
-            throw new GraphQLError(err.meta.cause, graphqlErrorOption);
-          }
-          throw err;
-        }
+        }, {
+          RECORD_NOT_FOUND: 'Email not found!'
+        });
       }
     }
   }

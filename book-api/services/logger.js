@@ -12,6 +12,7 @@ const formatTimestamps = () => {
 
 /**
  * Class supported logging feature.
+ * @class
  */
 class Logger {
 

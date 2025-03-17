@@ -8,6 +8,7 @@ const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
  * Organize author routes.
+ * @class
  * @extends Router
  */
 class AuthorRouter extends Router {

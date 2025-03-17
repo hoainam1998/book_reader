@@ -2,6 +2,7 @@ const Singleton = require('./singleton.js');
 
 /**
 * Class support validation request body object.
+* @class
 * @extends Singleton
 */
 class Validator extends Singleton {

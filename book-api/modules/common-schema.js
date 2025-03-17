@@ -4,6 +4,18 @@ const {
 } = require('graphql');
 const { HTTP_CODE } = require('#constants');
 
+/**
+ * Create graphql error option.
+ *
+ * @param {('BAD_REQUEST' | 'NOT_FOUND')} code - The file object.
+ * @return {{
+ * extensions: {
+ *  code: 'BAD_REQUEST' | 'NOT_FOUND',
+ *  http: {
+ *    status: number
+ *  }
+ * }}} The extension name.
+ */
 const createGraphqlError = (code) => {
   return {
     extensions: {
@@ -15,11 +27,11 @@ const createGraphqlError = (code) => {
   };
 };
 
-export const graphqlErrorOption = createGraphqlError('BAD_REQUEST');
+const graphqlErrorOption = createGraphqlError('BAD_REQUEST');
 
-export const graphqlNotFoundErrorOption = createGraphqlError('NOT_FOUND');
+const graphqlNotFoundErrorOption = createGraphqlError('NOT_FOUND');
 
-export const ResponseType = new GraphQLObjectType({
+const ResponseType = new GraphQLObjectType({
   name: 'Response',
   fields: {
     message: {
@@ -27,3 +39,9 @@ export const ResponseType = new GraphQLObjectType({
     }
   }
 });
+
+module.exports = {
+  ResponseType,
+  graphqlNotFoundErrorOption,
+  graphqlErrorOption,
+};

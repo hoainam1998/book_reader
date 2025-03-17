@@ -38,6 +38,7 @@
   },
   "imports": {
     "#utils": "./utils/index.js",
+    "#utils/*": "./utils/*.js",
     "#decorators": "./decorators/index.js",
     "#decorators/validators": "./decorators/validators/index.js",
     "#constants": "./constants/index.js",

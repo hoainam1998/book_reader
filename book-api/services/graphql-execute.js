@@ -1,6 +1,10 @@
 const { execute } = require('graphql');
 const { validateExecuteQuery } = require('#decorators');
 
+/**
+ * Class supported execute graphql query.
+ * @class
+ */
 class GraphqlExecute {
   _prismaField;
 

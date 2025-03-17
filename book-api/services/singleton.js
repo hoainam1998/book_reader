@@ -1,5 +1,6 @@
 /**
  * Any class extend this class, then will not instantiated by itself.
+ * @class
  */
 class Singleton {
   /**
