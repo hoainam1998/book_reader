@@ -14,6 +14,7 @@ const { PATH } = require('#constants');
 
 /**
 * Organize all router instance.
+* @class
 */
 class RouterFactory {
   /**

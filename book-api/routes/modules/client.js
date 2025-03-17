@@ -7,7 +7,18 @@ const { SignUp, ForgetPassword } = require('#dto/client/client-in.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 const EmailService = require('#services/email.js');
 
+/**
+ * Organize client routes.
+ * @class
+ * @extends Router
+ */
 class ClientRouter extends Router {
+  /**
+  * Create client routes instance.
+  *
+  * @param {Object} express - The express object.
+  * @param {Object} graphqlExecute - The graphql execute instance.
+  */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/sign-up', this._signup);

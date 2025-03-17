@@ -9,14 +9,15 @@ const MessageSerializerResponse = require('#dto/common/message-serializer-respon
 
 /**
  * Organize category routes.
+ * @class
  * @extends Router
  */
 class CategoryRouter extends Router {
   /**
   * Create categoryRouter instance.
   *
-  * @param {object} express - The express object.
-  * @param {object} graphqlExecute - The graphql execute instance.
+  * @param {Object} express - The express object.
+  * @param {Object} graphqlExecute - The graphql execute instance.
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);

@@ -3,6 +3,7 @@ const Singleton = require('#services/singleton.js');
 
 /**
  * Class support behavior between graphql select and prisma sql select.
+ * @class
  * @extends Singleton
  */
 class PrismaField extends Singleton {

@@ -6,6 +6,7 @@ const Singleton = require('#services/singleton.js');
 /**
 * Base router class.
 * This class organize the base methods will using another router extended class.
+* @class
 * @extends Singleton
 */
 class Router extends Singleton {

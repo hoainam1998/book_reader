@@ -41,15 +41,33 @@ const cpUpload = multer().fields([
   { name: 'avatar', maxCount: 1 }
 ]);
 
+/**
+ * Filter promise by status of them.
+ *
+ * @param {Promise} promise - The promise.
+ * @return {Promise} - The promise filtered.
+ */
 const filterResponse = (promise) =>
-  promise.then(async data => {
+  promise.then(async (data) => {
     const result = { ...await data.json(), status: data.status };
+    // if status === 200, return data, else return data as error.
     if (data.status === HTTP_CODE.CREATED) {
       return result;
     }
     return Promise.reject(result);
   });
 
+/**
+ * Return book saving data.
+ *
+ * @param {Express.Request} req - The express request.
+ * @param {number} [bookId=Date.now()] - The book id.
+ * @return {{
+ *  book: FormData,
+ *  pdf: FormData,
+ *  authors: { authorId: string; bookId: string }[]
+ * }}  The book collected data.
+ */
 const createBookFormData = (req, bookId = Date.now()) => {
   const pdf = req.files.pdf[0];
   const avatar = req.files.avatar[0];
@@ -87,14 +105,15 @@ const createBookFormData = (req, bookId = Date.now()) => {
 
 /**
  * Organize book routes.
+ * @class
  * @extends Router
  */
 class BookRouter extends Router {
   /**
   * Create bookRouter instance.
   *
-  * @param {object} express - The express object.
-  * @param {object} graphqlExecute - The graphql execute instance.
+  * @param {Object} express - The express object.
+  * @param {Object} graphqlExecute - The graphql execute instance.
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);

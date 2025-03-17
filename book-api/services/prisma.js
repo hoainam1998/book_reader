@@ -2,6 +2,7 @@ const Singleton = require('#services/singleton.js');
 
 /**
  * Class provided prisma instance.
+ * @class
  * @extends Singleton
  */
 class Service extends Singleton {
