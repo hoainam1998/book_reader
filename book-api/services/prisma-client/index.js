@@ -1,9 +1,12 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, Prisma } = require('@prisma/client');
 const reader = require('./extensions/reader');
 
-module.exports = new PrismaClient()
-  .$extends({
+const extensions = Prisma.defineExtension((prisma) => {
+  return prisma.$extends({
     query: {
-      reader
+      reader: reader(prisma)
     }
-  });
+  })
+});
+
+module.exports = new PrismaClient().$extends(extensions);

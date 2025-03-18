@@ -10,8 +10,9 @@ const {
   GraphQLNonNull,
   GraphQLFloat
 } = require('graphql');
+const { compare } = require('bcrypt');
 const handleResolveResult = require('#utils/handleResolveResult');
-const { ResponseType } = require('../common-schema');
+const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
 const { messageCreator } = require('#utils');
 
 const mutation = new GraphQLObjectType({
@@ -51,16 +52,38 @@ const mutation = new GraphQLObjectType({
         passwordResetToken: {
           type: new GraphQLNonNull(GraphQLString)
         },
-        passwordResetExpires: {
-          type: new GraphQLNonNull(GraphQLFloat)
-        }
       },
-      resolve: async (service, { email, passwordResetToken, passwordResetExpires }) => {
+      resolve: async (service, { email, passwordResetToken }) => {
         return handleResolveResult(async () => {
-          await service.forgetPassword(email, passwordResetToken, passwordResetExpires);
+          await service.forgetPassword(email, passwordResetToken);
           return messageCreator('Reset password link already sent to your email!');
         }, {
           RECORD_NOT_FOUND: 'Email not found!'
+        });
+      }
+    },
+    resetPassword: {
+      type: ResponseType,
+      args: {
+        token: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        email: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        password: {
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: async (service, { token, email, password }) => {
+        return handleResolveResult(async () => {
+          const client = await service.getClientDetail(email);
+          if (client.reset_password_token !== token) {
+            throw new GraphQLError('Reset password token is valid!', graphqlUnauthorizedErrorOption);
+          }
+          return messageCreator('Reset password link already sent to your email!');
+        }, {
+          UNAUTHORIZED: 'User not found!'
         });
       }
     }
@@ -70,8 +93,8 @@ const mutation = new GraphQLObjectType({
 const query = new GraphQLObjectType({
   name: 'ClientQuery',
   fields: {
-    detail: {
-      type: ResponseType
+    login: {
+      type: ResponseType,
     }
   }
 });

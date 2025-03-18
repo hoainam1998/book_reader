@@ -1,6 +1,6 @@
 const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { graphqlErrorOption, graphqlNotFoundErrorOption } = require('../modules/common-schema')
+const { graphqlErrorOption, graphqlNotFoundErrorOption, graphqlUnauthorizedErrorOption } = require('../modules/common-schema')
 
 /*
 * Prisma error code enum defined.
@@ -8,6 +8,7 @@ const { graphqlErrorOption, graphqlNotFoundErrorOption } = require('../modules/c
 const PRISMA_ERROR_CODE = Object.freeze({
   RECORD_NOT_FOUND: 'P2025',
   UNIQUE_DUPLICATE: 'P2002',
+  UNAUTHORIZED: 'P2025',
 });
 
 /**
@@ -29,8 +30,15 @@ const handleError = (err, messages) => {
     let message = '';
     switch (err.code) {
       case PRISMA_ERROR_CODE.RECORD_NOT_FOUND:
-        message = messages['RECORD_NOT_FOUND'] || 'Data is not found!';
-        throw new GraphQLError(message, graphqlNotFoundErrorOption);
+      case PRISMA_ERROR_CODE.UNAUTHORIZED:
+        message = 'User not found!';
+        if (messages['UNAUTHORIZED']) {
+          message = messages['UNAUTHORIZED'];
+          throw new GraphQLError(message, graphqlUnauthorizedErrorOption);
+        } else {
+          messages = messages['RECORD_NOT_FOUND'];
+          throw new GraphQLError(message, graphqlNotFoundErrorOption);
+        }
       case PRISMA_ERROR_CODE.UNIQUE_DUPLICATE:
         message = messages['UNIQUE_DUPLICATE'] || 'Data is duplicate!';
         throw new GraphQLError(message, graphqlErrorOption);
