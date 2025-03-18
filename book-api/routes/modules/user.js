@@ -173,7 +173,7 @@ class UserRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(UserUpdate, { error_message: 'Update user failed!', groups: ['update'] })
+  @validation(UserUpdate, { error_message: 'Update user was failed!', groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateUser(req, res, next, self) {
@@ -196,7 +196,7 @@ class UserRouter extends Router {
     return self.execute(query, { user: variables });
   }
 
-  @validation(UserDetail)
+  @validation(UserDetail, { error_message: 'Load user detail was failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserDetailResponse)
   _getUserDetail(req, res, next, self) {
@@ -214,7 +214,7 @@ class UserRouter extends Router {
     );
   }
 
-  @validation(Login)
+  @validation(Login, { error_message: 'Login was failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(LoginResponse)
   _login(req, res, next, self) {
@@ -233,7 +233,7 @@ class UserRouter extends Router {
     req.body.query);
   }
 
-  @validation(OtpVerify)
+  @validation(OtpVerify, { error_message: 'Verify otp was failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpVerifyResponse)
   _verifyOtp(req, res, next, self) {
@@ -252,7 +252,7 @@ class UserRouter extends Router {
     return self.execute(query, variables);
   }
 
-  @validation(OtpUpdate)
+  @validation(OtpUpdate, { error_message: 'Update otp code was failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpUpdateResponse)
   _updateOtpCode(req, res, next, self) {

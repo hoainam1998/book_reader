@@ -12,15 +12,35 @@ class ClientService extends Service {
     });
   }
 
-  forgetPassword(email, resetToken, passwordExpires) {
+  forgetPassword(email, resetToken) {
     return this.PrismaInstance.reader.update({
       where: {
         email,
       },
       data: {
         reset_password_token: resetToken,
-        password_reset_expires: passwordExpires,
+      }
+    });
+  }
+
+  resetPassword(token, email, password) {
+    return this.PrismaInstance.reader.update({
+      where: {
+        email,
+        reset_password_token: token
       },
+      data: {
+        password,
+        reset_password_token: null
+      }
+    });
+  }
+
+  getClientDetail(email) {
+    return this.PrismaInstance.reader.findUniqueOrThrow({
+      where: {
+        email
+      }
     });
   }
 }

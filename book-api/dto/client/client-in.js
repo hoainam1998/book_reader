@@ -1,6 +1,6 @@
 const { classCreator, Validation } = require('../helper.js');
 const { Validator } = require('#services/validator.js');
-const { IsString, IsEmail, IsPassword, IsPositive } = require('#decorators/validators');
+const { IsString, IsEmail, IsPassword } = require('#decorators/validators');
 
 const SignUp = (validators, className) => {
   return classCreator(class extends Validator {
@@ -37,15 +37,30 @@ const ForgetPassword = (validators, className) => {
       IsString('resetToken must be a string!')
     )
     resetToken;
+  }, className);
+};
+
+const ResetPassword = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsEmail('email invalid!')
+    )
+    email;
 
     @validators(
-      IsPositive('expires must be a number!')
+      IsString('token must be a string!')
     )
-    expires;
+    token;
+
+    @validators(
+      IsPassword('Invalid password!'),
+    )
+    password;
   }, className);
 };
 
 module.exports = {
   SignUp: Validation(SignUp),
   ForgetPassword: Validation(ForgetPassword),
+  ResetPassword: Validation(ResetPassword),
 };
