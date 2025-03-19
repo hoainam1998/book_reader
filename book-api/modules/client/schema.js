@@ -104,6 +104,7 @@ const mutation = new GraphQLObjectType({
           if (client.reset_password_token !== token) {
             throw new GraphQLError('Reset password token is valid!', graphqlUnauthorizedErrorOption);
           }
+          await service.resetPassword(token, email, password);
           return messageCreator('Reset password link already sent to your email!');
         }, {
           UNAUTHORIZED: 'User not found!'
