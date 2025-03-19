@@ -36,11 +36,19 @@ class ClientService extends Service {
     });
   }
 
-  getClientDetail(email) {
-    return this.PrismaInstance.reader.findUniqueOrThrow({
+  getClientDetail(emailOrId, select) {
+    return this.PrismaInstance.reader.findFirstOrThrow({
       where: {
-        email
-      }
+        OR: [
+          {
+            email: emailOrId
+          },
+          {
+            reader_id: emailOrId
+          },
+        ],
+      },
+      select,
     });
   }
 }

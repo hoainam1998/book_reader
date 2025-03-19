@@ -6,7 +6,13 @@ const PrismaField = require('./prisma-field');
 * @extends PrismaField
 */
 class ClientPrismaField extends PrismaField {
-  _fields = {};
+  _fields = {
+    firstName: 'first_name',
+    lastName: 'last_name',
+    avatar: 'avatar',
+    email: 'email',
+    apiKey: 'login_token',
+  };
 }
 
 module.exports = ClientPrismaField;

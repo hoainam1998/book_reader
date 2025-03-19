@@ -4,6 +4,8 @@ const { validateResultExecute, upload, validation, serializer } = require('#deco
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
 const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in.js');
+const Login = require('#dto/common/login-validator.js');
+const { ClientDetailResponse } = require('#dto/client/client-out.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 const EmailService = require('#services/email.js');
 
@@ -25,6 +27,7 @@ class ClientRouter extends Router {
     this.post('/forget-password', this._forgetPassword);
     this.post('/generated-reset-password-token', this._generatedResetPassword);
     this.post('/reset-password', this._resetPassword);
+    this.post('/login', this._login);
   }
 
   @validation(SignUp, { error_message: 'Sign up was failed!' })
@@ -133,6 +136,24 @@ class ClientRouter extends Router {
       token: req.body.token,
       password: req.body.password,
     });
+  }
+
+  @validation(Login, { error_message: 'Login was failed!' })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(ClientDetailResponse)
+  _login(req, res, nest, self) {
+    const query = `query Login($email: String!, $password: String!) {
+      client {
+        login(email: $email, password: $password) ${
+          req.body.query
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      email: req.body.email,
+      password: req.body.password,
+    }, req.body.query);
   }
 }
 
