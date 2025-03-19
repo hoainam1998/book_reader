@@ -36,27 +36,6 @@ const UserPaginationValidateClass = (validators, className) => {
     pageNumber;
 
     @validators(
-      IsObject('Query must be object!'),
-      IsGraphqlSelect('Value of field must be boolean!')
-    )
-    query;
-  }, className);
-};
-
-const LoginValidateClass = (validators, className) => {
-  return classCreator(class extends Validator {
-    @validators(
-      IsEmail('Invalid email!'),
-    )
-    email;
-
-    @validators(
-      IsPassword('Invalid password!'),
-    )
-    password;
-
-    @validators(
-      IsObject('Query must be object!'),
       IsGraphqlSelect('Value of field must be boolean!')
     )
     query;
@@ -78,7 +57,6 @@ const OtpVerify = (validators, className) => {
     otp;
 
     @validators(
-      IsObject('Query must be object!'),
       IsGraphqlSelect('Value of field must be boolean!')
     )
     query;
@@ -93,7 +71,6 @@ const OtpUpdate = (validators, className) => {
     email;
 
     @validators(
-      IsObject('Query must be object!'),
       IsGraphqlSelect('Value of field must be boolean!')
     )
     query;
@@ -122,7 +99,6 @@ const UserDetail = (validators, className) => {
     userId;
 
     @validators(
-      IsObject('Query must be object!'),
       IsGraphqlSelect('Value of field must be boolean!')
     )
     query;
@@ -179,7 +155,6 @@ const UserDelete = (validators, className) => {
 
 module.exports = {
   UserPaginationInput: Validation('UserPaginationInput', UserPaginationValidateClass),
-  Login: Validation('Login', LoginValidateClass),
   OtpVerify: Validation(OtpVerify),
   OtpUpdate: Validation(OtpUpdate),
   MfaUpdate: Validation(MfaUpdate),

@@ -11,9 +11,32 @@ const {
   GraphQLFloat
 } = require('graphql');
 const { compare } = require('bcrypt');
+const { plainToInstance } = require('class-transformer');
 const handleResolveResult = require('#utils/handleResolveResult');
+const ClientDTO = require('#dto/client/client.js');
 const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
 const { messageCreator } = require('#utils');
+
+const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
+  name: 'ClientDetail',
+  fields: {
+    firstName: {
+      type: GraphQLString
+    },
+    lastName: {
+      type: GraphQLString,
+    },
+    avatar: {
+      type: GraphQLString,
+    },
+    email: {
+      type: GraphQLString,
+    },
+    apiKey: {
+      type: GraphQLString,
+    }
+  }
+});
 
 const mutation = new GraphQLObjectType({
   name: 'ClientMutation',
@@ -75,9 +98,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: async (service, { token, email, password }) => {
+      resolve: async (service, { token, email, password }, context) => {
         return handleResolveResult(async () => {
-          const client = await service.getClientDetail(email);
+          const client = await service.getClientDetail(email, context);
           if (client.reset_password_token !== token) {
             throw new GraphQLError('Reset password token is valid!', graphqlUnauthorizedErrorOption);
           }
@@ -94,7 +117,27 @@ const query = new GraphQLObjectType({
   name: 'ClientQuery',
   fields: {
     login: {
-      type: ResponseType,
+      type: CLIENT_DETAIL_TYPE,
+      args: {
+        email: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
+        password: {
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: async (service, { email, password }, context) => {
+        return handleResolveResult(async () => {
+          const select = { ...context, password: true };
+          const client = await service.getClientDetail(email, select);
+          if (await compare(password, client.password)) {;
+            return plainToInstance(ClientDTO, client);
+          }
+          throw new GraphQLError('Password is incorrect!', graphqlUnauthorizedErrorOption);
+        }, {
+          UNAUTHORIZED: 'User not found!'
+        });
+      }
     }
   }
 });

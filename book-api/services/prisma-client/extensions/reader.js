@@ -9,7 +9,7 @@ const { sign } = require('jsonwebtoken');
  */
 const passwordHashing = async (password) => {
   const saltRound = await genSalt(10);
-  return await hash(password, 10);
+  return await hash(password, saltRound);
 };
 
 /**
@@ -53,7 +53,7 @@ module.exports = (prisma) => {
 
       if (args.data.password) {
         if (!await compare(args.data.password, oldUser.password)) {
-          args.data.password = await passwordHashing(args.data.password)
+          args.data.password = await passwordHashing(args.data.password);
         } else {
           args.data.password = oldUser.password;
         }

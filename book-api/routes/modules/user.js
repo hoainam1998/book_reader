@@ -18,7 +18,6 @@ const {
 } = require('#dto/user/user-out.js');
 const {
   UserPaginationInput,
-  Login,
   OtpVerify,
   OtpUpdate,
   MfaUpdate,
@@ -26,6 +25,7 @@ const {
   UserUpdate,
   UserDelete,
 } = require('#dto/user/user-in.js');
+const Login = require('#dto/common/login-validator.js');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
 
 /**
