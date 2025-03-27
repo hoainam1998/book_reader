@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers');
+const { validate, validating } = require('#helpers');
 
 const isString = validate((value) => typeof value === 'string');
 

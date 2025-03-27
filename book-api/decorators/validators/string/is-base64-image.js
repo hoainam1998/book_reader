@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers');
+const { validate, validating } = require('#helpers');
 
 const base64ImagePattern = /data:image\/(png|jpeg|jpg);base64,.+/;
 

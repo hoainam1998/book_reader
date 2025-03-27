@@ -1,4 +1,4 @@
-const Service = require('#services/prisma.js');
+const Service = require('#services/prisma');
 
 class CategoryService extends Service {
 
@@ -12,8 +12,10 @@ class CategoryService extends Service {
     });
   }
 
-  all() {
-    return this.PrismaInstance.category.findMany();
+  all(select) {
+    return this.PrismaInstance.category.findMany({
+      select
+    });
   }
 
   pagination(pageSize, pageNumber) {
@@ -36,13 +38,12 @@ class CategoryService extends Service {
   }
 
   detail(id, select) {
-    return this.PrismaInstance.category.findFirst({
+    return this.PrismaInstance.category.findUniqueOrThrow({
       where: {
         category_id: id
       },
       select
-    })
-    .then((category) => ({ ...category, categoryId: category.category_id }));
+    });
   }
 
   update(category) {

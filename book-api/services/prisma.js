@@ -1,4 +1,4 @@
-const Singleton = require('#services/singleton.js');
+const Singleton = require('#services/singleton');
 
 /**
  * Class provided prisma instance.

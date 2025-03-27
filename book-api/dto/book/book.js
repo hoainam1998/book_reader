@@ -1,6 +1,7 @@
 const { Type, Exclude } = require('class-transformer');
+const OutputValidate = require('#services/output-validate');
 
-class BookDTO {
+class BookDTO extends OutputValidate {
   @Exclude()
   book_id;
 
@@ -32,9 +33,9 @@ class BookDTO {
     return this.book_id;
   }
 
-  @Type(() => Number)
+  @Type(() => String)
   get publishedDay() {
-    return parseInt(this.published_day);
+    return this.published_day;
   }
 
   @Type(() => Number)
@@ -46,7 +47,6 @@ class BookDTO {
   get categoryId() {
     return this.category_id;
   }
-
 };
 
 module.exports = BookDTO;

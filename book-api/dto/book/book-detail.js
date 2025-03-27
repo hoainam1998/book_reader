@@ -44,9 +44,9 @@ class BookDetailDTO extends BookDTO {
     return this.published_time;
   }
 
-  @Type(() => Number)
+  @Type(() => String)
   get publishedDay() {
-    return parseInt(this.published_day);
+    return this.published_day;
   }
 
   @Type(() => String)

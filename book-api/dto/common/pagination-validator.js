@@ -1,4 +1,4 @@
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const { classCreator, Validation } = require('../helper.js');
 const {
   IsPositive,

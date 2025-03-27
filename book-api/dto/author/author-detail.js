@@ -1,5 +1,5 @@
 const { Type } = require('class-transformer');
-const AuthorDTO = require('#dto/author/author.js');
+const AuthorDTO = require('#dto/author/author');
 
 class AuthorStory {
   @Type(() => String)

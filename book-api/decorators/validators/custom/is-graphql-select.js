@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers.js');
+const { validate, validating } = require('#helpers');
 
 const isGraphqlSelect = validate((value) => {
   const graphqlSelectChecker = (value) => {

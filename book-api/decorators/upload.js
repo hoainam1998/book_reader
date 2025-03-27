@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 const { convertFileToBase64 } = require('#utils');
-const Logger = require('#services/logger.js');
+const Logger = require('#services/logger');
 
 const storage = multer.memoryStorage();
 

@@ -1,4 +1,4 @@
-const Singleton = require('./singleton.js');
+const Singleton = require('#services/singleton');
 
 /**
 * Class support validation request body object.

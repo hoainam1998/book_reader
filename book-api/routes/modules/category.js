@@ -1,11 +1,11 @@
-const Router = require('../router.js');
+const Router = require('../router');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
-const authentication = require('#middlewares/auth/authentication.js');
-const { CategoryPagination, CategoryValidator, CategoryDeleteParamsValidator } = require('#dto/category/category-in.js');
-const { CategoryPaginationResponse, CategoryDetailResponse, AllCategoryResponse } = require('#dto/category/category-out.js');
-const { CategoryDetailValidator, AllCategory } = require('#dto/category/category-in.js');
-const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
+const authentication = require('#middlewares/auth/authentication');
+const { CategoryPagination, CategoryValidator, CategoryDeleteParamsValidator } = require('#dto/category/category-in');
+const { CategoryPaginationResponse, CategoryDetailResponse, AllCategoryResponse } = require('#dto/category/category-out');
+const { CategoryDetailValidator, AllCategory } = require('#dto/category/category-in');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 
 /**
  * Organize category routes.
@@ -57,11 +57,13 @@ class CategoryRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query,
       {
         pageNumber: req.body.pageNumber,
         pageSize: req.body.pageSize
-      }
+      },
+      req.body.query
     );
   }
 

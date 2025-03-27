@@ -1,4 +1,4 @@
-const Service = require("#services/prisma.js");
+const Service = require("#services/prisma");
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password) {

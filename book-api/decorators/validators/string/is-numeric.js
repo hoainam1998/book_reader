@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers.js');
+const { validate, validating } = require('#helpers');
 
 const isNumeric = validate((value) => /^([0-9])+$/.test(value));
 

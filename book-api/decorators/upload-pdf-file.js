@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const { HTTP_CODE } = require('#constants');
-const Logger = require('#services/logger.js');
+const Logger = require('#services/logger');
 
 const storage = multer.diskStorage({
   filename: (req, file, cb) => {

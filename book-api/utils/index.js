@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { mkdir } = require('fs/promises');
 const { plainToInstance } = require('class-transformer');
-const MessageResponse = require('#dto/common/message-response.js');
+const MessageResponse = require('#dto/common/message-response');
 
 /**
  * Return freezed object.
@@ -20,12 +20,27 @@ const deepFreeze = (object) => {
 };
 
 /**
+ * Get final result from generator function return.
+ *
+ * @param {class} dtoClass - The dto class.
+ * @param {Object} value - The value to plain.
+ * @return {Object} - The value converted.
+ */
+const convertDtoToZodObject = (dtoClass, value) => {
+  // plain value.
+  const result = plainToInstance(dtoClass, value);
+  // prepare parse function for validate output phase.
+  dtoClass.prepare(result);
+  return result;
+};
+
+/**
  * Return message response object.
  *
  * @param {string} message - message.
  * @returns {Object} - message object.
  */
-const messageCreator = (message) => plainToInstance(MessageResponse, { message });
+const messageCreator = (message) => convertDtoToZodObject(MessageResponse, { message });
 
 /**
  * Return otp code.
@@ -39,6 +54,14 @@ const generateOtp = () => {
   }
   return otp.substring(0, 6);
 };
+
+/**
+ * Check array is empty or not.
+ *
+ * @param {*} obj - The object checking.
+ * @returns {boolean} - The checking result.
+ */
+const checkArrayHaveValues = (array) => Array.isArray(array) && array.length > 0;
 
 /**
  * Create folder at specific path.
@@ -247,4 +270,6 @@ module.exports = {
   deleteFile,
   fetchHelper,
   getOriginInternalServerUrl,
+  convertDtoToZodObject,
+  checkArrayHaveValues,
 };

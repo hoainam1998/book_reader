@@ -1,11 +1,13 @@
-const { getGraphqlFinalData } = require('#utils');
-const GraphqlResponse = require('#dto/common/graphql-response.js');
-const { CategoriesDTO, CategoryDTO } = require('#dto/category/category.js');
 const { Expose, Type } = require('class-transformer');
+const { getGraphqlFinalData } = require('#utils');
+const { zodValidateClassWrapper } = require('#decorators');
+const GraphqlResponse = require('#dto/common/graphql-response');
+const { CategoryDTO } = require('#dto/category/category');
+const PaginationResponse = require('#dto/common/pagination-response');
 
 class CategoryPaginationResponse extends GraphqlResponse {
   @Expose({ toClassOnly: true })
-  @Type(() => CategoriesDTO)
+  @Type(() => PaginationResponse)
   get response() {
     return getGraphqlFinalData(this.data);
   }
@@ -28,7 +30,7 @@ class AllCategoryResponse extends GraphqlResponse {
 }
 
 module.exports = {
-  CategoryPaginationResponse,
-  CategoryDetailResponse,
-  AllCategoryResponse,
+  CategoryPaginationResponse: zodValidateClassWrapper(CategoryPaginationResponse, PaginationResponse),
+  CategoryDetailResponse: zodValidateClassWrapper(CategoryDetailResponse, CategoryDTO),
+  AllCategoryResponse: zodValidateClassWrapper(AllCategoryResponse, CategoryDTO),
 };

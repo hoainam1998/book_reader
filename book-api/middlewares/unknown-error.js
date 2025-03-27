@@ -1,6 +1,6 @@
 const { messageCreator } = require('#utils');
 const { HTTP_CODE } = require('#constants');
-const Logger = require('#services/logger.js');
+const Logger = require('#services/logger');
 
 /**
  * Handle unknown error.

@@ -1,6 +1,6 @@
 const { generateOtp } = require('#utils');
 const { sign } = require('jsonwebtoken');
-const Service = require('#services/prisma.js');
+const Service = require('#services/prisma');
 
 class UserService extends Service {
   addUser(user) {
@@ -86,7 +86,7 @@ class UserService extends Service {
   }
 
   login(email, password, select) {
-    return this.PrismaInstance.user.findFirst({
+    return this.PrismaInstance.user.findFirstOrThrow({
       where: {
         AND: [
           {
@@ -102,26 +102,19 @@ class UserService extends Service {
         user_id: true
       }
     }).then((user) => {
-      if (user) {
-        if (!user.mfa_enable) {
-          return {
-            ...user,
-            apiKey: sign({ userId: user.user_id }, process.env.SECRET_KEY),
-          };
-        } else {
-          return {
-            ...user,
-            apiKey: sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN)
-          };
-        }
+      let apiKey;
+      if (!user.mfa_enable) {
+        apiKey = sign({ userId: user.user_id, email }, process.env.SECRET_KEY);
+      } else {
+        apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
       }
-      return user;
+      return { ...user, apiKey };
     });
   }
 
   updateOtpCode(email) {
     const otpCode = generateOtp();
-    return this.PrismaInstance.user.updateMany({
+    return this.PrismaInstance.user.update({
       where: {
         email
       },
@@ -132,93 +125,54 @@ class UserService extends Service {
   }
 
   verifyOtpCode(email, otp) {
-    return this.PrismaInstance.$transaction([
-      this.PrismaInstance.user.count({
-        where: {
-          AND: [
-            {
-              email
-            },
-            {
-              otp_code: otp
-            }
-          ]
-        }
-      }),
-      this.PrismaInstance.user.findFirst({
-        where: {
-          email
-        },
-        select: {
-          user_id: true,
-          mfa_enable: true,
-          email: true
-        }
-      }),
-    ])
-    .then((results) => {
-      const verifyResult = {
-        verify: false,
-        apiKey: '',
-      };
-
-      const user = results[1];
-
-      if (results[0]) {
-        verifyResult.verify = true;
-        verifyResult.apiKey = sign(
-          { userId: user.user_id },
-          process.env.SECRET_KEY
-        );
-      }
-      return verifyResult;
-    });
-  }
-
-  updatePerson(user) {
-    const { firstName, lastName, avatar, email, password, userId } = user;
-    return this.PrismaInstance.user.findFirst({
+    return this.PrismaInstance.user.findFirstOrThrow({
       where: {
-        user_id: userId
+        AND: [
+          {
+            email
+          },
+          {
+            otp_code: otp
+          }
+        ]
+      },
+      select: {
+        user_id: true,
+        mfa_enable: true,
+        email: true
       }
-    }).then(oldUser => {
-      return this.PrismaInstance.user.update({
-        where: {
-          user_id: userId
-        },
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          avatar: avatar,
-          email: email,
-          password: password
-        },
-      }).then(newUser => {
-        if (oldUser.email !== newUser.email || oldUser.password !== newUser.password) {
-          return {
-            reLoginFlag: true
-          };
-        }
-        return {
-          reLoginFlag: false
-        };
-      });
-    });
+    })
+    .then((user) => ({
+      apiKey: sign(
+        { userId: user.user_id },
+        process.env.SECRET_KEY
+      )
+    }));
   }
 
   updateUser(user) {
-    const { firstName, lastName, avatar, email, mfaEnable, userId } = user;
+    const { firstName, lastName, avatar, email, password, mfaEnable, userId } = user;
+    const reduceUndefinedProps = (obj) => {
+      return Object.keys(obj).reduce((objReduced, key) => {
+        if (obj[key] !== undefined) {
+          objReduced[key] = obj[key];
+        }
+        return objReduced;
+      }, {});
+    };
+
     return this.PrismaInstance.user.update({
       where: {
         user_id: userId,
       },
-      data: {
+      data: reduceUndefinedProps({
         first_name: firstName,
         last_name: lastName,
         avatar: avatar,
         email: email,
-        mfa_enable: mfaEnable
-      },
+        mfa_enable: mfaEnable,
+        password,
+      }),
     });
   }
 
@@ -231,7 +185,7 @@ class UserService extends Service {
   }
 
   getUserDetail(userId, select) {
-    return this.PrismaInstance.user.findUnique({
+    return this.PrismaInstance.user.findUniqueOrThrow({
       where: {
         user_id: userId
       },
@@ -239,11 +193,9 @@ class UserService extends Service {
     });
   }
 
-  getAllEmail() {
+  getAllUsers(select) {
     return this.PrismaInstance.user.findMany({
-      select: {
-        email: true
-      }
+      select
     });
   }
 }

@@ -1,6 +1,7 @@
 const { Type, Exclude } = require('class-transformer');
+const OutputValidate = require('#services/output-validate');
 
-class AuthorDTO {
+class AuthorDTO extends OutputValidate {
   @Exclude()
   @Type(() => String)
   author_id;

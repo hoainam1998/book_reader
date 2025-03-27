@@ -1,13 +1,13 @@
-const Router = require('../router.js');
+const Router = require('../router');
 const { sign, verify } = require('jsonwebtoken');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
-const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in.js');
-const Login = require('#dto/common/login-validator.js');
-const { ClientDetailResponse } = require('#dto/client/client-out.js');
-const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const EmailService = require('#services/email.js');
+const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in');
+const Login = require('#dto/common/login-validator');
+const { ClientDetailResponse } = require('#dto/client/client-out');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response');
+const EmailService = require('#services/email');
 
 /**
  * Organize client routes.

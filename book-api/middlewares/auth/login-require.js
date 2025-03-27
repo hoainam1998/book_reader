@@ -1,6 +1,8 @@
 const { verify } = require('jsonwebtoken');
 const { HTTP_CODE, INTERNAL_ERROR_MESSAGE } = require('#constants');
 const { messageCreator } = require('#utils');
+const Logger = require('#services/logger');
+const logger = new Logger('Login require');
 
 /**
  * Checking user have login yet.
@@ -26,9 +28,15 @@ const loginRequire = (req, res, next) => {
       }
     }
     // if token have not, also return unauthorized message.
+    logger.warn('unauthorized error');
     return res.status(HTTP_CODE.UNAUTHORIZED)
       .json(messageCreator('Your have not login yet!'));
-  } catch {
+  } catch (error) {
+    if (error.message === 'invalid signature') {
+      return res.status(HTTP_CODE.UNAUTHORIZED)
+        .json(messageCreator('Invalid authentication token!'));
+    }
+    logger.error(error.message);
     return res.status(HTTP_CODE.SERVER_ERROR)
       .json(messageCreator(INTERNAL_ERROR_MESSAGE));
   }

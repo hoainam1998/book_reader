@@ -1,4 +1,4 @@
-const Router = require('../router.js');
+const Router = require('../router');
 const multer = require('multer');
 const {
   validateResultExecute,
@@ -7,8 +7,8 @@ const {
   serializer,
   validation
 } = require('#decorators');
-const authentication = require('#middlewares/auth/authentication.js');
-const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
+const authentication = require('#middlewares/auth/authentication');
+const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const {
   promiseAll,
@@ -16,17 +16,19 @@ const {
   createFile,
   fetchHelper,
   messageCreator,
+  convertDtoToZodObject,
   getOriginInternalServerUrl
 } = require('#utils');
-const { BookPagination } = require('#dto/book/book-in.js');
-const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
+const { BookPagination } = require('#dto/book/book-in');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const {
-  AllBookName,
+  AllBooksResponse,
   BookCreatedResponse,
   BookDetailResponse,
   BookPaginationResponse
-} = require('#dto/book/book-out.js');
+} = require('#dto/book/book-out');
 const {
+  AllBooks,
   BookCreate,
   BookSave,
   BookFileCreated,
@@ -34,7 +36,8 @@ const {
   BookDetail,
   IntroduceHTMLFileSave,
   BookAuthors
-} = require('#dto/book/book-in.js');
+} = require('#dto/book/book-in');
+const BookCreated = require('#dto/book/book-created');
 const cpUpload = multer().fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 },
@@ -119,7 +122,7 @@ class BookRouter extends Router {
     super(express, graphqlExecute);
     this.post('/save-introduce', authentication, this._saveIntroduceHtmlFile);
     this.put('/update-introduce', authentication, this._updateIntroduceHtmlFile);
-    this.get('/book-name', authentication, this._getAllBookName);
+    this.post('/all', authentication, this._getAllBooks);
     this.post('/save-book-info', allowInternalCall, this._saveBookInfo);
     this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
     this.post('/save-pdf', allowInternalCall, this._savePdf);
@@ -186,16 +189,19 @@ class BookRouter extends Router {
     return self.execute(query, { bookId: req.body.bookId }, req.body.query);
   }
 
+  @validation(AllBooks, { error_message: 'Load all books failed!' })
   @validateResultExecute(HTTP_CODE.OK)
-  @serializer(AllBookName)
-  _getAllBookName(req, res, next, self) {
-    const query = `query GetAllBookName {
+  @serializer(AllBooksResponse)
+  _getAllBooks(req, res, next, self) {
+    const query = `query GetAllBooks {
       book {
-        names
+        all ${
+          req.body.query
+        }
       }
     }`;
 
-    return self.execute(query);
+    return self.execute(query, undefined, req.body.query);
   }
 
   @validation(BookPagination, { error_message: 'Loading books failed!' })
@@ -397,10 +403,10 @@ class BookRouter extends Router {
         return Promise.reject('Create book failed!');
       }
 
-      return {
+      return convertDtoToZodObject(BookCreated, {
         ...messageCreator('Book created success!'),
         bookId: bookId.toString()
-      };
+      });
     });
   }
 
@@ -421,7 +427,7 @@ class BookRouter extends Router {
     }
   )
   @validateResultExecute(HTTP_CODE.CREATED)
-  @serializer(BookCreatedResponse)
+  @serializer(MessageSerializerResponse)
   _updateBookInformation(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
     const bookId = req.body.bookId;

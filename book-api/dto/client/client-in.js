@@ -1,5 +1,5 @@
 const { classCreator, Validation } = require('../helper.js');
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const { IsString, IsEmail, IsPassword } = require('#decorators/validators');
 
 const SignUp = (validators, className) => {

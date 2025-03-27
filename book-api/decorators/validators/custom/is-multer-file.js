@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers.js');
+const { validate, validating } = require('#helpers');
 
 const isMulterFile = validate((value) => {
   const checkMulterFile = (file) => {

@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers.js');
+const { validate, validating } = require('#helpers');
 
 const isIds = validate((value) => {
   const checker = (valueValidate) =>

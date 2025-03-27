@@ -1,6 +1,7 @@
 const { Expose, Type } = require('class-transformer');
+const OutputValidate = require('#services/output-validate');
 
-class PaginationResponse {
+class PaginationResponse extends OutputValidate {
   @Expose({ toClassOnly: true })
   @Type(() => Array)
   list;
