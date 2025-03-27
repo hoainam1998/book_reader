@@ -27,6 +27,12 @@ class Validate extends Singleton {
   * @param {Object} value - The value to convert.
   */
   static prepare(value) {
+    /**
+    * Determinate output value is the equal with original value.
+    *
+    * @param {Object} graphQlResult - The object will be compare with value.
+    * @return {boolean} - The compare result.
+    */
     const recursiveCheck = (graphQlResult) => {
       if (graphQlResult.isValueEqual(value)) {
         return true;

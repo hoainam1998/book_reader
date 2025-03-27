@@ -241,8 +241,9 @@ const serializer = (serializerClass) => {
       if (!(finalResult instanceof Error)) {
         if (finalResult instanceof Promise) {
           return finalResult.then(value => {
-            // convert value into the instance serializerClass, if response not include in instance,
-            // then value is deserialization value, and they will directly throw.
+            // convert value into the instance serializerClass, then compare value had been got with origin value
+            // if it is equal return value, else throw bad request
+            // if value is the error, it will be throw direct for the later process.
             if (!Object.hasOwn(value, 'errors')) {
               const { success, message, data } = serializerClass.parse(plainToInstance(serializerClass, value));
               if (!success) {

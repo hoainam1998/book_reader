@@ -21,7 +21,7 @@ class AuthorRouter extends Router {
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/create', authentication, this._createAuthor);
-    this.post('/pagination', this._pagination);
+    this.post('/pagination', authentication, this._pagination);
     this.post('/detail', authentication, this._getAuthorDetail);
     this.put('/update', authentication, this._updateAuthor);
     this.post('/filter', authentication, this._getAuthors);

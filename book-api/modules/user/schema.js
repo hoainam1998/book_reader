@@ -172,8 +172,7 @@ const query = new GraphQLObjectType({
       },
       resolve: async (user, { email, password }, context) => {
         return handleResolveResult(async () => {
-          const userLogin = await user.login(email, password, context);
-          return convertDtoToZodObject(UserDTO, userLogin);
+          return convertDtoToZodObject(UserDTO, await user.login(email, password, context));
         }, {
           UNAUTHORIZED: 'User not found!'
         });

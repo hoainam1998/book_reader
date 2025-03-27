@@ -128,7 +128,7 @@ class BookRouter extends Router {
     this.post('/save-pdf', allowInternalCall, this._savePdf);
     this.put('/update-pdf', allowInternalCall, this._updatePdf);
     this.post('/save-book-authors', allowInternalCall, this._saveBookAuthors);
-    this.post('/detail', this._getBookDetail);
+    this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
     this.post('/pagination', authentication, this._paginationBook);

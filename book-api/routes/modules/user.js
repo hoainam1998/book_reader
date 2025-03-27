@@ -268,7 +268,7 @@ class UserRouter extends Router {
       }
       return response.json();
     })
-    .then(async (json) => {
+    .then((json) => {
       const { otp, message } = json;
       return EmailService.sendOtpEmail(req.body.email, otp).then(() => messageCreator(message));
     });
