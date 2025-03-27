@@ -1,9 +1,9 @@
 const Router = require('../router');
 const { validateResultExecute, upload, serializer, validation } = require('#decorators');
-const authentication = require('#middlewares/auth/authentication.js');
-const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
-const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out.js');
-const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter } = require('#dto/author/author-in.js');
+const authentication = require('#middlewares/auth/authentication');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response');
+const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out');
+const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter } = require('#dto/author/author-in');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 
 /**
@@ -21,7 +21,7 @@ class AuthorRouter extends Router {
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post('/create', authentication, this._createAuthor);
-    this.post('/pagination', authentication, this._pagination);
+    this.post('/pagination', this._pagination);
     this.post('/detail', authentication, this._getAuthorDetail);
     this.put('/update', authentication, this._updateAuthor);
     this.post('/filter', authentication, this._getAuthors);
@@ -98,9 +98,7 @@ class AuthorRouter extends Router {
     }`;
 
     return self.execute(query,
-    {
-      authorId: req.body.authorId
-    },
+    { authorId: req.body.authorId },
     req.body.query);
   }
 

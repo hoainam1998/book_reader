@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { join } = require('path');
 const { saveFile, deleteFile } = require('#utils');
-const Service = require('#services/prisma.js');
+const Service = require('#services/prisma');
 
 class BookService extends Service {
 
@@ -62,7 +62,7 @@ class BookService extends Service {
   }
 
   deletePdfFile(bookId, name) {
-    return this.PrismaInstance.book.findFirst({
+    return this.PrismaInstance.book.findUniqueOrThrow({
       where: {
         book_id: bookId
       },
@@ -72,23 +72,19 @@ class BookService extends Service {
     })
     .then((result) => {
       const oldPdfFile = `pdf/${name}.pdf`
-      if (result) {
-        if (result.pdf !== oldPdfFile) {
-          const filePath = join(__dirname, `../../public/${result.pdf}`);
-          try {
-            fs.unlinkSync(filePath);
-          } catch (err) {
-            throw err;
-          }
+      if (result.pdf !== oldPdfFile) {
+        const filePath = join(__dirname, `../../public/${result.pdf}`);
+        try {
+          fs.unlinkSync(filePath);
+        } catch (err) {
+          throw err;
         }
-      } else {
-        throw new Error('Can not found pdf file!');
       }
     });
   }
 
   deleteIntroduceFile(bookId) {
-    return this.PrismaInstance.book.findFirst({
+    return this.PrismaInstance.book.findUniqueOrThrow({
       where: {
         book_id: bookId
       },
@@ -149,7 +145,7 @@ class BookService extends Service {
   }
 
   getBookDetail(bookId, select) {
-    return this.PrismaInstance.book.findUnique({
+    return this.PrismaInstance.book.findFirstOrThrow({
       where: {
         book_id: bookId
       },
@@ -157,11 +153,9 @@ class BookService extends Service {
     });
   }
 
-  getAllName() {
+  getAllBooks(select) {
     return this.PrismaInstance.book.findMany({
-      select: {
-        name: true
-      }
+      select
     });
   }
 

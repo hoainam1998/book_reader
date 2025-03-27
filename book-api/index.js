@@ -1,20 +1,21 @@
 const { config } = require('dotenv');
 require('reflect-metadata');
+require('./global/index');
 config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { GraphQLObjectType, GraphQLSchema } = require('graphql');
-const startCategory = require('./modules/category/index.js');
-const startBook = require('./modules/book/index.js');
-const startUser = require('./modules/user/index.js');
-const startAuthor = require('./modules/author/index.js');
-const startClient = require('./modules/client/index.js');
-const FactoryRouter = require('./routes/factory.js');
-const validateUrl = require('#middlewares/validate-url.js');
-const unknownError = require('#middlewares/unknown-error.js');
-const PrismaClient = require('#services/prisma-client/index.js');
-const Logger = require('#services/logger.js');
+const startCategory = require('./modules/category');
+const startBook = require('./modules/book');
+const startUser = require('./modules/user');
+const startAuthor = require('./modules/author');
+const startClient = require('./modules/client');
+const FactoryRouter = require('./routes/factory');
+const validateUrl = require('#middlewares/validate-url');
+const unknownError = require('#middlewares/unknown-error');
+const PrismaClient = require('#services/prisma-client');
+const Logger = require('#services/logger');
 
 const corsOptions = {
   origin: process.env.ORIGIN_CORS,
@@ -29,7 +30,7 @@ app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(bodyParser.json({ limit: '5mb' }));
 app.use(unknownError);
-app.use((req, res, next, layers) => validateUrl(req, res, next, layers));
+app.use((req, res, next) => validateUrl(req, res, next, layers));
 
 try {
   const category = startCategory(PrismaClient);
@@ -63,7 +64,7 @@ try {
   FactoryRouter.getRoutes(express, new GraphQLSchema({ query, mutation })).forEach(({ route, path }) => app.use(path, route.Router));
 } catch (err) {
   Logger.error('Book api building schema', err.message);
-  FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router))
+  FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router));
 } finally {
   app._router.stack.forEach(parentLayer => {
     (parentLayer.handle.stack || []).forEach(childLayer => {

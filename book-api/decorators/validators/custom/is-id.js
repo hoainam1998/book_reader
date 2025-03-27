@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers.js');
+const { validate, validating } = require('#helpers');
 
 const isId = validate((value) => {
   return /^([0-9])+$/.test(value) && typeof value === 'string' && value.length === 13;

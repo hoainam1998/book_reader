@@ -1,4 +1,4 @@
-const { validation } = require('#services/validator.js');
+const { validation } = require('#services/validator');
 
 /**
 * Adding class name and sealing validate object.

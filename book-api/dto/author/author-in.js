@@ -1,5 +1,5 @@
 const { classCreator, Validation } = require('../helper.js');
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const {
   IsString,
   IsNumeric,
@@ -100,7 +100,7 @@ const AuthorFilter = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
       IsOptional(),
-      IsIds('authors must be an id or an id array!')
+      IsIds('authorIds must be an id or an id array!')
     )
     authorIds;
 

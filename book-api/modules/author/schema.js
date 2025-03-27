@@ -9,19 +9,20 @@ const {
   GraphQLError
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
-const PaginationResponse = require('#dto/common/pagination-response.js');
-const AuthorDTO = require('#dto/author/author.js');
-const AuthorDetailDTO = require('#dto/author/author-detail.js');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const PaginationResponse = require('#dto/common/pagination-response');
+const AuthorDTO = require('#dto/author/author');
+const AuthorDetailDTO = require('#dto/author/author-detail');
 const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
-const { messageCreator } = require('#utils');
+const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const handleResolveResult = require('#utils/handle-resolve-result');
 
 const COMMON_AUTHOR_FIELDS = {
   name: {
     type: GraphQLString
   },
   sex: {
-    type: GraphQLInt,
+    type: GraphQLInt
   },
   avatar: {
     type: GraphQLString,
@@ -113,18 +114,11 @@ const query = new GraphQLObjectType({
         }
       },
       resolve: async (author, { authorId }, context) => {
-        try {
-          const authorDetail = await author.getAuthorDetail(authorId, context);
-          if (!authorDetail) {
-            throw new GraphQLError('Author not found!', graphqlNotFoundErrorOption);
-          }
-          return plainToInstance(AuthorDetailDTO, authorDetail);
-        } catch (error) {
-          if (error instanceof PrismaClientKnownRequestError) {
-            throw new GraphQLError(error.meta.cause, graphqlErrorOption);
-          }
-          throw error;
-        }
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(AuthorDetailDTO, await author.getAuthorDetail(authorId, context));
+        }, {
+          RECORD_NOT_FOUND: 'Author not found!'
+        });
       }
     },
     pagination: {
@@ -151,9 +145,8 @@ const query = new GraphQLObjectType({
         }
       },
       resolve: async (author, { pageSize, pageNumber, keyword }, context) => {
-        const result = await author.pagination(pageSize, pageNumber, keyword, context);
-        const authors = result[0];
-        if (authors.length === 0) {
+        const [authors, total] = await author.pagination(pageSize, pageNumber, keyword, context);
+        if (!checkArrayHaveValues(authors)) {
           const response = {
             list: [],
             total: 0
@@ -161,9 +154,9 @@ const query = new GraphQLObjectType({
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
           throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
         }
-        return plainToInstance(PaginationResponse, {
+        return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(AuthorDTO, authors),
-          total: parseInt(result[1] || 0)
+          total: parseInt(total || 0)
         });
       }
     },
@@ -176,11 +169,11 @@ const query = new GraphQLObjectType({
       },
       resolve: async (author, { authorIds }, context) => {
         const authors = await author.getAuthors(authorIds, context);
-        if (authors.length === 0) {
+        if (!checkArrayHaveValues(authors)) {
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
           throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
         }
-        return plainToInstance(AuthorDTO, authors);
+        return convertDtoToZodObject(AuthorDTO, authors);
       }
     }
   }
@@ -209,19 +202,13 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (service, { author }) => {
-        try {
-          const result = await service.deleteStoryFile(author.authorId);
-          if (result) {
-            await service.updateAuthor(author);
-            return messageCreator('The author updated success!');
-          }
-          throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
-        } catch (error) {
-          if (error instanceof PrismaClientKnownRequestError) {
-            throw new GraphQLError(error.meta.cause, graphqlErrorOption);
-          }
-          throw error;
-        }
+        return handleResolveResult(async () => {
+          await service.deleteStoryFile(author.authorId);
+          await service.updateAuthor(author);
+          return messageCreator('Author updated success!');
+        }, {
+          RECORD_NOT_FOUND: 'Authors not found!'
+        });
       }
     },
   }

@@ -31,12 +31,12 @@ const handleError = (err, messages) => {
     switch (err.code) {
       case PRISMA_ERROR_CODE.RECORD_NOT_FOUND:
       case PRISMA_ERROR_CODE.UNAUTHORIZED:
-        message = 'User not found!';
+        message = 'Data not found!';
         if (messages['UNAUTHORIZED']) {
           message = messages['UNAUTHORIZED'];
           throw new GraphQLError(message, graphqlUnauthorizedErrorOption);
         } else {
-          messages = messages['RECORD_NOT_FOUND'];
+          message = messages['RECORD_NOT_FOUND'];
           throw new GraphQLError(message, graphqlNotFoundErrorOption);
         }
       case PRISMA_ERROR_CODE.UNIQUE_DUPLICATE:

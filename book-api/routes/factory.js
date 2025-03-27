@@ -1,15 +1,15 @@
 const { graphqlExecuteWrapper, loggerWrapper } = require('#decorators');
-const GraphqlExecute = require('#services/graphql-execute.js');
-const UserPrismaField = require('#services/prisma-fields/user.js');
-const CategoryPrismaField = require('#services/prisma-fields/category.js');
-const BookPrismaField = require('#services/prisma-fields/book.js');
-const AuthorPrismaField = require('#services/prisma-fields/author.js');
-const ClientPrismaField = require('#services/prisma-fields/client.js');
-const CategoryRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/category.js')));
-const BookRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/book.js')));
-const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user.js')));
-const AuthorRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/author.js')));
-const ClientRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/client.js')));
+const GraphqlExecute = require('#services/graphql-execute');
+const UserPrismaField = require('#services/prisma-fields/user');
+const CategoryPrismaField = require('#services/prisma-fields/category');
+const BookPrismaField = require('#services/prisma-fields/book');
+const AuthorPrismaField = require('#services/prisma-fields/author');
+const ClientPrismaField = require('#services/prisma-fields/client');
+const CategoryRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/category')));
+const BookRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/book')));
+const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user')));
+const AuthorRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/author')));
+const ClientRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/client')));
 const { PATH } = require('#constants');
 
 /**

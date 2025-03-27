@@ -1,4 +1,4 @@
-const { validate, validating } = require('../helpers');
+const { validate, validating } = require('#helpers');
 
 const passwordPattern = /[A-Za-z0-9@$]{8}/;
 

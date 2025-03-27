@@ -1,7 +1,7 @@
 const { messageCreator } = require('#utils');
 const { HTTP_CODE } = require('#constants');
 const { endpoint } = require('#decorators');
-const Singleton = require('#services/singleton.js');
+const Singleton = require('#services/singleton');
 
 /**
 * Base router class.

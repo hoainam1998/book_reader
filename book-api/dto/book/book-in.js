@@ -1,5 +1,5 @@
 const { classCreator, Validation } = require('../helper.js');
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const {
   IsString,
   IsOptional,
@@ -41,10 +41,19 @@ const BookPagination = (validators, className) => {
   }, className);
 };
 
+const AllBooks = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
+
 const BookCreate = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('bookId must be numeric string and contain 13 character')
     )
     bookId;
 
@@ -91,7 +100,7 @@ const BookCreate = (validators, className) => {
 const PdfFileSaved = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('bookId must be numeric string and contain 13 character')
     )
     bookId;
 
@@ -180,7 +189,7 @@ const BookDetail = (validators, className) => {
 const IntroduceHTMLFileSave = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('bookId must be numeric string and contain 13 character')
     )
     bookId;
 
@@ -219,4 +228,5 @@ module.exports = {
   BookDetail: Validation(BookDetail),
   IntroduceHTMLFileSave: Validation(IntroduceHTMLFileSave),
   BookAuthors: Validation(BookAuthors),
+  AllBooks: Validation(AllBooks),
 };

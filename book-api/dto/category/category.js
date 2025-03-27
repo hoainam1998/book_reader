@@ -1,6 +1,7 @@
 const { Type, Exclude } = require('class-transformer');
+const OutputValidate = require('#services/output-validate');
 
-class CategoriesDTO {
+class CategoriesDTO extends OutputValidate {
   @Type(() => String)
   name;
 
@@ -22,7 +23,7 @@ class CategoriesDTO {
   }
 }
 
-class CategoryDTO {
+class CategoryDTO extends OutputValidate {
   @Type(() => String)
   get categoryId() {
     return this.category_id;

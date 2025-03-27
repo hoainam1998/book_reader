@@ -1,11 +1,10 @@
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const {
   IsPositive,
   IsRangeContain,
   IsString,
   IsPassword,
   IsEmail,
-  IsObject,
   IsNumeric,
   IsGraphqlSelect,
   IsOptional,
@@ -16,7 +15,7 @@ const {
 } = require('#decorators/validators');
 const { classCreator, Validation } = require('../helper.js');
 
-const UserPaginationValidateClass = (validators, className) => {
+const UserPaginationInput = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
       IsRangeContain([10, 30, 50], 'Page size must in [10, 30, 50]!'),
@@ -35,6 +34,15 @@ const UserPaginationValidateClass = (validators, className) => {
     )
     pageNumber;
 
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
+
+const AllUser = (validators, className) => {
+  return classCreator(class extends Validator {
     @validators(
       IsGraphqlSelect('Value of field must be boolean!')
     )
@@ -80,7 +88,7 @@ const OtpUpdate = (validators, className) => {
 const MfaUpdate = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('userId must be numeric string and contain 13 character')
     )
     userId;
 
@@ -94,7 +102,7 @@ const MfaUpdate = (validators, className) => {
 const UserDetail = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('userId must be numeric string and contain 13 character')
     )
     userId;
 
@@ -108,7 +116,8 @@ const UserDetail = (validators, className) => {
 const UserUpdate = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character', { groups: ['update'] })
+      IsOptional(),
+      IsId('userId must be numeric string and contain 13 character', { groups: ['update'] })
     )
     userId;
 
@@ -133,12 +142,14 @@ const UserUpdate = (validators, className) => {
     avatar;
 
     @validators(
+      IsOptional(),
       IsBoolean('mfa must be boolean!', { groups: ['update', 'create'] })
     )
     mfa;
 
     @validators(
-      IsPassword('Invalid password!', { groups: ['update_person'] }),
+      IsOptional(),
+      IsPassword('Invalid password!'),
     )
     password;
   }, className);
@@ -147,18 +158,19 @@ const UserUpdate = (validators, className) => {
 const UserDelete = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsId('categoryId must be numeric string and contain 13 character')
+      IsId('userId must be numeric string and contain 13 character')
     )
     id;
   }, className);
 };
 
 module.exports = {
-  UserPaginationInput: Validation('UserPaginationInput', UserPaginationValidateClass),
+  UserPaginationInput: Validation(UserPaginationInput),
   OtpVerify: Validation(OtpVerify),
   OtpUpdate: Validation(OtpUpdate),
   MfaUpdate: Validation(MfaUpdate),
   UserDetail: Validation(UserDetail),
   UserUpdate: Validation(UserUpdate),
   UserDelete: Validation(UserDelete),
+  AllUser: Validation(AllUser),
 };

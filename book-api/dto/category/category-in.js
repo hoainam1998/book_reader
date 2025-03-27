@@ -1,5 +1,5 @@
 const { classCreator, Validation } = require('../helper.js');
-const { Validator } = require('#services/validator.js');
+const { Validator } = require('#services/validator');
 const {
   IsString,
   IsBase64Image,
@@ -7,7 +7,7 @@ const {
   IsGraphqlSelect,
   IsId,
 } = require('#decorators/validators');
-const PaginationValidator = require('../common/pagination-validator.js');
+const PaginationValidator = require('../common/pagination-validator');
 
 const CategoryValidator = (validators, className) => {
   return classCreator(class extends Validator {

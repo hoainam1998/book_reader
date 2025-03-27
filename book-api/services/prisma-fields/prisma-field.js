@@ -1,5 +1,5 @@
-const Logger = require('#services/logger.js');
-const Singleton = require('#services/singleton.js');
+const Logger = require('#services/logger');
+const Singleton = require('#services/singleton');
 
 /**
  * Class support behavior between graphql select and prisma sql select.

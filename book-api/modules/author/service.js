@@ -1,7 +1,7 @@
 const { saveFile } = require('#utils');
 const { createFolder, deleteFile } = require('#utils');
 const { join } = require('path');
-const Service = require('#services/prisma.js');
+const Service = require('#services/prisma');
 const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
 class AuthorService extends Service {
@@ -62,7 +62,7 @@ class AuthorService extends Service {
   }
 
   getAuthorDetail(authorId, select) {
-    return this.PrismaInstance.author.findUnique({
+    return this.PrismaInstance.author.findUniqueOrThrow({
       where: {
         author_id: authorId
       },
@@ -71,21 +71,13 @@ class AuthorService extends Service {
   }
 
   deleteStoryFile(authorId) {
-    return this.PrismaInstance.author.findUnique({
-      where: {
-        author_id: authorId
-      },
-      select: {
-        story: true
-      }
+    return this.getAuthorDetail(authorId, {
+      story: true
     }).then(author => {
-      if (author) {
-        const storyFile = author.story.split(', ');
-        const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
-        const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
-        return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
-      }
-      return author;
+      const storyFile = author.story.split(', ');
+      const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
+      const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
+      return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
     });
   }
 
@@ -109,7 +101,7 @@ class AuthorService extends Service {
         },
         data: {
           name: author.name,
-          sex: author.sex === 1,
+          sex: author.sex,
           avatar: author.avatar,
           year_of_birth: author.yearOfBirth,
           year_of_dead: author.yearOfDead,
@@ -146,7 +138,7 @@ class AuthorService extends Service {
           data: {
             author_id: author.authorId,
             name: author.name,
-            sex: author.sex === 1,
+            sex: author.sex,
             avatar: author.avatar,
             year_of_birth: author.yearOfBirth,
             year_of_dead: author.yearOfDead,

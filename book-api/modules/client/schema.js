@@ -11,11 +11,10 @@ const {
   GraphQLFloat
 } = require('graphql');
 const { compare } = require('bcrypt');
-const { plainToInstance } = require('class-transformer');
-const handleResolveResult = require('#utils/handleResolveResult');
-const ClientDTO = require('#dto/client/client.js');
+const ClientDTO = require('#dto/client/client');
 const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
-const { messageCreator } = require('#utils');
+const { messageCreator, convertDtoToZodObject } = require('#utils');
+const handleResolveResult = require('#utils/handle-resolve-result');
 
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
@@ -131,8 +130,8 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           const select = { ...context, password: true };
           const client = await service.getClientDetail(email, select);
-          if (await compare(password, client.password)) {;
-            return plainToInstance(ClientDTO, client);
+          if (await compare(password, client.password)) {
+            return convertDtoToZodObject(ClientDTO, client);
           }
           throw new GraphQLError('Password is incorrect!', graphqlUnauthorizedErrorOption);
         }, {

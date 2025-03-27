@@ -1,13 +1,16 @@
 const { Expose, Type } = require('class-transformer');
 const { getGraphqlFinalData } = require('#utils');
-const GraphqlResponse = require('#dto/common/graphql-response.js');
-const MessageSerializerResponse = require('#dto/common/message-response.js');
-const PaginationResponse = require('#dto/common/pagination-response.js');
-const BookDetailDTO = require('#dto/book/book-detail.js');
+const { zodValidateClassWrapper } = require('#decorators');
+const GraphqlResponse = require('#dto/common/graphql-response');
+const MessageSerializerResponse = require('#dto/common/message-response');
+const PaginationResponse = require('#dto/common/pagination-response');
+const BookDetailDTO = require('#dto/book/book-detail');
+const BookDTO = require('#dto/book/book');
+const BookCreated = require('#dto/book/book-created');
 
-class AllBookName extends GraphqlResponse {
+class AllBooksResponse extends GraphqlResponse {
   @Expose({ toClassOnly: true })
-  @Type(() => [String])
+  @Type(() => [BookDTO])
   get response() {
     return getGraphqlFinalData(this.data);
   }
@@ -18,7 +21,7 @@ class BookCreatedResponse extends MessageSerializerResponse {
   bookId;
 
   @Expose({ toClassOnly: true })
-  @Type(() => BookCreatedResponse)
+  @Type(() => BookCreated)
   get response() {
     return {
       message: this.message,
@@ -44,8 +47,8 @@ class BookPaginationResponse extends GraphqlResponse {
 }
 
 module.exports = {
-  AllBookName,
-  BookCreatedResponse,
-  BookDetailResponse,
-  BookPaginationResponse
+  AllBooksResponse: zodValidateClassWrapper(AllBooksResponse, BookDTO),
+  BookCreatedResponse: zodValidateClassWrapper(BookCreatedResponse, BookCreated),
+  BookDetailResponse: zodValidateClassWrapper(BookDetailResponse, BookDetailDTO),
+  BookPaginationResponse: zodValidateClassWrapper(BookPaginationResponse, PaginationResponse)
 };

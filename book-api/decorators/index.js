@@ -4,8 +4,8 @@ const uploadPdf = require('./upload-pdf-file.js');
 const { HTTP_CODE, INTERNAL_ERROR_MESSAGE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, getGeneratorFunctionData, graphqlQueryParser } = require('#utils');
 const { plainToInstance } = require('class-transformer');
-const { Validator } = require('#services/validator.js');
-const Logger = require('#services/logger.js');
+const { Validator } = require('#services/validator');
+const Logger = require('#services/logger');
 
 /**
  * Return validate execute query decorator.
@@ -88,6 +88,9 @@ const validateResultExecute = (httpCode) => {
                   response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
                 }
               } else {
+                if (Object.hasOwn(resultClone, 'status') && Object.hasOwn(resultClone, 'json')) {
+                  return response.status(resultClone.status).json(resultClone.json);
+                }
                 return response.status(httpCode).json(resultClone);
               }
             } catch (err) {
@@ -206,6 +209,25 @@ const loggerWrapper = (target) => {
 };
 
 /**
+ * Inject logger service to current router object.
+ *
+ * @param {class} target - The base dto class.
+ * @param {class} validateClass - The validate class.
+ * @returns {class} - The new class extend from target object.
+ */
+const zodValidateClassWrapper = (target, validateClass) => {
+  return class extends target {
+    /**
+    * Create new dto class.
+    * Passing validate class to graphql response base class.
+    */
+    constructor() {
+      super(validateClass);
+    }
+  };
+};
+
+/**
  * Serializing response according pattern class.
  *
  * @param {class} serializerClass - serializer class.
@@ -221,8 +243,18 @@ const serializer = (serializerClass) => {
           return finalResult.then(value => {
             // convert value into the instance serializerClass, if response not include in instance,
             // then value is deserialization value, and they will directly throw.
-            const { response } = plainToInstance(serializerClass, value);
-            return response ?? value;
+            if (!Object.hasOwn(value, 'errors')) {
+              const { success, message, data } = serializerClass.parse(plainToInstance(serializerClass, value));
+              if (!success) {
+                return {
+                  status: HTTP_CODE.BAD_REQUEST,
+                  json: messageCreator(message)
+                };
+              } else {
+                return data ?? value;
+              }
+            }
+            return value;
           });
         }
         return finalResult;
@@ -348,4 +380,5 @@ module.exports = {
   loggerWrapper,
   serializer,
   validation,
+  zodValidateClassWrapper,
 };

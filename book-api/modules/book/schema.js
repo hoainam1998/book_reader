@@ -10,12 +10,13 @@ const {
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
 const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
-const PaginationResponse = require('#dto/common/pagination-response.js');
-const BookDTO = require('#dto/book/book.js');
-const BookDetailDTO = require('#dto/book/book-detail.js');
-const { messageCreator } = require('#utils');
+const PaginationResponse = require('#dto/common/pagination-response');
+const BookDTO = require('#dto/book/book');
+const BookDetailDTO = require('#dto/book/book-detail');
+const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const handleResolveResult = require('#utils/handle-resolve-result');
 
-const commonBookField = {
+const COMMON_BOOK_FIELD = {
   name: {
     type: GraphQLString
   },
@@ -30,22 +31,13 @@ const commonBookField = {
   }
 };
 
-const BookType = new GraphQLObjectType({
+const BOOK_TYPE = new GraphQLObjectType({
   name: 'Book',
   fields: {
     bookId: {
       type: GraphQLID
     },
-    name: {
-      type: GraphQLString
-    },
     pdf: {
-      type: GraphQLString
-    },
-    publishedTime: {
-      type: GraphQLInt
-    },
-    publishedDay: {
       type: GraphQLString
     },
     category: {
@@ -56,11 +48,12 @@ const BookType = new GraphQLObjectType({
     },
     avatar: {
       type: GraphQLString
-    }
+    },
+    ...COMMON_BOOK_FIELD,
   }
 });
 
-const BookInformationInputType = new GraphQLInputObjectType({
+const BOOK_INFORMATION_INPUT_TYPE = new GraphQLInputObjectType({
   name: 'BookInformationInput',
   fields: {
     bookId: {
@@ -85,14 +78,14 @@ const BookInformationInputType = new GraphQLInputObjectType({
         }
       })),
     },
-    ...commonBookField,
+    ...COMMON_BOOK_FIELD,
   }
 });
 
-const BookInformationType = new GraphQLObjectType({
+const BOOK_INFORMATION_TYPE = new GraphQLObjectType({
   name: 'BookInformation',
   fields: {
-    ...commonBookField,
+    ...COMMON_BOOK_FIELD,
     pdf: {
       type: GraphQLString
     },
@@ -150,10 +143,13 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID)
         }
       },
-      resolve: async (book, args) => {
-        const { name, html, json, bookId } = args;
-        await book.saveIntroduceHtmlFile(name, html, json, bookId);
-        return messageCreator('Introduce file created!');
+      resolve: async (book, { name, html, json, bookId }) => {
+        return handleResolveResult(async () => {
+          await book.saveIntroduceHtmlFile(name, html, json, bookId);
+          return messageCreator('Introduce file created!');
+        }, {
+          RECORD_NOT_FOUND: 'Book not found!'
+        });
       }
     },
     updateIntroduce: {
@@ -172,18 +168,21 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID)
         }
       },
-      resolve: async (book, args) => {
-        const { name, html, json, bookId } = args;
-        await book.deleteIntroduceFile(bookId);
-        await book.saveIntroduceHtmlFile(name, html, json, bookId);
-        return messageCreator('Introduce file created!');
+      resolve: async (book, { name, html, json, bookId }) => {
+        return handleResolveResult(async () => {
+          await book.deleteIntroduceFile(bookId);
+          await book.saveIntroduceHtmlFile(name, html, json, bookId);
+          return messageCreator('Introduce file created!');
+        }, {
+          RECORD_NOT_FOUND: 'Can not introduce file!'
+        });
       }
     },
     saveBookInfo: {
       type: ResponseType,
       args: {
         book: {
-          type: new GraphQLNonNull(BookInformationInputType)
+          type: new GraphQLNonNull(BOOK_INFORMATION_INPUT_TYPE)
         }
       },
       resolve: async (book, args) => {
@@ -195,12 +194,16 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         book: {
-          type: new GraphQLNonNull(BookInformationInputType)
+          type: new GraphQLNonNull(BOOK_INFORMATION_INPUT_TYPE)
         }
       },
       resolve: async (book, args) => {
-        await book.updateBookInfo(args.book);
-        return messageCreator('Book has been updated!');
+        return handleResolveResult(async () => {
+          await book.updateBookInfo(args.book);
+          return messageCreator('Book has been updated!');
+        }, {
+          RECORD_NOT_FOUND: 'Book not found!'
+        });
       }
     },
     savePdfFile: {
@@ -214,8 +217,12 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (book, { bookId, pdf }) => {
-        await book.savePdfFile(bookId, pdf);
-        return messageCreator('Save pdf file success!');
+        return handleResolveResult(async () => {
+          await book.savePdfFile(bookId, pdf);
+          return messageCreator('Save pdf file success!');
+        }, {
+          RECORD_NOT_FOUND: 'Book not found!'
+        });
       }
     },
     updatePdfFile: {
@@ -232,28 +239,13 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (book, { bookId, pdf, name }) => {
-        await book.deletePdfFile(bookId, name);
-        await book.savePdfFile(bookId, pdf);
-        return messageCreator('Update pdf file success!');
-      }
-    },
-    updateBookImages: {
-      type: ResponseType,
-      args: {
-        images: {
-          type: new GraphQLList(GraphQLString)
-        },
-        name: {
-          type: new GraphQLList(GraphQLString)
-        },
-        bookId: {
-          type: GraphQLID
-        }
-      },
-      resolve: async (book, { images, bookId, name }) => {
-        await book.deleteImages(bookId);
-        await book.saveBookImages(images, bookId, name);
-        return messageCreator('Book images has been updated!');
+        return handleResolveResult(async () => {
+          await book.deletePdfFile(bookId, name);
+          await book.savePdfFile(bookId, pdf);
+          return messageCreator('Update pdf file success!');
+        }, {
+          RECORD_NOT_FOUND: 'Can not found pdf file!'
+        });
       }
     },
     saveBookAuthor: {
@@ -291,30 +283,28 @@ const query = new GraphQLObjectType({
   name: 'BookQuery',
   fields: {
     all: {
-      type: GraphQLString,
-      resolve: () => {}
+      type: new GraphQLNonNull(new GraphQLList(BOOK_TYPE)),
+      resolve: async (book, args, context) => {
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(BookDTO, await book.getAllBooks(context));
+        }, {
+          RECORD_NOT_FOUND: 'Books not found!'
+        });
+      }
     },
     detail: {
-      type: BookInformationType,
+      type: BOOK_INFORMATION_TYPE,
       args: {
         bookId: {
           type: new GraphQLNonNull(GraphQLID)
         }
       },
       resolve: async (book, { bookId }, context) => {
-        const bookInfo = await book.getBookDetail(bookId, context);
-        if (bookInfo) {
-          return plainToInstance(BookDetailDTO, bookInfo);
-        } else {
-          throw new GraphQLError(`Can not found book with id is ${bookId}!`, graphqlNotFoundErrorOption);
-        }
-      }
-    },
-    names: {
-      type: new GraphQLList(GraphQLString),
-      resolve: async (book) => {
-        const names = await book.getAllName();
-        return plainToInstance(String, names.map(({ name }) => name));
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(BookDetailDTO, await book.getBookDetail(bookId, context));
+        }, {
+          RECORD_NOT_FOUND: 'Book not found!'
+        });
       }
     },
     pagination: {
@@ -322,10 +312,10 @@ const query = new GraphQLObjectType({
         name: 'BookPagination',
         fields: {
           list: {
-            type: new GraphQLList(BookType)
+            type: new GraphQLNonNull(new GraphQLList(BOOK_TYPE))
           },
           total: {
-            type: GraphQLInt
+            type: new GraphQLNonNull(GraphQLInt)
           }
         }
       }),
@@ -341,9 +331,8 @@ const query = new GraphQLObjectType({
         }
       },
       resolve: async (book, { pageNumber, pageSize, keyword }, context) => {
-        const result = await book.pagination(pageSize, pageNumber, keyword, context);
-        const books = result[0];
-        if (books.length === 0) {
+        const [books, total] = await book.pagination(pageSize, pageNumber, keyword, context);
+        if (!checkArrayHaveValues(books)) {
           const response = {
             list: [],
             total: 0
@@ -351,9 +340,9 @@ const query = new GraphQLObjectType({
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
           throw new GraphQLError('Books not found!', graphqlNotFoundErrorOption);
         }
-        return plainToInstance(PaginationResponse, {
+        return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(BookDTO, books.map(book => ({ ...book, category: book.category.name }))),
-          total: parseInt(result[1] || 0)
+          total: parseInt(total || 0)
         });
       }
     }

@@ -1,21 +1,19 @@
-const Router = require('../router.js');
-const { verify } = require('jsonwebtoken');
+const Router = require('../router');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
-const EmailService = require('#services/email.js');
-const loginRequire = require('#middlewares/auth/login-require.js');
-const authentication = require('#middlewares/auth/authentication.js');
-const allowInternalCall = require('#middlewares/only-allow-internal-call.js');
+const EmailService = require('#services/email');
+const loginRequire = require('#middlewares/auth/login-require');
+const authentication = require('#middlewares/auth/authentication');
+const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const {
   UserPagination,
   LoginResponse,
   OtpVerifyResponse,
   OtpUpdateResponse,
-  EmailsResponse,
+  AllUsersResponse,
   UserDetailResponse,
-  PersonUpdateResponse,
-} = require('#dto/user/user-out.js');
+} = require('#dto/user/user-out');
 const {
   UserPaginationInput,
   OtpVerify,
@@ -24,9 +22,10 @@ const {
   UserDetail,
   UserUpdate,
   UserDelete,
-} = require('#dto/user/user-in.js');
-const Login = require('#dto/common/login-validator.js');
-const MessageSerializerResponse = require('#dto/common/message-serializer-response.js');
+  AllUser,
+} = require('#dto/user/user-in');
+const Login = require('#dto/common/login-validator');
+const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 
 /**
  * Organize user routes.
@@ -50,10 +49,9 @@ class UserRouter extends Router {
     this.put('/update-user', authentication, this._updateUser);
     this.post('/send-otp', loginRequire, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
-    this.put('/update-person', authentication, this._updatePerson);
     this.post('/login', this._login);
     this.post('/verify-otp', loginRequire, this._verifyOtp);
-    this.get('/emails', authentication, this._getAllEmail);
+    this.post('/all', authentication, this._getAllUsers);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
@@ -142,57 +140,26 @@ class UserRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(UserUpdate, { error_message: 'Update personal information failed!', groups: ['update_person'] })
-  @validateResultExecute(HTTP_CODE.CREATED)
-  @serializer(PersonUpdateResponse)
-  _updatePerson(req, res, next, self) {
-    const userLogged = verify(req.get('authorization'), process.env.SECRET_KEY);
-
-    const query = `mutation UpdatePerson($person: PersonInputType!) {
-      user {
-        updatePerson(person: $person) {
-          message,
-          reLoginFlag
-        }
-      }
-    }`;
-
-    const variables = {
-      userId: userLogged.userId,
-      firstName: req.body.first_name,
-      lastName: req.body.last_name,
-      email: req.body.email,
-      avatar: req.body.avatar,
-      password: req.body.password
-    };
-
-    return self.execute(
-      query,
-      { person: variables },
-    );
-  }
-
-  @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validation(UserUpdate, { error_message: 'Update user was failed!', groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateUser(req, res, next, self) {
     const variables = {
-      userId: req.body.userId,
+      userId: req.body.userId ?? req.caller.userId,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       avatar: req.body.avatar,
+      password: req.body.password,
       mfaEnable: req.body.mfa === 'true'
     };
-    const query = `
-      mutation UpdateUser($user: UserInformationInput!) {
-        user {
-          update(user: $user) {
-            message
-          }
+    const query = ` mutation UpdateUser($user: UserInformationInput!) {
+      user {
+        update(user: $user) {
+          message
         }
-      }`;
+       }
+    }`;
     return self.execute(query, { user: variables });
   }
 
@@ -249,6 +216,7 @@ class UserRouter extends Router {
         }
       }
     }`;
+
     return self.execute(query, variables);
   }
 
@@ -268,15 +236,18 @@ class UserRouter extends Router {
     return self.execute(query, { email: req.body.email, });
   }
 
+  @validation(AllUser, { error_message: 'Load all users failed!' })
   @validateResultExecute(HTTP_CODE.OK)
-  @serializer(EmailsResponse)
-  _getAllEmail(req, res, next, self) {
-    const query = `query GetAllEmail {
+  @serializer(AllUsersResponse)
+  _getAllUsers(req, res, next, self) {
+    const query = `query GetAllUsers {
       user {
-        emails
+        all ${
+          req.body.query
+        }
       }
     }`;
-    return self.execute(query);
+    return self.execute(query, undefined, req.body.query);
   }
 
   @validateResultExecute(HTTP_CODE.OK)
@@ -297,7 +268,7 @@ class UserRouter extends Router {
       }
       return response.json();
     })
-    .then((json) => {
+    .then(async (json) => {
       const { otp, message } = json;
       return EmailService.sendOtpEmail(req.body.email, otp).then(() => messageCreator(message));
     });

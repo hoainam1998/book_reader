@@ -10,7 +10,7 @@ datasource db {
 model author {
   author_id     String  @id @db.VarChar(20)
   name          String? @db.VarChar(200)
-  sex           Boolean
+  sex           Int     @db.UnsignedTinyInt
   avatar        String? @db.Text
   year_of_birth Int?
   year_of_dead  Int?
