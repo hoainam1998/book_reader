@@ -1,7 +1,8 @@
 import { AxiosResponse } from 'axios';
-import { LoaderFunctionArgs } from 'react-router-dom';
+import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { AuthorService } from 'services';
-import { handleNotfoundApiError } from 'utils';
+import { handleNotfoundApiError, showToast } from 'utils';
+import path from 'router/paths';
 
 export const authorPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
   const url: URL = new URL(request.url);
@@ -35,7 +36,7 @@ export const updateAuthor = (formData: FormData): Promise<AxiosResponse> => {
   return AuthorService.put('update', formData);
 };
 
-export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse> | null => {
+export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {
   const authorId: string | undefined = params.id;
   return AuthorService.post('detail', {
     authorId,
@@ -50,5 +51,8 @@ export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosR
         json: true,
       },
     },
+  }).catch((err) => {
+    showToast('Author detail', err.response.data.message);
+    return redirect(`${path.HOME}/${path.AUTHOR}`);
   });
 };

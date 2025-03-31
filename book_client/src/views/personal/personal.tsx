@@ -8,13 +8,13 @@ import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-
 import Button from 'components/button/button';
 import { required, email, matchPattern } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
+import useModalNavigation from 'hooks/useModalNavigation';
 import store, { UserLogin } from 'store/auth';
 import path from 'router/paths';
-import { updatePerson } from './fetcher';
+import { updateUser as updatePerson } from 'views/user/fetcher';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
 import './style.scss';
-import useModalNavigation from 'hooks/useModalNavigation';
 const { subscribe, getSnapshot } = store;
 
 type PersonalType = {
@@ -71,13 +71,11 @@ function Personal(): JSX.Element {
       updatePerson(formData)
         .then((res) => {
           showToast('Update your information', res.data.message);
-          if (res.data.reLoginFlag) {
-            setReLogin(true);
-            store.logout();
-            setTimeout(() => {
-              navigate(path.LOGIN);
-            }, 200);
-          }
+          setReLogin(true);
+          store.logout();
+          setTimeout(() => {
+            navigate(path.LOGIN);
+          }, 200);
         })
         .catch((err) => showToast('Personal', err.response.data.message));
     }

@@ -4,7 +4,7 @@ import Home from 'views/home/home';
 import Personal from 'views/personal/personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
 import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
-import Category, { loadInitCategory } from 'views/category-group/category';
+import Category, { loadInitCategory } from 'views/category/category';
 import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail/author-detail';
@@ -74,14 +74,13 @@ const adminRoutes: RoutePropsUnion[] = [
             index: true,
             element: <UserList />,
             loader: loadInitUser,
-            errorElement: <ApiError />
+            errorElement: <ApiError alignCenter />
           },
           {
             path: 'new',
             element: <UserDetail />,
             handle: {
-              crumb: ({ pathname }: UIMatch) =>
-                <span key={pathname}>New</span>
+              crumb: ({ pathname }: UIMatch) => <span key={pathname}>New</span>
             }
           },
           {

@@ -98,7 +98,7 @@ function Category(): JSX.Element {
       revalidator.revalidate();
       document.querySelector('.table-wrapper')?.scrollTo({ top: currentOffset });
       return Promise.resolve(res);
-    }).catch(err => Promise.reject(err));
+    });
   }, []);
 
   const resetState = useCallback((): void => {
@@ -137,7 +137,8 @@ function Category(): JSX.Element {
   }, [categoryName]);
 
   const deleteCategory = useCallback((categoryId: string): void => {
-    reFetchCategory(_deleteCategory(categoryId));
+    reFetchCategory(_deleteCategory(categoryId))
+      .catch((err) => showToast('Delete category', err.response.data.message));
   }, []);
 
   const operationSlot = useCallback((slotProp: CategoryType): JSX.Element => {

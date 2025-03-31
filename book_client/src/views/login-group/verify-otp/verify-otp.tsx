@@ -31,14 +31,10 @@ function VerifyOtp(): JSX.Element {
     const otp: string | undefined = inputRef.current?.input?.value;
     verifyOtp(email, otp as string)
       .then((res) => {
-        if (res.data.verify) {
-          auth.saveApiKey(res.data.apiKey);
-          navigate(path.HOME);
-        } else {
-          showToast('OTP', 'Otp code is incorrect!');
-        }
+        auth.saveApiKey(res.data.apiKey);
+        navigate(path.HOME);
       })
-      .catch(() => showToast('OTP', 'Verify otp code failed!'));
+      .catch((error) => showToast('OTP', error.response.data.message));
   }, []);
 
   const reSend = useCallback((): void => {

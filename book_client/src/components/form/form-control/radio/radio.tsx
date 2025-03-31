@@ -1,13 +1,17 @@
-import { JSX, useCallback } from 'react';
+/* eslint-disable no-unused-vars */
+import { JSX,  useEffect, useMemo } from 'react';
 import FormControl, { FormControlProps, OptionPrototype } from '../form-control';
 import List from 'components/list/list';
 import { FieldValidateProps } from 'hooks/useForm';
 import { clsx } from 'utils';
 import './style.scss';
 
-type RadioPropsType<T> = { horizontal?: boolean } & Partial<FieldValidateProps<T>> & FormControlProps;
+type RadioPropsType<T> = {
+  horizontal?: boolean;
+  onChange: (value: unknown) => void;
+} & Partial<Omit<FieldValidateProps<T>, 'onChange'>> & FormControlProps;
 
-function Radio<T>({
+function Radio<T extends string | number>({
   name,
   value,
   label,
@@ -19,30 +23,22 @@ function Radio<T>({
   onFocus
 }: RadioPropsType<T>): JSX.Element {
 
-  const defaultChecked = useCallback((radioValue: number | string): boolean => {
-    const transformValue = (): unknown => {
-      if ((typeof value === 'string')) {
-        if (value === '') {
-          return options![0].value;
-        } else {
-          return parseInt(value);
-        }
-      } else {
-        return value;
-      }
-    };
-    return transformValue() === radioValue;
-  }, [value, options]);
+  const valueTransformed = useMemo<T>(() => {
+    if ((typeof value === 'string')) {
+      return (value === '' ? options![0].value: parseInt(value)) as T;
+    }
+    return value!;
+  }, [value]);
 
-  const radioValueChange = (e: any) => {
-    onChange!(e!);
-  };
+  useEffect(() => {
+    onChange!(valueTransformed);
+  }, []);
 
   return (
     <FormControl name={name} label={label} inputColumnSize={inputColumnSize} labelColumnSize={labelColumnSize}>
       <ul className={clsx(horizontal && 'horizontal')}>
-        <List<OptionPrototype<number>>
-          items={options as OptionPrototype<number>[]}
+        <List<OptionPrototype<T>>
+          items={options as OptionPrototype<T>[]}
           render={(item) => {
             return (
               <li>
@@ -51,8 +47,8 @@ function Radio<T>({
                     type="radio"
                     name={name}
                     value={item.value}
-                    checked={defaultChecked(item.value!)}
-                    onChange={radioValueChange}
+                    checked={item.value === valueTransformed}
+                    onChange={onChange!}
                     onFocus={onFocus}/>
                   <span className="checkmark" />
                   <span>{item.label}</span>

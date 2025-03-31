@@ -12,7 +12,7 @@ import useModalNavigation from 'hooks/useModalNavigation';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import { required, email as emailValidate, ErrorFieldInfo } from 'hooks/useValidate';
-import { addUser, loadUserDetail, updateUser, getAllEmail } from '../fetcher';
+import { addUser, loadUserDetail, updateUser, getAllUsers } from '../fetcher';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
 import { HaveLoadedFnType } from 'interfaces';
@@ -58,7 +58,7 @@ function UserDetail(): JSX.Element {
   const rules: RuleType<UserType> = {
     email: {
       required,
-      emailValidate,
+      emailValidate: emailValidate('Email invalid!'),
       emailDuplicateValidate: emailDuplicateValidate('Email is duplicate!')
     },
     firstName: { required },
@@ -81,29 +81,29 @@ function UserDetail(): JSX.Element {
     navigate(`${paths.HOME}/${paths.USER}`);
   }, []);
 
+  const handleUserSaved = useCallback((promise: Promise<AxiosResponse>, title: string): void => {
+    promise.then((res) => {
+      reset();
+      showToast(title, res.data.message);
+      setTimeout(() => backToUserList(), 100);
+    })
+    .catch((error) => showToast(title, error.response.data.message));
+  }, []);
+
   const onSubmit = useCallback((formData: FormData) => {
     handleSubmit();
 
     if (!validate.error) {
-      const saveUser = (): Promise<AxiosResponse> => {
-        if (!formData.has('mfa')) {
-          formData.append('mfa', 'false');
-        }
+      if (!formData.has('mfa')) {
+        formData.append('mfa', 'false');
+      }
 
-        if (id) {
-          formData.append('userId', id);
-          return updateUser(formData);
-        } else {
-          return addUser(formData);
-        }
-      };
-
-      saveUser()
-        .then(() => {
-          reset();
-          setTimeout(() => backToUserList(), 100);
-        })
-        .catch((error) => showToast('User', error.response.data.message));
+      if (id) {
+        formData.append('userId', id);
+        handleUserSaved(updateUser(formData), 'Update user');
+      } else {
+        handleUserSaved(addUser(formData), 'Create user');
+      }
     }
   }, []);
 
@@ -131,8 +131,8 @@ function UserDetail(): JSX.Element {
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        getAllEmail()
-          .then(res => setEmails(res.data))
+        getAllUsers()
+          .then(res => setEmails(res.data.map(({ email }: { email: string }) => email)))
           .catch(() => setEmails([]));
       }
     };

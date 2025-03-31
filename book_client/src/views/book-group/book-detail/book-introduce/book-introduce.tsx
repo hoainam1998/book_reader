@@ -6,7 +6,7 @@ import { saveIntroduceFile, getBookIntroduceFile, updateIntroduceFile } from '..
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import useInitEditor from 'hooks/useInitEditor';
-import { getJsonFileContent } from 'utils';
+import { getJsonFileContent, showToast } from 'utils';
 import { useBookStoreContext } from 'contexts/book-store';
 import { HaveLoadedFnType } from 'interfaces';
 import './style.scss';
@@ -49,8 +49,9 @@ function BookIntroduce(): JSX.Element {
         updateData({ ...data, introduce: res.data });
         updateStep(3);
         updateDisableStep(false);
-      });
-    });
+      })
+      .catch((err) => showToast('Get introduce file', err.response.data.message));
+    }).catch((err) => showToast('Save introduce', err.response.data.message));
   }, [quill]);
 
   useEffect(() => {
