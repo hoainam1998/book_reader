@@ -18,11 +18,11 @@ module.exports = (req, res, next, layers) => {
     if (layerFound.methods[req.method.toLowerCase()]) {
       next();
     } else {
-      logger.error('method in valid!');
-      res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator('Method in valid!'));
+      logger.error(`Method ${req.method} not allowed for ${req.originalUrl} url!`);
+      res.status(HTTP_CODE.METHOD_NOT_ALLOWED).json(messageCreator(`Method ${req.method} not allowed for ${req.originalUrl} url!`));
     }
   } else {
-    logger.error('url in valid!');
-    res.status(HTTP_CODE.BAD_REQUEST).json(messageCreator('Url in valid!'));
+    logger.error(`Can not found ${req.originalUrl}!`);
+    res.status(HTTP_CODE.NOT_FOUND).json(messageCreator(`Can not found ${req.originalUrl}!`));
   }
 };
