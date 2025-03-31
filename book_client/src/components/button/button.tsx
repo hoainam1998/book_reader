@@ -17,12 +17,12 @@ function Button({
   onClick,
   disabled
 }: ButtonPropsType): JSX.Element {
-  const buttonTypeClass: string = useMemo(() => {
+  const buttonTypeClass: string = useMemo<string>(() => {
     if (variant) {
       if (globalThis.isClient && variant === 'submit') {
         return 'btn-submit-client';
       } else {
-        return variant;
+        return `btn-${variant}`;
       }
     }
     return '';

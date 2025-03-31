@@ -9,7 +9,7 @@ import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { bookPagination, getBookDetail } from '../fetcher';
 import store from 'store/book';
-import { openFile } from 'utils';
+import { openFile, showToast } from 'utils';
 import './style.scss';
 const { updateData, deleteAllStorage } = store;
 
@@ -88,7 +88,8 @@ function BookList(): JSX.Element {
         .then((res) => {
           updateData({ ...res.data, bookId });
           navigate(bookId);
-        });
+        })
+        .catch((err) => showToast('Book', err.response.data.message));
     };
 
     return (

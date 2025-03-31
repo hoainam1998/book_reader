@@ -16,7 +16,6 @@ export const verifyOtp = (email: string, otp: string): Promise<AxiosResponse> =>
     email,
     otp,
     query: {
-      verify: true,
       apiKey: true
     }
   };

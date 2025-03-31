@@ -34,7 +34,7 @@ function Form({
     <form id={id} className={clsx('form', className)} data-testid="form" encType="multipart/form-data">
       {children}
       <Button
-        className={`btn-save ${submitBtnClass}`}
+        className={clsx('btn-save', submitBtnClass)}
         variant="submit"
         onClick={handleSubmit}
         disabled={disableSubmitButton}>

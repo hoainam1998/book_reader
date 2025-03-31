@@ -51,8 +51,12 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
   });
 };
 
-const getAllBookName = (): Promise<AxiosResponse> => {
-  return BookService.get('book-name');
+const getAllBooks = (): Promise<AxiosResponse> => {
+  return BookService.post('all', {
+    query: {
+      name: true
+    },
+  });
 };
 
 const getAuthors = (authorIds?: string[], query?: IQueryType): Promise<AxiosResponse> => {
@@ -70,7 +74,7 @@ const getAuthors = (authorIds?: string[], query?: IQueryType): Promise<AxiosResp
   });
 };
 
-const getBookIntroduceFile = (bookId: string) => {
+const getBookIntroduceFile = (bookId: string): Promise<AxiosResponse> => {
   return BookService.post('detail', {
     query: {
       introduce: {
@@ -92,7 +96,7 @@ const saveIntroduceFile = (
     html,
     json,
     fileName,
-    bookId
+    bookId,
   };
   return BookService.post('save-introduce', body);
 };
@@ -144,7 +148,7 @@ export {
   getBookDetail,
   saveIntroduceFile,
   getBookIntroduceFile,
-  getAllBookName,
+  getAllBooks,
   updateBookInformation,
   updateIntroduceFile,
   getAuthors,

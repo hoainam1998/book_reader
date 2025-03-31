@@ -55,11 +55,12 @@
     @extend .flex-align-center;
     margin-top: auto;
     margin-bottom: 5px;
+    padding: 5px;
 
     .pop-up-content {
       @extend .flex-align-center;
       min-height: 50px;
-      padding: 5px;
+      min-width: calc(100% - 40px);
       white-space: pre-line;
     }
   }

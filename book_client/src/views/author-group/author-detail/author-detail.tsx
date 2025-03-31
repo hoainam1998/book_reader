@@ -73,28 +73,22 @@ function AuthorDetail(): JSX.Element  {
   const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
 
-    const navigateToAuthorList = (): void => {
-      setTimeout(() => {
-        navigate(`${path.HOME}/${path.AUTHOR}`);
-      }, 200);
+    const handlePromiseMutationAuthor = (promise: Promise<AxiosResponse>, toastTitle: string): void => {
+      promise.then((res) => {
+        showToast(toastTitle, res.data.message);
+        setTimeout(() => {
+          navigate(`${path.HOME}/${path.AUTHOR}`);
+        }, 200);
+      })
+      .catch((error) => showToast(toastTitle, error.response.data.message));
     };
 
     if (!validate.error) {
       if (id) {
         formData.append('authorId', id);
-        updateAuthor(formData)
-          .then((res) => {
-            showToast('Update author', res.data.message);
-            navigateToAuthorList();
-          })
-          .catch((error) => showToast('Update author', error.response.data.message));
+        handlePromiseMutationAuthor(updateAuthor(formData), 'Update author');
       } else {
-        createAuthor(formData)
-          .then((res) => {
-            showToast('Create author', res.data.message);
-            navigateToAuthorList();
-          })
-          .catch((error) => showToast('Create author', error.response.data.message));
+        handlePromiseMutationAuthor(createAuthor(formData), 'Create author');
       }
     }
   }, [validate]);

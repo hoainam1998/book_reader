@@ -23,7 +23,7 @@ import useComponentWillMount from 'hooks/useComponentWillMount';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import { useBookStoreContext } from 'contexts/book-store';
 import { Image } from 'store/book';
-import { getBookDetail, saveBookInformation, getAllBookName, updateBookInformation, getAuthors } from '../../fetcher';
+import { getBookDetail, saveBookInformation, getAllBooks, updateBookInformation, getAuthors } from '../../fetcher';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import { HaveLoadedFnType } from 'interfaces';
 import './style.scss';
@@ -245,8 +245,8 @@ function BookInformation(): JSX.Element {
         getAuthors()
           .then((res) => setAuthorsList(res.data))
           .catch(() => setAuthorsList([]));
-        getAllBookName()
-          .then((res) => setBookNames(res.data));
+        getAllBooks()
+          .then((res) => setBookNames(res.data.map(({ name }: { name: string}) => name)));
       }
     };
   }, []);

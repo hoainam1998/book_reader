@@ -5,7 +5,7 @@ import { HaveLoadedFnType } from 'interfaces';
  * This callback update haveFetched flag.
  *
  * @callback updateHaveFetchedFlagCallback
- * @returns {boolean}
+ * @return {boolean}
  */
 
 /**
@@ -14,7 +14,7 @@ import { HaveLoadedFnType } from 'interfaces';
  * @callback executeCallback
  * @param {updateHaveFetchedFlagCallback} updateHaveFetched - flag to check if useEffect have been run,
  * it will not run again.
- * @returns {EffectCallback}
+ * @return {EffectCallback}
  */
 
 /**

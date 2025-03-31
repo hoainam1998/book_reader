@@ -1,7 +1,8 @@
 import { AxiosResponse } from 'axios';
-import { LoaderFunctionArgs } from 'react-router-dom';
+import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { UserService, RequestBody } from 'services';
 import { showToast } from 'utils';
+import paths from 'router/paths';
 
 export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
   return promise.then((res) => {
@@ -30,11 +31,15 @@ export const updateUser = (formData: FormData): Promise<AxiosResponse> => {
   return handlePromise(UserService.put('update-user', formData));
 };
 
-export const getAllEmail = (): Promise<AxiosResponse> => {
-  return UserService.get('emails');
+export const getAllUsers = (): Promise<AxiosResponse> => {
+  return UserService.post('all', {
+    query: {
+      email: true
+    },
+  });
 };
 
-export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse> | null => {
+export const loadUserDetail = async ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {
   const userId: string | undefined = params.id;
   const body: RequestBody = {
     userId,
@@ -46,7 +51,11 @@ export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosRes
       mfaEnable: true,
     }
   };
-  return UserService.post('user-detail', body);
+
+  return UserService.post('user-detail', body).catch((err) => {
+    showToast('User detail', err.response.data.message);
+    return redirect(`${paths.HOME}/${paths.USER}`);
+  });
 };
 
 export const loadInitUser = async ({
