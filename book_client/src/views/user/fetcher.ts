@@ -39,7 +39,7 @@ export const getAllUsers = (): Promise<AxiosResponse> => {
   });
 };
 
-export const loadUserDetail = async ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {
+export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {
   const userId: string | undefined = params.id;
   const body: RequestBody = {
     userId,
