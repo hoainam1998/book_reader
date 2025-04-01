@@ -6,7 +6,7 @@ const extensions = Prisma.defineExtension((prisma) => {
     query: {
       reader: reader(prisma)
     }
-  })
+  });
 });
 
 module.exports = new PrismaClient().$extends(extensions);

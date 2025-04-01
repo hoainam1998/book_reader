@@ -72,7 +72,7 @@ module.exports = (mode, fields, maxCount) => {
           originalMethod.apply(null, args);
         }
       });
-    }
+    };
     return target;
   }
 };

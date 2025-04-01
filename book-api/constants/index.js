@@ -28,5 +28,4 @@ module.exports = deepFreeze({
     QUERY: 'query',
     FILES: 'files',
   },
-  INTERNAL_ERROR_MESSAGE: 'Internal server error! Please contact my admin!'
 });

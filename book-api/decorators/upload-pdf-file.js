@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
     cb(null, `${fileName}${extName}`);
   },
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../public/pdf'))
+    cb(null, path.join(__dirname, '../public/pdf'));
   }
 });
 
@@ -48,7 +48,7 @@ module.exports = (field) => {
           originalMethod.apply(null, args);
         }
       });
-    }
+    };
     return target;
   };
 };

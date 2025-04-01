@@ -10,7 +10,7 @@ class Service extends Singleton {
 
   /**
   * Create prisma service class.
-  * @param {object} prisma - The prisma object.
+  * @param {Object} prisma - The prisma object.
   */
   constructor(prisma) {
     super(Service);

@@ -19,7 +19,6 @@ const PaginationResponse = require('#dto/common/pagination-response');
 
 const {
   ResponseType,
-  graphqlErrorOption,
   graphqlNotFoundErrorOption,
 } = require('../common-schema');
 

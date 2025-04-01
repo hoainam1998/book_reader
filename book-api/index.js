@@ -76,3 +76,5 @@ try {
 }
 
 app.listen(PORT, () => Logger.log('Book api bootstrap', `Your application started at ${PORT}!`));
+
+module.exports = app;

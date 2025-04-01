@@ -1,5 +1,6 @@
 const { verify } = require('jsonwebtoken');
-const { HTTP_CODE, INTERNAL_ERROR_MESSAGE } = require('#constants');
+const { HTTP_CODE } = require('#constants');
+const { COMMON } = require('#messages');
 const { messageCreator } = require('#utils');
 const Logger = require('#services/logger');
 const logger = new Logger('Login require');
@@ -38,7 +39,7 @@ const loginRequire = (req, res, next) => {
     }
     logger.error(error.message);
     return res.status(HTTP_CODE.SERVER_ERROR)
-      .json(messageCreator(INTERNAL_ERROR_MESSAGE));
+      .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
   }
 };
 
