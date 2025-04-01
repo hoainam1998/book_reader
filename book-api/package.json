@@ -4,7 +4,10 @@
   "description": "Using graphql for book collection api",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon -L --exec babel-node index.js"
+    "dev": "nodemon -L --exec babel-node index.js",
+    "test": "jest --watchAll",
+    "test-coverage": "jest --watchAll --coverage",
+    "test-silent": "jest --watchAll --silent"
   },
   "author": "hoai nam",
   "license": "ISC",
@@ -34,7 +37,10 @@
     "@babel/node": "^7.23.9",
     "@babel/plugin-proposal-decorators": "^7.24.1",
     "@babel/plugin-syntax-decorators": "^7.24.1",
-    "@babel/plugin-transform-class-static-block": "^7.26.0"
+    "@babel/plugin-transform-class-static-block": "^7.26.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.1.0"
   },
   "imports": {
     "#utils": "./utils/index.js",
@@ -42,6 +48,7 @@
     "#decorators": "./decorators/index.js",
     "#decorators/validators": "./decorators/validators/index.js",
     "#constants": "./constants/index.js",
+    "#messages": "./constants/messages.js",
     "#middlewares/*": "./middlewares/*.js",
     "#services/*": "./services/*.js",
     "#services/prisma-client": "./services/prisma-client/index.js",
@@ -50,5 +57,23 @@
   "exports": {
     "./modules/*": "./src/modules/*.js",
     "./routes/*.js": "./routes/*.js"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/__test__"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/prisma/",
+      "<rootDir>/db/",
+      "<rootDir>/node_modules"
+    ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>/dist/",
+      "<rootDir>/prisma/",
+      "<rootDir>/db/",
+      "<rootDir>/node_modules"
+    ],
+    "coverageDirectory": "__test__/coverage"
   }
 }

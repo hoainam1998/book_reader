@@ -1,7 +1,8 @@
 const { validate, parse } = require('graphql');
 const upload = require('./upload.js');
 const uploadPdf = require('./upload-pdf-file.js');
-const { HTTP_CODE, INTERNAL_ERROR_MESSAGE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { COMMON } = require('#messages');
 const { messageCreator, getGeneratorFunctionData, graphqlQueryParser } = require('#utils');
 const { plainToInstance } = require('class-transformer');
 const { Validator } = require('#services/validator');
@@ -28,7 +29,7 @@ const validateExecuteQuery =
         if (errors.length > 0) {
           errors.forEach(err => Logger.error(this.constructor.name, err.message));
           return {
-            json: messageCreator(INTERNAL_ERROR_MESSAGE),
+            json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
             status: HTTP_CODE.SERVER_ERROR
           };
         }
@@ -39,7 +40,7 @@ const validateExecuteQuery =
         } catch (error) {;
           Logger.error(this.constructor.name, error.message);
           return {
-            json: messageCreator(INTERNAL_ERROR_MESSAGE),
+            json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
             status: HTTP_CODE.SERVER_ERROR
           };
         }
@@ -85,7 +86,8 @@ const validateResultExecute = (httpCode) => {
                   response.status(status).json(messageCreator(error.message));
                 } else {
                   self.Logger.error(error.message);
-                  response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+                  response.status(HTTP_CODE.SERVER_ERROR)
+                    .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
                 }
               } else {
                 if (Object.hasOwn(resultClone, 'status') && Object.hasOwn(resultClone, 'json')) {
@@ -95,7 +97,8 @@ const validateResultExecute = (httpCode) => {
               }
             } catch (err) {
               Logger.error('Validate graphql execute result', err.message);
-              response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+              response.status(HTTP_CODE.SERVER_ERROR)
+                .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
             }
           })
           .catch(err => {
@@ -105,23 +108,29 @@ const validateResultExecute = (httpCode) => {
               return response.status(sts).json(err);
             }
             Logger.error('Validate graphql execute result', err.message);
-            response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+            response.status(HTTP_CODE.SERVER_ERROR)
+              .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
           });
         } else if (finalResult?.errors) {
           finalResult.errors.forEach(error => self.Logger.error(error.message));
-          response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+          response.status(HTTP_CODE.SERVER_ERROR)
+            .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
         } else if (finalResult?.data) {
           response.status(httpCode).json(finalResult.data);
-        } else if (finalResult && Object.hasOwn(finalResult, 'status') && Object.hasOwn(finalResult, 'json')){
+        } else if (finalResult
+          && Object.hasOwn(finalResult, 'status')
+          && Object.hasOwn(finalResult, 'json')) {
           response.status(finalResult.status).json(finalResult.json);
         } else if (finalResult) {
           response.status(httpCode).json(finalResult);
         } else {
-          response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+          response.status(HTTP_CODE.SERVER_ERROR)
+            .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
         }
       } catch (error) {
         self.Logger.error(error.message);
-        response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+        response.status(HTTP_CODE.SERVER_ERROR)
+          .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
       }
     };
     return target;
@@ -245,7 +254,8 @@ const serializer = (serializerClass) => {
             // if it is equal return value, else throw bad request
             // if value is the error, it will be throw direct for the later process.
             if (!Object.hasOwn(value, 'errors')) {
-              const { success, message, data } = serializerClass.parse(plainToInstance(serializerClass, value));
+              const { success, message, data }
+                = serializerClass.parse(plainToInstance(serializerClass, value));
               if (!success) {
                 return {
                   status: HTTP_CODE.BAD_REQUEST,
@@ -290,11 +300,8 @@ const validation = (...args) => {
         // it is flag will be determinate, origin method will run or not.
         let lastRun = true;
         const { groups, request_data_passed_type, error_message } = options || {};
-        let errorMessage = 'Something is not expected. Please try again or contact my admin!';
-        // error_message was provided, append it into default error message.
-        if (error_message) {
-          errorMessage = `${error_message} \n${errorMessage}`;
-        }
+         // error_message was provided, append it into default error message.
+        const errorMessage = (error_message || '').concat('\n', COMMON.INPUT_VALIDATE_FAIL);
 
         /**
          * Validate helper.
@@ -307,7 +314,8 @@ const validation = (...args) => {
             // convert request incoming data to instance validate class.
             // all validate class extended by Validator, therefor it owned validated method
             // run validate method with parameter, return errors array
-            const errorsValidated = plainToInstance(validateClass, request[type]).validate(groups)?.errors;
+            const errorsValidated
+              = plainToInstance(validateClass, request[type]).validate(groups)?.errors;
             // error is empty, skip
             if (errorsValidated.length) {
               // update lastRun flag, and return bad request response.
@@ -364,7 +372,8 @@ const validation = (...args) => {
       } catch (error) {
         // if any error, return server error.
         Logger.error('Validation', error.message);
-        return response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(INTERNAL_ERROR_MESSAGE));
+        return response.status(HTTP_CODE.SERVER_ERROR)
+          .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
       }
     };
     return target;

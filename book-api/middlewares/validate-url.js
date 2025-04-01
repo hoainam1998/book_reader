@@ -1,6 +1,7 @@
 const { messageCreator } = require('#utils');
 const { HTTP_CODE } = require('#constants');
 const Logger = require('#services/logger');
+const { COMMON } = require('#messages');
 const logger = new Logger('Validate url');
 
 /**
@@ -18,11 +19,14 @@ module.exports = (req, res, next, layers) => {
     if (layerFound.methods[req.method.toLowerCase()]) {
       next();
     } else {
-      logger.error(`Method ${req.method} not allowed for ${req.originalUrl} url!`);
-      res.status(HTTP_CODE.METHOD_NOT_ALLOWED).json(messageCreator(`Method ${req.method} not allowed for ${req.originalUrl} url!`));
+      const methodNotAllowed = COMMON.METHOD_NOT_ALLOWED.format(req.method, req.originalUrl);
+      logger.error(methodNotAllowed);
+      res.status(HTTP_CODE.METHOD_NOT_ALLOWED)
+        .json(messageCreator(methodNotAllowed));
     }
   } else {
-    logger.error(`Can not found ${req.originalUrl}!`);
-    res.status(HTTP_CODE.NOT_FOUND).json(messageCreator(`Can not found ${req.originalUrl}!`));
+    const urlInvalid = COMMON.URL_INVALID.format(req.originalUrl);
+    logger.error(urlInvalid);
+    res.status(HTTP_CODE.NOT_FOUND).json(messageCreator(urlInvalid));
   }
 };
