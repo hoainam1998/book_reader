@@ -155,17 +155,17 @@ const query = new GraphQLObjectType({
         fields: {
           ...USER_INFORMATION_FIELDS,
           name: {
-            type: GraphQLString,
+            type: new GraphQLNonNull(GraphQLString),
           },
           apiKey: {
-            type: GraphQLString,
+            type: new GraphQLNonNull(GraphQLString),
           },
           power: {
-            type: GraphQLInt,
+            type: new GraphQLNonNull(GraphQLInt),
           },
           passwordMustChange: {
             type: new GraphQLNonNull(GraphQLBoolean),
-          }
+          },
         },
       }),
       args: {
