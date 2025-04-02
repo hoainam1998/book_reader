@@ -14,6 +14,8 @@ class UserPrismaField extends PrismaField {
     mfaEnable: 'mfa_enable',
     userId: 'user_id',
     password: 'password',
+    power: 'power',
+    sex: 'sex',
     name: ['first_name', 'last_name']
   };
 }

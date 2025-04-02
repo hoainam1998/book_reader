@@ -20,7 +20,7 @@ const loginRequire = (req, res, next) => {
       // verify token
       const login = verify(authorization, process.env.SECRET_KEY_LOGIN);
       if (login && login.isLogin) {
-        // if user already login, then switch to next middleware.
+        // if user already login success, then switch to next middleware.
         return next();
       } else {
         // else return unauthorized message

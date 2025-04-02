@@ -12,6 +12,7 @@ module.exports = deepFreeze({
     BAD_REQUEST: 400,
     NOT_FOUND: 404,
     UNAUTHORIZED: 401,
+    NOT_PERMISSION: 403,
     METHOD_NOT_ALLOWED: 405,
     SERVER_ERROR: 500
   },

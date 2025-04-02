@@ -1,4 +1,5 @@
 const Router = require('../router');
+const { sign } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
@@ -41,7 +42,7 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/add', authentication, this._addUser);
+    this.post('/add', this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
     this.delete('/delete-user/:id', authentication, this._deleteUser);
@@ -73,6 +74,7 @@ class UserRouter extends Router {
       avatar: req.body.avatar,
       sex: +req.body.sex,
       power: +req.body.power,
+      resetPasswordToken: sign({ email: req.body.email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY),
       mfaEnable: req.body.mfa === 'true'
     };
     return self.execute(query, { user: variables });

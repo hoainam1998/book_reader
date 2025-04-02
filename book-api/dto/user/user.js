@@ -17,9 +17,6 @@ class UserDTO extends OutputValidate {
   last_name;
 
   @Type(() => String)
-  password;
-
-  @Type(() => String)
   avatar;
 
   @Type(() => Boolean)
@@ -51,6 +48,11 @@ class UserDTO extends OutputValidate {
   @Type(() => String)
   get lastName() {
     return this.last_name;
+  }
+
+  @Type(() => Boolean)
+  get passwordMustChange() {
+    return !!this.reset_password_token;
   }
 }
 

@@ -50,11 +50,11 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
     lastName: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    password: {
-      type: GraphQLString,
-    },
     power: {
-      type: GraphQLInt,
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    resetPasswordToken: {
+      type: GraphQLString,
     },
   },
 });
@@ -67,22 +67,6 @@ const USER_INFORMATION_DETAIL = new GraphQLObjectType({
       type: GraphQLString,
     },
     lastName: {
-      type: GraphQLString,
-    },
-  },
-});
-
-const USER_LOGIN_INFORMATION = new GraphQLObjectType({
-  name: 'UserLoginInformation',
-  fields: {
-    ...USER_INFORMATION_FIELDS,
-    name: {
-      type: GraphQLString,
-    },
-    password: {
-      type: GraphQLString,
-    },
-    apiKey: {
       type: GraphQLString,
     },
   },
@@ -166,7 +150,24 @@ const query = new GraphQLObjectType({
       },
     },
     login: {
-      type: USER_LOGIN_INFORMATION,
+      type: new GraphQLObjectType({
+        name: 'UserLoginInformation',
+        fields: {
+          ...USER_INFORMATION_FIELDS,
+          name: {
+            type: GraphQLString,
+          },
+          apiKey: {
+            type: GraphQLString,
+          },
+          power: {
+            type: GraphQLInt,
+          },
+          passwordMustChange: {
+            type: new GraphQLNonNull(GraphQLBoolean),
+          }
+        },
+      }),
       args: {
         email: {
           type: new GraphQLNonNull(GraphQLString),
