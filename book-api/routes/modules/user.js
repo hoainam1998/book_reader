@@ -67,11 +67,12 @@ class UserRouter extends Router {
       }
     }`;
     const variables = {
-      userId: Date.now(),
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       avatar: req.body.avatar,
+      sex: +req.body.sex,
+      power: +req.body.power,
       mfaEnable: req.body.mfa === 'true'
     };
     return self.execute(query, { user: variables });

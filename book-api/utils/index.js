@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { genSalt, hash } = require('bcrypt');
 const path = require('path');
 const { mkdir } = require('fs/promises');
 const { plainToInstance } = require('class-transformer');
@@ -254,6 +255,17 @@ const deleteFile = (filePath) => {
   });
 };
 
+/**
+ * Hashing password
+ *
+ * @param {string} password - The password.
+ * @return {string} The password decoded.
+ */
+const passwordHashing = async (password) => {
+  const saltRound = await genSalt(10);
+  return await hash(password, saltRound);
+};
+
 module.exports = {
   deepFreeze,
   messageCreator,
@@ -272,4 +284,5 @@ module.exports = {
   getOriginInternalServerUrl,
   convertDtoToZodObject,
   checkArrayHaveValues,
+  passwordHashing,
 };

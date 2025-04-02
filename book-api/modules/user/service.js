@@ -4,7 +4,7 @@ const Service = require('#services/prisma');
 
 class UserService extends Service {
   addUser(user) {
-    const { firstName, lastName, avatar, email, mfaEnable, userId } = user;
+    const { firstName, lastName, avatar, email, sex, power, mfaEnable } = user;
     return this.PrismaInstance.user.create({
       data: {
         user_id: userId,
@@ -12,6 +12,8 @@ class UserService extends Service {
         last_name: lastName,
         avatar: avatar,
         email: email,
+        sex,
+        power,
         mfa_enable: mfaEnable
       },
     });

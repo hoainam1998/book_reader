@@ -137,6 +137,16 @@ const UserUpdate = (validators, className) => {
     email;
 
     @validators(
+      IsNumeric('sex must be a numeric!')
+    )
+    sex;
+
+    @validators(
+      IsNumeric('power must be a numeric!')
+    )
+    power;
+
+    @validators(
       IsBase64Image('avatar must be image!')
     )
     avatar;
