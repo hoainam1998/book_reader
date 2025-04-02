@@ -1,16 +1,6 @@
-const { genSalt, hash } = require('bcrypt');
 const { sign } = require('jsonwebtoken');
-
-/**
- * Hashing password
- *
- * @param {string} password - The password.
- * @return {string} The password decoded.
- */
-const passwordHashing = async (password) => {
-  const saltRound = await genSalt(10);
-  return await hash(password, saltRound);
-};
+const { compare } = require('bcrypt');
+const { passwordHashing } = require('#utils');
 
 /**
  * Return reader prisma extension.
@@ -61,5 +51,5 @@ module.exports = (prisma) => {
 
       return query(args);
     }
-  }
+  };
 };

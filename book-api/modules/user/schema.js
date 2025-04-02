@@ -29,6 +29,9 @@ const USER_INFORMATION_FIELDS = {
   avatar: {
     type: GraphQLString,
   },
+  sex: {
+    type: GraphQLInt,
+  },
   mfaEnable: {
     type: GraphQLBoolean,
   },
@@ -38,7 +41,7 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
   name: 'UserInformationInput',
   fields: {
     userId: {
-      type: new GraphQLNonNull(GraphQLID),
+      type: GraphQLID,
     },
     ...USER_INFORMATION_FIELDS,
     firstName: {
@@ -50,10 +53,13 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
     password: {
       type: GraphQLString,
     },
+    power: {
+      type: GraphQLInt,
+    },
   },
 });
 
-const USER_INFORMATION_UPDATE = new GraphQLObjectType({
+const USER_INFORMATION_DETAIL = new GraphQLObjectType({
   name: 'UserInformationUpdate',
   fields: {
     ...USER_INFORMATION_FIELDS,
@@ -145,7 +151,7 @@ const query = new GraphQLObjectType({
       }
     },
     detail: {
-      type: USER_INFORMATION_UPDATE,
+      type: USER_INFORMATION_DETAIL,
       args: {
         userId: {
           type: new GraphQLNonNull(GraphQLID),
@@ -216,8 +222,12 @@ const mutation = new GraphQLObjectType({
         },
       },
       resolve: async (user, args) => {
-        await user.addUser(args.user);
-        return messageCreator('Add user success!');
+        return handleResolveResult(async () => {
+          await user.addUser(args.user);
+          return messageCreator('Add user success!');
+        }, {
+          UNIQUE_DUPLICATE: 'Email already exit. Please enter another email!'
+        });
       },
     },
     updateMfaState: {

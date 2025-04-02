@@ -1,6 +1,10 @@
 const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { graphqlErrorOption, graphqlNotFoundErrorOption, graphqlUnauthorizedErrorOption } = require('../modules/common-schema')
+const {
+  graphqlErrorOption,
+  graphqlNotFoundErrorOption,
+  graphqlUnauthorizedErrorOption
+} = require('../modules/common-schema')
 
 /*
 * Prisma error code enum defined.
