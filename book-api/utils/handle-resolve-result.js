@@ -4,7 +4,7 @@ const {
   graphqlErrorOption,
   graphqlNotFoundErrorOption,
   graphqlUnauthorizedErrorOption
-} = require('../modules/common-schema')
+} = require('../modules/common-schema');
 
 /*
 * Prisma error code enum defined.
@@ -70,10 +70,9 @@ const handleError = (err, messages) => {
  * @throws {Error} - Throw error if it have.
  */
 module.exports = (resolveFunction, messages) => {
-  const prismaErrorCodeNames = Object.keys(PRISMA_ERROR_CODE);
   // checking whether properties and data type is valid or not.
   // if true run resolve function, else throw an error.
-  if (Object.keys(messages).every((code) => prismaErrorCodeNames.includes(code) && typeof messages[code] === 'string')) {
+  if (Object.keys(messages).every((code) => Object.keys(PRISMA_ERROR_CODE).includes(code) && typeof messages[code] === 'string')) {
     return resolveFunction().catch((err) => handleError(err, messages));
   } else {
     throw new Error('Messages is not valid!');

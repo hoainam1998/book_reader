@@ -1,4 +1,5 @@
 const Router = require('../router');
+const { sign } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
@@ -73,6 +74,7 @@ class UserRouter extends Router {
       avatar: req.body.avatar,
       sex: +req.body.sex,
       power: +req.body.power,
+      resetPasswordToken: sign({ email: req.body.email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY),
       mfaEnable: req.body.mfa === 'true'
     };
     return self.execute(query, { user: variables });

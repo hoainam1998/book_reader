@@ -1,20 +1,23 @@
 const { generateOtp } = require('#utils');
 const { sign } = require('jsonwebtoken');
+const { compare } = require('bcrypt');
 const Service = require('#services/prisma');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 class UserService extends Service {
   addUser(user) {
-    const { firstName, lastName, avatar, email, sex, power, mfaEnable } = user;
+    const { firstName, lastName, avatar, email, sex, power, resetPasswordToken, mfaEnable } = user;
+
     return this.PrismaInstance.user.create({
       data: {
-        user_id: userId,
         first_name: firstName,
         last_name: lastName,
         avatar: avatar,
         email: email,
         sex,
         power,
-        mfa_enable: mfaEnable
+        reset_password_token: resetPasswordToken,
+        mfa_enable: mfaEnable,
       },
     });
   }
@@ -90,27 +93,28 @@ class UserService extends Service {
   login(email, password, select) {
     return this.PrismaInstance.user.findFirstOrThrow({
       where: {
-        AND: [
-          {
-            email
-          },
-          {
-            password
-          }
-        ]
+        email
       },
       select: {
         ...select,
-        user_id: true
+        login_token: true,
+        password: true,
+        reset_password_token: true,
       }
     }).then((user) => {
-      let apiKey;
-      if (!user.mfa_enable) {
-        apiKey = sign({ userId: user.user_id, email }, process.env.SECRET_KEY);
-      } else {
-        apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
-      }
-      return { ...user, apiKey };
+      return compare(password, user.password)
+        .then((compareResult) => {
+          let apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
+          if (compareResult) {
+            if (!user.reset_password_token) {
+              if (!user.mfa_enable) {
+                return apiKey = user.login_token;
+              }
+            }
+            return { ...user, apiKey };
+          }
+          throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+        });
     });
   }
 

@@ -226,7 +226,7 @@ const fetchHelper = (...args) => {
  *
  * @async
  * @param {[Promise]} promises - The array of promises.
- * @return {Promise<[*]>} The promise result.
+ * @return {Promise<[*]>} - The promise result.
  */
 async function promiseAll(promisesFn) {
   const arr = [];
@@ -241,7 +241,7 @@ async function promiseAll(promisesFn) {
  *
  * @async
  * @param {string} filePath - The file path.
- * @return {Promise<[*]>} The promise result.
+ * @return {Promise<boolean>} - The promise result.
  */
 const deleteFile = (filePath) => {
   return new Promise((resolve, reject) => {
@@ -258,8 +258,9 @@ const deleteFile = (filePath) => {
 /**
  * Hashing password
  *
+ * @async
  * @param {string} password - The password.
- * @return {string} The password decoded.
+ * @return {Promise<string>} -The password decoded.
  */
 const passwordHashing = async (password) => {
   const saltRound = await genSalt(10);
