@@ -24,15 +24,24 @@ module.exports = (prisma) => {
       const userId = Date.now().toString();
       const password = await passwordHashing(firstLoginPassword);
       const token = sign({ userId, email: args.data.email }, process.env.SECRET_KEY);
+      const resetPasswordToken = sign(
+        { email: args.data.email },
+        process.env.ADMIN_RESET_PASSWORD_SECRET_KEY,
+        { expiresIn: '1h' }
+      );
 
       args.data = {
         ...args.data,
         user_id: userId,
         login_token: token,
         password,
+        reset_password_token: resetPasswordToken,
       };
 
-      await query(args);
+      return {
+        ...await query(args),
+        plain_password: firstLoginPassword,
+      };
     },
   };
 };

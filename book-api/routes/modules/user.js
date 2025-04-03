@@ -1,8 +1,8 @@
 const Router = require('../router');
-const { sign } = require('jsonwebtoken');
+const multer = require('multer');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
-const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
+const { messageCreator, fetchHelper, getOriginInternalServerUrl, createFile } = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
 const authentication = require('#middlewares/auth/authentication');
@@ -14,6 +14,7 @@ const {
   OtpUpdateResponse,
   AllUsersResponse,
   UserDetailResponse,
+  UserCreatedResponse,
 } = require('#dto/user/user-out');
 const {
   UserPaginationInput,
@@ -42,7 +43,8 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/add', authentication, this._addUser);
+    this.post('/create-user', authentication, multer().single('avatar'), this._createUser);
+    this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
     this.delete('/delete-user/:id', authentication, this._deleteUser);
@@ -58,12 +60,14 @@ class UserRouter extends Router {
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validation(UserUpdate, { error_message: 'Add user failed!', groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
-  @serializer(MessageSerializerResponse)
+  @serializer(UserCreatedResponse)
   _addUser(req, res, next, self) {
     const query = `mutation AddUser($user: UserInformationInput!) {
       user {
         add(user: $user) {
-          message
+          message,
+          resetPasswordToken,
+          password
         }
       }
     }`;
@@ -74,7 +78,6 @@ class UserRouter extends Router {
       avatar: req.body.avatar,
       sex: +req.body.sex,
       power: +req.body.power,
-      resetPasswordToken: sign({ email: req.body.email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY),
       mfaEnable: req.body.mfa === 'true'
     };
     return self.execute(query, { user: variables });
@@ -274,6 +277,39 @@ class UserRouter extends Router {
     .then((json) => {
       const { otp, message } = json;
       return EmailService.sendOtpEmail(req.body.email, otp).then(() => messageCreator(message));
+    });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _createUser(req, res, next, schema) {
+    const url = getOriginInternalServerUrl(req);
+    const formData = new FormData();
+    const avatar = req.file;
+
+    for (const [key, value] of Object.entries(req.body)) {
+      if (key !== 'avatar') {
+        formData.append(key, value);
+      }
+    }
+
+    formData.append('avatar', createFile(avatar), avatar.originalname);
+
+    return fetchHelper(`${url}/add`,
+      'POST',
+      formData
+    )
+    .then(async (response) => {
+      const json = response.json();
+      if (response.status === HTTP_CODE.CREATED) {
+        return json;
+      }
+      return Promise.reject({ ...await json, status: response.status });
+    })
+    .then(({ resetPasswordToken, password }) => {
+      const link = `${process.env.ORIGIN_CORS}?token=${resetPasswordToken}`;
+      return EmailService.sendPassword(req.body.email, link, password)
+        .then(() => messageCreator('Reset password link have been sent into your email!'));
     });
   }
 }
