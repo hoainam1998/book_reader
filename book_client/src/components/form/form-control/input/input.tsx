@@ -52,6 +52,7 @@ function Input({
   disabled,
   className,
   labelClass,
+  labelStyle,
   inputClass,
   labelColumnSize,
   inputColumnSize,
@@ -133,6 +134,7 @@ function Input({
       label={label}
       className={className}
       labelClass={labelClass}
+      labelStyle={labelStyle}
       errors={errors}>
         <div className={clsx('input-wrapper', inputClass)}>
           <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
