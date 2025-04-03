@@ -8,6 +8,7 @@ import {
   Ref,
   ReactNode,
   useImperativeHandle,
+  CSSProperties,
 } from 'react';
 import { GridItem } from 'components/grid/grid';
 import { clsx } from 'utils';
@@ -33,6 +34,7 @@ export type FormControlProps = {
   options?: OptionPrototype<unknown>[]
   className?: string;
   labelClass?: string;
+  labelStyle?: CSSProperties;
   errors?: string[];
   labelColumnSize?: ColumnSize,
   inputColumnSize?: ColumnSize,
@@ -45,6 +47,7 @@ function FormControl({
   errors = [],
   className,
   labelClass,
+  labelStyle,
   labelColumnSize,
   inputColumnSize,
 }: FormControlProps, ref: Ref<HTMLElement>): JSX.Element {
@@ -68,7 +71,7 @@ function FormControl({
     <fieldset className={clsx('fieldset grid', className)} ref={fieldsetRef}>
       { label &&
         <GridItem {...labelColumnSize} >
-          <label htmlFor={name} className={labelClass}>{ label }</label>
+          <label htmlFor={name} style={labelStyle} className={labelClass}>{ label }</label>
         </GridItem>
       }
       <GridItem {...inputColumn}>

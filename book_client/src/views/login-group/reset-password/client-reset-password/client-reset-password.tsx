@@ -6,13 +6,7 @@ import ClientLoginWrapper from 'views/login-group/login-wrapper/client-login-wra
 import useForm, { RuleType } from 'hooks/useForm';
 import { required, email, matchPattern, sameAs } from 'hooks/useValidate';
 import constants from 'read-only-variables';
-import './style.scss';
-
-type ResetPasswordFieldType = {
-  email: string;
-  password: string;
-  passwordAgain: string;
-};
+import { ResetPasswordFieldType } from 'interfaces';
 
 const state: ResetPasswordFieldType = {
   email: '',
@@ -29,12 +23,12 @@ const rules: RuleType<ResetPasswordFieldType> = {
   passwordAgain: {
     required,
     sameAs: sameAs('password'),
-  }
+  },
 };
 
 const formId: string = 'login-form';
 
-function ResetPassword(): JSX.Element {
+function ClientResetPassword(): JSX.Element {
   const { email, password, passwordAgain, handleSubmit, reset, validate } = useForm<
   ResetPasswordFieldType,
     RuleType<ResetPasswordFieldType>
@@ -91,4 +85,4 @@ function ResetPassword(): JSX.Element {
   );
 }
 
-export default ResetPassword;
+export default ClientResetPassword;
