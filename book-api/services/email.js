@@ -84,6 +84,24 @@ class EmailService {
     `;
     return this.self._sendEmail(email, subject, html);
   }
+
+  /**
+  * Sending email contain new password and reset password link.
+  * @static
+  * @param {string} email - The receiver.
+  * @param {string} link - The reset password link.
+  * @param {string} password - The new password.
+  * @return {Promise} - The email sent result.
+  */
+  static sendPassword(email, link, password) {
+    const subject = 'Reset password';
+    const html = `
+      <div><h3 style="display: inline-block; margin-right: 7px; margin-bottom: 5px">Your password: </h3>${password}</div>
+      <h3>Click this link to navigate to reset password page</h3>
+      <a href=${link} target="_blank">${link}</a>
+    `;
+    return this.self._sendEmail(email, subject, html);
+  }
 }
 
 module.exports = EmailService;

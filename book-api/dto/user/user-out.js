@@ -4,6 +4,7 @@ const PaginationResponse = require('#dto/common/pagination-response');
 const UserDTO = require('#dto/user/user');
 const OtpVerify = require('#dto/user/otp-verify');
 const OtpUpdate = require('#dto/user/otp-update');
+const UserCreated = require('#dto/user/user-created');
 const { getGraphqlFinalData } = require('#utils');
 const { zodValidateClassWrapper } = require('#decorators');
 
@@ -55,6 +56,14 @@ class UserDetailResponse extends GraphqlResponse {
   }
 }
 
+class UserCreatedResponse extends GraphqlResponse {
+  @Expose({ toClassOnly: true })
+  @Type(() => UserCreated)
+  get response() {
+    return getGraphqlFinalData(this.data);
+  }
+}
+
 module.exports = {
   UserPagination: zodValidateClassWrapper(UserPagination, PaginationResponse),
   LoginResponse: zodValidateClassWrapper(LoginResponse, UserDTO),
@@ -62,4 +71,5 @@ module.exports = {
   OtpUpdateResponse: zodValidateClassWrapper(OtpUpdateResponse, OtpUpdate),
   AllUsersResponse: zodValidateClassWrapper(AllUsersResponse, UserDTO),
   UserDetailResponse: zodValidateClassWrapper(UserDetailResponse, UserDTO),
+  UserCreatedResponse: zodValidateClassWrapper(UserCreatedResponse, UserCreated),
 };

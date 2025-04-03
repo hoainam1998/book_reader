@@ -15,6 +15,7 @@ const handleResolveResult = require('#utils/handle-resolve-result');
 const UserDTO = require('#dto/user/user');
 const OtpVerify = require('#dto/user/otp-verify');
 const OtpUpdate = require('#dto/user/otp-update');
+const UserCreated = require('#dto/user/user-created');
 const PaginationResponse = require('#dto/common/pagination-response');
 
 const {
@@ -52,9 +53,6 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
     },
     power: {
       type: new GraphQLNonNull(GraphQLInt),
-    },
-    resetPasswordToken: {
-      type: GraphQLString,
     },
   },
 });
@@ -216,7 +214,20 @@ const mutation = new GraphQLObjectType({
   name: 'UserMutation',
   fields: {
     add: {
-      type: ResponseType,
+      type: new GraphQLObjectType({
+        name: 'UserCreated',
+        fields: {
+          message: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          password: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          resetPasswordToken: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+        },
+      }),
       args: {
         user: {
           type: new GraphQLNonNull(USER_INFORMATION_INPUT),
@@ -224,8 +235,10 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (user, args) => {
         return handleResolveResult(async () => {
-          await user.addUser(args.user);
-          return messageCreator('Add user success!');
+          return convertDtoToZodObject(UserCreated, {
+            ...messageCreator('Add user success!'),
+            ...await user.addUser(args.user)
+          });
         }, {
           UNIQUE_DUPLICATE: 'Email already exit. Please enter another email!'
         });
