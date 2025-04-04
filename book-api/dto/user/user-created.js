@@ -6,9 +6,6 @@ class UserCreated extends OutputValidate {
   plain_password;
 
   @Type(() => String)
-  message;
-
-  @Type(() => String)
   reset_password_token;
 
   @Type(() => String)

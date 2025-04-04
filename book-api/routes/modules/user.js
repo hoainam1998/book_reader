@@ -59,14 +59,13 @@ class UserRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(UserUpdate, { error_message: 'Add user failed!', groups: ['create'] })
+  @validation(UserUpdate, { error_message: USER.ADD_USER_FAIL, groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(UserCreatedResponse)
   _addUser(req, res, next, self) {
     const query = `mutation AddUser($user: UserInformationInput!) {
       user {
         add(user: $user) {
-          message,
           resetPasswordToken,
           password
         }
@@ -84,7 +83,7 @@ class UserRouter extends Router {
     return self.execute(query, { user: variables });
   }
 
-  @validation(UserPaginationInput, { error_message: 'Load users failed!' })
+  @validation(UserPaginationInput, { error_message: USER.PAGINATION_LOAD_USER_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserPagination)
   _pagination(req, res, next, self) {
@@ -108,7 +107,7 @@ class UserRouter extends Router {
     );
   }
 
-  @validation(MfaUpdate, { error_message: 'Update mfa failed!' })
+  @validation(MfaUpdate, { error_message: USER.UPDATE_MFA_STATE_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateMfaState(req, res, next, self) {
@@ -129,7 +128,7 @@ class UserRouter extends Router {
   }
 
   @validation(UserDelete, {
-    error_message: 'Delete user failed!',
+    error_message: USER.DELETE_USER_FAIL,
     request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM
   })
   @validateResultExecute(HTTP_CODE.CREATED)
@@ -147,7 +146,7 @@ class UserRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(UserUpdate, { error_message: 'Update user was failed!', groups: ['update'] })
+  @validation(UserUpdate, { error_message: USER.UPDATE_USER_FAIL, groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateUser(req, res, next, self) {
@@ -170,7 +169,7 @@ class UserRouter extends Router {
     return self.execute(query, { user: variables });
   }
 
-  @validation(UserDetail, { error_message: 'Load user detail was failed!' })
+  @validation(UserDetail, { error_message: USER.LOAD_USER_DETAIL_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserDetailResponse)
   _getUserDetail(req, res, next, self) {
@@ -188,7 +187,7 @@ class UserRouter extends Router {
     );
   }
 
-  @validation(Login, { error_message: 'Login was failed!' })
+  @validation(Login, { error_message: USER.LOGIN_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(LoginResponse)
   _login(req, res, next, self) {
@@ -207,7 +206,7 @@ class UserRouter extends Router {
     req.body.query);
   }
 
-  @validation(OtpVerify, { error_message: 'Verify otp was failed!' })
+  @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpVerifyResponse)
   _verifyOtp(req, res, next, self) {
@@ -227,7 +226,7 @@ class UserRouter extends Router {
     return self.execute(query, variables);
   }
 
-  @validation(OtpUpdate, { error_message: 'Update otp code was failed!' })
+  @validation(OtpUpdate, { error_message: USER.UPDATE_OTP_CODE_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpUpdateResponse)
   _updateOtpCode(req, res, next, self) {
@@ -243,7 +242,7 @@ class UserRouter extends Router {
     return self.execute(query, { email: req.body.email, });
   }
 
-  @validation(AllUser, { error_message: 'Load all users failed!' })
+  @validation(AllUser, { error_message: USER.LOAD_ALL_USER_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {
