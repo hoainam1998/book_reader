@@ -29,4 +29,5 @@ module.exports = deepFreeze({
     QUERY: 'query',
     FILES: 'files',
   },
+  RESET_PASSWORD_URL: `${process.env.ORIGIN_CORS}/reset-password?token={0}`,
 });
