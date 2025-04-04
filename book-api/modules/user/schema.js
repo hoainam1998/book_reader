@@ -239,6 +239,31 @@ const mutation = new GraphQLObjectType({
         });
       },
     },
+    resetPassword: {
+      type: ResponseType,
+      args: {
+        resetPasswordToken: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        email: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        oldPassword: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        password: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (user, { resetPasswordToken, email, oldPassword, password }) => {
+        return handleResolveResult(async () => {
+          await user.resetPassword(resetPasswordToken, email, oldPassword, password);
+          return messageCreator(USER.RESET_PASSWORD_SUCCESS);
+        }, {
+          UNAUTHORIZED: USER.USER_NOT_FOUND
+        });
+      },
+    },
     updateMfaState: {
       type: ResponseType,
       args: {

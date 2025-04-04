@@ -1,8 +1,9 @@
 const Router = require('../router');
 const multer = require('multer');
+const { verify } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL } = require('#constants');
-const { USER } = require('#messages');
+const { USER, COMMON } = require('#messages');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl, createFile } = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
@@ -22,6 +23,7 @@ const {
   OtpVerify,
   OtpUpdate,
   MfaUpdate,
+  AdminResetPassword,
   UserDetail,
   UserUpdate,
   UserDelete,
@@ -48,6 +50,7 @@ class UserRouter extends Router {
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
+    this.post('/reset-password', loginRequire, this._resetPassword);
     this.delete('/delete-user/:id', authentication, this._deleteUser);
     this.post('/user-detail', authentication, this._getUserDetail);
     this.put('/update-user', authentication, this._updateUser);
@@ -204,6 +207,43 @@ class UserRouter extends Router {
       password: req.body.password,
     },
     req.body.query);
+  }
+
+  @validation(AdminResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _resetPassword(req, res, next, self) {
+    const query = `mutation ResetPassword($resetPasswordToken: String!, $email: String!, $oldPassword: String!, $password: String!) {
+      user {
+        resetPassword(resetPasswordToken: $resetPasswordToken, email: $email, oldPassword: $oldPassword, password: $password) {
+          message
+        }
+      }
+    }`;
+
+    try {
+      const decodedUser = verify(req.body.resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
+      if (decodedUser.email !== req.body.email) {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH)
+        };
+      }
+    } catch (err) {
+      if (err.message === 'jwt expired') {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE)
+        };
+      } else {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(COMMON.TOKEN_INVALID)
+        };
+      }
+    }
+
+    return self.execute(query, req.body);
   }
 
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })

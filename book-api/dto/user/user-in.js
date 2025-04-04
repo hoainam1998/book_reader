@@ -99,6 +99,30 @@ const MfaUpdate = (validators, className) => {
   }, className);
 };
 
+const AdminResetPassword = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsString('resetPasswordToken must be string!')
+    )
+    resetPasswordToken;
+
+    @validators(
+      IsEmail('Invalid email!'),
+    )
+    email;
+
+    @validators(
+      IsPassword('oldPassword is wrong format!'),
+    )
+    oldPassword;
+
+    @validators(
+      IsPassword('password is wrong format!'),
+    )
+    password;
+  }, className);
+};
+
 const UserDetail = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
@@ -183,4 +207,5 @@ module.exports = {
   UserUpdate: Validation(UserUpdate),
   UserDelete: Validation(UserDelete),
   AllUser: Validation(AllUser),
+  AdminResetPassword: Validation(AdminResetPassword),
 };

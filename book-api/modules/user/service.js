@@ -117,6 +117,31 @@ class UserService extends Service {
     });
   }
 
+  resetPassword(resetPasswordToken, email, oldPassword, password) {
+    return this.PrismaInstance.user.findFirstOrThrow({
+      where: {
+        reset_password_token: resetPasswordToken,
+        email,
+      },
+    }).then(async (user) => {
+      const passwordCompareResult = await compare(oldPassword, user.password);
+      if (passwordCompareResult) {
+        return this.PrismaInstance.user.update({
+          where: {
+            reset_password_token: resetPasswordToken,
+            password: user.password,
+            email,
+          },
+          data: {
+            reset_password_token: null,
+            password
+          },
+        });
+      }
+      throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+    });
+  }
+
   updateOtpCode(email) {
     const otpCode = generateOtp();
     return this.PrismaInstance.user.update({
