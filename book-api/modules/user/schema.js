@@ -11,6 +11,7 @@ const {
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
 const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const { USER } = require('#messages');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const UserDTO = require('#dto/user/user');
 const OtpVerify = require('#dto/user/otp-verify');
@@ -113,7 +114,7 @@ const query = new GraphQLObjectType({
         const [users, total] = await user.pagination(pageSize, pageNumber, keyword, context);
 
         if (!checkArrayHaveValues(users)) {
-          throw new GraphQLError('User is empty!', graphqlNotFoundErrorOption);
+          throw new GraphQLError(USER.USERS_EMPTY, graphqlNotFoundErrorOption);
         }
 
         return convertDtoToZodObject(PaginationResponse, {
@@ -127,7 +128,7 @@ const query = new GraphQLObjectType({
       resolve: async (user, args, context) => {
         const users = await user.getAllUsers(context);
         if (!checkArrayHaveValues(users)) {
-          throw new GraphQLError('Users not found!', graphqlNotFoundErrorOption);
+          throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(UserDTO, users);
       }
@@ -143,7 +144,7 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(UserDTO, await user.getUserDetail(userId, context));
         }, {
-          RECORD_NOT_FOUND: 'User not found!'
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
     },
@@ -178,7 +179,7 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(UserDTO, await user.login(email, password, context));
         }, {
-          UNAUTHORIZED: 'User not found!'
+          UNAUTHORIZED: USER.USER_NOT_FOUND
         });
       },
     },
@@ -203,7 +204,7 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(OtpVerify, await user.verifyOtpCode(email, otp));
         }, {
-          UNAUTHORIZED: 'Verify otp code failed!. Email or otp code not found!'
+          UNAUTHORIZED: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL
         });
       }
     },
@@ -217,9 +218,6 @@ const mutation = new GraphQLObjectType({
       type: new GraphQLObjectType({
         name: 'UserCreated',
         fields: {
-          message: {
-            type: new GraphQLNonNull(GraphQLString),
-          },
           password: {
             type: new GraphQLNonNull(GraphQLString),
           },
@@ -235,12 +233,9 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (user, args) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(UserCreated, {
-            ...messageCreator('Add user success!'),
-            ...await user.addUser(args.user)
-          });
+          return convertDtoToZodObject(UserCreated, await user.addUser(args.user));
         }, {
-          UNIQUE_DUPLICATE: 'Email already exit. Please enter another email!'
+          UNIQUE_DUPLICATE: USER.EMAIL_EXIST
         });
       },
     },
@@ -257,9 +252,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (user, { userId, mfaEnable }) => {
         return handleResolveResult(async () => {
           const { email } = await user.updateMfaState(mfaEnable, userId);
-          return messageCreator(`Update mfa state for email: ${email} success!`);
+          return messageCreator(USER.UPDATE_MFA_STATE_SUCCESS.format(email));
         }, {
-          RECORD_NOT_FOUND: 'User not found!'
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
     },
@@ -283,9 +278,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (user, { email }) => {
         return handleResolveResult(async () => {
           const otp = await user.updateOtpCode(email);
-          return convertDtoToZodObject(OtpUpdate, { ...messageCreator('Otp code has sent to your email!'), otp });
+          return convertDtoToZodObject(OtpUpdate, { ...messageCreator(USER.OTP_HAS_BEEN_SENT), otp });
         }, {
-          RECORD_NOT_FOUND: 'User not found!'
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
     },
@@ -299,9 +294,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (user, args) => {
         return handleResolveResult(async () => {
           await user.updateUser(args.user);
-          return messageCreator('Update user success!');
+          return messageCreator(USER.UPDATE_USER_SUCCESS);
         }, {
-          RECORD_NOT_FOUND: 'User not found!'
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
     },
@@ -315,9 +310,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (user, { userId }) => {
         return handleResolveResult(async () => {
           const { email } = await user.deleteUser(userId);
-          return messageCreator(`Delete user with email = ${email} success!`);
+          return messageCreator(USER.DELETE_USER_SUCCESS.format(email));
         }, {
-          RECORD_NOT_FOUND: 'User not found!'
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
     },
