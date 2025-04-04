@@ -8,6 +8,9 @@ module.exports = deepFreeze({
     METHOD_NOT_ALLOWED: 'Method {0} not allowed for {1} url!',
     URL_INVALID: 'Can not found {0}!',
     AUTHENTICATION_TOKEN_INVALID: 'Invalid authentication token!',
+    RESET_PASSWORD_TOKEN_EXPIRE: 'The reset password token has expired!',
+    TOKEN_INVALID: 'Token is invalid!',
+    REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',
@@ -31,5 +34,7 @@ module.exports = deepFreeze({
     LOAD_USER_DETAIL_FAIL: 'Load user detail was failed!',
     USERS_EMPTY: 'Users is empty!',
     OTP_HAS_BEEN_SENT: 'Otp code has sent to your email!',
+    RESET_PASSWORD_FAIL: 'Reset password failed!',
+    RESET_PASSWORD_SUCCESS: 'Reset password success!',
   },
 });
