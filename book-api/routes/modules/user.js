@@ -1,7 +1,8 @@
 const Router = require('../router');
 const multer = require('multer');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL } = require('#constants');
+const { USER } = require('#messages');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl, createFile } = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
@@ -43,7 +44,7 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-user', authentication, multer().single('avatar'), this._createUser);
+    this.post('/create-user', multer().single('avatar'), this._createUser);
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
@@ -307,9 +308,9 @@ class UserRouter extends Router {
       return Promise.reject({ ...await json, status: response.status });
     })
     .then(({ resetPasswordToken, password }) => {
-      const link = `${process.env.ORIGIN_CORS}?token=${resetPasswordToken}`;
+      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
-        .then(() => messageCreator('Reset password link have been sent into your email!'));
+        .then(() => messageCreator(USER.USER_ADDED));
     });
   }
 }
