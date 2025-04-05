@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { JSX, useCallback } from 'react';
-import { LoaderFunctionArgs, redirect } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
@@ -9,6 +9,8 @@ import { required, email, matchPattern, sameAs } from 'hooks/useValidate';
 import { ResetPasswordFieldType } from 'interfaces';
 import constants from 'read-only-variables';
 import paths from 'router/paths';
+import { showToast } from 'utils';
+import { getResetPasswordToken, resetPassword } from './fetcher';
 
 type ResetAdminPasswordFieldType = ResetPasswordFieldType & {
   oldPassword: string;
@@ -44,13 +46,28 @@ function AdminResetPassword(): JSX.Element {
   ResetAdminPasswordFieldType,
     RuleType<ResetAdminPasswordFieldType>
   >(state, rules, formId);
+  const token: string | undefined = useLoaderData() as string | undefined;
+  const navigate = useNavigate();
 
   const onSubmit = useCallback((): void => {
     handleSubmit();
     if (!validate.error) {
-      // onLogin(email.value, password.value, reset);
+      const { email, password, oldPassword } = validate.values;
+      const body = {
+        email,
+        password,
+        oldPassword,
+        resetPasswordToken: token,
+      };
+
+      resetPassword(body)
+        .then((response) => {
+          showToast('Reset password', response.data.message);
+          navigate(paths.LOGIN);
+        })
+        .catch((error) => showToast('Reset password', error.response.data.message));
     }
-  }, []);
+  }, [validate.values]);
 
   return (
     <AdminLoginWrapper>
@@ -123,8 +140,6 @@ function AdminResetPassword(): JSX.Element {
 
 export default AdminResetPassword;
 
-export const getResetPasswordToken = ({ request }: LoaderFunctionArgs): string | Response => {
-  const url: URL = new URL(request.url);
-  const token: string | null = url.searchParams.get('token');
-  return token || redirect(paths.LOGIN);
+export {
+  getResetPasswordToken
 };
