@@ -10,8 +10,11 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
       avatar: true,
       email: true,
       mfaEnable: true,
-      password: true,
+      passwordMustChange: true,
+      resetPasswordToken: true,
       apiKey: true,
+      power: true,
+      sex: true,
     },
   };
   return UserService.post('login', body);

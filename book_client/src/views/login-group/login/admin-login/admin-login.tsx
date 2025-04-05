@@ -18,10 +18,14 @@ function AdminLogin(): JSX.Element {
         delete userLogin.apiKey;
         auth.saveUserLogin(userLogin);
         auth.saveApiKey(res.data.apiKey);
-        if (res.data.mfaEnable === false) {
-          navigate(path.HOME);
+        if (res.data.passwordMustChange) {
+          navigate(`${path.RESET_PASSWORD}?token=${res.data.resetPasswordToken}`);
         } else {
-          navigate(path.OTP);
+          if (res.data.mfaEnable === false) {
+            navigate(path.HOME);
+          } else {
+            navigate(path.OTP);
+          }
         }
       })
       .catch((error) => showToast('OTP', error.response.data.message))
