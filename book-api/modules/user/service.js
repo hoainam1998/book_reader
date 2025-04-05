@@ -103,8 +103,8 @@ class UserService extends Service {
     }).then((user) => {
       return compare(password, user.password)
         .then((compareResult) => {
-          let apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
           if (compareResult) {
+            let apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
             if (!user.reset_password_token) {
               if (!user.mfa_enable) {
                 return apiKey = user.login_token;

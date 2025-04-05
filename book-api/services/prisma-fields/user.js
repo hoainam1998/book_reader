@@ -16,6 +16,7 @@ class UserPrismaField extends PrismaField {
     password: 'password',
     power: 'power',
     sex: 'sex',
+    resetPasswordToken: 'reset_password_token',
     name: ['first_name', 'last_name']
   };
 }
