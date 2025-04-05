@@ -50,7 +50,7 @@ class UserRouter extends Router {
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
-    this.post('/reset-password', loginRequire, this._resetPassword);
+    this.post('/reset-password', this._resetPassword);
     this.delete('/delete-user/:id', authentication, this._deleteUser);
     this.post('/user-detail', authentication, this._getUserDetail);
     this.put('/update-user', authentication, this._updateUser);
