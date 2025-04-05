@@ -46,7 +46,7 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-user', multer().single('avatar'), this._createUser);
+    this.post('/create-user', authentication, multer().single('avatar'), this._createUser);
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
