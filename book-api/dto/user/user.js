@@ -26,6 +26,14 @@ class UserDTO extends OutputValidate {
   email;
 
   @Type(() => String)
+  reset_password_token;
+
+  @Type(() => String)
+  get resetPasswordToken() {
+    return this.reset_password_token;
+  }
+
+  @Type(() => String)
   get name() {
     return `${this.first_name} ${this.last_name}`;
   }

@@ -165,6 +165,9 @@ const query = new GraphQLObjectType({
           passwordMustChange: {
             type: new GraphQLNonNull(GraphQLBoolean),
           },
+          resetPasswordToken: {
+            type: GraphQLString,
+          },
         },
       }),
       args: {
