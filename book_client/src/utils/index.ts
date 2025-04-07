@@ -4,6 +4,7 @@ import showModal from './modal';
 import { createElementWrapper } from './element-wrapper';
 import { convertBase64ToSingleFile, openFile, getExtnameFromBlobType, getJsonFileContent } from './file-handle';
 import handleNotfoundApiError from './handle-data-not-found';
+import generateResetPasswordLink from './generate-reset-password-link';
 
 /**
  * Return class text from array.
@@ -71,4 +72,5 @@ export {
   openFile,
   getJsonFileContent,
   stringRandom,
+  generateResetPasswordLink,
 };

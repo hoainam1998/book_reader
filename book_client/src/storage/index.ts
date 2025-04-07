@@ -25,6 +25,10 @@ export type UserLogin = {
   avatar: string;
   mfaEnable: boolean;
   password: string;
+  mfaValidated: boolean;
+  isLogged: boolean;
+  passwordMustChange: boolean;
+  resetPasswordToken: string | null;
 };
 
 export class LocalStorage<T> {

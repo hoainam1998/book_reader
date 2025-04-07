@@ -32,12 +32,14 @@ function VerifyOtp(): JSX.Element {
     verifyOtp(email, otp as string)
       .then((res) => {
         auth.saveApiKey(res.data.apiKey);
+        auth.MfaValidated = true;
         navigate(path.HOME);
       })
       .catch((error) => showToast('OTP', error.response.data.message));
   }, []);
 
   const reSend = useCallback((): void => {
+    inputRef.current!.input!.value = '';
     _sendOtp();
   }, []);
 

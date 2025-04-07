@@ -1,14 +1,15 @@
 /* eslint-disable no-unused-vars */
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useEffect } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
 import useForm, { RuleType } from 'hooks/useForm';
-import { required, email, matchPattern, sameAs } from 'hooks/useValidate';
+import { required, email, matchPattern, sameAs, notSameWith } from 'hooks/useValidate';
 import { ResetPasswordFieldType } from 'interfaces';
 import constants from 'read-only-variables';
 import paths from 'router/paths';
+import auth from 'store/auth';
 import { showToast } from 'utils';
 import { getResetPasswordToken, resetPassword } from './fetcher';
 
@@ -31,6 +32,7 @@ const rules: RuleType<ResetAdminPasswordFieldType> = {
   },
   password: {
     required,
+    notSameWith: notSameWith('oldPassword'),
     matchPattern: matchPattern(constants.PASSWORD_PATTERN, 'Format password is wrong!')
   },
   passwordAgain: {
@@ -62,12 +64,16 @@ function AdminResetPassword(): JSX.Element {
 
       resetPassword(body)
         .then((response) => {
+          auth.destroyResetPasswordToken();
+          reset();
           showToast('Reset password', response.data.message);
           navigate(paths.LOGIN);
         })
         .catch((error) => showToast('Reset password', error.response.data.message));
     }
   }, [validate.values]);
+
+  useEffect(() => reset, []);
 
   return (
     <AdminLoginWrapper>
