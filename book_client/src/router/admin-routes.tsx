@@ -14,7 +14,7 @@ import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail
 import AuthorList, { authorPagination } from 'views/author-group/author-list/author-list';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
-import { LoginRequire, Logged  } from '../guard';
+import { LoginRequire } from '../guard';
 import { NavigationRouteMatchType, RoutePropsUnion } from './interfaces';
 import path from './paths';
 
@@ -25,7 +25,7 @@ const adminRoutes: RoutePropsUnion[] = [
   },
   {
     path: path.LOGIN,
-    element: <Logged><AdminLogin /></Logged>
+    element: <LoginRequire><AdminLogin /></LoginRequire>
   },
   {
     path: path.RESET_PASSWORD,
@@ -44,8 +44,8 @@ const adminRoutes: RoutePropsUnion[] = [
     path: path.HOME,
     element: <LoginRequire><Home /></LoginRequire>,
     handle: {
-      crumb: (match: UIMatch) =>
-        <Link key={match.pathname} to={match.pathname}>
+      crumb: ({ pathname }: UIMatch) =>
+        <Link key={pathname} to={pathname}>
           Home
         </Link>
     },
@@ -72,8 +72,8 @@ const adminRoutes: RoutePropsUnion[] = [
         name: 'users',
         element: <Outlet />,
         handle: {
-          crumb: (match: UIMatch) =>
-            <Link key={match.pathname} to={match.pathname}>
+          crumb: ({ pathname }: UIMatch) =>
+            <Link key={pathname} to={pathname}>
               User
             </Link>
         },
@@ -108,8 +108,8 @@ const adminRoutes: RoutePropsUnion[] = [
         icon: 'book.png',
         element: <Outlet />,
         handle: {
-          crumb: (match: UIMatch) =>
-            <Link key={match.pathname} to={match.pathname}>
+          crumb: ({ pathname }: UIMatch) =>
+            <Link key={pathname} to={pathname}>
               Book
             </Link>
         },
@@ -146,8 +146,8 @@ const adminRoutes: RoutePropsUnion[] = [
         icon: 'writer.png',
         element: <Outlet />,
         handle: {
-          crumb: (match: UIMatch) =>
-            <Link key={match.pathname} to={match.pathname}>
+          crumb: ({ pathname }: UIMatch) =>
+            <Link key={pathname} to={pathname}>
               Author
             </Link>
         },

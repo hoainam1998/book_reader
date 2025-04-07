@@ -16,6 +16,10 @@ class Store<T> {
     return this.currentStore;
   }
 
+  protected isContainData(field: string): boolean {
+    return !!this.CurrentStore && Object.hasOwn(this.CurrentStore!, field);
+  }
+
   protected emitChange(): void {
     for (let listener of this.listeners) {
       listener();

@@ -5,7 +5,7 @@ import LoginForm from '../login-form/login-form';
 import auth from 'store/auth';
 import { login } from './fetcher';
 import path from 'router/paths';
-import { showToast } from 'utils';
+import { showToast, generateResetPasswordLink } from 'utils';
 import './style.scss';
 
 function AdminLogin(): JSX.Element {
@@ -19,8 +19,9 @@ function AdminLogin(): JSX.Element {
         auth.saveUserLogin(userLogin);
         auth.saveApiKey(res.data.apiKey);
         if (res.data.passwordMustChange) {
-          navigate(`${path.RESET_PASSWORD}?token=${res.data.resetPasswordToken}`);
+          navigate(generateResetPasswordLink(res.data.resetPasswordToken));
         } else {
+          auth.IsLogged = true;
           if (res.data.mfaEnable === false) {
             navigate(path.HOME);
           } else {

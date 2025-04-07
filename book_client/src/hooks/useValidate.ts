@@ -9,7 +9,7 @@ export type ErrorFieldInfo = {
   max?: number;
 };
 
-export type ValidateName = 'required' | 'maxLength' | 'email' | 'matchPattern' | 'sameAs';
+export type ValidateName = 'required' | 'maxLength' | 'email' | 'matchPattern' | 'sameAs' | 'notSameWith';
 
 export type ValidateErrorInfo = {
   [key: string]: ErrorFieldInfo | boolean | number | Function | Array<string> | undefined;
@@ -39,7 +39,7 @@ export type ValidateFunction = (
 
 const constraints: Record<string, string> = {};
 
-const BUILTIN_VALIDATOR: string[] = ['required', 'maxLength', 'email', 'matchPattern', 'sameAs'];
+const BUILTIN_VALIDATOR: string[] = ['required', 'maxLength', 'email', 'matchPattern', 'sameAs', 'notSameWith'];
 
 const customValidate = (validateCallback: any): ValidateProcess =>
   (currentValue: string) => validateCallback(currentValue);
@@ -123,6 +123,28 @@ export const sameAs: ValidateFunction =
       error: currentValue.toString() !== state[keyConstraint],
       message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)}
         is not same with ${keyConstraint.toString()}!`,
+    };
+  };
+
+export const notSameWith: ValidateFunction =
+  (...args) =>
+  <T>(currentValue: any, state: T, field: string) => {
+    const keyConstraint: keyof T = args[0] as keyof T;
+    const message: string = args[1] ? args[1] as string : '';
+
+    if (field) {
+      Object.defineProperty(constraints, keyConstraint, {
+        value: field,
+        configurable: false,
+        enumerable: false,
+        writable: false,
+      });
+    }
+
+    return {
+      error: currentValue.toString() === state[keyConstraint],
+      message: message || `${field.charAt(0).toUpperCase()}${field.substring(1)}
+        must be different with ${keyConstraint.toString()}!`,
     };
   };
 
