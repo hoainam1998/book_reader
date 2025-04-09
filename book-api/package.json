@@ -7,7 +7,8 @@
     "dev": "nodemon -L --exec babel-node index.js",
     "test": "jest --watchAll",
     "test-coverage": "jest --watchAll --coverage",
-    "test-silent": "jest --watchAll --silent"
+    "test-silent": "jest --watchAll --silent",
+    "user-test": "jest --watchAll -- __test__/apis/user/reset-password.test.js"
   },
   "author": "hoai nam",
   "license": "ISC",
@@ -52,7 +53,9 @@
     "#middlewares/*": "./middlewares/*.js",
     "#services/*": "./services/*.js",
     "#services/prisma-client": "./services/prisma-client/index.js",
-    "#dto/*": "./dto/*.js"
+    "#dto/*": "./dto/*.js",
+    "#app": "./index.js",
+    "#test/*": "./__test__/*.js"
   },
   "exports": {
     "./modules/*": "./src/modules/*.js",

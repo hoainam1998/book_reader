@@ -1,8 +1,13 @@
-const fs = require('fs');
-const { genSalt, hash } = require('bcrypt');
-const path = require('path');
-const { mkdir } = require('fs/promises');
 const { plainToInstance } = require('class-transformer');
+const { saveFile, createFolder, deleteFile } = require('./handle-file');
+const { convertFileToBase64, getExtName, createFile } = require('./handle-file-buffer');
+const {
+  signingResetPasswordToken,
+  verifyResetPasswordToken,
+  passwordHashing,
+  autoGeneratePassword,
+  generateOtp
+} = require('./auth');
 const MessageResponse = require('#dto/common/message-response');
 
 /**
@@ -44,58 +49,12 @@ const convertDtoToZodObject = (dtoClass, value) => {
 const messageCreator = (message) => convertDtoToZodObject(MessageResponse, { message });
 
 /**
- * Return otp code.
- *
- * @returns {string} - otp number.
- */
-const generateOtp = () => {
-  let otp = '';
-  for (let i = 0; i < 6; i++) {
-    otp += Math.round(Math.random() * 10);
-  }
-  return otp.substring(0, 6);
-};
-
-/**
  * Check array is empty or not.
  *
  * @param {*} obj - The object checking.
  * @returns {boolean} - The checking result.
  */
 const checkArrayHaveValues = (array) => Array.isArray(array) && array.length > 0;
-
-/**
- * Create folder at specific path.
- *
- * @param {string} filePath - path to stored file.
- * @return {Promise<string>} promise contain file path.
- */
-const createFolder = (path) => {
-  return mkdir(path, { recursive: true });
-};
-
-/**
- * Write contents to file and save it to specific folder.
- *
- * @param {string} filePath - path to stored file.
- * @param {string} success - content of file.
- * @return {Promise<string>} - promise contain file path.
- */
-const saveFile = (filePath, content) => {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(
-      filePath,
-      content,
-      (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(path.resolve(filePath));
-        }
-      }
-    );
-  });
-};
 
 /**
  * Parse graphql select object to selected string.
@@ -174,30 +133,6 @@ const getGeneratorFunctionData = (generator) => {
 };
 
 /**
- * Convert file to base64 image file string.
- *
- * @param {File} file - The file object.
- * @return {string} The image base64 string.
- */
-const convertFileToBase64 = (file) => `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-
-/**
- * Get extension name of file.
- *
- * @param {File} file - The file object.
- * @return {string} The extension name.
- */
-const getExtName = (file) => path.extname(file.originalname);
-
-/**
- * Convert a multer file to new file.
- *
- * @param {Object} multerFile - The multerFile object.
- * @return {File} The file object.
- */
-const createFile = (file) => new File([file.buffer], file.originalname, { type: file.mimetype });
-
-/**
  * Return origin internal server url.
  *
  * @param {Express.Request} request - The express request.
@@ -236,41 +171,10 @@ async function promiseAll(promisesFn) {
   return arr;
 };
 
-/**
- * Delete file asynchronous.
- *
- * @async
- * @param {string} filePath - The file path.
- * @return {Promise<boolean>} - The promise result.
- */
-const deleteFile = (filePath) => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(filePath, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(true);
-      }
-    });
-  });
-};
-
-/**
- * Hashing password
- *
- * @async
- * @param {string} password - The password.
- * @return {Promise<string>} -The password decoded.
- */
-const passwordHashing = async (password) => {
-  const saltRound = await genSalt(10);
-  return await hash(password, saltRound);
-};
 
 module.exports = {
   deepFreeze,
   messageCreator,
-  generateOtp,
   graphqlQueryParser,
   getGraphqlFinalData,
   getGeneratorFunctionData,
@@ -286,4 +190,8 @@ module.exports = {
   convertDtoToZodObject,
   checkArrayHaveValues,
   passwordHashing,
+  signingResetPasswordToken,
+  verifyResetPasswordToken,
+  autoGeneratePassword,
+  generateOtp,
 };

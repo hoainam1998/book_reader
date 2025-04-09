@@ -1,7 +1,7 @@
-const { generateOtp } = require('#utils');
 const { sign } = require('jsonwebtoken');
 const { compare } = require('bcrypt');
 const Service = require('#services/prisma');
+const { generateOtp } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 class UserService extends Service {
@@ -107,7 +107,7 @@ class UserService extends Service {
             let apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
             if (!user.reset_password_token) {
               if (!user.mfa_enable) {
-                return apiKey = user.login_token;
+                apiKey = user.login_token;
               }
             }
             return { ...user, apiKey };

@@ -1,22 +1,6 @@
 const { sign } = require('jsonwebtoken');
 const { compare } = require('bcrypt');
-const { passwordHashing } = require('#utils');
-
-/**
- * Generate the new password.
- *
- * @return {string} - The new password.
- */
-const autoGeneratePassword = () => {
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyz!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let password = '';
-
-  for (let i = 0; i < 8; i++) {
-    const index = Math.round(Math.random() * chars.length);
-    password += chars.charAt(index);
-  }
-  return password;
-};
+const { passwordHashing, signingResetPasswordToken, autoGeneratePassword } = require('#utils');
 
 /**
  * Signing login token with payload is email and userId.
@@ -34,11 +18,7 @@ module.exports = (prisma) => {
       const userId = Date.now().toString();
       const password = await passwordHashing(firstLoginPassword);
       const token = signLoginToken(userId, args.data.email);
-      const resetPasswordToken = sign(
-        { email: args.data.email },
-        process.env.ADMIN_RESET_PASSWORD_SECRET_KEY,
-        { expiresIn: '1h' }
-      );
+      const resetPasswordToken = signingResetPasswordToken(args.data.email);
 
       args.data = {
         ...args.data,
