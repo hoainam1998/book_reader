@@ -36,5 +36,6 @@ module.exports = deepFreeze({
     OTP_HAS_BEEN_SENT: 'Otp code has sent to your email!',
     RESET_PASSWORD_FAIL: 'Reset password failed!',
     RESET_PASSWORD_SUCCESS: 'Reset password success!',
+    OLD_AND_NEW_PASSWORD_IS_SAME: 'Old password and new password must be difference!',
   },
 });

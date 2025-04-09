@@ -1,10 +1,15 @@
 const Router = require('../router');
 const multer = require('multer');
-const { verify } = require('jsonwebtoken');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { messageCreator, fetchHelper, getOriginInternalServerUrl, createFile } = require('#utils');
+const {
+  messageCreator,
+  fetchHelper,
+  getOriginInternalServerUrl,
+  createFile,
+  verifyResetPasswordToken
+} = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
 const authentication = require('#middlewares/auth/authentication');
@@ -221,9 +226,21 @@ class UserRouter extends Router {
       }
     }`;
 
+    if (req.body.password === req.body.oldPassword) {
+      return {
+        status: HTTP_CODE.UNAUTHORIZED,
+        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME)
+      };
+    }
+
     try {
-      const decodedUser = verify(req.body.resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
-      if (decodedUser.email !== req.body.email) {
+      const decodedUser = verifyResetPasswordToken(req.body.resetPasswordToken);
+      if (!decodedUser) {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(USER.USER_NOT_FOUND)
+        };
+      } else if (decodedUser.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
           json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH)
