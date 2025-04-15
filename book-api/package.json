@@ -8,7 +8,10 @@
     "test": "jest --watchAll",
     "test-coverage": "jest --watchAll --coverage",
     "test-silent": "jest --watchAll --silent",
-    "user-test": "jest --watchAll -- __test__/apis/user/reset-password.test.js"
+    "test.user.reset-password": "jest --watchAll -- __test__/apis/user/reset-password.test.js",
+    "test.user.reset-password.silent": "jest --watchAll --silent -- __test__/apis/user/reset-password.test.js",
+    "test.user.login": "jest --watchAll -- __test__/apis/user/login.test.js",
+    "test.user.login.silent": "jest --watchAll --silent -- __test__/apis/user/login.test.js"
   },
   "author": "hoai nam",
   "license": "ISC",
@@ -22,12 +25,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.1",
+    "express-session": "^1.18.1",
     "graphql": "^16.8.1",
     "graphql-http": "^1.22.0",
     "graphql-upload": "^16.0.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.11.0",
     "nodemailer": "^6.9.15",
     "prisma": "^6.1.0",
     "reflect-metadata": "^0.2.2"

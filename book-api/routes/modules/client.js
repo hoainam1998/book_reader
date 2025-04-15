@@ -1,7 +1,7 @@
 const Router = require('../router');
 const { sign, verify } = require('jsonwebtoken');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD } = require('#constants');
 const { messageCreator, fetchHelper, getOriginInternalServerUrl } = require('#utils');
 const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
@@ -75,7 +75,7 @@ class ClientRouter extends Router {
     };
 
     return fetchHelper(`${url}/generated-reset-password-token`,
-      'POST',
+      METHOD.POST,
       {
         'Content-Type': 'application/json'
       },

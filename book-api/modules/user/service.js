@@ -103,16 +103,10 @@ class UserService extends Service {
     }).then((user) => {
       return compare(password, user.password)
         .then((compareResult) => {
-          if (compareResult) {
-            let apiKey = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
-            if (!user.reset_password_token) {
-              if (!user.mfa_enable) {
-                apiKey = user.login_token;
-              }
-            }
-            return { ...user, apiKey };
+          if (!compareResult) {
+            throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
           }
-          throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+          return user;
         });
     });
   }

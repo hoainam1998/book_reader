@@ -9,7 +9,7 @@ const {
 } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD } = require('#constants');
 const {
   promiseAll,
   getExtName,
@@ -390,9 +390,9 @@ class BookRouter extends Router {
     const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
-      () => filterResponse(fetchHelper(`${url}/save-book-info`, 'POST', book)),
-      () => filterResponse(fetchHelper(`${url}/save-pdf`, 'POST', pdf)),
-      () => filterResponse(fetchHelper(`${url}/save-book-authors`, 'POST', {
+      () => filterResponse(fetchHelper(`${url}/save-book-info`, METHOD.POST, book)),
+      () => filterResponse(fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf)),
+      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
           'Content-Type': 'application/json'
         },
         JSON.stringify({ authors }))
@@ -434,9 +434,9 @@ class BookRouter extends Router {
     const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
-      () => filterResponse(fetchHelper(`${url}/update-book-info`, 'PUT', book)),
-      () => filterResponse(fetchHelper(`${url}/update-pdf`, 'PUT', pdf)),
-      () => filterResponse(fetchHelper(`${url}/save-book-authors`, 'POST', {
+      () => filterResponse(fetchHelper(`${url}/update-book-info`, METHOD.PUT, book)),
+      () => filterResponse(fetchHelper(`${url}/update-pdf`, METHOD.PUT, pdf)),
+      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
           'Content-Type': 'application/json'
         },
         JSON.stringify({ authors }))

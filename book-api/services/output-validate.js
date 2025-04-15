@@ -34,6 +34,10 @@ class Validate extends Singleton {
     * @return {boolean} - The compare result.
     */
     const recursiveCheck = (graphQlResult) => {
+      if (!graphQlResult) {
+        return false;
+      }
+
       if (graphQlResult.isValueEqual(value)) {
         return true;
       } else {

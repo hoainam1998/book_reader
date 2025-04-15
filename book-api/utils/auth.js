@@ -16,7 +16,30 @@ const signingResetPasswordToken = (email, expires = '1h') => {
   );
 };
 
+/**
+ * Verify reset password token.
+ *
+ * @param {string} resetPasswordToken - The reset password token.
+ * @return {boolean} - The verify result.
+ */
 const verifyResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
+
+/**
+ * Signing login token with payload is email and userId.
+ *
+ * @param {string} userId - The userId.
+ * @param {string} email - An email.
+ * @return {string} - The login token.
+ */
+const signLoginToken = (userId, email, power) => jwt.sign({ userId, email, power }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+/**
+ * Verify login token.
+ *
+ * @param {string} loginToken - The login token.
+ * @return {string} - The data decoded.
+ */
+const verifyLoginToken = (loginToken) => jwt.verify(loginToken, process.env.SECRET_KEY);
 
 /**
  * Hashing password
@@ -64,5 +87,7 @@ module.exports = {
   passwordHashing,
   autoGeneratePassword,
   generateOtp,
-  verifyResetPasswordToken
+  verifyResetPasswordToken,
+  signLoginToken,
+  verifyLoginToken,
 };

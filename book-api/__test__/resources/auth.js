@@ -9,6 +9,7 @@ const mockUser = {
   avatar: 'avatar',
   mfa_enable: true,
   password: 'namtran9',
+  power: 0,
 };
 
 const loginRequireToken = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);

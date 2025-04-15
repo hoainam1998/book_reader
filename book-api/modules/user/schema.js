@@ -157,7 +157,7 @@ const query = new GraphQLObjectType({
             type: new GraphQLNonNull(GraphQLString),
           },
           apiKey: {
-            type: new GraphQLNonNull(GraphQLString),
+            type: GraphQLString,
           },
           power: {
             type: new GraphQLNonNull(GraphQLInt),

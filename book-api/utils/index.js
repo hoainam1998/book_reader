@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const { plainToInstance } = require('class-transformer');
 const { saveFile, createFolder, deleteFile } = require('./handle-file');
 const { convertFileToBase64, getExtName, createFile } = require('./handle-file-buffer');
@@ -6,7 +7,9 @@ const {
   verifyResetPasswordToken,
   passwordHashing,
   autoGeneratePassword,
-  generateOtp
+  generateOtp,
+  signLoginToken,
+  verifyLoginToken,
 } = require('./auth');
 const MessageResponse = require('#dto/common/message-response');
 
@@ -194,4 +197,6 @@ module.exports = {
   verifyResetPasswordToken,
   autoGeneratePassword,
   generateOtp,
+  signLoginToken,
+  verifyLoginToken,
 };

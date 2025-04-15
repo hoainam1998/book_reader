@@ -1,7 +1,7 @@
 const Router = require('../router');
 const multer = require('multer');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL, METHOD } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -61,7 +61,8 @@ class UserRouter extends Router {
     this.put('/update-user', authentication, this._updateUser);
     this.post('/send-otp', loginRequire, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
-    this.post('/login', this._login);
+    this.post('/login-process', allowInternalCall, this._login);
+    this.post('/login', this._loginWithSession);
     this.post('/verify-otp', loginRequire, this._verifyOtp);
     this.post('/all', authentication, this._getAllUsers);
   }
@@ -159,7 +160,7 @@ class UserRouter extends Router {
   @serializer(MessageSerializerResponse)
   _updateUser(req, res, next, self) {
     const variables = {
-      userId: req.body.userId ?? req.caller.userId,
+      userId: req.body.userId ?? req.session.user.userId,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
@@ -247,7 +248,7 @@ class UserRouter extends Router {
         };
       }
     } catch (err) {
-      if (err.message === 'jwt expired') {
+      if (err.name === 'TokenExpiredError') {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
           json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE)
@@ -319,7 +320,7 @@ class UserRouter extends Router {
     const url = getOriginInternalServerUrl(req);
 
     return fetchHelper(`${url}/update-otp`,
-      'POST',
+      METHOD.POST,
       {
         'Content-Type': 'application/json'
       },
@@ -353,7 +354,7 @@ class UserRouter extends Router {
     formData.append('avatar', createFile(avatar), avatar.originalname);
 
     return fetchHelper(`${url}/add`,
-      'POST',
+      METHOD.POST,
       formData
     )
     .then(async (response) => {
@@ -367,6 +368,43 @@ class UserRouter extends Router {
       const link = RESET_PASSWORD_URL.format(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
         .then(() => messageCreator(USER.USER_ADDED));
+    });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  _loginWithSession(req, res, next, schema) {
+    const url = getOriginInternalServerUrl(req);
+
+    if (req.session.user) {
+      if (req.body.email === req.session.user.email) {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(USER.ALREADY_LOGIN),
+        };
+      }
+    }
+
+    return fetchHelper(`${url}/login-process`,
+      METHOD.POST,
+      {
+        'Content-Type': 'application/json'
+      },
+      JSON.stringify(req.body),
+    ).then(async (response) => {
+      const json = response.json();
+      if (response.status === HTTP_CODE.OK) {
+        return json;
+      }
+      return Promise.reject({ ...await json, status: response.status });
+    })
+    .then((json) => {
+      req.session.user = {
+        email: json.email,
+        mafEnable: json.mfaEnable,
+        apiKey: json.apiKey,
+        power: json.power
+      };
+      return json;
     });
   }
 }

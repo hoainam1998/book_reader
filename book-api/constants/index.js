@@ -16,6 +16,12 @@ module.exports = deepFreeze({
     METHOD_NOT_ALLOWED: 405,
     SERVER_ERROR: 500
   },
+  METHOD: {
+    POST: 'POST',
+    GET: 'GET',
+    PUT: 'PUT',
+    DELETE: 'DELETE'
+  },
   PATH: {
     CATEGORY: '/category',
     BOOK: '/book',

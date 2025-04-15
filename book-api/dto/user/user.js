@@ -5,9 +5,6 @@ class UserDTO extends OutputValidate {
   @Type(() => String)
   user_id;
 
-  @Type(() => String)
-  apiKey;
-
   @Exclude()
   @Type(() => String)
   first_name;
@@ -21,6 +18,9 @@ class UserDTO extends OutputValidate {
 
   @Type(() => Boolean)
   mfa_enable;
+
+  @Type(() => String)
+  login_token;
 
   @Type(() => String)
   email;
@@ -61,6 +61,17 @@ class UserDTO extends OutputValidate {
   @Type(() => Boolean)
   get passwordMustChange() {
     return !!this.reset_password_token;
+  }
+
+  @Type(() => String)
+  get apiKey() {
+    let apiKey = null;
+    if (!this.resetPasswordToken) {
+      if (!this.mfaEnable) {
+        apiKey = this.login_token;
+      }
+    }
+    return apiKey;
   }
 }
 
