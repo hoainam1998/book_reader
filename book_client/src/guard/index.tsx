@@ -1,4 +1,4 @@
-import { JSX, useCallback } from 'react';
+import { JSX } from 'react';
 import path from 'router/paths';
 import { Navigate, useMatch } from 'react-router-dom';
 import auth from 'store/auth';
@@ -9,33 +9,40 @@ type GuardPropsType = {
 };
 
 export const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
-  const checkCurrentRoute = useCallback((path: string): boolean => !!useMatch(path), []);
+  const isLogin = useMatch(path.LOGIN);
+  const isHome = useMatch(`${path.HOME}/*`);
+  const isOtp = useMatch(path.OTP);
+  const isResetPassword = useMatch(path.RESET_PASSWORD);
 
   if (auth.IsLogged) {
     if (auth.MfaEnable) {
       if (auth.MfaValidated) {
-        if (!checkCurrentRoute(`${path.HOME}/*`)) {
+        if (!isHome) {
           return <Navigate to={path.HOME} />;
         }
         return children;
       } else {
-        if (!checkCurrentRoute(path.OTP)) {
+        if (!isOtp) {
           return <Navigate to={path.OTP} />;
         }
         return children;
       }
     }
+
+    if (!isHome) {
+      return <Navigate to={path.HOME} />;
+    }
     return children;
   }
 
   if (auth.PasswordMustChange && auth.ResetPasswordToken) {
-    if (!checkCurrentRoute(path.RESET_PASSWORD)) {
+    if (!isResetPassword) {
       return <Navigate to={generateResetPasswordLink(auth.ResetPasswordToken)} />;
     }
     return children;
   }
 
-  if (!checkCurrentRoute(path.LOGIN)) {
+  if (!isLogin) {
     return <Navigate to={path.LOGIN} />;
   }
   return children;
