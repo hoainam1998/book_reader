@@ -1,6 +1,5 @@
-const { verify } = require('jsonwebtoken');
 const { HTTP_CODE } = require('#constants');
-const { COMMON } = require('#messages');
+const { COMMON, USER } = require('#messages');
 const { messageCreator } = require('#utils');
 const Logger = require('#services/logger');
 const logger = new Logger('Login require');
@@ -15,28 +14,16 @@ const logger = new Logger('Login require');
  */
 const loginRequire = (req, res, next) => {
   try {
-    const authorization = req.get('authorization');
-    if (authorization) {
-      // verify token
-      const login = verify(authorization, process.env.SECRET_KEY_LOGIN);
-      if (login && login.isLogin) {
-        // if user already login success, then switch to next middleware.
-        return next();
-      } else {
-        // else return unauthorized message
-        return res.status(HTTP_CODE.UNAUTHORIZED)
-          .json(messageCreator('Your are not permission!'));
-      }
-    }
-    // if token have not, also return unauthorized message.
-    logger.warn('unauthorized error');
-    return res.status(HTTP_CODE.UNAUTHORIZED)
-      .json(messageCreator('Your have not login yet!'));
-  } catch (error) {
-    if (error.message === 'invalid signature') {
+    if (req.session.user) {
+      // if user already login success, then switch to next middleware.
+      return next();
+    } else {
+      // else return unauthorized message
+      logger.warn('unauthorized error');
       return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator('Invalid authentication token!'));
+        .json(messageCreator(USER.USER_UNAUTHORIZED));
     }
+  } catch (error) {
     logger.error(error.message);
     return res.status(HTTP_CODE.SERVER_ERROR)
       .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));

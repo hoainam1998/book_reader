@@ -1,15 +1,10 @@
-const { sign } = require('jsonwebtoken');
 const { compare } = require('bcrypt');
-const { passwordHashing, signingResetPasswordToken, autoGeneratePassword } = require('#utils');
-
-/**
- * Signing login token with payload is email and userId.
- *
- * @param {string} userId - The userId.
- * @param {string} email - An email.
- * @return {string} - The login token.
- */
-const signLoginToken = (userId, email) => sign({ userId, email }, process.env.SECRET_KEY);
+const {
+  passwordHashing,
+  signingResetPasswordToken,
+  autoGeneratePassword,
+  signLoginToken
+} = require('#utils');
 
 module.exports = (prisma) => {
   return {
@@ -17,7 +12,7 @@ module.exports = (prisma) => {
       const firstLoginPassword = autoGeneratePassword();
       const userId = Date.now().toString();
       const password = await passwordHashing(firstLoginPassword);
-      const token = signLoginToken(userId, args.data.email);
+      const token = signLoginToken(userId, args.data.email, args.data.power);
       const resetPasswordToken = signingResetPasswordToken(args.data.email);
 
       args.data = {

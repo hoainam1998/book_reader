@@ -3,6 +3,7 @@ require('reflect-metadata');
 require('./global/index');
 config();
 const express = require('express');
+const session = require('express-session');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { GraphQLObjectType, GraphQLSchema } = require('graphql');
@@ -12,6 +13,7 @@ const startUser = require('./modules/user');
 const startAuthor = require('./modules/author');
 const startClient = require('./modules/client');
 const FactoryRouter = require('./routes/factory');
+const { METHOD } = require('#constants');
 const validateUrl = require('#middlewares/validate-url');
 const unknownError = require('#middlewares/unknown-error');
 const PrismaClient = require('#services/prisma-client');
@@ -19,13 +21,21 @@ const Logger = require('#services/logger');
 
 const corsOptions = {
   origin: process.env.ORIGIN_CORS,
-  methods: ['GET', 'PUT', 'POST', 'DELETE']
+  methods: [METHOD.GET, METHOD.PUT, METHOD.POST, METHOD.DELETE],
+  credentials: true,
+  exposedHeaders: ['set-cookie'],
 };
 
+const PORT = process.env.NODE_ENV === 'test' ? process.env.TEST_PORT : process.env.PORT;
 const layers = [];
 
 const app = express();
-const PORT = process.env.PORT;
+app.use(session({
+  resave: false,
+  saveUninitialized: false,
+  secret: process.env.SESSION_ID_TOKEN,
+  cookie: { maxAge: +process.env.SESSION_EXPIRES }
+}));
 app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(bodyParser.json({ limit: '5mb' }));

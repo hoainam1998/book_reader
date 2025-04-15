@@ -1,26 +1,50 @@
-const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const { JsonWebTokenError, TokenExpiredError } = require('#test/mocks/json-web-token-error');
 const prismaClientMock = require('#test/mocks/prisma-client');
-const app = require('#app');
+const TestServer = require('#test/resources/test-server');
 const prismaClient = require('#services/prisma-client');
-const { HTTP_CODE, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { autoGeneratePassword, passwordHashing, signingResetPasswordToken } = require('#utils');
 const { COMMON, USER } = require('#messages');
-const { urlNotFound, methodNotAllowed } = require('#test/apis/common/common');
 const { resetPasswordToken, mockUser } = require('#test/resources/auth');
+const commonTest = require('#test/apis/common/index');
 const resetPasswordUrl = `${PATH.USER}/reset-password`;
-const api = request(app);
+let api;
+
+commonTest('reset password common test', [
+  {
+    name: 'url test',
+    describe: 'url is invalid',
+    url: `${PATH.USER}/unknown`,
+    method: METHOD.POST.toLowerCase(),
+  },
+  {
+    name: 'method test',
+    describe: 'method not allowed',
+    url: resetPasswordUrl,
+    method: METHOD.GET.toLowerCase(),
+  },
+  {
+    name: 'cors test',
+    describe: 'reset password api cors',
+    url: resetPasswordUrl,
+    method: METHOD.POST.toLowerCase(),
+    origin: process.env.ORIGIN_CORS
+  }
+], 'reset password');
 
 describe('reset password api test', () => {
+  beforeAll((done) => {
+    api = TestServer.startTestServer(done, 'reset password');
+  });
+
+  afterAll((done) => TestServer.closeTestServer(done, 'reset password'));
 
   afterEach(() => {
     prismaClientMock.resetAllMocks();
     jest.restoreAllMocks();
   });
-
-  urlNotFound('url is invalid', api.post(`${PATH.USER}/unknown`));
-  methodNotAllowed('method not allowed', api.get(resetPasswordUrl));
 
   test('reset password success', async () => {
     const oldPassword = autoGeneratePassword();
@@ -148,7 +172,7 @@ describe('reset password api test', () => {
   test('failed with token has expired', async () => {
     const oldPassword = autoGeneratePassword();
     const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() => {
-      throw new Error('jwt expired');
+      throw new TokenExpiredError('jwt expired');
     });
 
     const response = await api.post(resetPasswordUrl)
@@ -171,7 +195,7 @@ describe('reset password api test', () => {
   test('failed with invalid token', async () => {
     const oldPassword = autoGeneratePassword();
     const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() =>  {
-      throw new Error('jwt malformed');
+      throw new JsonWebTokenError('jwt malformed');
     });
 
     const response = await api.post(resetPasswordUrl)
