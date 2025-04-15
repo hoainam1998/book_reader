@@ -11,10 +11,10 @@ class TestServer {
   _api;
   _server;
 
-    /**
-   * Test server instance
-   * @static
-    */
+  /**
+  * Test server instance
+  * @static
+  */
   static testServerInstance = new TestServer();
 
   /**
