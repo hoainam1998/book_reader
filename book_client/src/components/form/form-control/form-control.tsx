@@ -59,10 +59,11 @@ function FormControl({
     []
   );
 
-  const inputColumn: ColumnSize = useMemo(() => {
+  const inputColumn: ColumnSize = useMemo<ColumnSize>(() => {
     if (!label && inputColumnSize) {
-      Object.keys(inputColumnSize)
-        .forEach((key: string) => {inputColumnSize[key as keyof ColumnSize] = 12; });
+      Object.keys(inputColumnSize).forEach((key: string) => {
+        inputColumnSize[key as keyof ColumnSize] = 12;
+      });
     }
     return inputColumnSize || { lg: 8 };
   }, [inputColumnSize, label]);

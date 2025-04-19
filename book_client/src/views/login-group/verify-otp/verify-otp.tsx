@@ -1,4 +1,4 @@
-import { JSX, useCallback, useSyncExternalStore, useRef } from 'react';
+import { JSX, useCallback, useSyncExternalStore, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
 import Input, { InputRefType } from 'components/form/form-control/input/input';
@@ -13,6 +13,7 @@ import './style.scss';
 const { subscribe, getSnapshot } = auth;
 
 function VerifyOtp(): JSX.Element {
+  const [errors, setErrors] = useState<string[]>([]);
   const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
   if (!userLogin) {
     return <></>;
@@ -21,7 +22,16 @@ function VerifyOtp(): JSX.Element {
   const inputRef = useRef<InputRefType>(null);
   const navigate = useNavigate();
 
-  const _sendOtp = useCallback(() => {
+  const validateOtp = useCallback((event: any): void => {
+    const otp: string = event.target.value;
+    if (!/(\d{6})/.test(otp)) {
+      setErrors(['Otp must be number and contain 6 digit!']);
+    } else {
+      setErrors([]);
+    }
+  }, [errors]);
+
+  const _sendOtp = useCallback((): void => {
     sendOtp(email)
       .then(res => showToast('OTP', res.data.message))
       .catch(error => showToast('Send OTP error', error.response.data.message));
@@ -54,11 +64,23 @@ function VerifyOtp(): JSX.Element {
   return (
     <AdminLoginWrapper>
       <div className="verify-otp">
-        <Input name="otp" type="number" inputClass="otp-box" className="otp-un-grid-fieldset-wrapper" ref={inputRef} />
-        <div className="btn-group">
-          <Button variant="outline" onClick={verify}>Verify</Button>
-          <Button variant="success" onClick={reSend}>Re-send</Button>
-        </div>
+        <Input
+          name="otp"
+          type="number"
+          errors={errors}
+          inputClass="otp-box"
+          className="otp-un-grid-fieldset-wrapper"
+          inputColumnSize={{
+            lg: 12,
+            sm: 12,
+            md: 12,
+          }}
+          onInput={validateOtp}
+          ref={inputRef} />
+          <div className="btn-group">
+            <Button variant="outline" onClick={verify}>Verify</Button>
+            <Button variant="success" onClick={reSend}>Re-send</Button>
+          </div>
       </div>
     </AdminLoginWrapper>
   );
