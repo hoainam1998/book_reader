@@ -30,16 +30,27 @@ function Form({
     onSubmit(new FormData((event.target as HTMLFormElement).form));
   }, [onSubmit]);
 
+  const enterKeyEvent = useCallback((event: any): void => {
+    if (event.code === 'Enter') {
+      onSubmit(new FormData((event.target as HTMLFormElement).form));
+    }
+  }, [onSubmit]);
+
   return (
-    <form id={id} className={clsx('form', className)} data-testid="form" encType="multipart/form-data">
-      {children}
-      <Button
-        className={clsx('btn-save', submitBtnClass)}
-        variant="submit"
-        onClick={handleSubmit}
-        disabled={disableSubmitButton}>
-          {submitLabel}
-      </Button>
+    <form
+      id={id}
+      className={clsx('form', className)}
+      data-testid="form"
+      encType="multipart/form-data"
+      onKeyDown={enterKeyEvent}>
+        {children}
+        <Button
+          className={clsx('btn-save', submitBtnClass)}
+          variant="submit"
+          onClick={handleSubmit}
+          disabled={disableSubmitButton}>
+            {submitLabel}
+        </Button>
     </form>
   );
 }
