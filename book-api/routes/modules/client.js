@@ -127,7 +127,6 @@ class ClientRouter extends Router {
           json: messageCreator('Token is invalid!')
         };
       }
-
       throw err;
     }
 

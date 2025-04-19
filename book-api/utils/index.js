@@ -174,8 +174,17 @@ async function promiseAll(promisesFn) {
   return arr;
 };
 
+/**
+ * Prevent modify util functions when development phase.
+ *
+ * @param {Object} utilsObject - The utils object.
+ * @return {Object} - The utils object was freezed.
+ */
+const freezing = (utilsObject) => {
+  return process.env.NODE_ENV === 'test' ? utilsObject : Object.freeze(utilsObject);
+};
 
-module.exports = {
+module.exports = freezing({
   deepFreeze,
   messageCreator,
   graphqlQueryParser,
@@ -199,4 +208,4 @@ module.exports = {
   generateOtp,
   signLoginToken,
   verifyLoginToken,
-};
+});

@@ -1,5 +1,6 @@
 const request = require('supertest');
-const { createServer } = require('http');
+const http = require('http');
+const { createServer } = http;
 const app = require('#app');
 const Logger = require('#services/logger');
 
@@ -28,6 +29,44 @@ class TestServer {
       // wrap new server by supertest.
       this._api = request(this._server);
     }
+  }
+
+  /**
+  * Private method helping to add middleware.
+  *
+  * @private
+  * @param {Function} middleware - The middleware.
+  */
+  _addMiddleware(middleware) {
+    this._server.on('request', middleware);
+  }
+
+  /**
+  * Private method helping to remove middleware.
+  *
+  * @private
+  */
+  _removeTestMiddleware() {
+    this._server.removeAllListeners();
+  }
+
+  /**
+  * Adding middleware to support test.
+  *
+  * @static
+  * @param {Function} middleware - The middleware.
+  */
+  static addMiddleware(middleware) {
+    TestServer.testServerInstance._addMiddleware(middleware);
+  }
+
+  /**
+  * Remove middleware added to support test.
+  *
+  * @static
+  */
+  static removeTestMiddleware() {
+    TestServer.testServerInstance._removeTestMiddleware();
   }
 
   /**
