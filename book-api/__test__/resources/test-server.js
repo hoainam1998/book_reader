@@ -1,6 +1,5 @@
 const request = require('supertest');
-const http = require('http');
-const { createServer } = http;
+const { createServer } = require('http');
 const app = require('#app');
 const Logger = require('#services/logger');
 
