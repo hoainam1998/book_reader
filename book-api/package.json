@@ -11,7 +11,9 @@
     "test.user.reset-password": "jest --watchAll -- __test__/apis/user/reset-password.test.js",
     "test.user.reset-password.silent": "jest --watchAll --silent -- __test__/apis/user/reset-password.test.js",
     "test.user.login": "jest --watchAll -- __test__/apis/user/login.test.js",
-    "test.user.login.silent": "jest --watchAll --silent -- __test__/apis/user/login.test.js"
+    "test.user.login.silent": "jest --watchAll --silent -- __test__/apis/user/login.test.js",
+    "test.user.logout": "jest --watchAll -- __test__/apis/user/logout.test.js",
+    "test.user.logout.silent": "jest --watchAll --silent -- __test__/apis/user/logout.test.js"
   },
   "author": "hoai nam",
   "license": "ISC",

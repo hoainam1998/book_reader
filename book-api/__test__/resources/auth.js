@@ -12,13 +12,16 @@ const mockUser = {
   power: 0,
 };
 
-const loginRequireToken = sign({ isLogin: true }, process.env.SECRET_KEY_LOGIN);
-const authentication = sign({ userId: mockUser.user_id, email: mockUser.email }, process.env.SECRET_KEY);
+const authenticationToken = sign({
+  userId: mockUser.user_id,
+  email: mockUser.email,
+  power: mockUser.power,
+},
+process.env.SECRET_KEY);
 const resetPasswordToken = signingResetPasswordToken(mockUser.email);
 
 module.exports = {
-  loginRequireToken,
-  authentication,
+  authenticationToken,
   mockUser,
   resetPasswordToken,
 };

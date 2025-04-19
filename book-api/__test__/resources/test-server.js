@@ -31,6 +31,44 @@ class TestServer {
   }
 
   /**
+  * Private method helping to add middleware.
+  *
+  * @private
+  * @param {Function} middleware - The middleware.
+  */
+  _addMiddleware(middleware) {
+    this._server.on('request', middleware);
+  }
+
+  /**
+  * Private method helping to remove middleware.
+  *
+  * @private
+  */
+  _removeTestMiddleware() {
+    this._server.removeAllListeners();
+  }
+
+  /**
+  * Adding middleware to support test.
+  *
+  * @static
+  * @param {Function} middleware - The middleware.
+  */
+  static addMiddleware(middleware) {
+    TestServer.testServerInstance._addMiddleware(middleware);
+  }
+
+  /**
+  * Remove middleware added to support test.
+  *
+  * @static
+  */
+  static removeTestMiddleware() {
+    TestServer.testServerInstance._removeTestMiddleware();
+  }
+
+  /**
   * Start a test server.
   *
   * @static

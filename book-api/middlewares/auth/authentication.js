@@ -1,6 +1,7 @@
 const { HTTP_CODE } = require('#constants');
 const { COMMON, USER } = require('#messages');
-const { messageCreator, verifyLoginToken } = require('#utils');
+const utils = require('#utils');
+const { messageCreator } = utils;
 const Logger = require('#services/logger');
 const logger = new Logger('Authentication');
 
@@ -18,7 +19,7 @@ const authentication = (req, res, next) => {
     if (authorization && req.session.user) {
       // verify token
       if (req.session.user.apiKey === authorization) {
-        verifyLoginToken(authorization);
+        utils.verifyLoginToken(authorization);
         // if user already passed mfa, then switch to next middleware.
         return next();
       } else {

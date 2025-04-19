@@ -63,6 +63,7 @@ class UserRouter extends Router {
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.post('/login-process', allowInternalCall, this._login);
     this.post('/login', this._loginWithSession);
+    this.get('/logout', authentication, this._logout);
     this.post('/verify-otp', loginRequire, this._verifyOtp);
     this.post('/all', authentication, this._getAllUsers);
   }
@@ -405,6 +406,14 @@ class UserRouter extends Router {
         power: json.power
       };
       return json;
+    });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _logout(req, res, next, schema) {
+    return new Promise((resolve) => {
+      req.session.destroy(() => resolve(messageCreator(USER.LOGOUT_SUCCESS)));
     });
   }
 }

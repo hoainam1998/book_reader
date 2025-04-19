@@ -38,5 +38,6 @@ module.exports = deepFreeze({
     RESET_PASSWORD_SUCCESS: 'Reset password success!',
     OLD_AND_NEW_PASSWORD_IS_SAME: 'Old password and new password must be difference!',
     ALREADY_LOGIN: 'You already login!',
+    LOGOUT_SUCCESS: 'Logout success!',
   },
 });
