@@ -11,7 +11,8 @@ import {
   Ref,
   FormEvent,
   HTMLProps,
-  useCallback
+  useCallback,
+  KeyboardEvent,
 } from 'react';
 import FormControl from '../form-control';
 import type { FormControlProps } from '../form-control';
@@ -36,6 +37,7 @@ type InputPropsType = {
   onInput?: <T>(event: FormEvent<T>) => void;
   onFocus?: () => void;
   onBlur?: (value: number | string) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 } & Omit<FormControlProps, 'children'>;
 
 function Input({
@@ -59,7 +61,8 @@ function Input({
   onChange = () => {},
   onInput = () => {},
   onFocus = () => {},
-  onBlur = () => {}
+  onBlur = () => {},
+  onKeyDown = () => {},
 }: InputPropsType, ref: Ref<InputRefType>): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputType, setInputType] = useState<string>(type);
@@ -137,16 +140,26 @@ function Input({
       labelStyle={labelStyle}
       errors={errors}>
         <div className={clsx('input-wrapper', inputClass)}>
-          <input id={name} name={name} className={clsx('input custom-input', { 'error-input': error })}
-            type={inputType} {...specificPropInput} multiple={multiple} disabled={disabled}
-            min={min} ref={inputRef} data-testid={`input-${name}`}
-            onChange={onChangeEvent} onInput={onInput} onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)} />
-          {
-            type === 'password' &&
-              <button onClick={toggleChangeInputType} className="eye-button">
-                <img src={require('images/icons/eye.svg')} alt="eye-icon" />
-              </button>
-          }
+          <input
+            id={name}
+            name={name}
+            className={clsx('input custom-input', { 'error-input': error })}
+            type={inputType}
+            {...specificPropInput}
+            multiple={multiple}
+            disabled={disabled}
+            min={min}
+            ref={inputRef}
+            data-testid={`input-${name}`}
+            onChange={onChangeEvent} onInput={onInput}
+            onFocus={onFocus} onBlur={(e) => onBlur(e.target.value)}
+            onKeyDown={onKeyDown}/>
+            {
+              type === 'password' &&
+                <button onClick={toggleChangeInputType} className="eye-button">
+                  <img src={require('images/icons/eye.svg')} alt="eye-icon" />
+                </button>
+            }
           { limitCharacter && <p className="limit">{ limitCharacter }</p> }
         </div>
     </FormControl>

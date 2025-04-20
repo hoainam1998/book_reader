@@ -53,6 +53,12 @@ function VerifyOtp(): JSX.Element {
     _sendOtp();
   }, []);
 
+  const enterKeyEvent = useCallback((event: any): void => {
+    if (event.code === 'Enter') {
+      verify();
+    }
+  }, [verify]);
+
   useComponentDidMount((haveFetched) => {
     return () => {
       if (!haveFetched()) {
@@ -76,6 +82,7 @@ function VerifyOtp(): JSX.Element {
             md: 12,
           }}
           onInput={validateOtp}
+          onKeyDown={enterKeyEvent}
           ref={inputRef} />
           <div className="btn-group">
             <Button variant="outline" onClick={verify}>Verify</Button>
