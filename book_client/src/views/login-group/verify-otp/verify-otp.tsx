@@ -24,7 +24,7 @@ function VerifyOtp(): JSX.Element {
 
   const validateOtp = useCallback((event: any): void => {
     const otp: string = event.target.value;
-    if (!/(\d{6})/.test(otp)) {
+    if (!/^(\d{6})$/.test(otp)) {
       setErrors(['Otp must be number and contain 6 digit!']);
     } else {
       setErrors([]);
@@ -38,15 +38,17 @@ function VerifyOtp(): JSX.Element {
   }, []);
 
   const verify = useCallback((): void => {
-    const otp: string | undefined = inputRef.current?.input?.value;
-    verifyOtp(email, otp as string)
-      .then((res) => {
-        auth.saveApiKey(res.data.apiKey);
-        auth.MfaValidated = true;
-        navigate(path.HOME);
-      })
-      .catch((error) => showToast('OTP', error.response.data.message));
-  }, []);
+    if (!errors.length) {
+      const otp: string | undefined = inputRef.current?.input?.value;
+      verifyOtp(email, otp as string)
+        .then((res) => {
+          auth.saveApiKey(res.data.apiKey);
+          auth.MfaValidated = true;
+          navigate(path.HOME);
+        })
+        .catch((error) => showToast('OTP', error.response.data.message));
+    }
+  }, [errors]);
 
   const reSend = useCallback((): void => {
     inputRef.current!.input!.value = '';
