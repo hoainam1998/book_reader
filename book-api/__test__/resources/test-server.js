@@ -64,8 +64,9 @@ class TestServer {
   *
   * @static
   */
-  static removeTestMiddleware() {
+  static removeTestMiddleware(done) {
     TestServer.testServerInstance._removeTestMiddleware();
+    done();
   }
 
   /**
@@ -78,7 +79,7 @@ class TestServer {
   */
   static startTestServer(done, serverName) {
     TestServer.testServerInstance._server.listen(done);
-    Logger.log('Start test server!', `Start test server for ${serverName}`);
+    Logger.log('Start test server!', `Start test server for ${serverName}!`);
     return TestServer.testServerInstance._api;
   }
 
@@ -91,7 +92,7 @@ class TestServer {
   */
   static closeTestServer(done, serverName) {
     TestServer.testServerInstance._server.close(() => {
-      Logger.log('Close test server!', `Test server closed for ${serverName}`);
+      Logger.log('Close test server!', `${serverName} test server was closed!`);
       done();
     });
   }

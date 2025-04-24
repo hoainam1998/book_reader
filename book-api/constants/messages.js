@@ -39,5 +39,7 @@ module.exports = deepFreeze({
     OLD_AND_NEW_PASSWORD_IS_SAME: 'Old password and new password must be difference!',
     ALREADY_LOGIN: 'You already login!',
     LOGOUT_SUCCESS: 'Logout success!',
+    MFA_UNENABLE: 'Mfa unenable for user!',
+    USER_FINISH_LOGIN: 'User has already completely logged in!',
   },
 });

@@ -140,12 +140,14 @@ class UserService extends Service {
     const otpCode = generateOtp();
     return this.PrismaInstance.user.update({
       where: {
-        email
+        email,
+        mfa_enable: true,
+        mfa_enable: true,
       },
       data: {
         otp_code: otpCode
       },
-    }).then(() => otpCode);
+    }).then((user) => user.otp_code);
   }
 
   verifyOtpCode(email, otp) {

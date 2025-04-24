@@ -265,6 +265,20 @@ class UserRouter extends Router {
     return self.execute(query, req.body);
   }
 
+  @validation(AllUser, { error_message: USER.LOAD_ALL_USER_FAIL })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AllUsersResponse)
+  _getAllUsers(req, res, next, self) {
+    const query = `query GetAllUsers {
+      user {
+        all ${
+          req.body.query
+        }
+      }
+    }`;
+    return self.execute(query, undefined, req.body.query);
+  }
+
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpVerifyResponse)
@@ -320,6 +334,18 @@ class UserRouter extends Router {
   _sendOtpCode(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
 
+    if (!req.session.user.mfaEnable) {
+      return {
+        status: HTTP_CODE.UNAUTHORIZED,
+        json: messageCreator(USER.MFA_UNENABLE),
+      };
+    } else if (req.session.user.apiKey) {
+      return {
+        status: HTTP_CODE.UNAUTHORIZED,
+        json: messageCreator(USER.USER_FINISH_LOGIN),
+      };
+    }
+
     return fetchHelper(`${url}/update-otp`,
       METHOD.POST,
       {
@@ -328,10 +354,11 @@ class UserRouter extends Router {
       JSON.stringify(req.body)
     )
     .then(async (response) => {
-      if (![HTTP_CODE.OK, HTTP_CODE.CREATED].includes(response.status)) {
-        return Promise.reject(await response.json());
+      const json = response.json();
+      if (response.status === HTTP_CODE.OK) {
+        return json;
       }
-      return response.json();
+      return Promise.reject({ ...await json, status: response.status });
     })
     .then((json) => {
       const { otp, message } = json;
@@ -401,7 +428,7 @@ class UserRouter extends Router {
     .then((json) => {
       req.session.user = {
         email: json.email,
-        mafEnable: json.mfaEnable,
+        mfaEnable: json.mfaEnable,
         apiKey: json.apiKey,
         power: json.power
       };

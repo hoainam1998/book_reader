@@ -1,5 +1,4 @@
-const { sign } = require('jsonwebtoken');
-const { signingResetPasswordToken } = require('#utils');
+const { signingResetPasswordToken, generateOtp, signLoginToken } = require('#utils');
 
 const mockUser = {
   user_id: Date.now().toString(),
@@ -9,19 +8,17 @@ const mockUser = {
   avatar: 'avatar',
   mfa_enable: true,
   password: 'namtran9',
+  otp_code: generateOtp(),
   power: 0,
 };
 
-const authenticationToken = sign({
-  userId: mockUser.user_id,
-  email: mockUser.email,
-  power: mockUser.power,
-},
-process.env.SECRET_KEY);
+const authenticationToken = signLoginToken(mockUser.user_id, mockUser.email, mockUser.power);
 const resetPasswordToken = signingResetPasswordToken(mockUser.email);
+const otpCode = generateOtp();
 
 module.exports = {
   authenticationToken,
   mockUser,
   resetPasswordToken,
+  otpCode,
 };
