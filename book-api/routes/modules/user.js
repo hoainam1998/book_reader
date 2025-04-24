@@ -315,20 +315,6 @@ class UserRouter extends Router {
     return self.execute(query, { email: req.body.email, });
   }
 
-  @validation(AllUser, { error_message: USER.LOAD_ALL_USER_FAIL })
-  @validateResultExecute(HTTP_CODE.OK)
-  @serializer(AllUsersResponse)
-  _getAllUsers(req, res, next, self) {
-    const query = `query GetAllUsers {
-      user {
-        all ${
-          req.body.query
-        }
-      }
-    }`;
-    return self.execute(query, undefined, req.body.query);
-  }
-
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _sendOtpCode(req, res, next, self) {
