@@ -1,8 +1,5 @@
 const { HTTP_CODE } = require('#constants');
 const { COMMON } = require('#messages');
-const TestServer = require('#test/resources/test-server');
-
-let api;
 
 /**
  * Determine test case skip or not.
@@ -34,14 +31,6 @@ const isTestSkip = (testInfo) => {
 module.exports = (describeTitle, testParameter, serverName) => {
   return describe(describeTitle, () => {
 
-    beforeAll((done) => {
-      api = TestServer.startTestServer(done, serverName);
-    });
-
-    afterAll((done) => {
-      TestServer.closeTestServer(done, serverName);
-    });
-
     let urlInvalidRequest;
     let methodAllowedRequest;
     let corsOriginRequest;
@@ -62,7 +51,7 @@ module.exports = (describeTitle, testParameter, serverName) => {
 
     if (!isTestSkip(urlInvalidRequest)) {
       test(urlInvalidRequest.describe, (done) => {
-        api[urlInvalidRequest.method](urlInvalidRequest.url)
+        globalThis.api[urlInvalidRequest.method](urlInvalidRequest.url)
           .expect(HTTP_CODE.NOT_FOUND)
           .expect('Content-Type', /application\/json/)
           .then((response) => {
@@ -74,7 +63,7 @@ module.exports = (describeTitle, testParameter, serverName) => {
 
     if (!isTestSkip(methodAllowedRequest)) {
       test(methodAllowedRequest.describe, (done) => {
-        api[methodAllowedRequest.method](methodAllowedRequest.url)
+        globalThis.api[methodAllowedRequest.method](methodAllowedRequest.url)
           .expect(HTTP_CODE.METHOD_NOT_ALLOWED)
           .expect('Content-Type', /application\/json/)
           .then((response) => {
@@ -86,7 +75,7 @@ module.exports = (describeTitle, testParameter, serverName) => {
 
     if (!isTestSkip(corsOriginRequest)) {
       test(corsOriginRequest.describe, (done) => {
-        api[corsOriginRequest.method](corsOriginRequest.url)
+        globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
           .then((response) => {
             const originUrl = `${response.request.protocol}//${response.request.host}`;
             expect(response.header['access-control-allow-origin']).toBe(corsOriginRequest.origin || originUrl);

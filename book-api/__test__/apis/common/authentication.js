@@ -2,36 +2,18 @@ const { HTTP_CODE } = require('#constants');
 const { JsonWebTokenError, TokenExpiredError } = require('#test/mocks/json-web-token-error');
 const { COMMON, USER } = require('#messages');
 const utils = require('#utils');
-const { signLoginToken } = utils;
 const { authenticationToken, mockUser } = require('#test/resources/auth');
 const authentication = require('#middlewares/auth/authentication');
 
-let req = {
-  get: function(field) {
-    return this[field];
-  },
-  authorization: authenticationToken,
-};
-const res = {
-  status: jest.fn().mockReturnThis(),
-  json: jest.fn(),
-};
-const next = jest.fn();
-
 module.exports = describe('authentication test', () => {
-  afterEach(() => {
+  afterEach((done) => {
     jest.restoreAllMocks();
-    res.status.mockClear();
-    res.json.mockClear();
-  });
-
-  beforeAll(() => {
-    jest.restoreAllMocks();
+    done();
   });
 
   test('authentication success', (done) => {
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
       session: {
         user: {
@@ -42,42 +24,42 @@ module.exports = describe('authentication test', () => {
         },
       },
     };
-    authentication(req, res, next);
-    expect(next).toHaveBeenCalled();
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    expect(globalThis.expressMiddleware.next).toHaveBeenCalled();
     done();
   });
 
   test('authentication failed with session unset', (done) => {
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
       session: {}
     };
-    authentication(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_UNAUTHORIZED,
     }));
     done();
   });
 
   test('authentication failed with token does not have', (done) => {
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       session: {}
     };
-    authentication(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_UNAUTHORIZED,
     }));
     done();
   });
 
   test('authentication failed with session api token and authentication token are difference', (done) => {
-    const authenticationTokenFake = signLoginToken(Date.now(), mockUser.email, 1);
-    req = {
-      ...req,
+    const authenticationTokenFake = utils.signLoginToken(Date.now(), mockUser.email, 1);
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationTokenFake,
       session: {
         user: {
@@ -88,9 +70,9 @@ module.exports = describe('authentication test', () => {
         },
       }
     };
-    authentication(req, res, next);
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_NOT_FOUND,
     }));
     done();
@@ -101,8 +83,8 @@ module.exports = describe('authentication test', () => {
       throw new TokenExpiredError('jwt expired');
     });
 
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
       session: {
         user: {
@@ -114,10 +96,10 @@ module.exports = describe('authentication test', () => {
       }
     };
 
-    authentication(req, res, next);
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
     expect(verifyLoginTokenMock).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: COMMON.RESET_PASSWORD_TOKEN_EXPIRE
     }));
     done();
@@ -128,8 +110,8 @@ module.exports = describe('authentication test', () => {
       throw new JsonWebTokenError('jwt malformed');
     });
 
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
       session: {
         user: {
@@ -141,10 +123,10 @@ module.exports = describe('authentication test', () => {
       }
     };
 
-    authentication(req, res, next);
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
     expect(verifyLoginTokenMock).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: COMMON.AUTHENTICATION_TOKEN_INVALID
     }));
     done();
@@ -155,8 +137,8 @@ module.exports = describe('authentication test', () => {
       throw new Error('Server error!');
     });
 
-    req = {
-      ...req,
+    globalThis.expressMiddleware.req = {
+      ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
       session: {
         user: {
@@ -168,10 +150,10 @@ module.exports = describe('authentication test', () => {
       }
     };
 
-    authentication(req, res, next);
+    authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
     expect(verifyLoginTokenMock).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(HTTP_CODE.SERVER_ERROR);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+    expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.SERVER_ERROR);
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: COMMON.INTERNAL_ERROR_MESSAGE
     }));
     done();

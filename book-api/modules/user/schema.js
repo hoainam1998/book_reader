@@ -18,7 +18,6 @@ const OtpVerify = require('#dto/user/otp-verify');
 const OtpUpdate = require('#dto/user/otp-update');
 const UserCreated = require('#dto/user/user-created');
 const PaginationResponse = require('#dto/common/pagination-response');
-
 const {
   ResponseType,
   graphqlNotFoundErrorOption,
@@ -308,7 +307,7 @@ const mutation = new GraphQLObjectType({
           const otp = await user.updateOtpCode(email);
           return convertDtoToZodObject(OtpUpdate, { ...messageCreator(USER.OTP_HAS_BEEN_SENT), otp });
         }, {
-          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
+          UNAUTHORIZED: USER.USER_NOT_FOUND
         });
       },
     },
