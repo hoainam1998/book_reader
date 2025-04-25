@@ -1,4 +1,3 @@
-const { sign } = require('jsonwebtoken');
 const { compare } = require('bcrypt');
 const Service = require('#services/prisma');
 const { generateOtp } = require('#utils');
@@ -142,7 +141,6 @@ class UserService extends Service {
       where: {
         email,
         mfa_enable: true,
-        mfa_enable: true,
       },
       data: {
         otp_code: otpCode
@@ -151,28 +149,18 @@ class UserService extends Service {
   }
 
   verifyOtpCode(email, otp) {
-    return this.PrismaInstance.user.findFirstOrThrow({
+    return this.PrismaInstance.user.update({
       where: {
-        AND: [
-          {
-            email
-          },
-          {
-            otp_code: otp
-          }
-        ]
-      },
-      select: {
-        user_id: true,
+        email,
+        otp_code: otp,
         mfa_enable: true,
-        email: true
+      },
+      data: {
+        otp_code: null
       }
     })
     .then((user) => ({
-      apiKey: sign(
-        { userId: user.user_id },
-        process.env.SECRET_KEY
-      )
+      apiKey: user.login_token
     }));
   }
 

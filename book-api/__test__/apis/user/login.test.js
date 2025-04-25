@@ -9,6 +9,7 @@ const commonTest = require('#test/apis/common/common');
 const { mockUser } = require('#test/resources/auth');
 const { passwordHashing } = require('#utils');
 const loginUrl = `${PATH.USER}/login`;
+const internalLoginApiUrl = `${PATH.USER}/login-process`;
 
 const requestBody = {
   email: mockUser.email,
@@ -26,30 +27,30 @@ let sessionToken = null;
 
 describe('login api', () => {
 
+  commonTest('login api common test', [
+    {
+      name: 'url test',
+      describe: 'url is invalid',
+      url: `${PATH.USER}/unknown`,
+      method: METHOD.POST.toLowerCase(),
+    },
+    {
+      name: 'method test',
+      describe: 'method not allowed',
+      url: loginUrl,
+      method: METHOD.GET.toLowerCase(),
+    },
+    {
+      name: 'cors test',
+      describe: 'login api cors',
+      url: loginUrl,
+      method: METHOD.POST.toLowerCase(),
+      origin: process.env.ORIGIN_CORS
+    }
+  ], 'login common test');
+
   describe('login api test', () => {
     afterEach(() => fetch.mockReset());
-
-    commonTest('login api common test', [
-      {
-        name: 'url test',
-        describe: 'url is invalid',
-        url: `${PATH.USER}/unknown`,
-        method: METHOD.POST.toLowerCase(),
-      },
-      {
-        name: 'method test',
-        describe: 'method not allowed',
-        url: loginUrl,
-        method: METHOD.GET.toLowerCase(),
-      },
-      {
-        name: 'cors test',
-        describe: 'login api cors',
-        url: loginUrl,
-        method: METHOD.POST.toLowerCase(),
-        origin: process.env.ORIGIN_CORS
-      }
-    ], 'login common test');
 
     test('login success', (done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify({
@@ -140,21 +141,17 @@ describe('login api', () => {
     }, 1000);
   });
 
+  commonTest('login internal api common test', [
+    {
+      name: 'cors test',
+      describe: 'login internal api cors',
+      url: internalLoginApiUrl,
+      method: METHOD.POST.toLowerCase(),
+    }
+  ], 'login internal');
+
   describe('login api testing with internal api', () => {
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    const internalLoginApiUrl = `${PATH.USER}/login-process`;
-
-    commonTest('login internal api common test', [
-      {
-        name: 'cors test',
-        describe: 'login internal api cors',
-        url: internalLoginApiUrl,
-        method: METHOD.POST.toLowerCase(),
-      }
-    ], 'login internal');
+    afterEach(() => jest.restoreAllMocks());
 
     test('login internal api will be success', async () => {
       const passwordHash = await passwordHashing(mockUser.password);

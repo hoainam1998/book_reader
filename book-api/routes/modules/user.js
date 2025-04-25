@@ -12,6 +12,7 @@ const {
 } = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
+const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const {
@@ -59,12 +60,13 @@ class UserRouter extends Router {
     this.delete('/delete-user/:id', authentication, this._deleteUser);
     this.post('/user-detail', authentication, this._getUserDetail);
     this.put('/update-user', authentication, this._updateUser);
-    this.post('/send-otp', loginRequire, this._sendOtpCode);
+    this.post('/send-otp', loginRequire, otpAllowed, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.post('/login-process', allowInternalCall, this._login);
     this.post('/login', this._loginWithSession);
     this.get('/logout', authentication, this._logout);
-    this.post('/verify-otp', loginRequire, this._verifyOtp);
+    this.post('/verify-otp', loginRequire, otpAllowed, this._verifyOtpWithSession);
+    this.post('/verify-otp-process', allowInternalCall, this._verifyOtp);
     this.post('/all', authentication, this._getAllUsers);
   }
 
@@ -299,6 +301,29 @@ class UserRouter extends Router {
     return self.execute(query, variables);
   }
 
+  @validateResultExecute(HTTP_CODE.OK)
+  _verifyOtpWithSession(req, res, next, self) {
+    const url = getOriginInternalServerUrl(req);
+
+    return fetchHelper(`${url}/verify-otp-process`,
+      METHOD.POST,
+      {
+        'Content-Type': 'application/json'
+      },
+      JSON.stringify(req.body)
+    ).then(async (response) => {
+      const json = response.json();
+      if (response.status === HTTP_CODE.OK) {
+        return json;
+      }
+      return Promise.reject({ ...await json, status: response.status });
+    })
+    .then((json) => {
+      req.session.user.apiKey = json.apiKey;
+      return json;
+    });
+  }
+
   @validation(OtpUpdate, { error_message: USER.UPDATE_OTP_CODE_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(OtpUpdateResponse)
@@ -319,18 +344,6 @@ class UserRouter extends Router {
   @serializer(MessageSerializerResponse)
   _sendOtpCode(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
-
-    if (!req.session.user.mfaEnable) {
-      return {
-        status: HTTP_CODE.UNAUTHORIZED,
-        json: messageCreator(USER.MFA_UNENABLE),
-      };
-    } else if (req.session.user.apiKey) {
-      return {
-        status: HTTP_CODE.UNAUTHORIZED,
-        json: messageCreator(USER.USER_FINISH_LOGIN),
-      };
-    }
 
     return fetchHelper(`${url}/update-otp`,
       METHOD.POST,

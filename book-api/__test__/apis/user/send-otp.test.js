@@ -4,10 +4,11 @@ const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { authenticationToken, mockUser, otpCode } = require('#test/resources/auth');
-const { generateOtp } = require('#utils/auth');
+const { mockUser, otpCode } = require('#test/resources/auth');
+const { generateOtp } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const sendOtpUrl = `${PATH.USER}/send-otp`;
+const sendOtpInternalUrl = `${PATH.USER}/update-otp`;
 
 const requestBody = {
   email: mockUser.email,
@@ -20,34 +21,36 @@ const requestBody = {
 describe('send otp', () => {
   require('#test/apis/common/login-require');
 
+  commonTest('send otp api common test', [
+    {
+      name: 'url test',
+      describe: 'url is invalid',
+      url: `${PATH.USER}/unknown`,
+      method: METHOD.POST.toLowerCase(),
+    },
+    {
+      name: 'method test',
+      describe: 'method not allowed',
+      url: sendOtpUrl,
+      method: METHOD.GET.toLowerCase(),
+    },
+    {
+      name: 'cors test',
+      describe: 'send otp api cors',
+      url: sendOtpUrl,
+      method: METHOD.POST.toLowerCase(),
+      origin: process.env.ORIGIN_CORS,
+    }
+  ], 'send otp common test');
+
+  require('#test/apis/common/otp-allowed');
+
   describe('send otp api test', () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       fetch.mockClear();
       done();
     });
-
-    commonTest('send otp api common test', [
-      {
-        name: 'url test',
-        describe: 'url is invalid',
-        url: `${PATH.USER}/unknown`,
-        method: METHOD.POST.toLowerCase(),
-      },
-      {
-        name: 'method test',
-        describe: 'method not allowed',
-        url: sendOtpUrl,
-        method: METHOD.GET.toLowerCase(),
-      },
-      {
-        name: 'cors test',
-        describe: 'send otp api cors',
-        url: sendOtpUrl,
-        method: METHOD.POST.toLowerCase(),
-        origin: process.env.ORIGIN_CORS
-      }
-    ], 'send otp common test');
 
     test('send otp will be success', (done) => {
       globalThis.TestServer.addMiddleware((request) => {
@@ -71,7 +74,9 @@ describe('send otp', () => {
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          expect(fetch).toHaveBeenCalledWith(expect.stringContaining(`${PATH.USER}/update-otp`), expect.objectContaining({
+          expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining(sendOtpInternalUrl),
+            expect.objectContaining({
             method: METHOD.POST,
             headers: expect.objectContaining({
               'Content-Type': 'application/json'
@@ -81,50 +86,6 @@ describe('send otp', () => {
           expect(sendOtpEmail).toHaveBeenCalledWith(expect.stringMatching(mockUser.email), expect.stringMatching(otpCode));
           expect(response.body).toMatchObject({
             message: USER.OTP_HAS_BEEN_SENT
-          });
-          done();
-        });
-    });
-
-    test('send otp failed due mfa turn off', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: false,
-          apiKey: null,
-          power: mockUser.power,
-        };
-      });
-
-      globalThis.api.post(sendOtpUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.UNAUTHORIZED)
-        .expect('Content-Type', /application\/json/)
-        .then((response) => {
-          expect(response.body).toMatchObject({
-            message: USER.MFA_UNENABLE
-          });
-          done();
-        });
-    });
-
-    test('send otp failed due user has already logged in', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: mockUser.mfa_enable,
-          apiKey: authenticationToken,
-          power: mockUser.power,
-        };
-      });
-
-      globalThis.api.post(sendOtpUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.UNAUTHORIZED)
-        .expect('Content-Type', /application\/json/)
-        .then((response) => {
-          expect(response.body).toMatchObject({
-            message: USER.USER_FINISH_LOGIN
           });
           done();
         });
@@ -173,7 +134,7 @@ describe('send otp', () => {
         .expect('Content-Type', /application\/json/)
         .then((response) => {
           expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(`${PATH.USER}/update-otp`),
+            expect.stringContaining(sendOtpInternalUrl),
             expect.objectContaining({
               method: METHOD.POST,
               headers: expect.objectContaining({
@@ -189,17 +150,16 @@ describe('send otp', () => {
     });
   });
 
-  describe('send otp internal test', () => {
-    const sendOtpInternalUrl = `${PATH.USER}/update-otp`;
+  commonTest('send otp internal api common test', [
+    {
+      name: 'cors test',
+      describe: 'send otp internal api cors',
+      url: sendOtpInternalUrl,
+      method: METHOD.POST.toLowerCase(),
+    }
+  ], 'send otp internal');
 
-    commonTest('send otp internal api common test', [
-      {
-        name: 'cors test',
-        describe: 'send otp internal api cors',
-        url: sendOtpInternalUrl,
-        method: METHOD.POST.toLowerCase(),
-      }
-    ], 'send otp internal');
+  describe('send otp internal test', () => {
 
     test('send otp internal api will be success', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
