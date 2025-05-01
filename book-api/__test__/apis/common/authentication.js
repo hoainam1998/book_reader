@@ -5,7 +5,7 @@ const utils = require('#utils');
 const { authenticationToken, mockUser } = require('#test/resources/auth');
 const authentication = require('#middlewares/auth/authentication');
 
-module.exports = describe('authentication test', () => {
+module.exports = describe('authentication', () => {
   afterEach((done) => {
     jest.restoreAllMocks();
     done();

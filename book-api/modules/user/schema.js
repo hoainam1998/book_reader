@@ -36,6 +36,9 @@ const USER_INFORMATION_FIELDS = {
   mfaEnable: {
     type: GraphQLBoolean,
   },
+  phone: {
+    type: GraphQLString,
+  },
 };
 
 const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
@@ -44,17 +47,52 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
     userId: {
       type: GraphQLID,
     },
-    ...USER_INFORMATION_FIELDS,
     firstName: {
       type: new GraphQLNonNull(GraphQLString),
     },
     lastName: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    email: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
     power: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    phone: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    mfaEnable: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    sex: {
       type: new GraphQLNonNull(GraphQLInt),
     },
   },
+});
+
+const USER_INFORMATION_UPDATE_PERSON_INPUT = new GraphQLInputObjectType({
+  name: 'UserInformationUpdatePersonInput',
+  fields: {
+    firstName: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    lastName: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    sex: {
+      type: new GraphQLNonNull(GraphQLInt),
+    },
+    email: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    avatar: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    phone: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  }
 });
 
 const USER_INFORMATION_DETAIL = new GraphQLObjectType({
@@ -67,6 +105,9 @@ const USER_INFORMATION_DETAIL = new GraphQLObjectType({
     lastName: {
       type: GraphQLString,
     },
+    power: {
+      type: GraphQLBoolean,
+    },
   },
 });
 
@@ -78,6 +119,9 @@ const USER_INFORMATION = new GraphQLObjectType({
     },
     ...USER_INFORMATION_FIELDS,
     name: {
+      type: GraphQLString,
+    },
+    role: {
       type: GraphQLString,
     },
   },
@@ -124,8 +168,13 @@ const query = new GraphQLObjectType({
     },
     all: {
       type: new GraphQLList(new GraphQLNonNull(USER_INFORMATION)),
-      resolve: async (user, args, context) => {
-        const users = await user.getAllUsers(context);
+      args: {
+        exceptedUserId: {
+          type: GraphQLID,
+        },
+      },
+      resolve: async (user, { exceptedUserId }, context) => {
+        const users = await user.getAllUsers(exceptedUserId, context);
         if (!checkArrayHaveValues(users)) {
           throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
         }
@@ -152,14 +201,17 @@ const query = new GraphQLObjectType({
         name: 'UserLoginInformation',
         fields: {
           ...USER_INFORMATION_FIELDS,
+          userId: {
+            type: new GraphQLNonNull(GraphQLID),
+          },
           name: {
             type: new GraphQLNonNull(GraphQLString),
           },
           apiKey: {
             type: GraphQLString,
           },
-          power: {
-            type: new GraphQLNonNull(GraphQLInt),
+          role: {
+            type: new GraphQLNonNull(GraphQLString),
           },
           passwordMustChange: {
             type: new GraphQLNonNull(GraphQLBoolean),
@@ -237,7 +289,7 @@ const mutation = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(UserCreated, await user.addUser(args.user));
         }, {
-          UNIQUE_DUPLICATE: USER.EMAIL_EXIST
+          UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
         });
       },
     },
@@ -311,7 +363,7 @@ const mutation = new GraphQLObjectType({
         });
       },
     },
-    update: {
+    updateUser: {
       type: ResponseType,
       args: {
         user: {
@@ -323,9 +375,27 @@ const mutation = new GraphQLObjectType({
           await user.updateUser(args.user);
           return messageCreator(USER.UPDATE_USER_SUCCESS);
         }, {
-          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
+          UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
         });
       },
+    },
+    updatePerson: {
+      type: ResponseType,
+      args: {
+        person: {
+          type: new GraphQLNonNull(USER_INFORMATION_UPDATE_PERSON_INPUT)
+        },
+      },
+      resolve: async (user, args) => {
+        return handleResolveResult(async () => {
+          await user.updateUser(args.person);
+          return messageCreator(USER.UPDATE_SELF_INFORMATION_SUCCESS);
+        }, {
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
+          UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
+        });
+      }
     },
     delete: {
       type: ResponseType,

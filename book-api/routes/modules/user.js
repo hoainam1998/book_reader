@@ -14,6 +14,7 @@ const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
 const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
+const onlyAdminAllowed = require('#middlewares/auth/only-admin-allowed');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const {
   UserPagination,
@@ -32,6 +33,7 @@ const {
   AdminResetPassword,
   UserDetail,
   UserUpdate,
+  PersonUpdate,
   UserDelete,
   AllUser,
 } = require('#dto/user/user-in');
@@ -57,9 +59,9 @@ class UserRouter extends Router {
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
     this.post('/reset-password', this._resetPassword);
-    this.delete('/delete-user/:id', authentication, this._deleteUser);
-    this.post('/user-detail', authentication, this._getUserDetail);
-    this.put('/update-user', authentication, this._updateUser);
+    this.delete('/delete-user/:id', authentication, onlyAdminAllowed, this._deleteUser);
+    this.post('/user-detail', authentication, onlyAdminAllowed, this._getUserDetail);
+    this.put('/update-user', authentication, onlyAdminAllowed, this._updateUser);
     this.post('/send-otp', loginRequire, otpAllowed, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.post('/login-process', allowInternalCall, this._login);
@@ -157,27 +159,53 @@ class UserRouter extends Router {
     return self.execute(query, { userId: req.params.id });
   }
 
-  @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validation(UserUpdate, { error_message: USER.UPDATE_USER_FAIL, groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateUser(req, res, next, self) {
     const variables = {
-      userId: req.body.userId ?? req.session.user.userId,
+      userId: req.body.userId,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      avatar: req.body.avatar,
-      password: req.body.password,
-      mfaEnable: req.body.mfa === 'true'
+      sex: +req.body.sex,
+      phone: req.body.phone,
+      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : undefined,
+      mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
-    const query = ` mutation UpdateUser($user: UserInformationInput!) {
+    const query = `mutation UpdateUser($user: UserInformationInput!) {
       user {
-        update(user: $user) {
+        updateUser(user: $user) {
           message
         }
        }
     }`;
+    return self.execute(query, { user: variables });
+  }
+
+  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @validation(PersonUpdate, { error_message: USER.UPDATE_USER_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updatePerson(req, res, next, self) {
+    const variables = {
+      userId: req.session.user.userId,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      sex: +req.body.sex,
+      phone: req.body.phone,
+      avatar: req.body.avatar,
+    };
+
+    const query = `mutation UpdatePerson($person: UserInformationUpdatePersonInput!) {
+      user {
+        updatePerson(person: $person) {
+          message
+        }
+       }
+    }`;
+
     return self.execute(query, { user: variables });
   }
 
@@ -197,25 +225,6 @@ class UserRouter extends Router {
       { userId: req.body.userId, },
       req.body.query
     );
-  }
-
-  @validation(Login, { error_message: USER.LOGIN_FAIL })
-  @validateResultExecute(HTTP_CODE.OK)
-  @serializer(LoginResponse)
-  _login(req, res, next, self) {
-    const query = `
-      query Login($email: String!, $password: String!) {
-        user {
-          login(email: $email, password: $password) ${
-            req.body.query
-          }
-        }
-      }`;
-    return self.execute(query, {
-      email: req.body.email,
-      password: req.body.password,
-    },
-    req.body.query);
   }
 
   @validation(AdminResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
@@ -271,14 +280,14 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {
-    const query = `query GetAllUsers {
+    const query = `query GetAllUsers($exceptedUserId: ID) {
       user {
-        all ${
+        all(exceptedUserId: $exceptedUserId) ${
           req.body.query
         }
       }
     }`;
-    return self.execute(query, undefined, req.body.query);
+    return self.execute(query, { exceptedUserId: req.body.exceptedUserId }, req.body.query);
   }
 
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })
@@ -361,7 +370,8 @@ class UserRouter extends Router {
     })
     .then((json) => {
       const { otp, message } = json;
-      return EmailService.sendOtpEmail(req.body.email, otp).then(() => messageCreator(message));
+      return EmailService.sendOtpEmail(req.body.email, otp)
+        .then(() => messageCreator(message));
     });
   }
 
@@ -398,8 +408,27 @@ class UserRouter extends Router {
     });
   }
 
+  @validation(Login, { error_message: USER.LOGIN_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
-  _loginWithSession(req, res, next, schema) {
+  @serializer(LoginResponse)
+  _login(req, res, next, self) {
+    const query = `
+      query Login($email: String!, $password: String!) {
+        user {
+          login(email: $email, password: $password) ${
+            req.body.query
+          }
+        }
+      }`;
+    return self.execute(query, {
+      email: req.body.email,
+      password: req.body.password,
+    },
+    req.body.query);
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  _loginWithSession(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
 
     if (req.session.user) {
@@ -426,10 +455,11 @@ class UserRouter extends Router {
     })
     .then((json) => {
       req.session.user = {
+        userId: json.userId,
         email: json.email,
         mfaEnable: json.mfaEnable,
         apiKey: json.apiKey,
-        power: json.power
+        role: json.role,
       };
       return json;
     });
@@ -437,7 +467,7 @@ class UserRouter extends Router {
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
-  _logout(req, res, next, schema) {
+  _logout(req, res, next, self) {
     return new Promise((resolve) => {
       req.session.destroy(() => resolve(messageCreator(USER.LOGOUT_SUCCESS)));
     });

@@ -3,7 +3,7 @@ const { USER } = require('#messages');
 const { authenticationToken, mockUser } = require('#test/resources/auth');
 const loginRequire = require('#middlewares/auth/login-require');
 
-module.exports = describe('login require test', () => {
+module.exports = describe('login require', () => {
   test('have logged and pass to next middleware', (done) => {
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,

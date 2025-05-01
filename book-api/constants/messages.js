@@ -11,6 +11,7 @@ module.exports = deepFreeze({
     RESET_PASSWORD_TOKEN_EXPIRE: 'The reset password token has expired!',
     TOKEN_INVALID: 'Token is invalid!',
     REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',
+    FILE_NOT_IMAGE: 'File must be an image file!'
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',
@@ -19,7 +20,6 @@ module.exports = deepFreeze({
     USER_UNAUTHORIZED: 'Your have not login yet!',
     USER_ADDED: 'Add user success! An announcement email has been sent to the user just has been created!',
     ADD_USER_FAIL: 'Add user failed!',
-    EMAIL_EXIST: 'Email already exist. Please enter another email!',
     LOAD_ALL_USER_FAIL: 'Load all users failed!',
     UPDATE_MFA_STATE_FAIL: 'Update mfa state failed!',
     UPDATE_MFA_STATE_SUCCESS: 'Update mfa state for email: {0} success!',
@@ -27,6 +27,7 @@ module.exports = deepFreeze({
     UPDATE_OTP_CODE_FAIL: 'Update otp code was failed!',
     UPDATE_USER_FAIL: 'Update user was failed!',
     UPDATE_USER_SUCCESS: 'Update user success!',
+    UPDATE_SELF_INFORMATION_SUCCESS: 'Update your information success!',
     DELETE_USER_FAIL: 'Delete user failed!',
     DELETE_USER_SUCCESS: 'Delete user with email: {0} success!',
     VERIFY_OTP_FAIL: 'Verify otp was failed!',
@@ -41,5 +42,7 @@ module.exports = deepFreeze({
     LOGOUT_SUCCESS: 'Logout success!',
     MFA_UNENABLE: 'Mfa unenable for user!',
     USER_FINISH_LOGIN: 'User has already completely logged in!',
+    DUPLICATE_EMAIL_OR_PHONE_NUMBER: 'Email or phone number have been duplicate. Please enter another one!',
+    NOT_PERMISSION: 'User dose not have permission to perform this operation!'
   },
 });

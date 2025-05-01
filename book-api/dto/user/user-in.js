@@ -44,6 +44,12 @@ const UserPaginationInput = (validators, className) => {
 const AllUser = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
+      IsOptional(),
+      IsId('userId must be numeric string and contain 13 character')
+    )
+    exceptedUserId;
+
+    @validators(
       IsGraphqlSelect('Value of field must be boolean!')
     )
     query;
@@ -140,7 +146,6 @@ const UserDetail = (validators, className) => {
 const UserUpdate = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsOptional(),
       IsId('userId must be numeric string and contain 13 character', { groups: ['update'] })
     )
     userId;
@@ -166,26 +171,58 @@ const UserUpdate = (validators, className) => {
     sex;
 
     @validators(
-      IsNumeric('power must be a numeric!')
+      Length(10, 'phone number must contain 10 character!'),
+      IsString('phone number must be a string!'),
+      IsNumeric('phone number must be numeric!'),
+    )
+    phone;
+
+    @validators(
+      IsBoolean('mfa must be boolean!')
     )
     power;
 
     @validators(
+      IsBoolean('mfa must be boolean!')
+    )
+    mfa;
+  }, className);
+};
+
+const PersonUpdate = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsString('userId must be string!'),
+    )
+    firstName;
+
+    @validators(
+      IsString('userId must be string!'),
+    )
+    lastName;
+
+    @validators(
+      IsEmail('Invalid email!'),
+    )
+    email;
+
+    @validators(
+      IsNumeric('sex must be a numeric!')
+    )
+    sex;
+
+    @validators(
+      Length(10, 'phone number must contain 10 character!'),
+      IsString('phone number must be a string!'),
+      IsNumeric('phone number must be numeric!'),
+    )
+    phone;
+
+    @validators(
+      IsOptional(),
       IsBase64Image('avatar must be image!')
     )
     avatar;
-
-    @validators(
-      IsOptional(),
-      IsBoolean('mfa must be boolean!', { groups: ['update', 'create'] })
-    )
-    mfa;
-
-    @validators(
-      IsOptional(),
-      IsPassword('Invalid password!'),
-    )
-    password;
   }, className);
 };
 
@@ -205,6 +242,7 @@ module.exports = {
   MfaUpdate: Validation(MfaUpdate),
   UserDetail: Validation(UserDetail),
   UserUpdate: Validation(UserUpdate),
+  PersonUpdate: Validation(PersonUpdate),
   UserDelete: Validation(UserDelete),
   AllUser: Validation(AllUser),
   AdminResetPassword: Validation(AdminResetPassword),

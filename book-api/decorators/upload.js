@@ -1,7 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
-const { convertFileToBase64 } = require('#utils');
+const { COMMON } = require('#messages');
+const { convertFileToBase64, messageCreator } = require('#utils');
 const Logger = require('#services/logger');
 
 const storage = multer.memoryStorage();
@@ -17,7 +18,7 @@ const upload = multer({
     if (extensionFileIsValid) {
       cb(null, true);
     } else {
-      cb(null, false);
+      cb(new Error(COMMON.FILE_NOT_IMAGE));
     }
   }
 });
@@ -46,8 +47,8 @@ module.exports = (mode, fields, maxCount) => {
       const response = args[1];
       uploadHandle(request, response, (err) => {
         if (err) {
-          Logger.error('Upload file', err.message);
-          response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
+          Logger.error('Upload file!', err.message);
+          response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message));
         } else {
           // run by mode, and convert file to base64 string.
           switch (mode) {
@@ -66,8 +67,7 @@ module.exports = (mode, fields, maxCount) => {
                 }
               });
               break;
-            default:
-              break;
+            default: break;
           }
           originalMethod.apply(null, args);
         }

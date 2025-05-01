@@ -1,5 +1,6 @@
 const { Type, Exclude } = require('class-transformer');
 const OutputValidate = require('#services/output-validate');
+const { POWER } = require('#constants');
 
 class UserDTO extends OutputValidate {
   @Type(() => String)
@@ -16,8 +17,19 @@ class UserDTO extends OutputValidate {
   @Type(() => String)
   avatar;
 
+  @Type(() => String)
+  phone = null;
+
   @Type(() => Boolean)
   mfa_enable;
+
+  @Type(() => Boolean)
+  power;
+
+  @Type(() => String)
+  get role() {
+    return this.power ? POWER.ADMIN : POWER.USER;
+  }
 
   @Type(() => String)
   login_token;

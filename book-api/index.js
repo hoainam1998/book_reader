@@ -16,6 +16,7 @@ const FactoryRouter = require('./routes/factory');
 const { METHOD } = require('#constants');
 const validateUrl = require('#middlewares/validate-url');
 const unknownError = require('#middlewares/unknown-error');
+const signedTestCookie = require('#middlewares/test/signed-test-cookie');
 const PrismaClient = require('#services/prisma-client');
 const Logger = require('#services/logger');
 
@@ -39,6 +40,9 @@ app.use(session({
 app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(bodyParser.json({ limit: '5mb' }));
+if (process.env.NODE_ENV === 'test') {
+  app.post('/signed-test-cookie', signedTestCookie);
+}
 app.use(unknownError);
 app.use((req, res, next) => validateUrl(req, res, next, layers));
 

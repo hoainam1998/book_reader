@@ -56,9 +56,9 @@ model book_image {
 
 model book_reader {
   reader_id String @db.VarChar(20)
-  book_id String @db.VarChar(20)
-  book    book   @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_BOOK")
-  reader  reader @relation(fields: [reader_id], references: [reader_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_USER")
+  book_id   String @db.VarChar(20)
+  book      book   @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_BOOK")
+  reader    reader @relation(fields: [reader_id], references: [reader_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK_READER_USER")
 
   @@id([reader_id, book_id])
   @@index([book_id], map: "FK_BOOK_READER_BOOK")
@@ -78,8 +78,9 @@ model user {
   first_name                String        @db.VarChar(200)
   avatar                    String        @db.Text
   email                     String        @unique @db.VarChar(100)
+  phone                     String        @unique @db.VarChar(11)
   sex                       Int           @default(0) @db.UnsignedTinyInt
-  power                     Int           @default(1) @db.UnsignedTinyInt
+  power                     Boolean
   mfa_enable                Boolean
   otp_code                  String?       @unique @db.VarChar(10)
   login_token               String        @db.Text
