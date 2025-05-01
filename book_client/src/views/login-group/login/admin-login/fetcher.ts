@@ -6,6 +6,7 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
     email,
     password,
     query: {
+      userId: true,
       name: true,
       avatar: true,
       email: true,
@@ -13,9 +14,14 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
       passwordMustChange: true,
       resetPasswordToken: true,
       apiKey: true,
-      power: true,
+      role: true,
+      phone: true,
       sex: true,
     },
   };
   return UserService.post('login', body);
+};
+
+export const logout = (): Promise<AxiosResponse> => {
+  return UserService.get('logout');
 };

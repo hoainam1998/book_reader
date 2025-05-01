@@ -1,4 +1,4 @@
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useMemo } from 'react';
 import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import Button from 'components/button/button';
@@ -7,7 +7,9 @@ import Slot from 'components/slot/slot';
 import Switch from 'components/form/form-control/switch/switch';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Tooltip from 'components/tooltip/tooltip';
+import constants from 'read-only-variables';
 import { showToast } from 'utils';
+import auth from 'store/auth';
 import { loadInitUser, updateMfaState, deleteUser as _deleteUser } from '../fetcher';
 import './style.scss';
 
@@ -20,6 +22,8 @@ type UserType = {
   avatar: string;
   name: string;
   email: string;
+  role: string;
+  sex: number;
   mfaEnable: boolean;
 };
 
@@ -32,7 +36,8 @@ function UserList(): JSX.Element {
   const users: UserType[] = responseData.data?.list || [];
   const total: number = responseData.data?.total || 0;
 
-  const fields: Field[] = [
+  const fields: Field[] = useMemo<Field[]>(() => {
+    const defaultFields: Field[] = [
     {
       key: 'avatar'
     },
@@ -43,18 +48,34 @@ function UserList(): JSX.Element {
       key: 'email'
     },
     {
-      key: 'mfaEnable',
-      label: 'MFA'
+      key: 'phone'
     },
     {
-      key: 'operation',
-      width: 150,
-      style: {
-        color: 'transparent',
-        userSelect: 'none',
-      }
-    }
+      key: 'sex'
+    },
+    {
+      key: 'role'
+    },
   ];
+  if (auth.IsAdmin) {
+    const adminFields: Field[] = [
+      {
+        key: 'mfaEnable',
+        label: 'MFA',
+      },
+      {
+        key: 'operation',
+        width: 200,
+        style: {
+          color: 'transparent',
+          userSelect: 'none',
+        }
+      },
+    ];
+    return defaultFields.concat(adminFields);
+  }
+  return defaultFields;
+  }, [auth.IsAdmin]);
 
   const fetchUser = useCallback((pageSize: number, pageNumber: number): void => {
     _pageSize = pageSize;
@@ -100,7 +121,7 @@ function UserList(): JSX.Element {
 
   return (
     <>
-      <HeaderDashboard add={navigateToDetailPage} search={search} />
+      <HeaderDashboard hiddenNewBtn={!auth.IsAdmin} add={navigateToDetailPage} search={search} />
       <Table
         responsive
         fields={fields}
@@ -114,6 +135,7 @@ function UserList(): JSX.Element {
           <Slot<UserType> name="email" render={
             (slotProp) => <Tooltip className="email-col"><div className="line-clamp">{slotProp.email}</div></Tooltip>
             } />
+          <Slot<UserType> name="sex" render={({ sex }) => constants.SEX[sex] } />
           <Slot<UserType> name="mfaEnable" render={
             (slotProp) => <Switch label="" name="mfa"
               value={slotProp.mfaEnable} onChange={(mfaEnable) => updateMfa(slotProp.userId, mfaEnable)} />

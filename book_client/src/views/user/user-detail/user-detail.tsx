@@ -4,58 +4,70 @@ import { useNavigate, useLoaderData, useParams } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
-import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Switch from 'components/form/form-control/switch/switch';
 import Button from 'components/button/button';
+import Radio from 'components/form/form-control/radio/radio';
+import { OptionPrototype } from 'components/form/form-control/form-control';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import useComponentDidMount from 'hooks/useComponentDidMount';
-import { required, email as emailValidate, ErrorFieldInfo } from 'hooks/useValidate';
+import { required, email as emailValidate, ErrorFieldInfo, matchPattern } from 'hooks/useValidate';
 import { addUser, loadUserDetail, updateUser, getAllUsers } from '../fetcher';
-import { convertBase64ToSingleFile, showToast } from 'utils';
+import { showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
 import { HaveLoadedFnType } from 'interfaces';
 import paths from 'router/paths';
+import constants from 'read-only-variables';
+import { UserType } from 'interfaces';
 import './style.scss';
 
-type UserType = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  avatar: string;
-  mfa: boolean;
-};
+type AllUserType = Pick<UserType, 'email' | 'phone'>[];
 
 const state: UserType = {
   firstName: '',
   lastName: '',
   email: '',
-  avatar: '',
-  mfa: true
+  phone: '',
+  mfa: true,
+  sex: 0,
+  power: false,
 };
 
 const formId: string = 'user_form';
+const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) => ({ label, value: index }));
 
 function UserDetail(): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
+  const [phones, setPhones] = useState<string[]>([]);
   const loaderData = useLoaderData() as any;
   const navigate = useNavigate();
   const { id } = useParams();
   const user = loaderData?.data;
 
   const emailDuplicateValidate = useCallback(
-    (message: string,) =>
+    (message: string) =>
       (currentValue: string): ErrorFieldInfo => {
         return {
-          error: id ? false : emails.includes(currentValue),
+          error: emails.includes(currentValue),
           message
         };
       },
     [emails]
   );
 
-  const rules: RuleType<UserType> = {
+  const phoneDuplicateValidate = useCallback(
+    (message: string) =>
+      (currentValue: string): ErrorFieldInfo => {
+        return {
+          error: phones.includes(currentValue),
+          message
+        };
+      },
+    [phones]
+  );
+
+  const rules: RuleType<Omit<UserType, 'userId'>> = {
     email: {
       required,
       emailValidate: emailValidate('Email invalid!'),
@@ -63,21 +75,38 @@ function UserDetail(): JSX.Element {
     },
     firstName: { required },
     lastName: { required },
-    avatar: { required },
+    sex: { required },
+    phone: {
+      required,
+      phoneDuplicateValidate: phoneDuplicateValidate('Phone is duplicate!'),
+      matchPattern: matchPattern(constants.PHONE_NUMBER_PATTERN, 'Format phone number is wrong!')
+    },
+    power: {},
     mfa: {}
   };
 
-  const { firstName, lastName, avatar, email, mfa, reset, handleSubmit, validate } = useForm<
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    mfa,
+    sex,
+    power,
+    reset,
+    handleSubmit,
+    validate
+  } = useForm<
     UserType,
     RuleType<UserType>
-  >(state, rules, formId, [emails]);
+  >(state, rules, formId, [emails, phones]);
 
   const UserForm = useCallback(({ children }: { children: JSX.Element }): JSX.Element => {
     useModalNavigation({ onLeaveAction: reset });
     return children;
   }, []);
 
-  const backToUserList = useCallback(() => {
+  const backToUserList = useCallback((): void => {
     navigate(`${paths.HOME}/${paths.USER}`);
   }, []);
 
@@ -90,22 +119,17 @@ function UserDetail(): JSX.Element {
     .catch((error) => showToast(title, error.response.data.message));
   }, []);
 
-  const onSubmit = useCallback((formData: FormData) => {
+  const onSubmit = useCallback((): void => {
     handleSubmit();
 
     if (!validate.error) {
-      if (!formData.has('mfa')) {
-        formData.append('mfa', 'false');
-      }
-
       if (id) {
-        formData.append('userId', id);
-        handleUserSaved(updateUser(formData), 'Update user');
+        handleUserSaved(updateUser({ ...state, userId: id }), 'Update user');
       } else {
-        handleUserSaved(addUser(formData), 'Create user');
+        handleUserSaved(addUser(state), 'Create user');
       }
     }
-  }, []);
+  }, [state]);
 
   const userName = useMemo<string>(() => {
     return user ? `${user.firstName} ${user.lastName}` : '';
@@ -119,20 +143,27 @@ function UserDetail(): JSX.Element {
       lastName.watch(user.lastName);
       email.watch(user.email);
       mfa.watch(user.mfaEnable);
-      convertBase64ToSingleFile(user.avatar, `${user.firstName}-${user.lastName}`)
-        .then((res) => {
-          if (res.type.includes('image')) {
-            avatar.watch(res);
-          }
-        });
+      sex.watch(user.sex);
+      phone.watch(user.phone);
+      power.watch(user.power);
     }
   }, []);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        getAllUsers()
-          .then(res => setEmails(res.data.map(({ email }: { email: string }) => email)))
+        getAllUsers(id)
+          .then((res: AxiosResponse<AllUserType>) => {
+            const { emailsList, phonesList } =
+              res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
+                flat.phonesList.push(current.phone);
+                flat.emailsList.push(current.email);
+                return flat;
+              }, { phonesList: [], emailsList: [] });
+
+            setEmails(emailsList);
+            setPhones(phonesList);
+          })
           .catch(() => setEmails([]));
       }
     };
@@ -153,7 +184,7 @@ function UserDetail(): JSX.Element {
                 marginBottom: 15,
                 gap: 17
               }}>
-              <GridItem sm={12} md={6} lg={2}>
+              <GridItem sm={12} md={6} lg={6}>
                 <Input
                   {...firstName}
                   label="First name"
@@ -165,7 +196,7 @@ function UserDetail(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} md={6} lg={2}>
+              <GridItem sm={12} md={6} lg={6}>
                 <Input
                   {...lastName}
                   label="Last name"
@@ -177,33 +208,40 @@ function UserDetail(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} md={6} lg={3}>
+              <GridItem sm={12} md={6} lg={6}>
                 <Input
                   {...email}
                   label="Email"
                   type="email"
                   name="email"
                   inputColumnSize={{
-                    lg: 8
+                    lg: 10,
+                    md: 8,
+                    sm: 8
                   }}
                   labelColumnSize={{
-                    lg: 4
+                    lg: 2,
+                    sm: 4,
+                    md: 4,
                   }} />
               </GridItem>
-              <GridItem sm={12} md={6} lg={2}>
-                <FileDragDropUpload
-                  multiple={false}
-                  {...avatar}
-                  label="Avatar"
-                  name="avatar"
+              <GridItem sm={12} md={6} lg={6}>
+                <Input
+                  {...phone}
+                  label="Phone"
+                  name="phone"
                   inputColumnSize={{
-                    lg: 12
+                    lg: 9,
+                    sm: 8,
+                    md: 8,
                   }}
                   labelColumnSize={{
-                    lg: 12
-                  }}  />
+                    lg: 3,
+                    sm: 4,
+                    md: 4
+                  }} />
               </GridItem>
-              <GridItem sm={12} md={6} lg={3}>
+              <GridItem sm={12} md={4} lg={3}>
                 <Switch
                   {...mfa}
                   label="Mfa"
@@ -213,6 +251,32 @@ function UserDetail(): JSX.Element {
                   }}
                   labelColumnSize={{
                     lg: 4
+                  }} />
+              </GridItem>
+              <GridItem sm={12} md={4} lg={3}>
+                <Switch
+                  {...power}
+                  label="Admin"
+                  name="power"
+                  inputColumnSize={{
+                    lg: 8
+                  }}
+                  labelColumnSize={{
+                    lg: 4
+                  }} />
+              </GridItem>
+              <GridItem sm={12} md={4} lg={3}>
+                <Radio
+                  {...sex}
+                  label="Sex"
+                  name="sex"
+                  horizontal
+                  options={sexOptions}
+                  labelColumnSize={{
+                    lg: 2
+                  }}
+                  inputColumnSize={{
+                    lg: 10
                   }} />
               </GridItem>
             </Grid>

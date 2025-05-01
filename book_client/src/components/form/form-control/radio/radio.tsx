@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { JSX,  useEffect, useMemo } from 'react';
+import { JSX, useMemo } from 'react';
 import FormControl, { FormControlProps, OptionPrototype } from '../form-control';
 import List from 'components/list/list';
 import { FieldValidateProps } from 'hooks/useForm';
@@ -22,7 +22,6 @@ function Radio<T extends string | number>({
   onChange,
   onFocus
 }: RadioPropsType<T>): JSX.Element {
-
   const valueTransformed = useMemo<T>(() => {
     if ((typeof value === 'string')) {
       return (value === '' ? options![0].value: parseInt(value)) as T;
@@ -30,34 +29,34 @@ function Radio<T extends string | number>({
     return value!;
   }, [value]);
 
-  useEffect(() => {
-    onChange!(valueTransformed);
-  }, []);
-
   return (
-    <FormControl name={name} label={label} inputColumnSize={inputColumnSize} labelColumnSize={labelColumnSize}>
-      <ul className={clsx(horizontal && 'horizontal')}>
-        <List<OptionPrototype<T>>
-          items={options as OptionPrototype<T>[]}
-          render={(item) => {
-            return (
-              <li>
-                <label className="radio-wrapper">
-                  <input
-                    type="radio"
-                    name={name}
-                    value={item.value}
-                    checked={item.value === valueTransformed}
-                    onChange={onChange!}
-                    onFocus={onFocus}/>
-                  <span className="checkmark" />
-                  <span>{item.label}</span>
-                </label>
-              </li>
-            );
-          }}
-        />
-      </ul>
+    <FormControl
+      name={name}
+      label={label}
+      inputColumnSize={inputColumnSize}
+      labelColumnSize={labelColumnSize}>
+        <ul className={clsx(horizontal && 'horizontal')}>
+          <List<OptionPrototype<T>>
+            items={options as OptionPrototype<T>[]}
+            render={(item) => {
+              return (
+                <li>
+                  <label className="radio-wrapper">
+                    <input
+                      type="radio"
+                      name={name}
+                      value={item.value}
+                      checked={item.value === valueTransformed}
+                      onChange={onChange!}
+                      onFocus={onFocus}/>
+                    <span className="checkmark" />
+                    <span>{item.label}</span>
+                  </label>
+                </li>
+              );
+            }}
+          />
+        </ul>
     </FormControl>
   );
 }

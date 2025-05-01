@@ -2,9 +2,15 @@
   .user-form {
     margin: auto;
     margin-top: 10px;
+    max-width: 35vw;
 
     @include mobile {
       width: 100%;
+      max-width: unset;
+    }
+
+    @include tablet {
+      max-width: unset;
     }
   }
 

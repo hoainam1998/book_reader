@@ -20,11 +20,15 @@ export type BookInfoType = {
 };
 
 export type UserLogin = {
+  userId: string;
   name: string;
   email: string;
   avatar: string;
   mfaEnable: boolean;
   password: string;
+  phone: string;
+  sex: number;
+  role: string;
   mfaValidated: boolean;
   isLogged: boolean;
   passwordMustChange: boolean;

@@ -12,12 +12,13 @@ export const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
   const isLogin = useMatch(path.LOGIN);
   const isHome = useMatch(`${path.HOME}/*`);
   const isOtp = useMatch(path.OTP);
+  const isPersonal = useMatch(path.PERSONAL);
   const isResetPassword = useMatch(path.RESET_PASSWORD);
 
   if (auth.IsLogged) {
     if (auth.MfaEnable) {
       if (auth.MfaValidated) {
-        if (!isHome) {
+        if (!isHome && !isPersonal) {
           return <Navigate to={path.HOME} />;
         }
         return children;
@@ -29,7 +30,7 @@ export const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
       }
     }
 
-    if (!isHome) {
+    if (!isHome && !isPersonal) {
       return <Navigate to={path.HOME} />;
     }
     return children;
