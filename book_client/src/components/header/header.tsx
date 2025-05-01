@@ -1,11 +1,12 @@
 import { JSX, useSyncExternalStore, useCallback, useRef, CSSProperties } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { createRoot, Root } from 'react-dom/client';
-import { createElementWrapper } from 'utils';
+import { createElementWrapper, showToast } from 'utils';
 import Button from 'components/button/button';
 import Tooltip from 'components/tooltip/tooltip';
 import store, { UserLogin } from 'store/auth';
 import paths from 'router/paths';
+import { logout as logoutApi } from 'views/login-group/login/admin-login/fetcher';
 import useUpdatePositionAcrossWindowSize from 'hooks/useUpdatePositionAcrossWindowSize';
 const { getSnapshot, subscribe } = store;
 import './style.scss';
@@ -21,19 +22,23 @@ type MenuDropdownPropsType = {
 };
 
 function MenuDropdown({ navigate, onPositionChange }: MenuDropdownPropsType): JSX.Element {
+  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
 
-  const personalSetting = useCallback(() => {
+  const personalSetting = useCallback((): void => {
     hideMenu();
     navigate(paths.PERSONAL);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback((): void => {
     hideMenu();
-    store.logout();
-    navigate(paths.LOGIN);
+    logoutApi()
+      .then((response) => {
+        showToast('Logout!', response.data.message);
+        store.logout();
+        setTimeout(() => navigate(paths.LOGIN), 200);
+      })
+      .catch((error) => showToast('Logout!', error.response.data.message));
   }, []);
-
-  const position = useUpdatePositionAcrossWindowSize(onPositionChange);
 
   if (!Object.keys(position).length) {
     return <></>;

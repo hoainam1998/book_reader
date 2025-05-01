@@ -1,6 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { UserService, RequestBody } from 'services';
+import { UserType } from 'interfaces';
 import { showToast } from 'utils';
 import paths from 'router/paths';
 
@@ -11,8 +12,8 @@ export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosRes
   });
 };
 
-export const addUser = (formData: FormData): Promise<AxiosResponse> => {
-  return handlePromise(UserService.post('add', formData));
+export const addUser = (user: UserType): Promise<AxiosResponse> => {
+  return handlePromise(UserService.post('add', user));
 };
 
 export const updateMfaState = (userId: string, mfaEnable: boolean): Promise<AxiosResponse> => {
@@ -27,14 +28,16 @@ export const deleteUser = (userId: string): Promise<AxiosResponse> => {
   return handlePromise(UserService.delete(`delete-user/${userId}`));
 };
 
-export const updateUser = (formData: FormData): Promise<AxiosResponse> => {
-  return handlePromise(UserService.put('update-user', formData));
+export const updateUser = (user: UserType): Promise<AxiosResponse> => {
+  return UserService.put('update-user', user);
 };
 
-export const getAllUsers = (): Promise<AxiosResponse> => {
+export const getAllUsers = (userId?: string): Promise<AxiosResponse> => {
   return UserService.post('all', {
+    exceptedUserId: userId,
     query: {
-      email: true
+      email: true,
+      phone: true,
     },
   });
 };
@@ -49,6 +52,9 @@ export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosRes
       email: true,
       avatar: true,
       mfaEnable: true,
+      phone: true,
+      power: true,
+      sex: true,
     }
   };
 
@@ -74,6 +80,9 @@ export const loadInitUser = async ({
       name: true,
       avatar: true,
       email: true,
+      phone: true,
+      sex: true,
+      role: true,
       mfaEnable: true
     }
   };

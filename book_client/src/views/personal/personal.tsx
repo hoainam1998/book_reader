@@ -1,28 +1,31 @@
 import { JSX, useCallback, useSyncExternalStore, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AxiosResponse } from 'axios';
 import BlockerProvider from 'contexts/blocker';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-upload';
 import Button from 'components/button/button';
-import { required, email, matchPattern } from 'hooks/useValidate';
+import Radio from 'components/form/form-control/radio/radio';
+import { OptionPrototype } from 'components/form/form-control/form-control';
+import { required, email as emailValidate, matchPattern, ErrorFieldInfo } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { UserLogin } from 'store/auth';
 import path from 'router/paths';
-import { updateUser as updatePerson } from 'views/user/fetcher';
+import { getAllUsers } from 'views/user/fetcher';
+import { updatePerson } from './fetcher';
+import { logout } from 'views/login-group/login/admin-login/fetcher';
+import useComponentDidMount from 'hooks/useComponentDidMount';
 import { convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
+import { HaveLoadedFnType, UserType } from 'interfaces';
 import './style.scss';
 const { subscribe, getSnapshot } = store;
 
-type PersonalType = {
-  firstName: string;
-  lastName: string;
-  email: string;
+type PersonalType = Omit<UserType, 'mfa' | 'power'> & {
   avatar: string;
-  password: string;
 };
 
 const state: PersonalType = {
@@ -30,32 +33,75 @@ const state: PersonalType = {
   lastName: '',
   email: '',
   avatar: '',
-  password: ''
-};
-
-const rules: RuleType<PersonalType> = {
-  email: { required, email },
-  firstName: { required },
-  lastName: { required },
-  avatar: { required },
-  password: {
-    required,
-    matchPattern: matchPattern(constants.PASSWORD_PATTERN, 'Format password is wrong!')
-  }
+  phone: '',
+  sex: 0,
 };
 
 const formId: string = 'personal-form';
+const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) => ({ label, value: index }));
 
 function Personal(): JSX.Element {
+  const [emails, setEmails] = useState<string[]>([]);
+  const [phones, setPhones] = useState<string[]>([]);
   const [reLogin, setReLogin] = useState<boolean>(false);
   const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
   const navigate = useNavigate();
-  const { firstName, lastName, avatar, email, password, handleSubmit, validate, reset } = useForm<
+
+  const emailDuplicateValidate = useCallback(
+    (message: string) =>
+      (currentValue: string): ErrorFieldInfo => {
+        return {
+          error: emails.includes(currentValue),
+          message
+        };
+      },
+    [emails]
+  );
+
+  const phoneDuplicateValidate = useCallback(
+    (message: string) =>
+      (currentValue: string): ErrorFieldInfo => {
+        return {
+          error: phones.includes(currentValue),
+          message
+        };
+      },
+    [phones]
+  );
+
+  const rules: RuleType<Omit<PersonalType, 'userId'>> = {
+    email: {
+      required,
+      emailValidate: emailValidate('Email invalid!'),
+      emailDuplicateValidate: emailDuplicateValidate('Email is duplicate!')
+    },
+    firstName: { required },
+    lastName: { required },
+    avatar: { required },
+    sex: { required },
+    phone: {
+      required,
+      phoneDuplicateValidate: phoneDuplicateValidate('Phone is duplicate!'),
+      matchPattern: matchPattern(constants.PHONE_NUMBER_PATTERN, 'Format phone number is wrong!')
+    },
+  };
+
+  const {
+    firstName,
+    lastName,
+    avatar,
+    email,
+    phone,
+    sex,
+    handleSubmit,
+    validate,
+    reset
+  } = useForm<
     PersonalType,
     RuleType<PersonalType>
-  >(state, rules, formId);
+  >(state, rules, formId, [emails, phones]);
 
-  const backToPrevious = useCallback((event: any) => {
+  const backToPrevious = useCallback((event: any): void => {
     event.preventDefault();
     navigate(path.HOME);
   }, []);
@@ -72,10 +118,11 @@ function Personal(): JSX.Element {
         .then((res) => {
           showToast('Update your information', res.data.message);
           setReLogin(true);
-          store.logout();
-          setTimeout(() => {
-            navigate(path.LOGIN);
-          }, 200);
+          logout()
+            .then(() => {
+              store.logout();
+              setTimeout(() => navigate(path.LOGIN), 200);
+            });
         })
         .catch((err) => showToast('Personal', err.response.data.message));
     }
@@ -87,7 +134,8 @@ function Personal(): JSX.Element {
       firstName.watch(nameSeparate[1]);
       lastName.watch(nameSeparate[0]);
       email.watch(userLogin.email);
-      password.watch(userLogin.password);
+      phone.watch(userLogin.phone);
+      sex.watch(userLogin.sex);
       convertBase64ToSingleFile(userLogin.avatar, userLogin.name)
         .then(res => {
           if (res.type.includes('image')) {
@@ -95,6 +143,26 @@ function Personal(): JSX.Element {
           }
         });
     }
+  }, []);
+
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+    return () => {
+      if (!haveFetched() && userLogin) {
+        getAllUsers(userLogin.userId)
+          .then((res: AxiosResponse<PersonalType[]>) => {
+            const { emailsList, phonesList } =
+              res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
+                flat.phonesList.push(current.phone);
+                flat.emailsList.push(current.email);
+                return flat;
+              }, { phonesList: [], emailsList: [] });
+
+            setEmails(emailsList);
+            setPhones(phonesList);
+          })
+          .catch(() => setEmails([]));
+      }
+    };
   }, []);
 
   return (
@@ -151,7 +219,12 @@ function Personal(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} md={12} lg={6}>
+              <GridItem sm={12} md={12} lg={6}
+                style={{
+                  lg: {
+                    gridRow: 'span 4'
+                  }
+                }}>
                 <FileDragDropUpload
                   {...avatar}
                   multiple={false}
@@ -166,15 +239,28 @@ function Personal(): JSX.Element {
               </GridItem>
               <GridItem sm={12} md={12} lg={6}>
                 <Input
-                  {...password}
-                  label="Password"
-                  type="password"
-                  name="password"
+                  {...phone}
+                  label="Phone number"
+                  name="phone"
                   inputColumnSize={{
                     lg: 8
                   }}
                   labelColumnSize={{
                     lg: 4
+                  }} />
+              </GridItem>
+              <GridItem sm={12} md={12} lg={6}>
+                <Radio
+                  {...sex}
+                  label="Sex"
+                  name="sex"
+                  horizontal
+                  options={sexOptions}
+                  labelColumnSize={{
+                    lg: 4
+                  }}
+                  inputColumnSize={{
+                    lg: 8
                   }} />
               </GridItem>
             </Grid>

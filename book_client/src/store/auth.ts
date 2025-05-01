@@ -1,5 +1,11 @@
+/* eslint-disable no-unused-vars */
 import Store from './store';
 import { UserLogin, ApiKeyStorage, UserStorage, LocalStorage } from 'storage';
+
+enum Role {
+  ADMIN = 'Admin',
+  USER = 'User',
+};
 
 class AuthStore extends Store<UserLogin | null> {
 
@@ -37,27 +43,34 @@ class AuthStore extends Store<UserLogin | null> {
 
   get MfaEnable() {
     if (this.isContainData('mfaEnable')) {
-      return this.CurrentStore?.mfaEnable;
+      return this.CurrentStore!.mfaEnable;
     }
     return false;
   }
 
   get PasswordMustChange() {
     if (this.isContainData('passwordMustChange')) {
-      return this.CurrentStore?.passwordMustChange;
+      return this.CurrentStore!.passwordMustChange;
     }
     return false;
   }
 
   get ResetPasswordToken() {
     if (this.isContainData('resetPasswordToken')) {
-      return this.CurrentStore?.resetPasswordToken;
+      return this.CurrentStore!.resetPasswordToken;
     }
     return null;
   }
 
   get ApiKey() {
     return ApiKeyStorage.getItem();
+  }
+
+  get IsAdmin() {
+    if (this.isContainData('role')) {
+      return this.CurrentStore!.role === Role.ADMIN;
+    }
+    return false;
   }
 
   destroyResetPasswordToken() {
@@ -80,7 +93,6 @@ class AuthStore extends Store<UserLogin | null> {
   logout(): void {
     LocalStorage.removeAll();
     this.CurrentStore = null;
-    this.emitChange();
   }
 }
 
