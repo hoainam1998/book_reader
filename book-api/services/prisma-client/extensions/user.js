@@ -44,7 +44,7 @@ module.exports = (prisma) => {
           select: {
             email: true,
             password: true,
-            user_id: true
+            user_id: true,
           },
         });
       }

@@ -2,10 +2,10 @@ const commonTest = require('#test/apis/common/common');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER } = require('#messages');
 const { authenticationToken, mockUser } = require('#test/resources/auth');
+const { createDescribeTest } = require('#test/helpers/index');
 const logoutUrl = `${PATH.USER}/logout`;
 
-describe('logout api', () => {
-  require('#test/apis/common/authentication');
+describe(createDescribeTest(METHOD.GET, logoutUrl), () => {
 
   commonTest('logout api common test', [
     {
@@ -42,9 +42,7 @@ describe('logout api', () => {
       done();
     });
 
-    afterAll((done) => {
-      TestServer.removeTestMiddleware(done);
-    });
+    afterAll((done) => TestServer.removeTestMiddleware(done));
 
     test('logout will be success', (done) => {
       globalThis.api.get(logoutUrl)

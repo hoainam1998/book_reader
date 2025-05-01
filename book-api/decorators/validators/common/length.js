@@ -1,5 +1,9 @@
 const checkLength = (value, limit, message) => {
-  if (value.length != limit) {
+  if (typeof value === 'string' || Array.isArray(value)) {
+    if (value.length != limit) {
+      return message;
+    }
+  } else {
     return message;
   }
 };

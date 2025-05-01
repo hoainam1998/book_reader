@@ -19,8 +19,6 @@ const requestBody = {
 };
 
 describe('send otp', () => {
-  require('#test/apis/common/login-require');
-
   commonTest('send otp api common test', [
     {
       name: 'url test',
@@ -42,8 +40,6 @@ describe('send otp', () => {
       origin: process.env.ORIGIN_CORS,
     }
   ], 'send otp common test');
-
-  require('#test/apis/common/otp-allowed');
 
   describe('send otp api test', () => {
     afterEach((done) => {

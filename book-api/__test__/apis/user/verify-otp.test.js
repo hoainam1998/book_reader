@@ -5,6 +5,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { signLoginToken } = require('#utils');
 const { mockUser, authenticationToken, otpCode } = require('#test/resources/auth');
+const { createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const verifyOtpUrl = `${PATH.USER}/verify-otp`;
 const verifyOtpInternalUrl = `${PATH.USER}/verify-otp-process`;
@@ -17,8 +18,7 @@ const requestBody = {
   },
 };
 
-describe('verify otp', () => {
-  require('#test/apis/common/login-require');
+describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
 
   commonTest('verify otp api common test', [
     {
@@ -149,7 +149,7 @@ describe('verify otp', () => {
     }
   ], 'verify otp internal');
 
-  describe('verify otp internal test', () => {
+  describe(createDescribeTest(method.POST, verifyOtpInternalUrl), () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       done();

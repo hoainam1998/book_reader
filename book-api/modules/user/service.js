@@ -21,6 +21,7 @@ class UserService extends Service {
   }
 
   pagination(pageSize, pageNumber, keyword, select) {
+    select = { ...select, power: true };
     const offset = (pageNumber - 1) * pageSize;
     if (keyword) {
       return this.PrismaInstance.$transaction([
@@ -38,7 +39,7 @@ class UserService extends Service {
                   contains: keyword
                 }
               }
-            ]
+            ],
           },
           orderBy: {
             user_id: 'desc'
@@ -95,6 +96,7 @@ class UserService extends Service {
       },
       select: {
         ...select,
+        power: true,
         login_token: true,
         password: true,
         reset_password_token: true,
@@ -165,7 +167,7 @@ class UserService extends Service {
   }
 
   updateUser(user) {
-    const { firstName, lastName, avatar, email, password, mfaEnable, userId } = user;
+    const { firstName, lastName, avatar, email, sex, phone, power, mfaEnable, userId } = user;
     const reduceUndefinedProps = (obj) => {
       return Object.keys(obj).reduce((objReduced, key) => {
         if (obj[key] !== undefined) {
@@ -185,7 +187,9 @@ class UserService extends Service {
         avatar: avatar,
         email: email,
         mfa_enable: mfaEnable,
-        password,
+        power,
+        sex,
+        phone,
       }),
     });
   }
@@ -207,9 +211,19 @@ class UserService extends Service {
     });
   }
 
-  getAllUsers(select) {
+  getAllUsers(exceptedUserId, select) {
+    const conditions = exceptedUserId
+    ? {
+      where: {
+        user_id: {
+          not: exceptedUserId
+        }
+      },
+    }
+    : {};
     return this.PrismaInstance.user.findMany({
-      select
+      ...conditions,
+      select: { ...select, power: true },
     });
   }
 }

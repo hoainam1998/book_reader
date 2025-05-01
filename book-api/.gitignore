@@ -7,6 +7,7 @@
 
 # testing
 /__test__/coverage
+/__test__/**/*.png
 
 # production
 /dist
