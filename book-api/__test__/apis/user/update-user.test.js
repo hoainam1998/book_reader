@@ -6,6 +6,7 @@ const { mockUser, authenticationToken, sessionData, signedTestCookie } = require
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const updateUserUrl = `${PATH.USER}/update-user`;
+let sessionToken;
 
 describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
   commonTest('update user common test', [
@@ -28,12 +29,12 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
       method: METHOD.POST.toLowerCase(),
       origin: process.env.ORIGIN_CORS,
     }
-  ], 'verify otp common test');
+  ], 'update user common test');
 
   test('update user will be success', (done) => {
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
-        const sessionToken = responseApiSignin.header['set-cookie'];
+        sessionToken = responseApiSignin.header['set-cookie'];
         globalThis.prismaClient.user.update.mockResolvedValue();
         globalThis.api
           .put(updateUserUrl)
@@ -183,7 +184,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
       describe: 'server error',
       cause: new Error('Server error!'),
       expected: {
-        message:COMMON.INTERNAL_ERROR_MESSAGE,
+        message: COMMON.INTERNAL_ERROR_MESSAGE,
       },
       status: HTTP_CODE.SERVER_ERROR,
     }
@@ -210,6 +211,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
           .expect('Content-Type', /application\/json/)
           .expect(status)
           .then((response) => {
+            expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
               expect.objectContaining({
                 where: expect.objectContaining({
@@ -261,6 +263,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
               expect.objectContaining({
                 where: expect.objectContaining({

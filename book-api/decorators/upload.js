@@ -5,6 +5,14 @@ const { COMMON } = require('#messages');
 const { convertFileToBase64, messageCreator } = require('#utils');
 const Logger = require('#services/logger');
 
+/**
+ * Check file is empty or not.
+ *
+ * @param {multer.File} file - The multer file.
+ * @returns {boolean} - True if file is empty, other false.
+ */
+const isEmptyFile = (file) => file.size === 0;
+
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -53,9 +61,16 @@ module.exports = (mode, fields, maxCount) => {
           // run by mode, and convert file to base64 string.
           switch (mode) {
             case UPLOAD_MODE.SINGLE:
-              args[0].body[fields] = request.file
-                ? convertFileToBase64(request.file)
-                : request.body[fields];
+              if (request.file) {
+                if (isEmptyFile(request.file)) {
+                  return response.status(HTTP_CODE.BAD_REQUEST)
+                    .json(messageCreator(COMMON.FILE_IS_EMPTY));
+                } else {
+                  args[0].body[fields] = convertFileToBase64(request.file);
+                }
+              } else {
+                args[0].body[fields] = request.body[fields];
+              }
               break;
             case UPLOAD_MODE.ARRAY:
               args[0].body[fields] = request.files.map(file => convertFileToBase64(file));

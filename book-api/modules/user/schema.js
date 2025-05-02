@@ -45,7 +45,7 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
   name: 'UserInformationInput',
   fields: {
     userId: {
-      type: GraphQLID,
+      type: new GraphQLNonNull(GraphQLID),
     },
     firstName: {
       type: new GraphQLNonNull(GraphQLString),
@@ -74,6 +74,9 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
 const USER_INFORMATION_UPDATE_PERSON_INPUT = new GraphQLInputObjectType({
   name: 'UserInformationUpdatePersonInput',
   fields: {
+    userId: {
+      type: new GraphQLNonNull(GraphQLID),
+    },
     firstName: {
       type: new GraphQLNonNull(GraphQLString),
     },

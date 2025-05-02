@@ -37,6 +37,7 @@ const signedTestCookie = (sessionJson) => {
 
 const sessionData = {
   user: {
+    userId: mockUser.user_id,
     email: mockUser.email,
     apiKey: authenticationToken,
     role: POWER.ADMIN,
