@@ -19,7 +19,9 @@
     "test.user.verify-otp": "jest --watchAll -- __test__/apis/user/verify-otp.test.js",
     "test.user.verify-otp.silent": "jest --watchAll --silent -- __test__/apis/user/verify-otp.test.js",
     "test.user.update-user": "jest --watchAll -- __test__/apis/user/update-user.test.js",
-    "test.user.update-user.silent": "jest --watchAll --silent -- __test__/apis/user/update-user.test.js"
+    "test.user.update-user.silent": "jest --watchAll --silent -- __test__/apis/user/update-user.test.js",
+    "test.user.update-person": "jest --watchAll -- __test__/apis/user/update-person.test.js",
+    "test.user.update-person.silent": "jest --watchAll --silent -- __test__/apis/user/update-user.test.js"
   },
   "author": "hoai nam",
   "license": "ISC",

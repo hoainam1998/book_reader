@@ -62,6 +62,7 @@ class UserRouter extends Router {
     this.delete('/delete-user/:id', authentication, onlyAdminAllowed, this._deleteUser);
     this.post('/user-detail', authentication, onlyAdminAllowed, this._getUserDetail);
     this.put('/update-user', authentication, onlyAdminAllowed, this._updateUser);
+    this.put('/update-person', authentication, this._updatePerson);
     this.post('/send-otp', loginRequire, otpAllowed, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.post('/login-process', allowInternalCall, this._login);
@@ -206,7 +207,7 @@ class UserRouter extends Router {
        }
     }`;
 
-    return self.execute(query, { user: variables });
+    return self.execute(query, { person: variables });
   }
 
   @validation(UserDetail, { error_message: USER.LOAD_USER_DETAIL_FAIL })

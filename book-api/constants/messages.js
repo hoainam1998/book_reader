@@ -11,7 +11,8 @@ module.exports = deepFreeze({
     RESET_PASSWORD_TOKEN_EXPIRE: 'The reset password token has expired!',
     TOKEN_INVALID: 'Token is invalid!',
     REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',
-    FILE_NOT_IMAGE: 'File must be an image file!'
+    FILE_NOT_IMAGE: 'File must be an image file!',
+    FILE_IS_EMPTY: 'File is empty!',
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',
@@ -43,6 +44,6 @@ module.exports = deepFreeze({
     MFA_UNENABLE: 'Mfa unenable for user!',
     USER_FINISH_LOGIN: 'User has already completely logged in!',
     DUPLICATE_EMAIL_OR_PHONE_NUMBER: 'Email or phone number have been duplicate. Please enter another one!',
-    NOT_PERMISSION: 'User dose not have permission to perform this operation!'
+    NOT_PERMISSION: 'User dose not have permission to perform this operation!',
   },
 });

@@ -5,7 +5,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { signLoginToken } = require('#utils');
 const { mockUser, authenticationToken, otpCode } = require('#test/resources/auth');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const verifyOtpUrl = `${PATH.USER}/verify-otp`;
 const verifyOtpInternalUrl = `${PATH.USER}/verify-otp-process`;
@@ -18,8 +18,7 @@ const requestBody = {
   },
 };
 
-describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
-
+describe(createDescribeTest(METHOD.POST, verifyOtpUrl), () => {
   commonTest('verify otp api common test', [
     {
       name: 'url test',
@@ -68,6 +67,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
+          expect(fetch).toHaveBeenCalledTimes(1);
           expect(fetch).toHaveBeenCalledWith(
             expect.stringContaining(verifyOtpInternalUrl),
             expect.objectContaining({
@@ -96,7 +96,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
       {
         describe: 'bad request',
         expected: {
-          message: `${USER.VERIFY_OTP_FAIL}\n${COMMON.INPUT_VALIDATE_FAIL}`
+          message: getInputValidateMessage(USER.VERIFY_OTP_FAIL)
         },
         status: HTTP_CODE.BAD_REQUEST
       },
@@ -124,6 +124,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .expect(status)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
+          expect(fetch).toHaveBeenCalledTimes(1);
           expect(fetch).toHaveBeenCalledWith(
             expect.stringContaining(verifyOtpInternalUrl),
             expect.objectContaining({
@@ -149,7 +150,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
     }
   ], 'verify otp internal');
 
-  describe(createDescribeTest(method.POST, verifyOtpInternalUrl), () => {
+  describe(createDescribeTest(METHOD.POST, verifyOtpInternalUrl), () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       done();
@@ -176,6 +177,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .send(requestBody)
         .expect(HTTP_CODE.OK)
         .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
@@ -204,6 +206,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .send(requestBody)
         .expect(HTTP_CODE.UNAUTHORIZED)
         .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
@@ -236,7 +239,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .then((response) => {
           expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
           expect(response.body).toMatchObject({
-            message: `${USER.VERIFY_OTP_FAIL}\n${COMMON.INPUT_VALIDATE_FAIL}`
+            message: getInputValidateMessage(USER.VERIFY_OTP_FAIL),
           });
           done();
         });
@@ -259,6 +262,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .send(requestBody)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
@@ -287,6 +291,7 @@ describe(createDescribeTest(method.POST, verifyOtpUrl), () => {
         .send(requestBody)
         .expect(HTTP_CODE.SERVER_ERROR)
         .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
