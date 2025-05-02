@@ -15,6 +15,7 @@ function Radio<T extends string | number>({
   name,
   value,
   label,
+  className,
   options,
   horizontal,
   inputColumnSize,
@@ -32,6 +33,7 @@ function Radio<T extends string | number>({
   return (
     <FormControl
       name={name}
+      className={className}
       label={label}
       inputColumnSize={inputColumnSize}
       labelColumnSize={labelColumnSize}>
