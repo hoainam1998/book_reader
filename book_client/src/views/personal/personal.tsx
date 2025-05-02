@@ -254,6 +254,7 @@ function Personal(): JSX.Element {
                   {...sex}
                   label="Sex"
                   name="sex"
+                  className="align-items-center"
                   horizontal
                   options={sexOptions}
                   labelColumnSize={{

@@ -72,14 +72,14 @@ function FormControl({
     <fieldset className={clsx('fieldset grid', className)} ref={fieldsetRef}>
       { label &&
         <GridItem {...labelColumnSize} >
-          <label htmlFor={name} style={labelStyle} className={labelClass}>{ label }</label>
+          <label htmlFor={name} style={labelStyle} className={labelClass}>{label}</label>
         </GridItem>
       }
       <GridItem {...inputColumn}>
         {children}
       </GridItem>
       <GridItem lg={12} className="error-feedback">
-        { errors.map((error, index) => <span key={index}>{ error }</span>) }
+        { errors.map((error, index) => <span key={index}>{error}</span>) }
       </GridItem>
     </fieldset>
   );
