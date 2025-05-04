@@ -8,10 +8,48 @@ const Singleton = require('#services/singleton');
 class Validator extends Singleton {
 
   /**
+  * A map stored all properties of each validate class.
+  * @static
+  */
+  static _keys = new Map();
+
+  static get Keys () {
+    return Validator._keys;
+  }
+
+  /**
   * Create validator instance.
+  * @constructor
   */
   constructor() {
     super(Validator);
+  }
+
+  /**
+  * Checking incoming request data have redundant fields. If they have throw error, and remove them.
+  *
+  * @static
+  * @param {Object} data - The incoming request data.
+  * @return {string[]} - The errors array.
+  */
+  static checkRedundantField(data) {
+    // fields in request data.
+    const dataKeys = Object.keys(data);
+    // all fields of each class.
+    const fieldsOfClass = Validator.Keys.get(this.name);
+    if (fieldsOfClass.length) {
+      // if field is not duplicate, that mean it not expected in request data, so throw it as error message.
+      return fieldsOfClass.concat(dataKeys).reduce((errors, key, index, array) => {
+        if (index === array.lastIndexOf(key)) {
+          if (array.lastIndexOf(key) === array.indexOf(key) && !fieldsOfClass.includes(key)) {
+            errors.push(`${key} is not expected!`);
+            delete data[key];
+          }
+        }
+        return errors;
+      }, []);
+    }
+    return [];
   }
 
   /**
@@ -86,11 +124,22 @@ const validation = (cls) => {
     // checking whether this field is optional or not.
     let isOptional = validatorsFn.some(validateInfo => typeof validateInfo === 'object' && validateInfo.isOptional);
     isOptional = validatorsFn.every(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
-
     validatorsFn = validatorsFn.filter(validateInfo => !Object.hasOwn(validateInfo, 'isOptional'));
     // adding validator object into validator instance.
     // all validator function in this object will be run validate method.
     return (target) => {
+      // get all fields of this validate class.
+      const fieldsOfClass = Validator.Keys.get(cls);
+
+      // if it not exist, push new
+      // else update it with new field.
+      if (fieldsOfClass) {
+        fieldsOfClass.push(target.key);
+        Validator.Keys.set(cls, fieldsOfClass);
+      } else {
+        Validator.Keys.set(cls, [target.key]);
+      }
+
       Validator.prototype.validators = {
         ...Validator.prototype.validators,
         [cls]: {

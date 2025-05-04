@@ -4,9 +4,7 @@ const { USER } = require('#messages');
 const { authenticationToken, mockUser } = require('#test/resources/auth');
 const { createDescribeTest } = require('#test/helpers/index');
 const logoutUrl = `${PATH.USER}/logout`;
-
-describe(createDescribeTest(METHOD.GET, logoutUrl), () => {
-
+describe('logout api', () => {
   commonTest('logout api common test', [
     {
       name: 'url test',
@@ -29,7 +27,7 @@ describe(createDescribeTest(METHOD.GET, logoutUrl), () => {
     }
   ], 'logout common test');
 
-  describe('logout api test', () => {
+  describe(createDescribeTest(METHOD.GET, logoutUrl), () => {
     beforeAll((done) => {
       globalThis.TestServer.addMiddleware((request) => {
         request.session.user = {

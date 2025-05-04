@@ -1,14 +1,12 @@
 const Router = require('../router');
-const multer = require('multer');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, RESET_PASSWORD_URL, METHOD } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
   fetchHelper,
   getOriginInternalServerUrl,
-  createFile,
-  verifyResetPasswordToken
+  verifyResetPasswordToken,
 } = require('#utils');
 const EmailService = require('#services/email');
 const loginRequire = require('#middlewares/auth/login-require');
@@ -54,7 +52,7 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-user', authentication, multer().single('avatar'), this._createUser);
+    this.post('/create-user', authentication, onlyAdminAllowed, this._createUser);
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, this._updateMfaState);
@@ -73,12 +71,11 @@ class UserRouter extends Router {
     this.post('/all', authentication, this._getAllUsers);
   }
 
-  @upload(UPLOAD_MODE.SINGLE, 'avatar')
   @validation(UserUpdate, { error_message: USER.ADD_USER_FAIL, groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(UserCreatedResponse)
   _addUser(req, res, next, self) {
-    const query = `mutation AddUser($user: UserInformationInput!) {
+    const query = `mutation AddUser($user: UserInformationCreateInput!) {
       user {
         add(user: $user) {
           resetPasswordToken,
@@ -90,10 +87,10 @@ class UserRouter extends Router {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
-      avatar: req.body.avatar,
       sex: +req.body.sex,
-      power: +req.body.power,
-      mfaEnable: req.body.mfa === 'true'
+      phone: req.body.phone,
+      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : undefined,
+      mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
     return self.execute(query, { user: variables });
   }
@@ -376,24 +373,17 @@ class UserRouter extends Router {
     });
   }
 
-  @validateResultExecute(HTTP_CODE.OK)
+  @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  _createUser(req, res, next, schema) {
+  _createUser(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
-    const formData = new FormData();
-    const avatar = req.file;
-
-    for (const [key, value] of Object.entries(req.body)) {
-      if (key !== 'avatar') {
-        formData.append(key, value);
-      }
-    }
-
-    formData.append('avatar', createFile(avatar), avatar.originalname);
 
     return fetchHelper(`${url}/add`,
       METHOD.POST,
-      formData
+      {
+        'Content-Type': 'application/json'
+      },
+      JSON.stringify(req.body)
     )
     .then(async (response) => {
       const json = response.json();

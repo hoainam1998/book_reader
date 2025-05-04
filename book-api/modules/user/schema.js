@@ -41,32 +41,49 @@ const USER_INFORMATION_FIELDS = {
   },
 };
 
+const REQUIREMENT_USER_INFORMATION_INPUT = {
+  firstName: {
+    type: new GraphQLNonNull(GraphQLString),
+  },
+  lastName: {
+    type: new GraphQLNonNull(GraphQLString),
+  },
+  sex: {
+    type: new GraphQLNonNull(GraphQLInt),
+  },
+  email: {
+    type: new GraphQLNonNull(GraphQLString),
+  },
+  phone: {
+    type: new GraphQLNonNull(GraphQLString),
+  },
+};
+
 const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
   name: 'UserInformationInput',
   fields: {
+    ...REQUIREMENT_USER_INFORMATION_INPUT,
     userId: {
       type: new GraphQLNonNull(GraphQLID),
-    },
-    firstName: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    lastName: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    email: {
-      type: new GraphQLNonNull(GraphQLString),
     },
     power: {
       type: new GraphQLNonNull(GraphQLBoolean),
     },
-    phone: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
     mfaEnable: {
       type: new GraphQLNonNull(GraphQLBoolean),
     },
-    sex: {
-      type: new GraphQLNonNull(GraphQLInt),
+  },
+});
+
+const USER_INFORMATION_CREATE_INPUT = new GraphQLInputObjectType({
+  name: 'UserInformationCreateInput',
+  fields: {
+    ...REQUIREMENT_USER_INFORMATION_INPUT,
+    power: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+    },
+    mfaEnable: {
+      type: new GraphQLNonNull(GraphQLBoolean),
     },
   },
 });
@@ -74,28 +91,14 @@ const USER_INFORMATION_INPUT = new GraphQLInputObjectType({
 const USER_INFORMATION_UPDATE_PERSON_INPUT = new GraphQLInputObjectType({
   name: 'UserInformationUpdatePersonInput',
   fields: {
+    ...REQUIREMENT_USER_INFORMATION_INPUT,
     userId: {
       type: new GraphQLNonNull(GraphQLID),
-    },
-    firstName: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    lastName: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-    sex: {
-      type: new GraphQLNonNull(GraphQLInt),
-    },
-    email: {
-      type: new GraphQLNonNull(GraphQLString),
     },
     avatar: {
       type: new GraphQLNonNull(GraphQLString),
     },
-    phone: {
-      type: new GraphQLNonNull(GraphQLString),
-    },
-  }
+  },
 });
 
 const USER_INFORMATION_DETAIL = new GraphQLObjectType({
@@ -285,7 +288,7 @@ const mutation = new GraphQLObjectType({
       }),
       args: {
         user: {
-          type: new GraphQLNonNull(USER_INFORMATION_INPUT),
+          type: new GraphQLNonNull(USER_INFORMATION_CREATE_INPUT),
         },
       },
       resolve: async (user, args) => {

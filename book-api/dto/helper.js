@@ -8,12 +8,22 @@ const { validation } = require('#services/validator');
 * @return {class} The sealed object.
 */
 const classCreator = (cls, className) => {
+  // add class name for validate instance
   cls.prototype.className = className;
+
   return class extends cls {
+    /**
+    * Create validate instance.
+    * @constructor
+    */
     constructor() {
       super();
+      // to ensure, can not add more fields to this object.
       Object.seal(this);
     }
+
+    // add class name for validate class
+    static name = className;
   };
 };
 

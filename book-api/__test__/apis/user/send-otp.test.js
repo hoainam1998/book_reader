@@ -6,6 +6,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { mockUser, otpCode } = require('#test/resources/auth');
 const { generateOtp } = require('#utils');
+const { createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const sendOtpUrl = `${PATH.USER}/send-otp`;
 const sendOtpInternalUrl = `${PATH.USER}/update-otp`;
@@ -41,7 +42,7 @@ describe('send otp', () => {
     }
   ], 'send otp common test');
 
-  describe('send otp api test', () => {
+  describe(createDescribeTest(METHOD.POST, sendOtpUrl), () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       fetch.mockClear();
@@ -155,7 +156,7 @@ describe('send otp', () => {
     }
   ], 'send otp internal');
 
-  describe('send otp internal test', () => {
+  describe(createDescribeTest(METHOD.POST, sendOtpInternalUrl), () => {
 
     test('send otp internal api will be success', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);

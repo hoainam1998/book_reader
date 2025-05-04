@@ -5,16 +5,16 @@ const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/librar
 
 class UserService extends Service {
   addUser(user) {
-    const { firstName, lastName, avatar, email, sex, power, mfaEnable } = user;
+    const { firstName, lastName, email, phone, sex, power, mfaEnable } = user;
 
     return this.PrismaInstance.user.create({
       data: {
         first_name: firstName,
         last_name: lastName,
-        avatar,
         email,
         sex,
         power,
+        phone,
         mfa_enable: mfaEnable,
       },
     });
