@@ -8,6 +8,7 @@ const { USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { mockUser } = require('#test/resources/auth');
 const { passwordHashing } = require('#utils');
+const { createDescribeTest } = require('#test/helpers/index');
 const loginUrl = `${PATH.USER}/login`;
 const internalLoginApiUrl = `${PATH.USER}/login-process`;
 
@@ -26,7 +27,6 @@ const requestBody = {
 let sessionToken = null;
 
 describe('login api', () => {
-
   commonTest('login api common test', [
     {
       name: 'url test',
@@ -49,7 +49,7 @@ describe('login api', () => {
     }
   ], 'login common test');
 
-  describe('login api test', () => {
+  describe(createDescribeTest(METHOD.POST, loginUrl), () => {
     afterEach(() => fetch.mockReset());
 
     test('login success', (done) => {
@@ -150,7 +150,7 @@ describe('login api', () => {
     }
   ], 'login internal');
 
-  describe('login api testing with internal api', () => {
+  describe(createDescribeTest(METHOD.POST, internalLoginApiUrl), () => {
     afterEach(() => jest.restoreAllMocks());
 
     test('login internal api will be success', async () => {

@@ -259,7 +259,7 @@ const serializer = (serializerClass) => {
               if (!success) {
                 return {
                   status: HTTP_CODE.BAD_REQUEST,
-                  json: messageCreator(message)
+                  json: messageCreator(message),
                 };
               } else {
                 return data ?? value;
@@ -310,20 +310,24 @@ const validation = (...args) => {
          * @param {class} validateClass - validate class
          */
         const validating = (type, validateClass) => {
-          if (request[type] && Object.keys(request[type]).length) {
+          const incomingData = request[type];
+          if (incomingData && Object.keys(incomingData).length) {
+            // checking redundant fields, return array error messages.
+            const preValidateErrors = validateClass.checkRedundantField(incomingData);
             // convert request incoming data to instance validate class.
             // all validate class extended by Validator, therefor it owned validated method
             // run validate method with parameter, return errors array
             const errorsValidated
-              = plainToInstance(validateClass, request[type]).validate(groups)?.errors;
+              = plainToInstance(validateClass, incomingData).validate(groups)?.errors;
+            const listErrorMessages = preValidateErrors.concat(errorsValidated);
             // error is empty, skip
-            if (errorsValidated.length) {
+            if (listErrorMessages.length) {
               // update lastRun flag, and return bad request response.
               if (lastRun) {
                 lastRun = false;
               }
               return response.status(HTTP_CODE.BAD_REQUEST).json({
-                errors: errorsValidated,
+                errors: listErrorMessages,
                 message: errorMessage
               });
             }

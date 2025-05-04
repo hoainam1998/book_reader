@@ -5,10 +5,11 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { autoGeneratePassword, passwordHashing, signingResetPasswordToken } = require('#utils');
 const { COMMON, USER } = require('#messages');
 const { resetPasswordToken, mockUser } = require('#test/resources/auth');
+const { createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const resetPasswordUrl = `${PATH.USER}/reset-password`;
 
-describe('reset password api', () => {
+describe('reset password', () => {
   commonTest('reset password common test', [
     {
       name: 'url test',
@@ -31,7 +32,7 @@ describe('reset password api', () => {
     }
   ], 'reset password');
 
-  describe('reset password api test', () => {
+  describe(createDescribeTest(METHOD.POST, resetPasswordUrl), () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       done();

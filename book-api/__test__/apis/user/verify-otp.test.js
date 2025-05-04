@@ -18,7 +18,7 @@ const requestBody = {
   },
 };
 
-describe(createDescribeTest(METHOD.POST, verifyOtpUrl), () => {
+describe('verify otp', () => {
   commonTest('verify otp api common test', [
     {
       name: 'url test',
@@ -41,7 +41,7 @@ describe(createDescribeTest(METHOD.POST, verifyOtpUrl), () => {
     }
   ], 'verify otp common test');
 
-  describe('verify otp test', () => {
+  describe(createDescribeTest(METHOD.POST, verifyOtpUrl), () => {
     afterEach((done) => {
       jest.restoreAllMocks();
       fetch.mockClear();
