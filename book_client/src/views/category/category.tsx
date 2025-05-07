@@ -93,12 +93,19 @@ function Category(): JSX.Element {
     }
   }, []);
 
-  const reFetchCategory = useCallback((promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
-    return promise.then(res => {
-      revalidator.revalidate();
-      document.querySelector('.table-wrapper')?.scrollTo({ top: currentOffset });
-      return Promise.resolve(res);
-    });
+  const reFetchCategory
+    = useCallback((promise: Promise<AxiosResponse>, title: string, callback?: () => void): Promise<AxiosResponse> => {
+      return promise.then(response => {
+        showToast(title, response.data.message);
+        revalidator.revalidate();
+        callback && callback();
+        document.querySelector('.table-wrapper')?.scrollTo({ top: currentOffset });
+        return response;
+      })
+      .catch((error) => {
+        showToast(title, error.response.data.message);
+        throw error;
+      });
   }, []);
 
   const resetState = useCallback((): void => {
@@ -113,9 +120,9 @@ function Category(): JSX.Element {
     if (!validate.error) {
       if (currentCategoryId) {
         formData.append('categoryId', currentCategoryId);
-        reFetchCategory(updateCategory(formData)).then(resetState);
+        reFetchCategory(updateCategory(formData), 'Update category!', resetState);
       } else {
-        reFetchCategory(createCategory(formData)).then(resetState);
+        reFetchCategory(createCategory(formData), 'Create category!', resetState);
       }
     }
   }, []);
@@ -127,18 +134,17 @@ function Category(): JSX.Element {
   const fetchCategoryDetail = useCallback((categoryId: string): void => {
     currentCategoryId = categoryId;
     getCategoryDetail(categoryId)
-      .then(res => {
+      .then((res) => {
         convertBase64ToSingleFile(res.data.avatar, 'avatar')
           .then(image => avatar.watch([image]));
         categoryName?.watch(res.data.name);
         setPreviewImage([res.data.avatar]);
       })
-      .catch(error => showToast('Category', error.response.data.message));
+      .catch((error) => showToast('Category', error.response.data.message));
   }, [categoryName]);
 
   const deleteCategory = useCallback((categoryId: string): void => {
-    reFetchCategory(_deleteCategory(categoryId))
-      .catch((err) => showToast('Delete category', err.response.data.message));
+    reFetchCategory(_deleteCategory(categoryId), 'Delete category!');
   }, []);
 
   const operationSlot = useCallback((slotProp: CategoryType): JSX.Element => {

@@ -2,8 +2,8 @@ import { JSX, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
 import LoginForm from '../login-form/login-form';
-import auth from 'store/auth';
 import { login } from './fetcher';
+import auth from 'store/auth';
 import path from 'router/paths';
 import { showToast, generateResetPasswordLink } from 'utils';
 import './style.scss';
@@ -29,7 +29,7 @@ function AdminLogin(): JSX.Element {
           }
         }
       })
-      .catch((error) => showToast('OTP', error.response.data.message))
+      .catch((error) => showToast('Login!', error.response.data.message))
       .finally(reset);
   }, []);
 

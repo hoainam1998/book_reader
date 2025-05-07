@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { JSX, useCallback } from 'react';
 import Button from 'components/button/button';
 import { clsx } from 'utils';
@@ -11,7 +10,6 @@ type FormProps = {
   submitLabel?: string;
   disableSubmitButton?: boolean;
   submitBtnClass?: string;
-  // eslint-disable-next-line no-unused-vars,
   onSubmit: (formData: FormData) => void;
 };
 
@@ -32,6 +30,7 @@ function Form({
 
   const enterKeyEvent = useCallback((event: any): void => {
     if (event.code === 'Enter') {
+      event.preventDefault();
       onSubmit(new FormData((event.target as HTMLFormElement).form));
     }
   }, [onSubmit]);
