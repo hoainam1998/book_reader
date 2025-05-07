@@ -83,7 +83,12 @@ const validateResultExecute = (httpCode) => {
                     return response.status(status).json(error.extensions.response);
                   }
                   self.Logger.error(error.message);
-                  response.status(status).json(messageCreator(error.message));
+                  if (error.extensions?.http.error_code) {
+                    response.status(status)
+                      .json(messageCreator(error.message, error.extensions?.http.error_code));
+                  } else {
+                    response.status(status).json(messageCreator(error.message));
+                  }
                 } else {
                   self.Logger.error(error.message);
                   response.status(HTTP_CODE.SERVER_ERROR)

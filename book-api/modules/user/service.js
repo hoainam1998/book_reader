@@ -1,6 +1,11 @@
 const { compare } = require('bcrypt');
 const Service = require('#services/prisma');
-const { generateOtp } = require('#utils');
+const {
+  generateOtp,
+  autoGeneratePassword,
+  passwordHashing,
+  signingResetPasswordToken
+} = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 class UserService extends Service {
@@ -110,6 +115,20 @@ class UserService extends Service {
           return user;
         });
     });
+  }
+
+  async forgetPassword(email) {
+    const password = autoGeneratePassword();
+    const passwordHash = await passwordHashing(password);
+    return this.PrismaInstance.user.update({
+      where: {
+        email
+      },
+      data: {
+        reset_password_token: signingResetPasswordToken(email),
+        password: passwordHash
+      }
+    }).then((user) => ({ ...user, password }));
   }
 
   resetPassword(resetPasswordToken, email, oldPassword, password) {

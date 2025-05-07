@@ -23,6 +23,7 @@ const {
   AllUsersResponse,
   UserDetailResponse,
   UserCreatedResponse,
+  ForgetPasswordResponse,
 } = require('#dto/user/user-out');
 const {
   UserPaginationInput,
@@ -35,6 +36,7 @@ const {
   PersonUpdate,
   UserDelete,
   AllUser,
+  UserForgetPassword,
 } = require('#dto/user/user-in');
 const Login = require('#dto/common/login-validator');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -69,6 +71,8 @@ class UserRouter extends Router {
     this.get('/logout', authentication, this._logout);
     this.post('/verify-otp', loginRequire, otpAllowed, this._verifyOtpWithSession);
     this.post('/verify-otp-process', allowInternalCall, this._verifyOtp);
+    this.post('/forget-password-process', allowInternalCall, this._forgetPasswordProcess);
+    this.post('/forget-password', this._forgetPassword);
     this.post('/all', authentication, this._getAllUsers);
   }
 
@@ -454,6 +458,45 @@ class UserRouter extends Router {
         role: json.role,
       };
       return json;
+    });
+  }
+
+  @validation(UserForgetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(ForgetPasswordResponse)
+  _forgetPasswordProcess(req, res, next, self) {
+    const query = `mutation ForgetPassword($email: String!) {
+      user {
+        forgetPassword(email: $email) {
+          resetPasswordToken,
+          password
+        }
+      }
+    }`;
+    return self.execute(query, { email: req.body.email });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  _forgetPassword(req, res, next, self) {
+    const url = getOriginInternalServerUrl(req);
+
+    return fetchHelper(`${url}/forget-password-process`,
+      METHOD.POST,
+      {
+        'Content-Type': 'application/json'
+      },
+      JSON.stringify(req.body),
+    ).then(async (response) => {
+      const json = response.json();
+      if (response.status === HTTP_CODE.OK) {
+        return json;
+      }
+      return Promise.reject({ ...await json, status: response.status });
+    })
+    .then(({ resetPasswordToken, password }) => {
+      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
+      return EmailService.sendPassword(req.body.email, link, password)
+        .then(() => messageCreator(USER.UPDATE_PASSWORD));
     });
   }
 
