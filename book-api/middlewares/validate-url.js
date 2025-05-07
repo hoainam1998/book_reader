@@ -1,5 +1,6 @@
 const { messageCreator } = require('#utils');
 const { HTTP_CODE } = require('#constants');
+const ErrorCode = require('#services/error-code');
 const Logger = require('#services/logger');
 const { COMMON } = require('#messages');
 const logger = new Logger('Validate url');
@@ -13,21 +14,23 @@ const logger = new Logger('Validate url');
  * @param {Array} layers - route layer function.
  */
 module.exports = (req, res, next, layers) => {
-  const realUrl = /(?!^(\/\w+))(\/(\w|-)+){1,2}/.exec(req.originalUrl)[0];
-  const layerFound = layers.find(layer => layer.route.test(req.originalUrl) && layer.endpoint.test(realUrl));
+  const matches = /(?!^(\/\w+))(\/(\w|-)+){1,2}/.exec(req.originalUrl);
+  if (matches && matches.length) {
+    const realUrl = matches[0];
+    const layerFound = layers.find(layer => layer.route.test(req.originalUrl) && layer.endpoint.test(realUrl));
 
-  if (layerFound) {
-    if (layerFound.methods[req.method.toLowerCase()]) {
-      next();
-    } else {
-      const methodNotAllowed = COMMON.METHOD_NOT_ALLOWED.format(req.method, req.originalUrl);
-      logger.error(methodNotAllowed);
-      res.status(HTTP_CODE.METHOD_NOT_ALLOWED)
-        .json(messageCreator(methodNotAllowed));
+    if (layerFound) {
+      if (layerFound.methods[req.method.toLowerCase()]) {
+        return next();
+      } else {
+        const methodNotAllowed = COMMON.METHOD_NOT_ALLOWED.format(req.method, req.originalUrl);
+        logger.error(methodNotAllowed);
+        return res.status(HTTP_CODE.METHOD_NOT_ALLOWED)
+          .json(messageCreator(methodNotAllowed));
+      }
     }
-  } else {
-    const urlInvalid = COMMON.URL_INVALID.format(req.originalUrl);
-    logger.error(urlInvalid);
-    res.status(HTTP_CODE.NOT_FOUND).json(messageCreator(urlInvalid));
   }
+  const urlInvalid = COMMON.URL_INVALID.format(req.originalUrl);
+  logger.error(urlInvalid);
+  res.status(HTTP_CODE.NOT_FOUND).json(messageCreator(urlInvalid, ErrorCode.URL_NOT_FOUND));
 };

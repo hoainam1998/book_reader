@@ -9,6 +9,7 @@ const {
   verifyResetPasswordToken,
 } = require('#utils');
 const EmailService = require('#services/email');
+const ErrorCode = require('#services/error-code');
 const loginRequire = require('#middlewares/auth/login-require');
 const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
@@ -240,7 +241,7 @@ class UserRouter extends Router {
     if (req.body.password === req.body.oldPassword) {
       return {
         status: HTTP_CODE.UNAUTHORIZED,
-        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME)
+        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE)
       };
     }
 
@@ -249,24 +250,24 @@ class UserRouter extends Router {
       if (!decodedUser) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(USER.USER_NOT_FOUND)
+          json: messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH)
         };
       } else if (decodedUser.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH)
+          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH)
         };
       }
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE)
+          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED)
         };
       } else {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.TOKEN_INVALID)
+          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID)
         };
       }
     }
@@ -426,7 +427,7 @@ class UserRouter extends Router {
       if (req.body.email === req.session.user.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(USER.ALREADY_LOGIN),
+          json: messageCreator(USER.ALREADY_LOGIN, ErrorCode.TOKEN_EXPIRED),
         };
       }
     }

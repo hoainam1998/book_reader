@@ -1,6 +1,7 @@
 const { HTTP_CODE } = require('#constants');
 const { COMMON, USER } = require('#messages');
 const { messageCreator } = require('#utils');
+const ErrorCode = require('#services/error-code');
 const Logger = require('#services/logger');
 const logger = new Logger('Login require');
 
@@ -21,7 +22,7 @@ const loginRequire = (req, res, next) => {
       // else return unauthorized message
       logger.warn('unauthorized error');
       return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(USER.USER_UNAUTHORIZED));
+        .json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
     }
   } catch (error) {
     logger.error(error.message);

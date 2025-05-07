@@ -3,6 +3,7 @@ const { COMMON, USER } = require('#messages');
 const utils = require('#utils');
 const { messageCreator } = utils;
 const Logger = require('#services/logger');
+const ErrorCode = require('#services/error-code');
 const logger = new Logger('Authentication');
 
 /**
@@ -25,20 +26,20 @@ const authentication = (req, res, next) => {
       } else {
         logger.warn('user not found!');
         return res.status(HTTP_CODE.UNAUTHORIZED)
-          .json(messageCreator(USER.USER_NOT_FOUND));
+          .json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
       }
     }
     // if token have not, also return unauthorized message.
     logger.warn('unauthorized error');
     return res.status(HTTP_CODE.UNAUTHORIZED)
-      .json(messageCreator(USER.USER_UNAUTHORIZED));
+      .json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE));
+        .json(messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED));
     } else if (error.name === 'JsonWebTokenError') {
       return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_INVALID));
+        .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_INVALID, ErrorCode.TOKEN_INVALID));
     }
 
     logger.error(error.message);
