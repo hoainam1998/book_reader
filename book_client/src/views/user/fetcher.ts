@@ -13,7 +13,7 @@ export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosRes
 };
 
 export const addUser = (user: UserType): Promise<AxiosResponse> => {
-  return handlePromise(UserService.post('add', user));
+  return handlePromise(UserService.post('create-user', user));
 };
 
 export const updateMfaState = (userId: string, mfaEnable: boolean): Promise<AxiosResponse> => {

@@ -1,19 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { CategoryService, RequestBody } from 'services';
-import { handleNotfoundApiError, showToast } from 'utils';
-
-const showToastWithName = (message: string) => showToast('Category', message);
-
-export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
-  return promise.then(res => {
-    showToastWithName(res.data.message);
-    return res;
-  }).catch((error) => {
-    showToastWithName(error.response.data.message);
-    throw error;
-  });
-};
 
 export const getCategoryDetail = (categoryId: string): Promise<AxiosResponse> => {
   const body: RequestBody = {
@@ -23,7 +10,7 @@ export const getCategoryDetail = (categoryId: string): Promise<AxiosResponse> =>
       avatar: true,
     }
   };
-  return CategoryService.post('detail', body);
+  return CategoryService.NotFoundAccepted.post('detail', body);
 };
 
 export const createCategory = (formData: FormData): Promise<AxiosResponse> => {
@@ -31,11 +18,11 @@ export const createCategory = (formData: FormData): Promise<AxiosResponse> => {
 };
 
 export const updateCategory = (formData: FormData): Promise<AxiosResponse> => {
-  return handlePromise(CategoryService.put('update', formData));
+  return CategoryService.put('update', formData);
 };
 
 export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
-  return handlePromise(CategoryService.delete(`delete/${categoryId}`));
+  return CategoryService.delete(`delete/${categoryId}`);
 };
 
 export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
@@ -52,5 +39,5 @@ export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<Axios
       disabled: true,
     },
   };
-  return handleNotfoundApiError(CategoryService.post('pagination', body));
+  return CategoryService.KeepAlive.NotFoundAccepted.post('pagination', body);
 };

@@ -5,7 +5,7 @@
  * @param {Object} target - The decorator binding object.
  * @param {string} propertyKey - The property name.
  * @param {TypedPropertyDescriptor<any>} descriptor - The descriptor value.
- * @returns {TypedPropertyDescriptor<any>}  - The descriptor.
+ * @returns {TypedPropertyDescriptor<any>} - The descriptor.
  */
 export default function (
   target: Object,
