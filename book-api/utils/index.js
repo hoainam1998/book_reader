@@ -49,7 +49,7 @@ const convertDtoToZodObject = (dtoClass, value) => {
  * @param {string} message - message.
  * @returns {Object} - message object.
  */
-const messageCreator = (message) => convertDtoToZodObject(MessageResponse, { message });
+const messageCreator = (message, errorCode) => convertDtoToZodObject(MessageResponse, { message, errorCode });
 
 /**
  * Check array is empty or not.
