@@ -5,6 +5,7 @@ const UserDTO = require('#dto/user/user');
 const OtpVerify = require('#dto/user/otp-verify');
 const OtpUpdate = require('#dto/user/otp-update');
 const UserCreated = require('#dto/user/user-created');
+const ForgetPassword = require('#dto/user/forget-password');
 const { getGraphqlFinalData } = require('#utils');
 const { zodValidateClassWrapper } = require('#decorators');
 
@@ -64,6 +65,14 @@ class UserCreatedResponse extends GraphqlResponse {
   }
 }
 
+class ForgetPasswordResponse extends GraphqlResponse {
+  @Expose({ toClassOnly: true })
+  @Type(() => ForgetPassword)
+  get response() {
+    return getGraphqlFinalData(this.data);
+  }
+}
+
 module.exports = {
   UserPagination: zodValidateClassWrapper(UserPagination, PaginationResponse),
   LoginResponse: zodValidateClassWrapper(LoginResponse, UserDTO),
@@ -72,4 +81,5 @@ module.exports = {
   AllUsersResponse: zodValidateClassWrapper(AllUsersResponse, UserDTO),
   UserDetailResponse: zodValidateClassWrapper(UserDetailResponse, UserDTO),
   UserCreatedResponse: zodValidateClassWrapper(UserCreatedResponse, UserCreated),
+  ForgetPasswordResponse: zodValidateClassWrapper(ForgetPasswordResponse, ForgetPassword),
 };

@@ -29,7 +29,7 @@ const PRISMA_ERROR_CODE = Object.freeze({
  * @param {PrismaErrorCodeMessages} messages - The error message object.
  * @throws {GraphQLError | Error}
  */
-const handleError = (err, messages) => {
+const handleError = (err, messages, errorCodes) => {
   if (err instanceof PrismaClientKnownRequestError) {
     let message = '';
     switch (err.code) {
@@ -38,6 +38,9 @@ const handleError = (err, messages) => {
         message = 'Data not found!';
         if (messages['UNAUTHORIZED']) {
           message = messages['UNAUTHORIZED'];
+          if (errorCodes['UNAUTHORIZED']) {
+            graphqlUnauthorizedErrorOption.error_code = errorCodes['UNAUTHORIZED'];
+          }
           throw new GraphQLError(message, graphqlUnauthorizedErrorOption);
         } else {
           message = messages['RECORD_NOT_FOUND'];
@@ -69,11 +72,11 @@ const handleError = (err, messages) => {
  * @return {Promise} - The result.
  * @throws {Error} - Throw error if it have.
  */
-module.exports = (resolveFunction, messages) => {
+module.exports = (resolveFunction, messages, errorCodes) => {
   // checking whether properties and data type is valid or not.
   // if true run resolve function, else throw an error.
   if (Object.keys(messages).every((code) => Object.keys(PRISMA_ERROR_CODE).includes(code) && typeof messages[code] === 'string')) {
-    return resolveFunction().catch((err) => handleError(err, messages));
+    return resolveFunction().catch((err) => handleError(err, messages, errorCodes));
   } else {
     throw new Error('Messages is not valid!');
   }

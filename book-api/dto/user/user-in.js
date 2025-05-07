@@ -235,6 +235,15 @@ const UserDelete = (validators, className) => {
   }, className);
 };
 
+const UserForgetPassword = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsEmail('Invalid email!'),
+    )
+    email;
+  }, className);
+};
+
 module.exports = {
   UserPaginationInput: Validation(UserPaginationInput),
   OtpVerify: Validation(OtpVerify),
@@ -246,4 +255,5 @@ module.exports = {
   UserDelete: Validation(UserDelete),
   AllUser: Validation(AllUser),
   AdminResetPassword: Validation(AdminResetPassword),
+  UserForgetPassword: Validation(UserForgetPassword),
 };

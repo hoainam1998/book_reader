@@ -17,14 +17,18 @@ const { HTTP_CODE } = require('#constants');
  * }}} The extension name.
  */
 const createGraphqlError = (code) => {
-  return {
+  return Object.defineProperty({
     extensions: {
       code,
       http: {
         status: HTTP_CODE[code],
-      }
+      },
+    },
+  }, 'error_code', {
+    set(value) {
+      this.extensions.http.error_code = value;
     }
-  };
+  });
 };
 
 const graphqlErrorOption = createGraphqlError('BAD_REQUEST');
@@ -38,8 +42,8 @@ const ResponseType = new GraphQLObjectType({
   fields: {
     message: {
       type: GraphQLString
-    }
-  }
+    },
+  },
 });
 
 module.exports = {

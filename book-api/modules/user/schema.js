@@ -13,10 +13,12 @@ const { plainToInstance } = require('class-transformer');
 const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
 const { USER } = require('#messages');
 const handleResolveResult = require('#utils/handle-resolve-result');
+const ErrorCode = require('#services/error-code');
 const UserDTO = require('#dto/user/user');
 const OtpVerify = require('#dto/user/otp-verify');
 const OtpUpdate = require('#dto/user/otp-update');
 const UserCreated = require('#dto/user/user-created');
+const ForgetPassword = require('#dto/user/forget-password');
 const PaginationResponse = require('#dto/common/pagination-response');
 const {
   ResponseType,
@@ -296,6 +298,33 @@ const mutation = new GraphQLObjectType({
           return convertDtoToZodObject(UserCreated, await user.addUser(args.user));
         }, {
           UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
+        });
+      },
+    },
+    forgetPassword: {
+      type: new GraphQLObjectType({
+        name: 'ForgetPassword',
+        fields: {
+          password: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          resetPasswordToken: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+        },
+      }),
+      args: {
+        email: {
+          type: new GraphQLNonNull(GraphQLString)
+        }
+      },
+      resolve: async (user, { email }) => {
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(ForgetPassword, await user.forgetPassword(email));
+        }, {
+          UNAUTHORIZED: USER.USER_NOT_FOUND,
+        }, {
+          UNAUTHORIZED: ErrorCode.CREDENTIAL_NOT_MATCH,
         });
       },
     },
