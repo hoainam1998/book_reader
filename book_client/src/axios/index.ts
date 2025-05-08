@@ -23,6 +23,7 @@ const handleRequestError = (error: AxiosError<any, any>): void => {
         case HttpStatusCode.Unauthorized: {
           const code = (error.response as AxiosResponse).data.errorCode || undefined;
           if (Object.values(UNAUTHORIZED_ERROR_CODE).includes(code)) {
+            auth.logout();
             redirect(paths.LOGIN);
           }
         };
