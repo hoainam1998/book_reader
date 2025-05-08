@@ -31,7 +31,6 @@ function ForgetPassword(): JSX.Element {
   const submit = useCallback(() => {
     handleSubmit();
     if (!validate.error) {
-      console.log(email.value);
       forgetPassword({ email: email.value })
         .then((response) => showToast('Forget password!', response.data.message))
         .catch((error) => showToast('Forget password!', error.response.data.message))
