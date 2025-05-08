@@ -1,5 +1,5 @@
 import { JSX, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AdminLoginWrapper from 'views/login-group/login-wrapper/admin-login-wrapper/admin-login-wrapper';
 import LoginForm from '../login-form/login-form';
 import { login } from './fetcher';
@@ -35,7 +35,10 @@ function AdminLogin(): JSX.Element {
 
   return (
     <AdminLoginWrapper>
-      <LoginForm onLogin={onSubmit} />
+      <>
+        <LoginForm onLogin={onSubmit} />
+        <Link className="forget-password-link" to={path.FORGET_PASSWORD}>Forget password?</Link>
+      </>
     </AdminLoginWrapper>
   );
 }
