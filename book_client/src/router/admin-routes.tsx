@@ -14,6 +14,7 @@ import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail
 import AuthorList, { authorPagination } from 'views/author-group/author-list/author-list';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
+import ForgetPassword from 'views/login-group/forget-password/forget-password';
 import { LoginRequire } from '../guard';
 import { NavigationRouteMatchType, RoutePropsUnion } from './interfaces';
 import path from './paths';
@@ -26,6 +27,10 @@ const adminRoutes: RoutePropsUnion[] = [
   {
     path: path.LOGIN,
     element: <LoginRequire><AdminLogin /></LoginRequire>
+  },
+  {
+    path: path.FORGET_PASSWORD,
+    element: <ForgetPassword />
   },
   {
     path: path.RESET_PASSWORD,

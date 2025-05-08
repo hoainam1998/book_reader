@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { JSX, ReactElement, useCallback } from 'react';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
