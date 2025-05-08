@@ -4,7 +4,14 @@ const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, resetPasswordToken, randomPassword, getResetPasswordLink } = require('#test/resources/auth');
+const {
+  mockUser,
+  authenticationToken,
+  sessionData,
+  resetPasswordToken,
+  randomPassword,
+  getResetPasswordLink
+} = require('#test/resources/auth');
 const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
@@ -30,25 +37,25 @@ afterAll((done) => globalThis.TestServer.removeTestMiddleware(done));
 
 describe('create user', () => {
   commonTest('create user api common test', [
-      {
-        name: 'url test',
-        describe: 'url is invalid',
-        url: `${PATH.USER}/unknown`,
-        method: METHOD.POST.toLowerCase(),
-      },
-      {
-        name: 'method test',
-        describe: 'method not allowed',
-        url: createUserUrl,
-        method: METHOD.GET.toLowerCase(),
-      },
-      {
-        name: 'cors test',
-        describe: 'create user api cors',
-        url: createUserUrl,
-        method: METHOD.POST.toLowerCase(),
-        origin: process.env.ORIGIN_CORS,
-      }
+    {
+      name: 'url test',
+      describe: 'url is invalid',
+      url: `${PATH.USER}/unknown`,
+      method: METHOD.POST.toLowerCase(),
+    },
+    {
+      name: 'method test',
+      describe: 'method not allowed',
+      url: createUserUrl,
+      method: METHOD.GET.toLowerCase(),
+    },
+    {
+      name: 'cors test',
+      describe: 'create user api cors',
+      url: createUserUrl,
+      method: METHOD.POST.toLowerCase(),
+      origin: process.env.ORIGIN_CORS,
+    }
   ], 'create user common test');
 
   describe(createDescribeTest(METHOD.POST, createUserUrl), () => {

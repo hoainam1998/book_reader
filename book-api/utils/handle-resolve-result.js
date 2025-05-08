@@ -38,7 +38,7 @@ const handleError = (err, messages, errorCodes) => {
         message = 'Data not found!';
         if (messages['UNAUTHORIZED']) {
           message = messages['UNAUTHORIZED'];
-          if (errorCodes['UNAUTHORIZED']) {
+          if (errorCodes && errorCodes['UNAUTHORIZED']) {
             graphqlUnauthorizedErrorOption.error_code = errorCodes['UNAUTHORIZED'];
           }
           throw new GraphQLError(message, graphqlUnauthorizedErrorOption);
