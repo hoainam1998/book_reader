@@ -8,6 +8,7 @@ module.exports = deepFreeze({
     METHOD_NOT_ALLOWED: 'Method {0} not allowed for {1} url!',
     URL_INVALID: 'Can not found {0}!',
     AUTHENTICATION_TOKEN_INVALID: 'Invalid authentication token!',
+    AUTHENTICATION_TOKEN_EXPIRE: 'Authentication token has been expired!',
     RESET_PASSWORD_TOKEN_EXPIRE: 'The reset password token has expired!',
     TOKEN_INVALID: 'Token is invalid!',
     REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',

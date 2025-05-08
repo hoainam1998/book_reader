@@ -25,6 +25,7 @@ afterAll((done) => TestServer.closeTestServer(done, global.name));
 
 afterEach((done) => {
   prismaClientMock.clearAllMocks();
+  jest.restoreAllMocks();
   globalThis.expressMiddleware.res.status.mockClear();
   globalThis.expressMiddleware.res.json.mockClear();
   globalThis.expressMiddleware.next.mockClear();

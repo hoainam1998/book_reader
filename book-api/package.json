@@ -23,8 +23,10 @@
     "test.user.update-user.silent": "npm run test.requirement -- __test__/apis/user/update-user.test.js --silent",
     "test.user.update-person": "npm run test.requirement -- __test__/apis/user/update-person.test.js",
     "test.user.update-person.silent": "npm run test.requirement -- __test__/apis/user/update-person.test.js --silent",
-    "test.user.create-user": "npm run test.requirement -- __test__\/apis\/user\/create-user.test.js",
-    "test.user.create-user.silent": "npm run test.requirement -- __test__/apis/user/create-user.test.js --silent"
+    "test.user.create-user": "npm run test.requirement -- __test__/apis/user/create-user.test.js",
+    "test.user.create-user.silent": "npm run test.requirement -- __test__/apis/user/create-user.test.js --silent",
+    "test.user.forget-password": "npm run test.requirement -- __test__/apis/user/forget-password.test.js",
+    "test.user.forget-password.silent": "npm run test.requirement -- __test__/apis/user/forget-password.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

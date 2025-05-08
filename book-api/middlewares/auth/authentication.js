@@ -36,7 +36,7 @@ const authentication = (req, res, next) => {
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED));
+        .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED));
     } else if (error.name === 'JsonWebTokenError') {
       return res.status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_INVALID, ErrorCode.TOKEN_INVALID));

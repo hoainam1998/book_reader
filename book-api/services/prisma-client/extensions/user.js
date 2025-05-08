@@ -62,10 +62,6 @@ module.exports = (prisma) => {
             args.data.login_token = signLoginToken(oldUser.user_id, args.data.email);
           }
         }
-
-        if (args.data.reset_password_token && oldUser.reset_password_token) {
-          args.data.reset_password_token = oldUser.reset_password_token;
-        }
       }
 
       return await query(args);

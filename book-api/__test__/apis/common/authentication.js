@@ -100,7 +100,7 @@ module.exports = describe('authentication', () => {
     expect(verifyLoginTokenMock).toHaveBeenCalled();
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: COMMON.RESET_PASSWORD_TOKEN_EXPIRE
+      message: COMMON.AUTHENTICATION_TOKEN_EXPIRE
     }));
     done();
   });

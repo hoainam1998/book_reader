@@ -119,14 +119,13 @@ class UserService extends Service {
 
   async forgetPassword(email) {
     const password = autoGeneratePassword();
-    const passwordHash = await passwordHashing(password);
     return this.PrismaInstance.user.update({
       where: {
         email
       },
       data: {
         reset_password_token: signingResetPasswordToken(email),
-        password: passwordHash
+        password,
       }
     }).then((user) => ({ ...user, password }));
   }
