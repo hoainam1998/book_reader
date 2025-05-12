@@ -1,4 +1,5 @@
 const { PrismaNotFoundError, PrismaDuplicateError } = require('#test/mocks/prisma-error');
+const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const { HTTP_CODE, PATH, METHOD } = require('#constants');
 const { USER, COMMON } = require('#messages');
@@ -9,11 +10,6 @@ const updatePersonUrl = `${PATH.USER}/update-person`;
 let sessionToken;
 
 describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
-  afterEach((done) => {
-    jest.restoreAllMocks();
-    done();
-  });
-
   commonTest('update person common test', [
     {
       name: 'url test',
@@ -37,6 +33,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   ], 'update person common test');
 
   test('update person will be success', (done) => {
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         sessionToken = responseApiSignin.header['set-cookie'];
@@ -70,7 +67,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
                 })
               })
             );
-            expect(response.body).toMatchObject({
+            expect(response.body).toEqual({
               message: USER.UPDATE_SELF_INFORMATION_SUCCESS
             });
             done();
@@ -79,6 +76,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   });
 
   test('update person failed with authentication error', (done) => {
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         globalThis.api
@@ -94,8 +92,9 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-            expect(response.body).toMatchObject({
+            expect(response.body).toEqual({
               message: expect.any(String),
+              errorCode: expect.any(String),
             });
             done();
           });
@@ -104,6 +103,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
 
   test('update person failed with bad request', (done) => {
     // missing email field
+    expect.hasAssertions();
     globalThis.api
       .put(updatePersonUrl)
       .set('authorization', authenticationToken)
@@ -117,8 +117,9 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       .expect(HTTP_CODE.BAD_REQUEST)
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toMatchObject({
-          message: getInputValidateMessage(USER.UPDATE_USER_FAIL)
+        expect(response.body).toEqual({
+          message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+          errors: expect.arrayContaining([expect.any(String)]),
         });
         done();
       });
@@ -143,13 +144,14 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     },
     {
       describe: 'server error',
-      cause: new Error('Server error!'),
+      cause: ServerError,
       expected: {
         message:COMMON.INTERNAL_ERROR_MESSAGE,
       },
       status: HTTP_CODE.SERVER_ERROR,
     }
   ])('update person failed with $describe', ({ cause, expected, status },done) => {
+    expect.hasAssertions();
     globalThis.prismaClient.user.update.mockRejectedValue(cause);
     globalThis.api
       .put(updatePersonUrl)
@@ -180,12 +182,13 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
             })
           })
         );
-        expect(response.body).toMatchObject(expected);
+        expect(response.body).toEqual(expected);
         done();
       });
   });
 
   test('update person failed with avatar not be image', (done) => {
+    expect.hasAssertions();
     globalThis.api
       .put(updatePersonUrl)
       .set('authorization', authenticationToken)
@@ -201,7 +204,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       .expect(HTTP_CODE.BAD_REQUEST)
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toMatchObject({
+        expect(response.body).toEqual({
           message: COMMON.FILE_NOT_IMAGE
         });
         done();
@@ -209,6 +212,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   });
 
   test('update person failed with avatar is empty file', (done) => {
+    expect.hasAssertions();
     globalThis.api
       .put(updatePersonUrl)
       .set('authorization', authenticationToken)
@@ -224,7 +228,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       .expect(HTTP_CODE.BAD_REQUEST)
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toMatchObject({
+        expect(response.body).toEqual({
           message: COMMON.FILE_IS_EMPTY
         });
         done();
@@ -232,6 +236,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   });
 
   test('update person failed with output validate error', (done) => {
+    expect.hasAssertions();
     globalThis.prismaClient.user.update.mockResolvedValue();
 
     jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
@@ -272,7 +277,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
             })
           })
         );
-        expect(response.body).toMatchObject({
+        expect(response.body).toEqual({
           message: COMMON.OUTPUT_VALIDATE_FAIL,
         });
         done();

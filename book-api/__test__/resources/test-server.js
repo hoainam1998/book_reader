@@ -55,8 +55,9 @@ class TestServer {
   * @static
   * @param {Function} middleware - The middleware.
   */
-  static addMiddleware(middleware) {
+  static addMiddleware(middleware, done) {
     TestServer.testServerInstance._addMiddleware(middleware);
+    done && done();
   }
 
   /**

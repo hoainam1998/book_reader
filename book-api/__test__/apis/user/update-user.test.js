@@ -1,4 +1,5 @@
 const { PrismaNotFoundError, PrismaDuplicateError } = require('#test/mocks/prisma-error');
+const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
@@ -32,6 +33,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
   ], 'update user common test');
 
   test('update user will be success', (done) => {
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         sessionToken = responseApiSignin.header['set-cookie'];
@@ -70,7 +72,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
                 })
               })
             );
-            expect(response.body).toMatchObject({
+            expect(response.body).toEqual({
               message: USER.UPDATE_USER_SUCCESS
             });
             done();
@@ -79,6 +81,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
   });
 
   test('update user failed with authentication error', (done) => {
+    expect.hasAssertions();
     globalThis.api
       .put(updateUserUrl)
       .set('authorization', authenticationToken)
@@ -96,45 +99,48 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
       .expect(HTTP_CODE.UNAUTHORIZED)
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toMatchObject({
-          message: expect.any(String)
+        expect(response.body).toEqual({
+          message: expect.any(String),
+          errorCode: expect.any(String),
         });
         done();
       });
   });
 
   test('update user failed with wrong permission error', (done) => {
+    expect.hasAssertions();
     signedTestCookie({ ...sessionData.user, role: POWER.USER })
-    .then((responseApiSignin) => {
-      const sessionToken = responseApiSignin.header['set-cookie'];
-      globalThis.api
-        .put(updateUserUrl)
-        .set('authorization', authenticationToken)
-        .set('Cookie', [sessionToken])
-        .send({
-          userId: mockUser.user_id,
-          firstName: mockUser.first_name,
-          lastName:  mockUser.last_name,
-          email: mockUser.email,
-          sex: mockUser.sex,
-          phone: mockUser.phone,
-          mfa: true,
-          power: true,
-        })
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.NOT_PERMISSION)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
-            message: USER.NOT_PERMISSION
+      .then((responseApiSignin) => {
+        const sessionToken = responseApiSignin.header['set-cookie'];
+        globalThis.api
+          .put(updateUserUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [sessionToken])
+          .send({
+            userId: mockUser.user_id,
+            firstName: mockUser.first_name,
+            lastName:  mockUser.last_name,
+            email: mockUser.email,
+            sex: mockUser.sex,
+            phone: mockUser.phone,
+            mfa: true,
+            power: true,
+          })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.NOT_PERMISSION)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.NOT_PERMISSION
+            });
+            done();
           });
-          done();
-        });
-    });
+      });
   });
 
   test('update user failed with bad request', (done) => {
     // missing email field.
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         const sessionToken = responseApiSignin.header['set-cookie'];
@@ -155,8 +161,9 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-            expect(response.body).toMatchObject({
-              message: getInputValidateMessage(USER.UPDATE_USER_FAIL)
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
             done();
           });
@@ -182,7 +189,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
     },
     {
       describe: 'server error',
-      cause: new Error('Server error!'),
+      cause: ServerError,
       expected: {
         message: COMMON.INTERNAL_ERROR_MESSAGE,
       },
@@ -191,6 +198,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
   ])('update user failed with $describe', ({ cause, expected, status }, done) => {
     globalThis.prismaClient.user.update.mockRejectedValue(cause);
 
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         const sessionToken = responseApiSignin.header['set-cookie'];
@@ -226,7 +234,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
                 })
               })
             );
-            expect(response.body).toMatchObject(expected);
+            expect(response.body).toEqual(expected);
             done();
           });
       });
@@ -243,6 +251,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
 
     globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
+    expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
         const sessionToken = responseApiSignin.header['set-cookie'];
@@ -278,7 +287,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
                 })
               })
             );
-            expect(response.body).toMatchObject({
+            expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
             done();

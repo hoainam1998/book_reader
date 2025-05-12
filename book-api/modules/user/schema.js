@@ -241,7 +241,7 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(UserDTO, await user.login(email, password, context));
         }, {
-          UNAUTHORIZED: USER.USER_NOT_FOUND
+          UNAUTHORIZED: USER.USER_NOT_FOUND,
         });
       },
     },
@@ -250,7 +250,7 @@ const query = new GraphQLObjectType({
         name: 'VerifyOtp',
         fields: {
           apiKey: {
-            type: GraphQLString,
+            type: new GraphQLNonNull(GraphQLString),
           },
         },
       }),
@@ -323,8 +323,6 @@ const mutation = new GraphQLObjectType({
           return convertDtoToZodObject(ForgetPassword, await user.forgetPassword(email));
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND,
-        }, {
-          UNAUTHORIZED: ErrorCode.CREDENTIAL_NOT_MATCH,
         });
       },
     },
@@ -377,10 +375,10 @@ const mutation = new GraphQLObjectType({
         name: 'Otp',
         fields: {
           otp: {
-            type: GraphQLString,
+            type: new GraphQLNonNull(GraphQLString),
           },
           message: {
-            type: GraphQLString,
+            type: new GraphQLNonNull(GraphQLString),
           },
         },
       }),
@@ -395,6 +393,9 @@ const mutation = new GraphQLObjectType({
           return convertDtoToZodObject(OtpUpdate, { ...messageCreator(USER.OTP_HAS_BEEN_SENT), otp });
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND
+        },
+        {
+          UNAUTHORIZED: ErrorCode.CREDENTIAL_NOT_MATCH,
         });
       },
     },
@@ -436,7 +437,7 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         userId: {
-          type: GraphQLID,
+          type: new GraphQLNonNull(GraphQLID),
         },
       },
       resolve: async (user, { userId }) => {

@@ -82,7 +82,6 @@ const validateResultExecute = (httpCode) => {
                   if (error.extensions?.response) {
                     return response.status(status).json(error.extensions.response);
                   }
-                  self.Logger.error(error.message);
                   if (error.extensions?.http.error_code) {
                     response.status(status)
                       .json(messageCreator(error.message, error.extensions?.http.error_code));
@@ -90,10 +89,10 @@ const validateResultExecute = (httpCode) => {
                     response.status(status).json(messageCreator(error.message));
                   }
                 } else {
-                  self.Logger.error(error.message);
                   response.status(HTTP_CODE.SERVER_ERROR)
                     .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
                 }
+                self.Logger.error(error.message);
               } else {
                 if (Object.hasOwn(resultClone, 'status') && Object.hasOwn(resultClone, 'json')) {
                   return response.status(resultClone.status).json(resultClone.json);
@@ -304,6 +303,14 @@ const validation = (...args) => {
       try {
         // it is flag will be determinate, origin method will run or not.
         let lastRun = true;
+        /**
+         * Update last run flag value.
+         */
+        const turnOffLastRunFlag = () => {
+          if (lastRun) {
+            lastRun = false;
+          }
+        };
         const { groups, request_data_passed_type, error_message } = options || {};
          // error_message was provided, append it into default error message.
         const errorMessage = (error_message || '').concat('\n', COMMON.INPUT_VALIDATE_FAIL);
@@ -316,7 +323,7 @@ const validation = (...args) => {
          */
         const validating = (type, validateClass) => {
           const incomingData = request[type];
-          if (incomingData && Object.keys(incomingData).length) {
+          if (incomingData && !Object.prototype.isEmpty.apply(incomingData)) {
             // checking redundant fields, return array error messages.
             const preValidateErrors = validateClass.checkRedundantField(incomingData);
             // convert request incoming data to instance validate class.
@@ -328,14 +335,18 @@ const validation = (...args) => {
             // error is empty, skip
             if (listErrorMessages.length) {
               // update lastRun flag, and return bad request response.
-              if (lastRun) {
-                lastRun = false;
-              }
+              turnOffLastRunFlag();
               return response.status(HTTP_CODE.BAD_REQUEST).json({
                 errors: listErrorMessages,
                 message: errorMessage
               });
             }
+          } else {
+            turnOffLastRunFlag();
+            return response.status(HTTP_CODE.BAD_REQUEST).json({
+              errors: [COMMON.REQUEST_DATA_EMPTY],
+              message: errorMessage
+            });
           }
         };
 

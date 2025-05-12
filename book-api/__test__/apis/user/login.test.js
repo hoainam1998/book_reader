@@ -1,14 +1,16 @@
 const fetch = require('node-fetch');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const { ServerError } = require('#test/mocks/other-errors');
+const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { plainToInstance } = require('class-transformer');
 const UserDTO = require('#dto/user/user');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { mockUser } = require('#test/resources/auth');
 const { passwordHashing } = require('#utils');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const loginUrl = `${PATH.USER}/login`;
 const internalLoginApiUrl = `${PATH.USER}/login-process`;
 
@@ -62,83 +64,112 @@ describe('login api', () => {
         power: 0,
       })));
 
+      expect.hasAssertions();
       globalThis.api.post(loginUrl)
         .send(requestBody)
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
           const plainUser = plainToInstance(UserDTO, mockUser);
-          expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/user/login-process'), expect.anything());
+          expect(fetch).toHaveBeenCalledTimes(1);
+          expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining(loginUrl),
+            expect.objectContaining({
+              method: METHOD.POST,
+              headers: expect.objectContaining({
+                'Content-Type': 'application/json'
+              }),
+              body: JSON.stringify(requestBody)
+            })
+          );
           expect(response.body.apiKey).toBeDefined();
-          expect(response.body).toHaveProperty('name', plainUser.name);
-          expect(response.body).toHaveProperty('avatar', plainUser.avatar);
-          expect(response.body).toHaveProperty('email', plainUser.email);
-          expect(response.body).toHaveProperty('mfaEnable', plainUser.mfaEnable);
+          expect(response.header).toMatchObject({
+            'set-cookie': expect.arrayContaining([expect.any(String)])
+          });
+          expect(response.body).toMatchObject({
+            name: plainUser.name,
+            avatar: plainUser.avatar,
+            email: plainUser.email,
+            mfaEnable: plainUser.mfaEnable
+          });
           sessionToken = response.header['set-cookie'];
           done();
         });
-    }, 1000);
+    });
 
     test('login failed when user already login', (done) => {
+      expect.hasAssertions();
       globalThis.api.post(loginUrl)
         .set('Cookie', [sessionToken])
         .send(requestBody)
+        .expect(HTTP_CODE.UNAUTHORIZED)
+        .expect('Content-Type', /application\/json/)
         .then((response) => {
           expect(fetch).not.toHaveBeenCalled();
-          expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
-          expect(response.header['content-type']).toContain('application/json;');
-          expect(response.body).toMatchObject({
-            message: USER.ALREADY_LOGIN
+          expect(response.body).toEqual({
+            message: USER.ALREADY_LOGIN,
+            errorCode: ErrorCode.TOKEN_EXPIRED
           });
           done();
         });
       sessionToken = null;
-    }, 1000);
+    });
 
     test.each([
       {
-        title: 'login failed with bad request',
+        title: 'bad request',
         expected: {
-          message: `${USER.LOGIN_FAIL}\n${COMMON.INPUT_VALIDATE_FAIL}`,
+          message: getInputValidateMessage(USER.LOGIN_FAIL),
           errors: [],
         },
         status: HTTP_CODE.BAD_REQUEST
       },
       {
-        title: 'login failed failed with output validated error',
+        title: 'output validated error',
         expected: {
           message: COMMON.OUTPUT_VALIDATE_FAIL,
         },
         status: HTTP_CODE.BAD_REQUEST
       },
       {
-        title: 'login failed with user not found',
+        title: 'user not found',
         expected: {
-          message: USER.USER_NOT_FOUND
+          message: USER.USER_NOT_FOUND,
+          errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
         },
         status: HTTP_CODE.UNAUTHORIZED
       },
       {
-        title: 'login failed with failed with server error',
+        title: 'server error',
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE
         },
         status: HTTP_CODE.SERVER_ERROR
       }
-    ])('$title', ({ expected, status }, done) => {
-      fetch.mockResolvedValue(
-        new Response(JSON.stringify(expected), { status })
-      );
+    ])('login failed with $title', ({ expected, status }, done) => {
+      fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
+      expect.hasAssertions();
       globalThis.api.post(loginUrl)
         .send(requestBody)
         .expect(status)
+        .expect('Content-Type', /application\/json/)
         .then((response) => {
-          expect(fetch).toHaveBeenCalled();
-          expect(response.body).toMatchObject(expected);
+          expect(fetch).toHaveBeenCalledTimes(1);
+          expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining(loginUrl),
+            expect.objectContaining({
+              method: METHOD.POST,
+              headers: expect.objectContaining({
+                'Content-Type': 'application/json'
+              }),
+              body: JSON.stringify(requestBody)
+            })
+          );
+          expect(response.body).toEqual(expected);
           done();
         });
-    }, 1000);
+    });
   });
 
   commonTest('login internal api common test', [
@@ -164,15 +195,33 @@ describe('login api', () => {
       const response = await globalThis.api.post(internalLoginApiUrl).send(requestBody);
 
       const plainUser = plainToInstance(UserDTO, mockUser);
-      expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalled();
+      expect.hasAssertions();
+      expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            email: requestBody.email
+          },
+          select: expect.objectContaining({
+            email: true,
+            power: true,
+            password: true,
+            reset_password_token: true,
+          })
+        })
+      );
+      expect(response.header['content-type']).toMatch(/application\/json/);
       expect(response.status).toBe(HTTP_CODE.OK);
-      expect(response.body).toHaveProperty('name', plainUser.name);
-      expect(response.body).toHaveProperty('avatar', plainUser.avatar);
-      expect(response.body).toHaveProperty('email', plainUser.email);
-      expect(response.body).toHaveProperty('mfaEnable', plainUser.mfaEnable);
+      expect(response.body).toMatchObject({
+        name: plainUser.name,
+        avatar: plainUser.avatar,
+        email: plainUser.email,
+        mfaEnable: plainUser.mfaEnable
+      });
     });
 
     test('login internal api failed with bad request', (done) => {
+      expect.hasAssertions();
       globalThis.api.post(internalLoginApiUrl)
         .send({
           query: {
@@ -187,13 +236,15 @@ describe('login api', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          const message = `${USER.LOGIN_FAIL}\n${COMMON.INPUT_VALIDATE_FAIL}`;
           expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
-          expect(response.body.message).toMatch(message);
           expect(response.body.errors).toHaveLength(2);
+          expect(response.body).toEqual(expect.objectContaining({
+            message: getInputValidateMessage(USER.LOGIN_FAIL),
+            errors: expect.any(Array),
+          }));
           done();
         });
-    }, 1000);
+    });
 
     test('login internal api failed with output validated error', async () => {
       const passwordHash = await passwordHashing(mockUser.password);
@@ -208,41 +259,69 @@ describe('login api', () => {
 
       const response = await globalThis.api.post(internalLoginApiUrl).send(requestBody);
 
+      expect.hasAssertions();
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
       expect(response.header['content-type']).toMatch(/application\/json/);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
-      expect(response.body).toMatchObject({
+      expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            email: requestBody.email
+          },
+          select: expect.objectContaining({
+            email: true,
+            power: true,
+            password: true,
+            reset_password_token: true,
+          })
+        })
+      );
+      expect(response.body).toEqual({
         message: COMMON.OUTPUT_VALIDATE_FAIL
       });
     });
 
     test.each([
       {
-        describe: 'with user not found',
+        describe: 'user not found',
         expected: {
-          message: USER.USER_NOT_FOUND
+          message: USER.USER_NOT_FOUND,
         },
-        cause_error: new PrismaClientKnownRequestError('Record not found!', { code: 'P2025' }),
+        cause: PrismaNotFoundError,
         status: HTTP_CODE.UNAUTHORIZED
       },
       {
-        describe: 'with unknown error',
+        describe: 'unknown error',
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE
         },
-        case_error: new Error('Server error!'),
+        cause: ServerError,
         status: HTTP_CODE.SERVER_ERROR
       }
-    ])('login internal api failed $describe', ({ expected, status, cause_error }, done) => {
-      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(cause_error);
+    ])('login internal api failed with $describe', ({ expected, status, cause }, done) => {
+      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(cause);
 
+      expect.hasAssertions();
       globalThis.api.post(internalLoginApiUrl)
         .send(requestBody)
         .expect(status)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
           expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
-          expect(response.body).toMatchObject(expected);
+          expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: {
+                email: requestBody.email
+              },
+              select: expect.objectContaining({
+                email: true,
+                power: true,
+                password: true,
+                reset_password_token: true,
+              })
+            })
+          );
+          expect(response.body).toEqual(expected);
           done();
         });
     });

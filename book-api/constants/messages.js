@@ -14,6 +14,7 @@ module.exports = deepFreeze({
     REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',
     FILE_NOT_IMAGE: 'File must be an image file!',
     FILE_IS_EMPTY: 'File is empty!',
+    REQUEST_DATA_EMPTY: 'Request data is empty!',
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',

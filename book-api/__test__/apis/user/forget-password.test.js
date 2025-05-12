@@ -2,7 +2,6 @@ const fetch = require('node-fetch');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
-const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
@@ -77,7 +76,7 @@ describe('forget password', () => {
           );
           expect(sendPassword).toHaveBeenCalledTimes(1);
           expect(sendPassword).toHaveBeenCalledWith(mockUser.email, link, forgetPasswordResponse.password);
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: USER.UPDATE_PASSWORD,
           });
           done();
@@ -89,7 +88,6 @@ describe('forget password', () => {
         describe: 'user not found',
         expected: {
           message: USER.USER_NOT_FOUND,
-          errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
         },
         status: HTTP_CODE.UNAUTHORIZED
       },
@@ -134,7 +132,7 @@ describe('forget password', () => {
             })
           );
           expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject(expected);
+          expect(response.body).toEqual(expected);
           done();
         });
     });
@@ -172,7 +170,7 @@ describe('forget password', () => {
               })
             })
           );
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             resetPasswordToken: mockUser.reset_password_token,
             password: expect.stringMatching(/(.+){8}/g)
           });
@@ -195,7 +193,7 @@ describe('forget password', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: getInputValidateMessage(USER.RESET_PASSWORD_FAIL),
             errors: expect.any(Array),
           });
@@ -235,7 +233,7 @@ describe('forget password', () => {
               })
             })
           );
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
           done();
@@ -281,7 +279,7 @@ describe('forget password', () => {
               })
             })
           );
-          expect(response.body).toMatchObject(expected);
+          expect(response.body).toEqual(expected);
           done();
         });
     });

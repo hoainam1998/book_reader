@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
@@ -67,6 +68,7 @@ describe('create user', () => {
       fetch.mockResolvedValue(new Response(JSON.stringify(createUserResponse), { status: HTTP_CODE.CREATED }));
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
+      expect.hasAssertions();
       globalThis.api
         .post(createUserUrl)
         .set('authorization', authenticationToken)
@@ -88,7 +90,7 @@ describe('create user', () => {
           );
           expect(sendPassword).toHaveBeenCalledTimes(1);
           expect(sendPassword).toHaveBeenCalledWith(mockUser.email, link, createUserResponse.password);
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: USER.USER_ADDED
           });
           done();
@@ -102,6 +104,7 @@ describe('create user', () => {
 
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
+      expect.hasAssertions();
       globalThis.api
         .post(createUserUrl)
         .send(requestBody)
@@ -110,8 +113,9 @@ describe('create user', () => {
         .then((response) => {
           expect(fetch).not.toHaveBeenCalled();
           expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
-            message: expect.any(String)
+          expect(response.body).toEqual({
+            message: expect.any(String),
+            errorCode: ErrorCode.HAVE_NOT_LOGIN
           });
           done();
         });
@@ -124,6 +128,7 @@ describe('create user', () => {
 
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
+      expect.hasAssertions();
       globalThis.api
         .post(createUserUrl)
         .set('authorization', authenticationToken)
@@ -133,7 +138,7 @@ describe('create user', () => {
         .then((response) => {
           expect(fetch).not.toHaveBeenCalled();
           expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: USER.NOT_PERMISSION
           });
           done();
@@ -155,6 +160,7 @@ describe('create user', () => {
 
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
+      expect.hasAssertions();
       globalThis.api
         .post(createUserUrl)
         .set('authorization', authenticationToken)
@@ -174,9 +180,9 @@ describe('create user', () => {
             })
           );
           expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: getInputValidateMessage(USER.ADD_USER_FAIL),
-            errors: []
+            errors: expect.any(Array),
           });
           done();
         });
@@ -196,6 +202,7 @@ describe('create user', () => {
 
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockRejectedValue();
 
+      expect.hasAssertions();
       globalThis.api
         .post(createUserUrl)
         .set('authorization', authenticationToken)
@@ -215,7 +222,7 @@ describe('create user', () => {
             })
           );
           expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE
           });
           done();
@@ -240,6 +247,7 @@ describe('create user', () => {
         power: true,
       });
 
+      expect.hasAssertions();
       globalThis.api
         .post(addUserUrl)
         .send(requestBody)
@@ -260,7 +268,7 @@ describe('create user', () => {
               })
             })
           );
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             password: expect.any(String),
             resetPasswordToken: expect.any(String),
           });
@@ -275,6 +283,7 @@ describe('create user', () => {
       const badRequestBody = { ...requestBody, avatar: 'avatar', image: 'image' };
       delete badRequestBody.email;
 
+      expect.hasAssertions();
       globalThis.api
         .post(addUserUrl)
         .send(badRequestBody)
@@ -282,7 +291,7 @@ describe('create user', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.user.create).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: getInputValidateMessage(USER.ADD_USER_FAIL),
             errors: expect.any(Array),
           });
@@ -306,6 +315,7 @@ describe('create user', () => {
         })
       );
 
+      expect.hasAssertions();
       globalThis.api
         .post(addUserUrl)
         .send(requestBody)
@@ -326,7 +336,7 @@ describe('create user', () => {
               })
             })
           );
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
           done();
@@ -353,6 +363,7 @@ describe('create user', () => {
     ])('add user failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.user.create.mockRejectedValue(cause);
 
+      expect.hasAssertions();
       globalThis.api
         .post(addUserUrl)
         .send(requestBody)
@@ -373,7 +384,7 @@ describe('create user', () => {
               })
             })
           );
-          expect(response.body).toMatchObject(expected);
+          expect(response.body).toEqual(expected);
           done();
         });
     });

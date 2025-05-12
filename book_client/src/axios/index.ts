@@ -1,9 +1,9 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig, AxiosError, HttpStatusCode } from 'axios';
-import { redirect } from 'react-router-dom';
 import paths from 'router/paths';
 import { UNAUTHORIZED_ERROR_CODE } from 'enums';
 import { showLoading, hideLoading, showToast } from 'utils';
 import auth from 'store/auth';
+import router from '../router';
 
 const Api: AxiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
@@ -16,7 +16,7 @@ const Api: AxiosInstance = axios.create({
  *
  * @param {AxiosError} error - The axios error.
  */
-const handleRequestError = (error: AxiosError<any, any>): void => {
+const handleRequestError = (error: AxiosError<any, any>): void=> {
   switch (error.code) {
     case AxiosError.ERR_BAD_REQUEST:
       switch (error.request.status) {
@@ -24,7 +24,9 @@ const handleRequestError = (error: AxiosError<any, any>): void => {
           const code = (error.response as AxiosResponse).data.errorCode || undefined;
           if (Object.values(UNAUTHORIZED_ERROR_CODE).includes(code)) {
             auth.logout();
-            redirect(paths.LOGIN);
+            if (!window.location.pathname.includes(paths.LOGIN)) {
+              router.navigate(paths.LOGIN);
+            }
           }
         };
         break;

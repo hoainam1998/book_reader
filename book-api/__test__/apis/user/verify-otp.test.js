@@ -1,17 +1,18 @@
 const fetch = require('node-fetch');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { signLoginToken } = require('#utils');
-const { mockUser, authenticationToken, otpCode } = require('#test/resources/auth');
+const { mockUser, authenticationToken, otpCode, sessionData, signedTestCookie } = require('#test/resources/auth');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const verifyOtpUrl = `${PATH.USER}/verify-otp`;
 const verifyOtpInternalUrl = `${PATH.USER}/verify-otp-process`;
 
 const requestBody = {
-  email: mockUser.email,
   otp: otpCode,
   query: {
     apiKey: true
@@ -43,43 +44,55 @@ describe('verify otp', () => {
 
   describe(createDescribeTest(METHOD.POST, verifyOtpUrl), () => {
     afterEach((done) => {
-      jest.restoreAllMocks();
       fetch.mockClear();
       done();
     });
 
     test('verify otp success', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: mockUser.mfa_enable,
-          apiKey: null,
-          power: mockUser.power,
-        };
-      });
-
       fetch.mockResolvedValue(new Response(JSON.stringify({
         apiKey: authenticationToken
-      }), { status: HTTP_CODE.OK }));
+      })));
 
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api.post(verifyOtpUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect(HTTP_CODE.OK)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(fetch).toHaveBeenCalledTimes(1);
+              expect(fetch).toHaveBeenCalledWith(
+                expect.stringContaining(verifyOtpInternalUrl),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
+                    'Cookie': cookie,
+                  }),
+                  body: JSON.stringify(requestBody)
+                })
+              );
+              expect(response.body).toEqual({
+                apiKey: authenticationToken
+              });
+              done();
+            });
+        });
+    });
+
+    test('verify otp failed due user have not login yet', (done) => {
       globalThis.api.post(verifyOtpUrl)
         .send(requestBody)
-        .expect(HTTP_CODE.OK)
+        .expect(HTTP_CODE.UNAUTHORIZED)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          expect(fetch).toHaveBeenCalledTimes(1);
-          expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(verifyOtpInternalUrl),
-            expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json'
-              }),
-              body: JSON.stringify(requestBody)
-            })
-          );
-          expect(response.body).toMatchObject({
-            apiKey: authenticationToken
+          expect(fetch).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: USER.USER_UNAUTHORIZED,
+            errorCode: ErrorCode.HAVE_NOT_LOGIN,
           });
           done();
         });
@@ -87,9 +100,54 @@ describe('verify otp', () => {
 
     test.each([
       {
+        describe: 'user was turn off mfa state',
+        expected: {
+          message: USER.MFA_UNENABLE,
+          errorCode: ErrorCode.MFA_TURN_OFF,
+        },
+        status: HTTP_CODE.UNAUTHORIZED,
+        credential: {
+          ...sessionData.user,
+          mfaEnable: false,
+        }
+      },
+      {
+        describe: 'user has already logged',
+        expected: {
+          message: USER.USER_FINISH_LOGIN,
+          errorCode: ErrorCode.ALREADY_LOGGED,
+        },
+        status: HTTP_CODE.UNAUTHORIZED,
+        credential: {
+          ...sessionData.user,
+          apiKey: authenticationToken
+        },
+      }
+    ])('verify otp failed with $describe', ({ expected, status, credential }, done) => {
+      fetch.mockResolvedValue();
+
+      expect.hasAssertions();
+      signedTestCookie(credential)
+        .then((responseSign) => {
+          globalThis.api.post(verifyOtpUrl)
+            .set('Cookie', responseSign.header['set-cookie'])
+            .send(requestBody)
+            .expect(status)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(fetch).not.toHaveBeenCalled();
+              expect(response.body).toEqual(expected);
+              done();
+            });
+        });
+    });
+
+    test.each([
+      {
         describe: 'user not found',
         expected: {
-          message: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL
+          message: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL,
+          errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
         },
         status: HTTP_CODE.UNAUTHORIZED
       },
@@ -108,35 +166,33 @@ describe('verify otp', () => {
         status: HTTP_CODE.SERVER_ERROR
       }
     ])('verify otp failed with $describe', ({ expected, status }, done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: mockUser.mfa_enable,
-          apiKey: null,
-          power: mockUser.power,
-        };
-      });
-
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
-      globalThis.api.post(verifyOtpUrl)
-        .send(requestBody)
-        .expect(status)
-        .expect('Content-Type', /application\/json/)
-        .then((response) => {
-          expect(fetch).toHaveBeenCalledTimes(1);
-          expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(verifyOtpInternalUrl),
-            expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json'
-              }),
-              body: JSON.stringify(requestBody)
-            })
-          );
-          expect(response.body).toMatchObject(expected);
-          done();
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api.post(verifyOtpUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect(status)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(fetch).toHaveBeenCalledTimes(1);
+              expect(fetch).toHaveBeenCalledWith(
+                expect.stringContaining(verifyOtpInternalUrl),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
+                    'Cookie': cookie,
+                  }),
+                  body: JSON.stringify(requestBody)
+                })
+              );
+              expect(response.body).toEqual(expected);
+              done();
+            });
         });
     });
   });
@@ -151,103 +207,119 @@ describe('verify otp', () => {
   ], 'verify otp internal');
 
   describe(createDescribeTest(METHOD.POST, verifyOtpInternalUrl), () => {
-    afterEach((done) => {
-      jest.restoreAllMocks();
-      done();
-    });
-
-    afterAll((done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: mockUser.mfa_enable,
-          apiKey: null,
-          power: mockUser.power,
-        };
-      });
-      done();
-    });
-
     test('verify otp internal will be success', (done) => {
-      globalThis.prismaClient.user.update
-        .mockResolvedValue({ ...mockUser, login_token: authenticationToken });
+      globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
-      globalThis.api
-        .post(verifyOtpInternalUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.OK)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: {
-                email: mockUser.email,
-                otp_code: otpCode,
-                mfa_enable: true,
-              },
-              data: {
-                otp_code: null
-              }
-            })
-          );
-          expect(response.body).toMatchObject({
-            apiKey: authenticationToken
-          });
-          done();
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(verifyOtpInternalUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect(HTTP_CODE.OK)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  where: {
+                    email: mockUser.email,
+                    otp_code: otpCode,
+                    mfa_enable: true,
+                  },
+                  data: {
+                    otp_code: null
+                  }
+                })
+              );
+              expect(response.body).toEqual({
+                apiKey: expect.any(String),
+              });
+              done();
+            });
         });
     });
 
-    test('verify otp internal failed with user not found', (done) => {
-      globalThis.prismaClient.user.update
-        .mockRejectedValue(new PrismaClientKnownRequestError('Record not found!', { code: 'P2025' }));
+    test.each([
+      {
+        describe: 'user not found',
+        cause: PrismaNotFoundError,
+        expected: {
+          message: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL,
+        },
+        status: HTTP_CODE.UNAUTHORIZED
+      },
+      {
+        describe: 'server error',
+        cause: ServerError,
+        expected: {
+          message: COMMON.INTERNAL_ERROR_MESSAGE
+        },
+        status: HTTP_CODE.SERVER_ERROR
+      }
+    ])('verify otp internal failed with $describe', ({ cause, status, expected }, done) => {
+      globalThis.prismaClient.user.update.mockRejectedValue(cause);
 
-      globalThis.api
-        .post(verifyOtpInternalUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.UNAUTHORIZED)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: {
-                email: mockUser.email,
-                otp_code: otpCode,
-                mfa_enable: true,
-              },
-              data: {
-                otp_code: null
-              }
-            })
-          );
-          expect(response.body).toMatchObject({
-            message: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(verifyOtpInternalUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect(status)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  where: {
+                    email: mockUser.email,
+                    otp_code: otpCode,
+                    mfa_enable: true,
+                  },
+                  data: {
+                    otp_code: null
+                  }
+                })
+              );
+              expect(response.body).toEqual(expected);
+              done();
+            });
           });
-          done();
-        });
     });
 
     test('verify otp internal failed with bad request', (done) => {
       const badRequestBody = {
-        otp: requestBody.otp,
         query: requestBody.query,
       };
 
-      globalThis.api
-        .post(verifyOtpInternalUrl)
-        .send(badRequestBody)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-          expect(response.body).toMatchObject({
-            message: getInputValidateMessage(USER.VERIFY_OTP_FAIL),
-          });
-          done();
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(verifyOtpInternalUrl)
+            .set('Cookie', cookie)
+            .send(badRequestBody)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(USER.VERIFY_OTP_FAIL),
+                errors: expect.arrayContaining([expect.any(String)]),
+              });
+              done();
+            });
         });
     });
 
     test('verify otp internal failed with output validated error', (done) => {
-      globalThis.prismaClient.user.update
-        .mockResolvedValue({ ...mockUser, login_token: authenticationToken });
+      globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
         () => GraphqlResponse.dto.parse({
@@ -257,57 +329,35 @@ describe('verify otp', () => {
         })
       );
 
-      globalThis.api
-        .post(verifyOtpInternalUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: {
-                email: mockUser.email,
-                otp_code: otpCode,
-                mfa_enable: true,
-              },
-              data: {
-                otp_code: null
-              }
-            })
-          );
-          expect(response.body).toMatchObject({
-            message: COMMON.OUTPUT_VALIDATE_FAIL,
-          });
-          done();
-        });
-    });
-
-    test('verify otp internal failed with server error', (done) => {
-      globalThis.prismaClient.user.update
-        .mockRejectedValue(new Error('Server error!'));
-
-      globalThis.api
-        .post(verifyOtpInternalUrl)
-        .send(requestBody)
-        .expect(HTTP_CODE.SERVER_ERROR)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: {
-                email: mockUser.email,
-                otp_code: otpCode,
-                mfa_enable: true,
-              },
-              data: {
-                otp_code: null
-              }
-            })
-          );
-          expect(response.body).toMatchObject({
-            message: COMMON.INTERNAL_ERROR_MESSAGE,
-          });
-          done();
+      expect.hasAssertions();
+      signedTestCookie({ ...sessionData.user, apiKey: null })
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(verifyOtpInternalUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  where: {
+                    email: mockUser.email,
+                    otp_code: otpCode,
+                    mfa_enable: true,
+                  },
+                  data: {
+                    otp_code: null
+                  }
+                })
+              );
+              expect(response.body).toEqual({
+                message: COMMON.OUTPUT_VALIDATE_FAIL,
+              });
+              done();
+            });
         });
     });
   });

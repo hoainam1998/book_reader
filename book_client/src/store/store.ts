@@ -2,18 +2,18 @@ type ListenerType = (() => void)[];
 
 class Store<T> {
   protected listeners: ListenerType = [];
-  private currentStore: T;
+  private _currentStore: T;
 
   constructor(currentStore: T) {
-    this.currentStore = currentStore;
+    this._currentStore = currentStore;
   }
 
   set CurrentStore(value: T) {
-    this.currentStore = value;
+    this._currentStore = value;
   }
 
   get CurrentStore() {
-    return this.currentStore;
+    return this._currentStore;
   }
 
   protected isContainData(field: string): boolean {
@@ -32,7 +32,7 @@ class Store<T> {
   };
 
   getSnapshot = (): T =>  {
-    return this.currentStore;
+    return this._currentStore;
   };
 };
 

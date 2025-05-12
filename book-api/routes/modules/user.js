@@ -298,7 +298,7 @@ class UserRouter extends Router {
   @serializer(OtpVerifyResponse)
   _verifyOtp(req, res, next, self) {
     const variables = {
-      email: req.body.email,
+      email: req.session.user.email,
       otp: req.body.otp,
     };
 
@@ -320,7 +320,8 @@ class UserRouter extends Router {
     return fetchHelper(`${url}/verify-otp-process`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cookie': [req.headers.cookie],
       },
       JSON.stringify(req.body)
     ).then(async (response) => {
@@ -349,7 +350,7 @@ class UserRouter extends Router {
         }
       }
     `;
-    return self.execute(query, { email: req.body.email, });
+    return self.execute(query, { email: req.session.user.email, });
   }
 
   @validateResultExecute(HTTP_CODE.OK)
@@ -360,7 +361,8 @@ class UserRouter extends Router {
     return fetchHelper(`${url}/update-otp`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cookie': [req.headers.cookie],
       },
       JSON.stringify(req.body)
     )
@@ -373,8 +375,14 @@ class UserRouter extends Router {
     })
     .then((json) => {
       const { otp, message } = json;
-      return EmailService.sendOtpEmail(req.body.email, otp)
+      return EmailService.sendOtpEmail(req.session.user.email, otp)
         .then(() => messageCreator(message));
+    })
+    .catch((error) => {
+      if (error.errorCode === ErrorCode.CREDENTIAL_NOT_MATCH) {
+        req.session.destroy();
+      }
+      throw error;
     });
   }
 

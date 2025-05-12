@@ -1,9 +1,8 @@
 import { AxiosResponse } from 'axios';
 import { RequestBody, UserService } from 'services';
 
-export const sendOtp = (email: string): Promise<AxiosResponse> => {
+export const sendOtp = (): Promise<AxiosResponse> => {
   return UserService.post('send-otp', {
-    email,
     query: {
       message: true,
       otp: true
@@ -11,9 +10,8 @@ export const sendOtp = (email: string): Promise<AxiosResponse> => {
   });
 };
 
-export const verifyOtp = (email: string, otp: string): Promise<AxiosResponse> => {
+export const verifyOtp = (otp: string): Promise<AxiosResponse> => {
   const body: RequestBody = {
-    email,
     otp,
     query: {
       apiKey: true

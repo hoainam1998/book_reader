@@ -33,6 +33,33 @@ const isValueEqual = function (valueToCompare) {
 };
 
 /**
+ * Check object is empty or not.
+ *
+ * @return {boolean} - The result compare.
+ */
+const isEmpty = function () {
+  if (Object.keys(this).length === 0) {
+    return true;
+  } else {
+    return Object.values(this).every(v => v === null || v === undefined);
+  }
+};
+
+/**
+ * Check some properties has contain in target object.
+ *
+ * @param {...string} keys - The property names array.
+ * @return {boolean} - The result compare.
+ */
+const isDefined = function (...keys) {
+  if (this.isEmpty()) {
+    return false;
+  } else {
+    return keys.every((key) => Object.hasOwn(this, key));
+  }
+};
+
+/**
  * [Danger] These are all global property. So you should remind yourself very carefully after add any property add here.
  * Adding property to global it must be handle by those who will take the highest responsibility for entire project.
  */
@@ -43,4 +70,16 @@ Object.defineProperties(Object.prototype, {
     enumerable: false,
     value: isValueEqual,
   },
+  isEmpty: {
+    writable: false,
+    configurable: false,
+    enumerable: false,
+    value: isEmpty,
+  },
+  isDefined: {
+    writable: false,
+    configurable: false,
+    enumerable: false,
+    value: isDefined,
+  }
 });

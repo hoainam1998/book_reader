@@ -12,13 +12,11 @@ module.exports = (prisma) => {
       const firstLoginPassword = autoGeneratePassword();
       const userId = Date.now().toString();
       const password = await passwordHashing(firstLoginPassword);
-      const token = signLoginToken(userId, args.data.email, args.data.power);
       const resetPasswordToken = signingResetPasswordToken(args.data.email);
 
       args.data = {
         ...args.data,
         user_id: userId,
-        login_token: token,
         password,
         reset_password_token: resetPasswordToken,
       };
@@ -54,12 +52,6 @@ module.exports = (prisma) => {
         if (args.data.password) {
           if (!await compare(args.data.password, oldUser.password)) {
             args.data.password = await passwordHashing(args.data.password);
-          }
-        }
-
-        if (args.data.email) {
-          if (args.data.email !== oldUser.email) {
-            args.data.login_token = signLoginToken(oldUser.user_id, args.data.email);
           }
         }
       }
