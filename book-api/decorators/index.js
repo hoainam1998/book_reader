@@ -132,7 +132,6 @@ const validateResultExecute = (httpCode) => {
             .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
         }
       } catch (error) {
-        console.log(error);
         self.Logger.error(error.message);
         response.status(HTTP_CODE.SERVER_ERROR)
           .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
@@ -395,7 +394,7 @@ const validation = (...args) => {
         Logger.error('Validation', error.message);
         return response.status(HTTP_CODE.SERVER_ERROR)
           .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
-        }
+      }
     };
     return target;
   };
