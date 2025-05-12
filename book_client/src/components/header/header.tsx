@@ -35,7 +35,7 @@ function MenuDropdown({ navigate, onPositionChange }: MenuDropdownPropsType): JS
       .then((response) => {
         showToast('Logout!', response.data.message);
         store.logout();
-        setTimeout(() => navigate(paths.LOGIN), 200);
+        navigate(paths.LOGIN);
       })
       .catch((error) => showToast('Logout!', error.response.data.message));
   }, []);

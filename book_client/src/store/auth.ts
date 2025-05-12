@@ -73,7 +73,7 @@ class AuthStore extends Store<UserLogin | null> {
     return false;
   }
 
-  destroyResetPasswordToken() {
+  destroyResetPasswordToken(): void {
     if (this.isContainData('resetPasswordToken')) {
       this.CurrentStore!.resetPasswordToken = null;
       UserStorage.setItem(this.CurrentStore!);
