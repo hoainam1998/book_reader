@@ -51,6 +51,7 @@ module.exports = (describeTitle, testParameter, serverName) => {
 
     if (!isTestSkip(urlInvalidRequest)) {
       test(urlInvalidRequest.describe, (done) => {
+        expect.hasAssertions();
         globalThis.api[urlInvalidRequest.method](urlInvalidRequest.url)
           .expect(HTTP_CODE.NOT_FOUND)
           .expect('Content-Type', /application\/json/)
@@ -58,11 +59,12 @@ module.exports = (describeTitle, testParameter, serverName) => {
             expect(response.body.message).toBe(COMMON.URL_INVALID.format(response.req.path));
             done();
           });
-      }, 1000);
+      });
     }
 
     if (!isTestSkip(methodAllowedRequest)) {
       test(methodAllowedRequest.describe, (done) => {
+        expect.hasAssertions();
         globalThis.api[methodAllowedRequest.method](methodAllowedRequest.url)
           .expect(HTTP_CODE.METHOD_NOT_ALLOWED)
           .expect('Content-Type', /application\/json/)
@@ -70,18 +72,19 @@ module.exports = (describeTitle, testParameter, serverName) => {
             expect(response.body.message).toBe(COMMON.METHOD_NOT_ALLOWED.format(response.req.method, response.req.path));
             done();
           });
-      }, 1000);
+      });
     }
 
     if (!isTestSkip(corsOriginRequest)) {
       test(corsOriginRequest.describe, (done) => {
+        expect.hasAssertions();
         globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
           .then((response) => {
             const originUrl = `${response.request.protocol}//${response.request.host}`;
             expect(response.header['access-control-allow-origin']).toBe(corsOriginRequest.origin || originUrl);
             done();
           });
-      }, 1000);
+      });
     }
   });
 };

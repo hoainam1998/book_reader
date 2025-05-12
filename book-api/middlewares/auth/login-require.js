@@ -15,7 +15,7 @@ const logger = new Logger('Login require');
  */
 const loginRequire = (req, res, next) => {
   try {
-    if (req.session.user) {
+    if (req.session.isDefined('user') && req.session.user.isDefined('email', 'mfaEnable')) {
       // if user already login success, then switch to next middleware.
       return next();
     } else {

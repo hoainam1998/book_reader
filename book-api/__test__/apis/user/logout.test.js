@@ -1,9 +1,10 @@
 const commonTest = require('#test/apis/common/common');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER } = require('#messages');
-const { authenticationToken, mockUser } = require('#test/resources/auth');
+const { authenticationToken, sessionData } = require('#test/resources/auth');
 const { createDescribeTest } = require('#test/helpers/index');
 const logoutUrl = `${PATH.USER}/logout`;
+
 describe('logout api', () => {
   commonTest('logout api common test', [
     {
@@ -30,25 +31,20 @@ describe('logout api', () => {
   describe(createDescribeTest(METHOD.GET, logoutUrl), () => {
     beforeAll((done) => {
       globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = {
-          email: mockUser.email,
-          mfaEnable: mockUser.mfa_enable,
-          apiKey: authenticationToken,
-          power: mockUser.power,
-        };
-      });
-      done();
+        request.session.user = sessionData.user;
+      }, done);
     });
 
-    afterAll((done) => TestServer.removeTestMiddleware(done));
+    afterAll((done) => globalThis.TestServer.removeTestMiddleware(done));
 
     test('logout will be success', (done) => {
+      expect.hasAssertions();
       globalThis.api.get(logoutUrl)
         .set('authorization', authenticationToken)
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          expect(response.body).toMatchObject({
+          expect(response.body).toEqual({
             message: USER.LOGOUT_SUCCESS
           });
           done();

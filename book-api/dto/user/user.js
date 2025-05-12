@@ -1,6 +1,7 @@
 const { Type, Exclude } = require('class-transformer');
 const OutputValidate = require('#services/output-validate');
 const { POWER } = require('#constants');
+const { signLoginToken } = require('#utils');
 
 class UserDTO extends OutputValidate {
   @Type(() => String)
@@ -30,9 +31,6 @@ class UserDTO extends OutputValidate {
   get role() {
     return this.power ? POWER.ADMIN : POWER.USER;
   }
-
-  @Type(() => String)
-  login_token;
 
   @Type(() => String)
   email;
@@ -80,7 +78,7 @@ class UserDTO extends OutputValidate {
     let apiKey = null;
     if (!this.resetPasswordToken) {
       if (!this.mfaEnable) {
-        apiKey = this.login_token;
+        apiKey = signLoginToken(this.user_id, this.email, this.power);
       }
     }
     return apiKey;

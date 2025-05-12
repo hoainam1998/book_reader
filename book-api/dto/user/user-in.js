@@ -59,11 +59,6 @@ const AllUser = (validators, className) => {
 const OtpVerify = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsEmail('Invalid email!'),
-    )
-    email;
-
-    @validators(
       IsString('Otp must be string!'),
       Length(6, 'Otp must have six character!'),
       IsNumeric('All otp character must be number!')
@@ -79,11 +74,6 @@ const OtpVerify = (validators, className) => {
 
 const OtpUpdate = (validators, className) => {
   return classCreator(class extends Validator {
-    @validators(
-      IsEmail('Invalid email!'),
-    )
-    email;
-
     @validators(
       IsGraphqlSelect('Value of field must be boolean!')
     )

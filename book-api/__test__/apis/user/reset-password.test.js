@@ -1,11 +1,13 @@
 const jwt = require('jsonwebtoken');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const { ServerError } = require('#test/mocks/other-errors');
 const { JsonWebTokenError, TokenExpiredError } = require('#test/mocks/json-web-token-error');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { autoGeneratePassword, passwordHashing, signingResetPasswordToken } = require('#utils');
 const { COMMON, USER } = require('#messages');
 const { resetPasswordToken, mockUser } = require('#test/resources/auth');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const resetPasswordUrl = `${PATH.USER}/reset-password`;
 
@@ -33,19 +35,15 @@ describe('reset password', () => {
   ], 'reset password');
 
   describe(createDescribeTest(METHOD.POST, resetPasswordUrl), () => {
-    afterEach((done) => {
-      jest.restoreAllMocks();
-      done();
-    });
-
     test('reset password success', async () => {
       const oldPassword = autoGeneratePassword();
-
-      globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue({
+      const user = {
         password: await passwordHashing(oldPassword),
-      });
+      }
 
-      globalThis.prismaClient.user.update.mockResolvedValue({ reset_password_token: null });
+      globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue(user);
+
+      globalThis.prismaClient.user.update.mockResolvedValue({ reset_password_token: null, password: user.password });
 
       const response = await globalThis.api.post(resetPasswordUrl)
         .send({
@@ -54,11 +52,33 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.OK);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            reset_password_token: resetPasswordToken,
+            email: mockUser.email
+          }
+        })
+      );
       expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-      expect(response.body).toMatchObject({
+      expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            reset_password_token: resetPasswordToken,
+            password: user.password,
+            email: mockUser.email,
+          },
+          data: {
+            reset_password_token: null,
+            password: mockUser.password,
+          }
+        })
+      );
+      expect(response.body).toEqual({
         message: USER.RESET_PASSWORD_SUCCESS
       });
     });
@@ -73,12 +93,14 @@ describe('reset password', () => {
           oldPassword,
           password: oldPassword,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: USER.OLD_AND_NEW_PASSWORD_IS_SAME
+      expect(response.body).toEqual({
+        message: USER.OLD_AND_NEW_PASSWORD_IS_SAME,
+        errorCode: ErrorCode.DATA_IS_DUPLICATE,
       });
     });
 
@@ -91,13 +113,15 @@ describe('reset password', () => {
           oldPassword,
           password: oldPassword,
         });
-      const message = `${USER.RESET_PASSWORD_FAIL}\n${COMMON.INPUT_VALIDATE_FAIL}`;
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(Object.keys(response.body)).toHaveLength(2);
-      expect(response.body.message).toBe(message);
+      expect(response.body).toEqual({
+        message: getInputValidateMessage(USER.RESET_PASSWORD_FAIL),
+        errors: expect.any(Array),
+      });
       expect(response.body.errors).toHaveLength(1);
     });
 
@@ -111,17 +135,19 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: COMMON.REGISTER_EMAIL_NOT_MATCH
+      expect(response.body).toEqual({
+        message: COMMON.REGISTER_EMAIL_NOT_MATCH,
+        errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
       });
     });
 
     test('failed with user not found', async () => {
-      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(new PrismaClientKnownRequestError('User not found', { code: 'P2025' }));
+      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(PrismaNotFoundError);
       const oldPassword = autoGeneratePassword();
 
       const response = await globalThis.api.post(resetPasswordUrl)
@@ -131,12 +157,13 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: USER.USER_NOT_FOUND
+      expect(response.body).toEqual({
+        message: USER.USER_NOT_FOUND,
       });
     });
 
@@ -151,13 +178,15 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(verifyMock).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: USER.USER_NOT_FOUND
+      expect(response.body).toEqual({
+        message: USER.USER_NOT_FOUND,
+        errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
       });
     });
 
@@ -174,13 +203,15 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(verifyMock).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: COMMON.RESET_PASSWORD_TOKEN_EXPIRE
+      expect(response.body).toEqual({
+        message: COMMON.RESET_PASSWORD_TOKEN_EXPIRE,
+        errorCode: ErrorCode.TOKEN_EXPIRED,
       });
     });
 
@@ -197,18 +228,20 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(verifyMock).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
-        message: COMMON.TOKEN_INVALID
+      expect(response.body).toEqual({
+        message: COMMON.TOKEN_INVALID,
+        errorCode: ErrorCode.TOKEN_INVALID,
       });
     });
 
     test('failed with server error', async () => {
-      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(new Error('Server error!'));
+      globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(ServerError);
       const oldPassword = autoGeneratePassword();
 
       const response = await globalThis.api.post(resetPasswordUrl)
@@ -218,11 +251,12 @@ describe('reset password', () => {
           oldPassword,
           password: mockUser.password,
         });
+      expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.SERVER_ERROR);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-      expect(response.body).toMatchObject({
+      expect(response.body).toEqual({
         message: COMMON.INTERNAL_ERROR_MESSAGE
       });
     });

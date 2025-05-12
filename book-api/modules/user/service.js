@@ -3,7 +3,6 @@ const Service = require('#services/prisma');
 const {
   generateOtp,
   autoGeneratePassword,
-  passwordHashing,
   signingResetPasswordToken
 } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
@@ -101,8 +100,8 @@ class UserService extends Service {
       },
       select: {
         ...select,
+        email: true,
         power: true,
-        login_token: true,
         password: true,
         reset_password_token: true,
       }
@@ -178,10 +177,7 @@ class UserService extends Service {
       data: {
         otp_code: null
       }
-    })
-    .then((user) => ({
-      apiKey: user.login_token
-    }));
+    });
   }
 
   updateUser(user) {

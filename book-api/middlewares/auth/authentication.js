@@ -17,7 +17,9 @@ const logger = new Logger('Authentication');
 const authentication = (req, res, next) => {
   try {
     const authorization = req.get('authorization');
-    if (authorization && req.session.user) {
+    if (authorization
+      && req.session.isDefined('user')
+      && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId')) {
       // verify token
       if (req.session.user.apiKey === authorization) {
         utils.verifyLoginToken(authorization);

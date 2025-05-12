@@ -17,9 +17,7 @@ const getStaticFile = (filePath) => {
  * @param {string} message - An error message.
  * @return {string} - The message concat with input validate error message.
  */
-const getInputValidateMessage = (message) => {
-  return `${message}\n${COMMON.INPUT_VALIDATE_FAIL}`;
-}
+const getInputValidateMessage = (message) => `${message}\n${COMMON.INPUT_VALIDATE_FAIL}`;
 
 /**
  * Get describe api test.

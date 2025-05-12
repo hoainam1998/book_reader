@@ -83,7 +83,6 @@ model user {
   power                     Boolean
   mfa_enable                Boolean
   otp_code                  String?       @unique @db.VarChar(10)
-  login_token               String        @db.Text
   reset_password_token      String?       @db.Text
 }
 
