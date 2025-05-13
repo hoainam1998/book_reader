@@ -164,8 +164,12 @@ function UserDetail(): JSX.Element {
             setEmails(emailsList);
             setPhones(phonesList);
           })
-          .catch(() => setEmails([]));
+          .catch(() => {
+            setEmails([]);
+            setPhones([]);
+          });
       }
+      return reset;
     };
   }, []);
 

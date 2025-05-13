@@ -1,6 +1,6 @@
 import { JSX } from 'react';
-import { useRouteError } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import { useRouteError, ErrorResponse } from 'react-router-dom';
+import { AxiosError, HttpStatusCode } from 'axios';
 import Error, { ImageError } from 'components/error/error';
 
 type ErrorResponseType = {
@@ -22,8 +22,8 @@ function ApiError({ alignCenter }: ApiErrorPropsType): JSX.Element {
       message = 'Server disconnect. Please contact my admin!';
     } else {
       switch(error.response?.status) {
-        case 500: image = 'server-error'; break;
-        case 400: image = 'bad-request'; break;
+        case HttpStatusCode.InternalServerError: image = 'server-error'; break;
+        case HttpStatusCode.BadRequest: image = 'bad-request'; break;
         default: image = 'empty'; break;
       }
       message = (error.response?.data as ErrorResponseType)?.message || '';

@@ -15,7 +15,8 @@ import AuthorList, { authorPagination } from 'views/author-group/author-list/aut
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import ForgetPassword from 'views/login-group/forget-password/forget-password';
-import { LoginRequire } from '../guard';
+import LoginRequire from 'guard/login-require';
+import AdminRequire from 'guard/admin-require';
 import { NavigationRouteMatchType, RoutePropsUnion } from './interfaces';
 import path from './paths';
 
@@ -91,14 +92,14 @@ const adminRoutes: RoutePropsUnion[] = [
           },
           {
             path: 'new',
-            element: <UserDetail />,
+            element: <AdminRequire><UserDetail /></AdminRequire>,
             handle: {
               crumb: ({ pathname }: UIMatch) => <span key={pathname}>New</span>
             }
           },
           {
             path: path.ID,
-            element: <UserDetail />,
+            element: <AdminRequire><UserDetail /></AdminRequire>,
             loader: loadUserDetail,
             handle: {
               crumb: ({ pathname, name }: NavigationRouteMatchType) =>

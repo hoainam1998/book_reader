@@ -57,6 +57,7 @@ module.exports = (envArgs) => ({
       'read-only-variables': getResolvePath('../src/read-only-variables/index.ts'),
       'enums': getResolvePath('../src/enums/index.ts'),
       'decorators': getResolvePath('../src/decorators/index.ts'),
+      'guard': getResolvePath('../src/guard'),
     }
   },
   module: {
