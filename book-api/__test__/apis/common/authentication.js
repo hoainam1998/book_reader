@@ -1,5 +1,6 @@
 const { HTTP_CODE } = require('#constants');
 const { JsonWebTokenError, TokenExpiredError } = require('#test/mocks/json-web-token-error');
+const ErrorCode = require('#services/error-code');
 const { ServerError } = require('#test/mocks/other-errors');
 const { COMMON, USER } = require('#messages');
 const utils = require('#utils');
@@ -37,7 +38,8 @@ module.exports = describe('authentication', () => {
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.USER_UNAUTHORIZED,
+      message: USER.WORKING_SESSION_EXPIRE,
+      errorCode: ErrorCode.WORKING_SESSION_ENDED,
     }));
     done();
   });
@@ -46,7 +48,8 @@ module.exports = describe('authentication', () => {
     expect.hasAssertions();
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
-      session: {}
+      authorization: undefined,
+      session: sessionData,
     };
     authentication(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
@@ -54,6 +57,7 @@ module.exports = describe('authentication', () => {
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_UNAUTHORIZED,
+      errorCode: ErrorCode.HAVE_NOT_LOGIN,
     }));
     done();
   });
@@ -72,6 +76,7 @@ module.exports = describe('authentication', () => {
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_NOT_FOUND,
+      errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
     }));
     done();
   });
@@ -94,7 +99,8 @@ module.exports = describe('authentication', () => {
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: COMMON.AUTHENTICATION_TOKEN_EXPIRE
+      message: COMMON.AUTHENTICATION_TOKEN_EXPIRE,
+      errorCode: ErrorCode.TOKEN_EXPIRED,
     }));
     done();
   });
@@ -117,7 +123,8 @@ module.exports = describe('authentication', () => {
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: COMMON.AUTHENTICATION_TOKEN_INVALID
+      message: COMMON.AUTHENTICATION_TOKEN_INVALID,
+      errorCode: ErrorCode.TOKEN_INVALID,
     }));
     done();
   });

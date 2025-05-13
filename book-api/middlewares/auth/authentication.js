@@ -19,7 +19,7 @@ const authentication = (req, res, next) => {
     const authorization = req.get('authorization');
     if (authorization
       && req.session.isDefined('user')
-      && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId')) {
+      && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId', 'apiKey')) {
       // verify token
       if (req.session.user.apiKey === authorization) {
         utils.verifyLoginToken(authorization);
@@ -31,6 +31,14 @@ const authentication = (req, res, next) => {
           .json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
       }
     }
+
+    // if session have not, also return unauthorized message.
+    if (!req.session.isDefined('user')){
+      logger.warn('session is out of date');
+      return res.status(HTTP_CODE.UNAUTHORIZED)
+        .json(messageCreator(USER.WORKING_SESSION_EXPIRE, ErrorCode.WORKING_SESSION_ENDED));
+    }
+
     // if token have not, also return unauthorized message.
     logger.warn('unauthorized error');
     return res.status(HTTP_CODE.UNAUTHORIZED)

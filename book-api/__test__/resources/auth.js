@@ -38,6 +38,15 @@ const signedTestCookie = (sessionJson) => {
 };
 
 /**
+ * Call request to destroy session for testing.
+ *
+ * @return {Promise} - The supertest promise.
+ */
+const destroySession = () => {
+  return globalThis.api.get('/destroy-session');
+};
+
+/**
  * Return reset password link.
  *
  * @param {string} resetPasswordToken - The reset password token.
@@ -63,5 +72,6 @@ module.exports = {
   otpCode,
   randomPassword,
   signedTestCookie,
+  destroySession,
   getResetPasswordLink,
 };

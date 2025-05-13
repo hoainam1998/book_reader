@@ -1,6 +1,7 @@
 const { HTTP_CODE } = require('#constants');
 const { USER } = require('#messages');
 const { authenticationToken, sessionData } = require('#test/resources/auth');
+const ErrorCode = require('#services/error-code');
 const loginRequire = require('#middlewares/auth/login-require');
 
 module.exports = describe('login require', () => {
@@ -32,6 +33,7 @@ module.exports = describe('login require', () => {
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_UNAUTHORIZED,
+      errorCode: ErrorCode.HAVE_NOT_LOGIN,
     }));
     done();
   });

@@ -46,6 +46,12 @@ class ErrorCode {
   static TOKEN_INVALID = 'TOKEN_INVALID';
 
   /**
+  * Working session ended.
+  * @static
+  */
+  static WORKING_SESSION_ENDED = 'WORKING_SESSION_ENDED';
+
+  /**
   * Mfa turn off.
   * @static
   */
