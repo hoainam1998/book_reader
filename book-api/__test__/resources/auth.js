@@ -37,6 +37,11 @@ const signedTestCookie = (sessionJson) => {
   return globalThis.api.post('/signed-test-cookie').send(sessionJson);
 };
 
+/**
+ * Call request to destroy session for testing.
+ *
+ * @return {Promise} - The supertest promise.
+ */
 const destroySession = () => {
   return globalThis.api.get('/destroy-session');
 };

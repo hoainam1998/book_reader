@@ -81,7 +81,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
       });
   });
 
-    test('update user failed with authentication token unset', (done) => {
+  test('update user failed with authentication token unset', (done) => {
     expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseSign) => {
