@@ -24,6 +24,7 @@ const handleRequestError = (error: AxiosError<any, any>): void=> {
           const code = (error.response as AxiosResponse).data.errorCode || undefined;
           if (Object.values(UNAUTHORIZED_ERROR_CODE).includes(code)) {
             auth.logout();
+            showToast('Unauthorized error!', error.response?.data.message);
             if (!window.location.pathname.includes(paths.LOGIN)) {
               router.navigate(paths.LOGIN);
             }
