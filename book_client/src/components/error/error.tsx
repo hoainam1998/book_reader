@@ -1,8 +1,8 @@
 import { JSX, useMemo } from 'react';
-import './style.scss';
 import { clsx } from 'utils';
+import './style.scss';
 
-export type ImageError = 'empty' | 'server-error' | 'server-disconnect' | 'bad-request';
+export type ImageError = 'empty' | 'server-error' | 'server-disconnect' | 'bad-request' | 'not-found';
 
 type ErrorProps = {
   message: string;

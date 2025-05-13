@@ -23,7 +23,8 @@ import path from './paths';
 const adminRoutes: RoutePropsUnion[] = [
   {
     path: path.ROOT,
-    element: <Navigate replace to={path.LOGIN} />
+    element: <Navigate replace to={path.LOGIN} />,
+    errorElement: <ApiError alignCenter />,
   },
   {
     path: path.LOGIN,
