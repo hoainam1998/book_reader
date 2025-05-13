@@ -12,7 +12,7 @@ type ApiErrorPropsType = {
 };
 
 function ApiError({ alignCenter }: ApiErrorPropsType): JSX.Element {
-  const error = useRouteError() as AxiosError;
+  const error = useRouteError() as AxiosError | ErrorResponse;
   let image: ImageError = 'empty';
   let message: string = '';
 
@@ -29,7 +29,10 @@ function ApiError({ alignCenter }: ApiErrorPropsType): JSX.Element {
       message = (error.response?.data as ErrorResponseType)?.message || '';
     }
   } else {
-    throw error;
+    if ((error as ErrorResponse).status === HttpStatusCode.NotFound) {
+      image = 'not-found';
+      message = 'Oops!\tThis url not found!';
+    }
   }
 
   return (<Error center={alignCenter} image={image} message={message} />);
