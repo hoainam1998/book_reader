@@ -19,8 +19,9 @@ module.exports = deepFreeze({
   USER: {
     USER_NOT_FOUND: 'User not found!',
     LOGIN_FAIL: 'Login was failed!',
-    USER_NOT_PERMISSION: 'Your are not permission!',
-    USER_UNAUTHORIZED: 'Your have not login yet!',
+    USER_NOT_PERMISSION: 'You are not permission!',
+    USER_UNAUTHORIZED: 'You have not login yet!',
+    WORKING_SESSION_EXPIRE: 'Your working session are expired!',
     USER_ADDED: 'Add user success! An announcement email has been sent to the user just has been created!',
     ADD_USER_FAIL: 'Add user failed!',
     LOAD_ALL_USER_FAIL: 'Load all users failed!',
@@ -46,7 +47,7 @@ module.exports = deepFreeze({
     MFA_UNENABLE: 'Mfa unenable for user!',
     USER_FINISH_LOGIN: 'User has already completely logged in!',
     DUPLICATE_EMAIL_OR_PHONE_NUMBER: 'Email or phone number have been duplicate. Please enter another one!',
-    NOT_PERMISSION: 'User dose not have permission to perform this operation!',
+    NOT_PERMISSION: 'You do not have permission to perform this operation!',
     UPDATE_PASSWORD: 'Update your password success. Please check your email!'
   },
 });

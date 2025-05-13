@@ -1,6 +1,7 @@
 const { HTTP_CODE } = require('#constants');
 const { USER } = require('#messages');
 const { sessionData } = require('#test/resources/auth');
+const ErrorCode = require('#services/error-code');
 const otpAllowed = require('#middlewares/auth/otp-allowed');
 
 module.exports = describe('otp allowed', () => {
@@ -40,6 +41,7 @@ module.exports = describe('otp allowed', () => {
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.MFA_UNENABLE,
+      errorCode: ErrorCode.MFA_TURN_OFF,
     }));
     done();
   });
@@ -57,6 +59,7 @@ module.exports = describe('otp allowed', () => {
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
       message: USER.USER_FINISH_LOGIN,
+      errorCode: ErrorCode.ALREADY_LOGGED,
     }));
     done();
   });

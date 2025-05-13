@@ -1,9 +1,10 @@
 const { PrismaNotFoundError, PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, PATH, METHOD } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, signedTestCookie } = require('#test/resources/auth');
+const { mockUser, authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const updatePersonUrl = `${PATH.USER}/update-person`;
@@ -75,7 +76,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       });
   });
 
-  test('update person failed with authentication error', (done) => {
+  test('update person failed with authentication token unset', (done) => {
     expect.hasAssertions();
     signedTestCookie(sessionData.user)
       .then((responseApiSignin) => {
@@ -93,8 +94,35 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
           .then((response) => {
             expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
             expect(response.body).toEqual({
-              message: expect.any(String),
-              errorCode: expect.any(String),
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
+            });
+            done();
+          });
+      });
+  });
+
+  test('update person failed with session expired', (done) => {
+    expect.hasAssertions();
+    destroySession()
+      .then(() => {
+        globalThis.api
+          .put(updatePersonUrl)
+          .set('authorization', authenticationToken)
+          .set('Connection', 'keep-alive')
+          .field('firstName', mockUser.first_name)
+          .field('lastName', mockUser.last_name)
+          .field('email', mockUser.email)
+          .field('sex', mockUser.sex)
+          .field('phone', mockUser.phone)
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
             done();
           });

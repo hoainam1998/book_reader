@@ -11,7 +11,9 @@ const {
   sessionData,
   resetPasswordToken,
   randomPassword,
-  getResetPasswordLink
+  signedTestCookie,
+  getResetPasswordLink,
+  destroySession
 } = require('#test/resources/auth');
 const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
@@ -60,64 +62,96 @@ describe('create user', () => {
   ], 'create user common test');
 
   describe(createDescribeTest(METHOD.POST, createUserUrl), () => {
+    afterEach((done) => {
+      fetch.mockClear();
+      done();
+    });
+
     test('create user will be success', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = sessionData.user;
-      });
 
       fetch.mockResolvedValue(new Response(JSON.stringify(createUserResponse), { status: HTTP_CODE.CREATED }));
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api
-        .post(createUserUrl)
-        .set('authorization', authenticationToken)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.CREATED)
-        .then((response) => {
-          const link = getResetPasswordLink(createUserResponse.resetPasswordToken);
-          expect(fetch).toHaveBeenCalledTimes(1);
-          expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(addUserUrl),
-            expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json'
-              }),
-              body: JSON.stringify(requestBody)
-            })
-          );
-          expect(sendPassword).toHaveBeenCalledTimes(1);
-          expect(sendPassword).toHaveBeenCalledWith(mockUser.email, link, createUserResponse.password);
-          expect(response.body).toEqual({
-            message: USER.USER_ADDED
-          });
-          done();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(createUserUrl)
+            .set('Cookie', cookie)
+            .set('authorization', authenticationToken)
+            .send(requestBody)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.CREATED)
+            .then((response) => {
+              const link = getResetPasswordLink(createUserResponse.resetPasswordToken);
+              expect(fetch).toHaveBeenCalledTimes(1);
+              expect(fetch).toHaveBeenCalledWith(
+                expect.stringContaining(addUserUrl),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json'
+                  }),
+                  body: JSON.stringify(requestBody)
+                })
+              );
+              expect(sendPassword).toHaveBeenCalledTimes(1);
+              expect(sendPassword).toHaveBeenCalledWith(mockUser.email, link, createUserResponse.password);
+              expect(response.body).toEqual({
+                message: USER.USER_ADDED
+              });
+              done();
+            });
         });
     });
 
-    test('create user failed with authorization error', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = sessionData.user;
-      });
-
+    test('create user failed with authentication token unset', (done) => {
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api
-        .post(createUserUrl)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.UNAUTHORIZED)
-        .then((response) => {
-          expect(fetch).not.toHaveBeenCalled();
-          expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: expect.any(String),
-            errorCode: ErrorCode.HAVE_NOT_LOGIN
-          });
-          done();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          const cookie = responseSign.header['set-cookie'];
+          globalThis.api
+            .post(createUserUrl)
+            .set('Cookie', cookie)
+            .send(requestBody)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.UNAUTHORIZED)
+            .then((response) => {
+              expect(fetch).not.toHaveBeenCalled();
+              expect(sendPassword).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: USER.USER_UNAUTHORIZED,
+                errorCode: ErrorCode.HAVE_NOT_LOGIN
+              });
+              done();
+            });
+        });
+    });
+
+    test('create user failed with session expired', (done) => {
+      const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
+
+      expect.hasAssertions();
+      destroySession()
+        .then(() => {
+          globalThis.api
+            .post(createUserUrl)
+            .set('authorization', authenticationToken)
+            .send(requestBody)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.UNAUTHORIZED)
+            .then((response) => {
+              expect(fetch).not.toHaveBeenCalled();
+              expect(sendPassword).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: USER.WORKING_SESSION_EXPIRE,
+                errorCode: ErrorCode.WORKING_SESSION_ENDED,
+              });
+              done();
+            });
         });
     });
 

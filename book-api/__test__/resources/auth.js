@@ -37,6 +37,10 @@ const signedTestCookie = (sessionJson) => {
   return globalThis.api.post('/signed-test-cookie').send(sessionJson);
 };
 
+const destroySession = () => {
+  return globalThis.api.get('/destroy-session');
+};
+
 /**
  * Return reset password link.
  *
@@ -63,5 +67,6 @@ module.exports = {
   otpCode,
   randomPassword,
   signedTestCookie,
+  destroySession,
   getResetPasswordLink,
 };

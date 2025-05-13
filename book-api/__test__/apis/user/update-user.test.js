@@ -1,9 +1,10 @@
 const { PrismaNotFoundError, PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, signedTestCookie } = require('#test/resources/auth');
+const { mockUser, authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const updateUserUrl = `${PATH.USER}/update-user`;
@@ -80,30 +81,63 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
       });
   });
 
-  test('update user failed with authentication error', (done) => {
+    test('update user failed with authentication token unset', (done) => {
     expect.hasAssertions();
-    globalThis.api
-      .put(updateUserUrl)
-      .set('authorization', authenticationToken)
-      .send({
-        userId: mockUser.user_id,
-        firstName: mockUser.first_name,
-        lastName:  mockUser.last_name,
-        email: mockUser.email,
-        sex: mockUser.sex,
-        phone: mockUser.phone,
-        mfa: true,
-        power: true,
-      })
-      .expect('Content-Type', /application\/json/)
-      .expect(HTTP_CODE.UNAUTHORIZED)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toEqual({
-          message: expect.any(String),
-          errorCode: expect.any(String),
-        });
-        done();
+    signedTestCookie(sessionData.user)
+      .then((responseSign) => {
+        globalThis.api
+          .put(updateUserUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send({
+            userId: mockUser.user_id,
+            firstName: mockUser.first_name,
+            lastName:  mockUser.last_name,
+            email: mockUser.email,
+            sex: mockUser.sex,
+            phone: mockUser.phone,
+            mfa: true,
+            power: true,
+          })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message:USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
+            });
+            done();
+          });
+      });
+  });
+
+  test('update user failed with session expired error', (done) => {
+    expect.hasAssertions();
+    destroySession()
+      .then(() => {
+        globalThis.api
+          .put(updateUserUrl)
+          .set('authorization', authenticationToken)
+          .send({
+            userId: mockUser.user_id,
+            firstName: mockUser.first_name,
+            lastName:  mockUser.last_name,
+            email: mockUser.email,
+            sex: mockUser.sex,
+            phone: mockUser.phone,
+            mfa: true,
+            power: true,
+          })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
+            });
+            done();
+          });
       });
   });
 
