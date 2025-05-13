@@ -2,13 +2,10 @@ import { JSX } from 'react';
 import path from 'router/paths';
 import { Navigate, useMatch } from 'react-router-dom';
 import auth from 'store/auth';
+import { GuardPropsType  } from './type';
 import { generateResetPasswordLink } from 'utils';
 
-type GuardPropsType = {
-  children : JSX.Element;
-};
-
-export const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
+const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
   const isLogin = useMatch(path.LOGIN);
   const isHome = useMatch(`${path.HOME}/*`);
   const isOtp = useMatch(path.OTP);
@@ -48,3 +45,5 @@ export const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
   }
   return children;
 };
+
+export default LoginRequire;

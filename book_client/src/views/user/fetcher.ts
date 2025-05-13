@@ -1,9 +1,8 @@
 import { AxiosResponse } from 'axios';
-import { LoaderFunctionArgs, redirect } from 'react-router-dom';
+import { LoaderFunctionArgs } from 'react-router-dom';
 import { UserService, RequestBody } from 'services';
 import { UserType } from 'interfaces';
 import { showToast } from 'utils';
-import paths from 'router/paths';
 
 export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
   return promise.then((res) => {
@@ -58,9 +57,9 @@ export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosRes
     }
   };
 
-  return UserService.post('user-detail', body).catch((err) => {
-    showToast('User detail', err.response.data.message);
-    return redirect(`${paths.HOME}/${paths.USER}`);
+  return UserService.KeepAlive.post('user-detail', body).catch((err) => {
+    showToast('User detail!', err.response.data.message);
+    return new Response(err.response);
   });
 };
 
