@@ -20,7 +20,15 @@ export const updateMfaState = (userId: string, mfaEnable: boolean): Promise<Axio
     userId,
     mfaEnable
   };
-  return handlePromise(UserService.post('update-mfa', body));
+  return UserService.post('update-mfa', body);
+};
+
+export const updatePower = (userId: string, power: boolean): Promise<AxiosResponse> => {
+  const body: RequestBody = {
+    userId,
+    power
+  };
+  return UserService.post('update-power', body);
 };
 
 export const deleteUser = (userId: string): Promise<AxiosResponse> => {
@@ -82,6 +90,7 @@ export const loadInitUser = async ({
       phone: true,
       sex: true,
       role: true,
+      isAdmin: true,
       mfaEnable: true
     }
   };
