@@ -93,6 +93,17 @@ class UserService extends Service {
     });
   }
 
+  updatePower(power, userId) {
+    return this.PrismaInstance.user.update({
+      where: {
+        user_id: userId
+      },
+      data: {
+        power
+      }
+    });
+  }
+
   login(email, password, select) {
     return this.PrismaInstance.user.findFirstOrThrow({
       where: {

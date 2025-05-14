@@ -95,6 +95,20 @@ const MfaUpdate = (validators, className) => {
   }, className);
 };
 
+const PowerUpdate = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsId('userId must be numeric string and contain 13 character')
+    )
+    userId;
+
+    @validators(
+      IsBoolean('power must be boolean!')
+    )
+    power;
+  }, className);
+};
+
 const AdminResetPassword = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
@@ -239,6 +253,7 @@ module.exports = {
   OtpVerify: Validation(OtpVerify),
   OtpUpdate: Validation(OtpUpdate),
   MfaUpdate: Validation(MfaUpdate),
+  PowerUpdate: Validation(PowerUpdate),
   UserDetail: Validation(UserDetail),
   UserUpdate: Validation(UserUpdate),
   PersonUpdate: Validation(PersonUpdate),

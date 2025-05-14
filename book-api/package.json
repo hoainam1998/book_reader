@@ -28,7 +28,9 @@
     "test.user.forget-password": "npm run test.requirement -- __test__/apis/user/forget-password.test.js",
     "test.user.forget-password.silent": "npm run test.requirement -- __test__/apis/user/forget-password.test.js --silent",
     "test.user.update-mfa": "npm run test.requirement -- __test__/apis/user/update-mfa.test.js",
-    "test.user.update-mfa.silent": "npm run test.requirement -- __test__/apis/user/update-mfa.test.js --silent"
+    "test.user.update-mfa.silent": "npm run test.requirement -- __test__/apis/user/update-mfa.test.js --silent",
+    "test.user.update-power": "npm run test.requirement -- __test__/apis/user/update-power.test.js",
+    "test.user.update-power.silent": "npm run test.requirement -- __test__/apis/user/update-power.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

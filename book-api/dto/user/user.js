@@ -48,6 +48,11 @@ class UserDTO extends OutputValidate {
     return `${this.first_name} ${this.last_name}`;
   }
 
+  @Type(() => Boolean)
+  get isAdmin() {
+    return this.power;
+  }
+
   @Type(() => String)
   get userId() {
     return this.user_id;
