@@ -10,7 +10,7 @@ import Tooltip from 'components/tooltip/tooltip';
 import constants from 'read-only-variables';
 import { showToast } from 'utils';
 import auth from 'store/auth';
-import { loadInitUser, updateMfaState, deleteUser as _deleteUser } from '../fetcher';
+import { loadInitUser, updateMfaState, updatePower, deleteUser as _deleteUser } from '../fetcher';
 import './style.scss';
 
 let _keyword: string = '';
@@ -23,6 +23,7 @@ type UserType = {
   name: string;
   email: string;
   role: string;
+  isAdmin: boolean;
   sex: number;
   mfaEnable: boolean;
 };
@@ -64,6 +65,10 @@ function UserList(): JSX.Element {
         label: 'MFA',
       },
       {
+        key: 'isAdmin',
+        label: 'Admin',
+      },
+      {
         key: 'operation',
         width: 200,
         style: {
@@ -85,7 +90,20 @@ function UserList(): JSX.Element {
 
   const updateMfa = useCallback((userId: string, mfaEnable: boolean): void => {
     updateMfaState(userId, mfaEnable)
-      .then(() => fetchUser(_pageSize, _pageNumber));
+      .then((response) => {
+        showToast('Update mfa!', response.data.message);
+        fetchUser(_pageSize, _pageNumber);
+      })
+      .catch((error) => showToast('Update mfa!', error.response.data.message));
+  }, []);
+
+    const updatePermission = useCallback((userId: string, power: boolean): void => {
+    updatePower(userId, power)
+      .then((response) => {
+        showToast('Update permission!', response.data.message);
+        fetchUser(_pageSize, _pageNumber);
+      })
+      .catch((error) => showToast('Update permission!', error.response.data.message));
   }, []);
 
   const navigateToDetailPage = useCallback((): void => {
@@ -139,6 +157,10 @@ function UserList(): JSX.Element {
           <Slot<UserType> name="mfaEnable" render={
             (slotProp) => <Switch label="" name="mfa"
               value={slotProp.mfaEnable} onChange={(mfaEnable) => updateMfa(slotProp.userId, mfaEnable)} />
+            } />
+          <Slot<UserType> name="isAdmin" render={
+            (slotProp) => <Switch label="" name="admin"
+              value={slotProp.isAdmin} onChange={(power) => updatePermission(slotProp.userId, power)} />
             } />
           <Slot name="operation" render={operationSlot} />
       </Table>
