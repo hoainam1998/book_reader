@@ -30,6 +30,7 @@ const {
   OtpVerify,
   OtpUpdate,
   MfaUpdate,
+  PowerUpdate,
   AdminResetPassword,
   UserDetail,
   UserUpdate,
@@ -59,6 +60,7 @@ class UserRouter extends Router {
     this.post('/add', allowInternalCall, this._addUser);
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, onlyAdminAllowed, this._updateMfaState);
+    this.post('/update-power', authentication, onlyAdminAllowed, this._updatePower);
     this.post('/reset-password', this._resetPassword);
     this.delete('/delete-user/:id', authentication, onlyAdminAllowed, this._deleteUser);
     this.post('/user-detail', authentication, onlyAdminAllowed, this._getUserDetail);
@@ -140,6 +142,26 @@ class UserRouter extends Router {
       {
         userId: req.body.userId,
         mfaEnable: req.body.mfaEnable,
+      },
+    );
+  }
+
+  @validation(PowerUpdate, { error_message: USER.UPDATE_POWER_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updatePower(req, res, next, self) {
+    const query = `mutation UpdatePower($userId: ID!, $power: Boolean!) {
+      user {
+        updatePower(userId: $userId, power: $power) {
+          message
+        }
+      }
+    }`;
+    return self.execute(
+      query,
+      {
+        userId: req.body.userId,
+        power: req.body.power,
       },
     );
   }

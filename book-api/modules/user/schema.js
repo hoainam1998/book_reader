@@ -132,6 +132,9 @@ const USER_INFORMATION = new GraphQLObjectType({
     role: {
       type: GraphQLString,
     },
+    isAdmin: {
+      type: GraphQLBoolean,
+    },
   },
 });
 
@@ -369,6 +372,25 @@ const mutation = new GraphQLObjectType({
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
       },
+    },
+    updatePower: {
+      type: ResponseType,
+      args: {
+        userId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+        power: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+        },
+      },
+      resolve: async (user, { userId, power }) => {
+        return handleResolveResult(async () => {
+          const { email } = await user.updatePower(power, userId);
+          return messageCreator(USER.UPDATE_POWER_SUCCESS.format(email));
+        }, {
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND
+        });
+      }
     },
     updateOtpCode: {
       type: new GraphQLObjectType({
