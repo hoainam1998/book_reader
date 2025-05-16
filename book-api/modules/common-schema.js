@@ -17,16 +17,23 @@ const { HTTP_CODE } = require('#constants');
  * }}} The extension name.
  */
 const createGraphqlError = (code) => {
-  return Object.defineProperty({
+  return Object.defineProperties({
     extensions: {
       code,
       http: {
         status: HTTP_CODE[code],
       },
+    }
+  },{
+    error_code: {
+      set(value) {
+        this.extensions.http.error_code = value;
+      }
     },
-  }, 'error_code', {
-    set(value) {
-      this.extensions.http.error_code = value;
+    response: {
+      set(value) {
+        this.extensions.response = value;
+      }
     }
   });
 };

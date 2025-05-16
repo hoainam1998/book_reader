@@ -311,7 +311,7 @@ const validation = (...args) => {
             lastRun = false;
           }
         };
-        const { groups, request_data_passed_type, error_message } = options || {};
+        const { groups, request_data_passed_type, error_message, exclude_query_fields } = options || {};
          // error_message was provided, append it into default error message.
         const errorMessage = (error_message || '').concat('\n', COMMON.INPUT_VALIDATE_FAIL);
 
@@ -385,7 +385,17 @@ const validation = (...args) => {
 
         if (request.body && request.body.query) {
           // parsing
-          request.body.query = graphqlQueryParser(request.body.query);
+          let queryFields = request.body.query;
+          const excludeFields = typeof exclude_query_fields === 'function' ? exclude_query_fields(request) : exclude_query_fields;
+          if (Array.isArray(excludeFields) && excludeFields.length) {
+            queryFields = Object.keys(request.body.query).reduce((query, key) => {
+              if (!excludeFields.includes(key)) {
+                query[key] = request.body.query[key];
+              }
+              return query;
+            }, {});
+          }
+          request.body.query = graphqlQueryParser(queryFields);
         }
 
         lastRun && originMethod.apply(this, args);

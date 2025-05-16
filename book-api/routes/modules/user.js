@@ -1,6 +1,6 @@
 const Router = require('../router');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -41,6 +41,23 @@ const {
 } = require('#dto/user/user-in');
 const Login = require('#dto/common/login-validator');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
+
+/**
+* Remove some fields that do not allow loading when the user has a user role.
+*
+* @param {Object} req - The express request.
+* @param {string[]} - The exclude fields.
+*/
+const excludePaginationQueryFields = (req) => {
+  console.log(req.session.user);
+  if (
+    req.session.isDefined('user')
+    && req.session.user.isDefined('role')
+    && req.session.user.role === POWER.USER) {
+      return ['userId', 'mfaEnable', 'isAdmin'];
+  }
+  return [];
+};
 
 /**
  * Organize user routes.
@@ -102,11 +119,14 @@ class UserRouter extends Router {
     return self.execute(query, { user: variables });
   }
 
-  @validation(UserPaginationInput, { error_message: USER.PAGINATION_LOAD_USER_FAIL })
+  @validation(UserPaginationInput, {
+    error_message: USER.PAGINATION_LOAD_USER_FAIL,
+    exclude_query_fields: excludePaginationQueryFields
+  })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserPagination)
   _pagination(req, res, next, self) {
-    const query = `query UserPagination($pageSize: Int, $pageNumber: Int, $keyword: String) {
+    const query = `query UserPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
       user {
         pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
           list ${

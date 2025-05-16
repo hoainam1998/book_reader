@@ -11,7 +11,9 @@ const isValueEqual = function (valueToCompare) {
 
   // if two object are array and length of them is same,
   // loop through and compare all elements.
-  if (Array.isArray(this) && Array.isArray(valueToCompare)) {
+  if (Array.isArray(this) && !Array.isArray(valueToCompare)) {
+    return false;
+  } else if (Array.isArray(this) && Array.isArray(valueToCompare)) {
     if (this.length === valueToCompare.length) {
       return this.every((v, index) => v.isValueEqual(valueToCompare[index]));
     }
