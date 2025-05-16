@@ -49,7 +49,6 @@ const MessageSerializerResponse = require('#dto/common/message-serializer-respon
 * @param {string[]} - The exclude fields.
 */
 const excludePaginationQueryFields = (req) => {
-  console.log(req.session.user);
   if (
     req.session.isDefined('user')
     && req.session.user.isDefined('role')
