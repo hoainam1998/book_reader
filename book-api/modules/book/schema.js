@@ -337,7 +337,7 @@ const query = new GraphQLObjectType({
             list: [],
             total: 0
           };
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
+          graphqlNotFoundErrorOption.response = response;
           throw new GraphQLError('Books not found!', graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {

@@ -30,7 +30,9 @@
     "test.user.update-mfa": "npm run test.requirement -- __test__/apis/user/update-mfa.test.js",
     "test.user.update-mfa.silent": "npm run test.requirement -- __test__/apis/user/update-mfa.test.js --silent",
     "test.user.update-power": "npm run test.requirement -- __test__/apis/user/update-power.test.js",
-    "test.user.update-power.silent": "npm run test.requirement -- __test__/apis/user/update-power.test.js --silent"
+    "test.user.update-power.silent": "npm run test.requirement -- __test__/apis/user/update-power.test.js --silent",
+    "test.user.pagination": "npm run test.requirement -- __test__/apis/user/pagination.test.js",
+    "test.user.pagination.silent": "npm run test.requirement -- __test__/apis/user/pagination.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

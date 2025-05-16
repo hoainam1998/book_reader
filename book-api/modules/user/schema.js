@@ -155,10 +155,10 @@ const query = new GraphQLObjectType({
       }),
       args: {
         pageSize: {
-          type: GraphQLInt,
+          type: new GraphQLNonNull(GraphQLInt),
         },
         pageNumber: {
-          type: GraphQLInt,
+          type: new GraphQLNonNull(GraphQLInt),
         },
         keyword: {
           type: GraphQLString,
@@ -168,6 +168,10 @@ const query = new GraphQLObjectType({
         const [users, total] = await user.pagination(pageSize, pageNumber, keyword, context);
 
         if (!checkArrayHaveValues(users)) {
+          graphqlNotFoundErrorOption.response = {
+            list: [],
+            total: 0,
+          };
           throw new GraphQLError(USER.USERS_EMPTY, graphqlNotFoundErrorOption);
         }
 
@@ -187,6 +191,7 @@ const query = new GraphQLObjectType({
       resolve: async (user, { exceptedUserId }, context) => {
         const users = await user.getAllUsers(exceptedUserId, context);
         if (!checkArrayHaveValues(users)) {
+          graphqlNotFoundErrorOption.response = [];
           throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(UserDTO, users);
