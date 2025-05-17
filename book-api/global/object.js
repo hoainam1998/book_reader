@@ -20,14 +20,18 @@ const isValueEqual = function (valueToCompare) {
     return false;
   } else if (this instanceof Object && valueToCompare instanceof Object) {
     // if they are plain object, compare value property of them.
-    return Array.from(Object.entries(this)).every(
-      ([key, val]) => {
-        if (typeof val === 'object' && typeof valueToCompare[key] === 'object' && !!val) {
-          return val.isValueEqual(valueToCompare[key]);
+    if (Object.keys(this).length && Object.keys(valueToCompare).length) {
+      return Array.from(Object.entries(this)).every(
+        ([key, val]) => {
+          if (typeof val === 'object' && typeof valueToCompare[key] === 'object' && !!val) {
+            return val.isValueEqual(valueToCompare[key]);
+          }
+          return val === valueToCompare[key];
         }
-        return val === valueToCompare[key];
-      }
-    );
+      );
+    } else {
+      return false;
+    }
   } else {
     // compare value, if they are primitive value.
     return this === valueToCompare;
