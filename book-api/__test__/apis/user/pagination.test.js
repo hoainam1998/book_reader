@@ -1,25 +1,14 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
+const PrismaField = require('#services/prisma-fields/prisma-field');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const { createMockUserList } = require('#test/resources/test-data');
+const { createMockUserList, userQueryFieldExpectedTypes, generateExpectedObject } = require('#test/resources/test-data');
 const paginationUrl = `${PATH.USER}/pagination`;
-
-const queryFieldExpectedTypes = {
-  userId: expect.any(String),
-  name: expect.any(String),
-  email: expect.any(String),
-  avatar: expect.any(String),
-  phone: expect.any(String),
-  sex: expect.any(Number),
-  role: expect.any(String),
-  isAdmin: expect.any(Boolean),
-  mfaEnable: expect.any(Boolean),
-};
 
 const requestBody = {
   pageSize: 10,
@@ -39,17 +28,16 @@ const requestBody = {
 
 const userLength = 2;
 
+/**
+ * Create the expected user list.
+ *
+ * @param {object} requestBodyQuery - The request body query.
+ * @param {string[]} [excludeFields=[]] - The fields should remove.
+ * @return {object[]} - The expected user list.
+ */
 const generateUserExpectedList = (requestBodyQuery, excludeFields= []) => {
   return Array.apply(null, Array(userLength)).map(() => {
-    return Object.keys(requestBodyQuery).reduce((queryExpected, field) => {
-      if (excludeFields.length) {
-        if (excludeFields.includes(field)) {
-          return queryExpected;
-        }
-      }
-      queryExpected[field] = queryFieldExpectedTypes[field];
-      return queryExpected;
-    }, {});
+    return generateExpectedObject(requestBodyQuery, userQueryFieldExpectedTypes, excludeFields);
   });
 };
 
@@ -82,9 +70,10 @@ describe('user pagination', () => {
         createMockUserList(userLength),
         userLength,
       ]);
-
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const userListExpected = generateUserExpectedList(requestBody.query);
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -95,15 +84,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBody)
             .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   orderBy: {
                     user_id: 'desc'
                   },
@@ -113,10 +104,9 @@ describe('user pagination', () => {
               );
               expect(globalThis.prismaClient.user.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
-                list: expect.any(Array),
+                list: userListExpected,
                 total: userLength,
               });
-              expect(response.body.list).toEqual(userListExpected);
               done();
             });
         });
@@ -128,8 +118,10 @@ describe('user pagination', () => {
         userLength,
       ]);
 
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const userListExpected = generateUserExpectedList(requestBody.query, ['userId', 'mfaEnable', 'isAdmin']);
 
+      expect.hasAssertions();
       signedTestCookie({ ...sessionData.user, role: POWER.USER })
         .then((responseSign) => {
           globalThis.api
@@ -140,15 +132,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBody)
             .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   orderBy: {
                     user_id: 'desc'
                   },
@@ -158,10 +152,9 @@ describe('user pagination', () => {
               );
               expect(globalThis.prismaClient.user.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
-                list: expect.any(Array),
+                list: userListExpected,
                 total: userLength,
               });
-              expect(response.body.list).toEqual(userListExpected);
               done();
             });
         });
@@ -178,8 +171,10 @@ describe('user pagination', () => {
         userLength,
       ]);
 
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const userListExpected = generateUserExpectedList(requestBodyWithKeyValue.query);
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -190,16 +185,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBodyWithKeyValue)
             .then((response) => {
-              console.log(response.body);
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   where: {
                     OR: [
                       {
@@ -241,10 +237,9 @@ describe('user pagination', () => {
                 })
               );
               expect(response.body).toEqual({
-                list: expect.any(Array),
+                list: userListExpected,
                 total: userLength,
               });
-              expect(response.body.list).toEqual(userListExpected);
               done();
             });
         });
@@ -255,7 +250,9 @@ describe('user pagination', () => {
         [],
         0,
       ]);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -266,15 +263,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBody)
             .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   orderBy: {
                     user_id: 'desc'
                   },
@@ -293,6 +292,7 @@ describe('user pagination', () => {
     });
 
     test('user pagination failed authentication token unset', (done) => {
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -315,6 +315,7 @@ describe('user pagination', () => {
     });
 
     test('user pagination failed session expired', (done) => {
+      expect.hasAssertions();
       destroySession()
         .then((responseSign) => {
           globalThis.api
@@ -338,6 +339,7 @@ describe('user pagination', () => {
     });
 
      test('user pagination failed with request body are empty', (done) => {
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -366,6 +368,7 @@ describe('user pagination', () => {
         pageNumber: requestBody.pageNumber,
       };
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -403,7 +406,9 @@ describe('user pagination', () => {
           }
         })
       );
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -414,15 +419,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBody)
             .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   orderBy: {
                     user_id: 'desc'
                   },
@@ -441,7 +448,9 @@ describe('user pagination', () => {
 
     test('user pagination failed with server error', (done) => {
       globalThis.prismaClient.$transaction.mockRejectedValue(ServerError);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -452,15 +461,17 @@ describe('user pagination', () => {
             .expect('Content-Type', /application\/json/)
             .send(requestBody)
             .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
-                  select: expect.objectContaining({
+                  select: {
+                    ...selectExpected,
                     power: true,
-                  }),
+                  },
                   orderBy: {
                     user_id: 'desc'
                   },
