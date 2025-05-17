@@ -49,8 +49,7 @@ export const getAllUsers = (userId?: string): Promise<AxiosResponse> => {
   });
 };
 
-export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {
-  const userId: string | undefined = params.id;
+export const getUserDetail = (userId: string): Promise<AxiosResponse> => {
   const body: RequestBody = {
     userId,
     query: {
@@ -65,10 +64,7 @@ export const loadUserDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosRes
     }
   };
 
-  return UserService.KeepAlive.post('user-detail', body).catch((err) => {
-    showToast('User detail!', err.response.data.message);
-    return new Response(err.response);
-  });
+  return UserService.post('user-detail', body);
 };
 
 export const loadInitUser = async ({
@@ -94,5 +90,5 @@ export const loadInitUser = async ({
       mfaEnable: true
     }
   };
-  return await UserService.post('pagination', body);
+  return await UserService.KeepAlive.post('pagination', body);
 };

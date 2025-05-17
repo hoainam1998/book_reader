@@ -1,4 +1,5 @@
 import { AxiosError, AxiosResponse } from 'axios';
+import { stringRandom as id } from 'utils';
 
 type PromiseOperationCallbackType = (
   resolve: (data: any) => void,
@@ -38,23 +39,73 @@ export default class SilentPromise {
   private _finallyCallback: () => void = () => {};
 
   /**
-  * Default silent promise instance.
+  * Request stored with key.
   *
-  * @public
+  * @private
   * @static
   */
-  static default: SilentPromise;
+  private static request = new Map<string, SilentPromise>();
 
   /**
-  * Default silent promise instance.
+  * Create silent promise instance.
   *
   * @public
   * @constructor
   * @param {PromiseOperationCallbackType} cb - The simulate promise callback passed on promise constructor.
   */
   constructor(cb: PromiseOperationCallbackType) {
-    SilentPromise.default = this;
-    cb(this.resolve, this.reject, this.final);
+    const requestId = id();
+    SilentPromise.addRequest(requestId, this);
+    cb(
+      (data: AxiosResponse) => this.resolve(requestId, data),
+      (error: AxiosError) => this.reject(requestId, error),
+      () => this.final(requestId)
+    );
+  }
+
+  /**
+  * Add request to request memory.
+  *
+  * @private
+  * @static
+  * @param {string} requestId - The request id.
+  * @param {SilentPromise} request - The request.
+  */
+  private static addRequest(requestId: string, request: SilentPromise): void {
+    SilentPromise.request.set(requestId, request);
+  }
+
+  /**
+  * Get request by id.
+  *
+  * @private
+  * @static
+  * @param {string} requestId - The request id.
+  * @return {SilentPromise} - The request.
+  */
+  private static getCurrentRequest(requestId: string): SilentPromise | undefined {
+    return SilentPromise.request.get(requestId);
+  }
+
+  /**
+  * Delete request out of memory.
+  *
+  * @private
+  * @static
+  * @param {string} requestId - The request id.
+  */
+  private static freeingRequest(requestId: string): void {
+    SilentPromise.request.delete(requestId);
+  }
+
+  /**
+  * Clear request memory.
+  *
+  * @public
+  * @static
+  */
+  public static clearRequestMemory(): void {
+    SilentPromise.request.clear();
   }
 
   /**
@@ -63,9 +114,13 @@ export default class SilentPromise {
   * @public
   * @param {AxiosResponse} data - The promise resolve data.
   */
-  resolve(data: AxiosResponse): void {
-    if (SilentPromise.default._thenCallback) {
-      SilentPromise.default._thenCallback(data);
+  resolve(requestId: string, data: AxiosResponse): void {
+    const context = SilentPromise.getCurrentRequest(requestId);
+    if (context && context._thenCallback) {
+      context._thenCallback(data);
+      if (!context._finallyCallback) {
+        SilentPromise.freeingRequest(requestId);
+      }
     }
   }
 
@@ -75,9 +130,13 @@ export default class SilentPromise {
   * @public
   * @param {AxiosError} error- The promise rejected error.
   */
-  reject(error: AxiosError): void {
-    if (SilentPromise.default._catchCallback) {
-      SilentPromise.default._catchCallback(error);
+  reject(requestId: string, error: AxiosError): void {
+    const context = SilentPromise.getCurrentRequest(requestId);
+    if (context && context._catchCallback) {
+      context._catchCallback(error);
+      if (!context._finallyCallback) {
+        SilentPromise.freeingRequest(requestId);
+      }
     }
   }
 
@@ -86,9 +145,11 @@ export default class SilentPromise {
   *
   * @public
   */
-  final(): void {
-    if (SilentPromise.default._finallyCallback) {
-      SilentPromise.default._finallyCallback();
+  final(requestId: string): void {
+    const context = SilentPromise.getCurrentRequest(requestId);
+    if (context && context._finallyCallback) {
+      context._finallyCallback();
+      SilentPromise.freeingRequest(requestId);
     }
   }
 

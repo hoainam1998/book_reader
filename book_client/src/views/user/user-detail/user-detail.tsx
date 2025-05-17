@@ -1,6 +1,6 @@
-import { JSX, useCallback, useLayoutEffect, useMemo, useState } from 'react';
+import { JSX, useCallback, useMemo, useState } from 'react';
 import { AxiosResponse } from 'axios';
-import { useNavigate, useLoaderData, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Grid, { GridItem } from 'components/grid/grid';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
@@ -11,9 +11,9 @@ import { OptionPrototype } from 'components/form/form-control/form-control';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
-import useComponentDidMount from 'hooks/useComponentDidMount';
+import useComponentWillMount from 'hooks/useComponentWillMount';
 import { required, email as emailValidate, ErrorFieldInfo, matchPattern } from 'hooks/useValidate';
-import { addUser, loadUserDetail, updateUser, getAllUsers } from '../fetcher';
+import { addUser, updateUser, getAllUsers, getUserDetail } from '../fetcher';
 import { showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
 import { HaveLoadedFnType } from 'interfaces';
@@ -40,10 +40,9 @@ const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) =
 function UserDetail(): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
   const [phones, setPhones] = useState<string[]>([]);
-  const loaderData = useLoaderData() as any;
+  const [name, setName] = useState<string[]>([]);
   const navigate = useNavigate();
   const { id } = useParams();
-  const user = loaderData?.data;
 
   const emailDuplicateValidate = useCallback(
     (message: string) =>
@@ -132,24 +131,12 @@ function UserDetail(): JSX.Element {
   }, [state]);
 
   const userName = useMemo<string>(() => {
-    return user ? `${user.firstName} ${user.lastName}` : '';
-  }, [user]);
+    return name.length ? name.join(' ') : '';
+  }, [name]);
 
   useSetTheLastNavigateName(userName);
 
-  useLayoutEffect(() => {
-    if (user) {
-      firstName.watch(user.firstName);
-      lastName.watch(user.lastName);
-      email.watch(user.email);
-      mfa.watch(user.mfaEnable);
-      sex.watch(user.sex);
-      phone.watch(user.phone);
-      power.watch(user.power);
-    }
-  }, []);
-
-  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
+  useComponentWillMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
         getAllUsers(id)
@@ -160,7 +147,6 @@ function UserDetail(): JSX.Element {
                 flat.emailsList.push(current.email);
                 return flat;
               }, { phonesList: [], emailsList: [] });
-
             setEmails(emailsList);
             setPhones(phonesList);
           })
@@ -168,6 +154,22 @@ function UserDetail(): JSX.Element {
             setEmails([]);
             setPhones([]);
           });
+
+          if (id) {
+            getUserDetail(id)
+              .then((response) => {
+                const user = response.data;
+                firstName.watch(user.firstName);
+                lastName.watch(user.lastName);
+                email.watch(user.email);
+                mfa.watch(user.mfaEnable);
+                sex.watch(user.sex);
+                phone.watch(user.phone);
+                power.watch(user.power);
+                setName([user.firstName, user.lastName]);
+              })
+              .catch((error) => showToast('User detail!', error.response.data.message));
+          }
       }
       return reset;
     };
@@ -291,5 +293,4 @@ function UserDetail(): JSX.Element {
   );
 }
 
-export { loadUserDetail };
 export default UserDetail;
