@@ -45,8 +45,23 @@ const generateExpectedObject = (requestBodyQuery, queryFieldExpectedTypes, exclu
   }, {});
 };
 
+/**
+ * Create the expected user list.
+ *
+ * @param {object} requestBodyQuery - The request body query.
+ * @param {number} length - The number user create.
+ * @param {string[]} [excludeFields=[]] - The fields should remove.
+ * @return {object[]} - The expected user list.
+ */
+const generateUserExpectedList = (requestBodyQuery, length, excludeFields= []) => {
+  return Array.apply(null, Array(length)).map(() => {
+    return generateExpectedObject(requestBodyQuery, userQueryFieldExpectedTypes, excludeFields);
+  });
+};
+
 module.exports = {
   createMockUserList,
   generateExpectedObject,
+  generateUserExpectedList,
   userQueryFieldExpectedTypes,
 };

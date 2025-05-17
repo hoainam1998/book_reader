@@ -320,7 +320,10 @@ class UserRouter extends Router {
     return self.execute(query, req.body);
   }
 
-  @validation(AllUser, { error_message: USER.LOAD_ALL_USER_FAIL })
+  @validation(AllUser, {
+    error_message: USER.LOAD_ALL_USER_FAIL,
+    exclude_query_fields: excludePaginationQueryFields
+  })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {

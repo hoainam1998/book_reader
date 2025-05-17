@@ -83,6 +83,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
         globalThis.api
           .put(updatePersonUrl)
           .set('Cookie', [responseApiSignin.header['set-cookie']])
+          .set('Connection', 'keep-alive')
           .field('firstName', mockUser.first_name)
           .field('lastName', mockUser.last_name)
           .field('email', mockUser.email)
