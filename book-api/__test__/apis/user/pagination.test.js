@@ -7,7 +7,7 @@ const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const { createMockUserList, userQueryFieldExpectedTypes, generateExpectedObject } = require('#test/resources/test-data');
+const { createMockUserList, generateUserExpectedList } = require('#test/resources/test-data');
 const paginationUrl = `${PATH.USER}/pagination`;
 
 const requestBody = {
@@ -27,19 +27,6 @@ const requestBody = {
 };
 
 const userLength = 2;
-
-/**
- * Create the expected user list.
- *
- * @param {object} requestBodyQuery - The request body query.
- * @param {string[]} [excludeFields=[]] - The fields should remove.
- * @return {object[]} - The expected user list.
- */
-const generateUserExpectedList = (requestBodyQuery, excludeFields= []) => {
-  return Array.apply(null, Array(userLength)).map(() => {
-    return generateExpectedObject(requestBodyQuery, userQueryFieldExpectedTypes, excludeFields);
-  });
-};
 
 describe('user pagination', () => {
   commonTest('user pagination api common test', [
@@ -71,7 +58,7 @@ describe('user pagination', () => {
         userLength,
       ]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBody.query);
+      const userListExpected = generateUserExpectedList(requestBody.query, userLength);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -119,7 +106,7 @@ describe('user pagination', () => {
       ]);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBody.query, ['userId', 'mfaEnable', 'isAdmin']);
+      const userListExpected = generateUserExpectedList(requestBody.query, userLength, ['userId', 'mfaEnable', 'isAdmin']);
 
       expect.hasAssertions();
       signedTestCookie({ ...sessionData.user, role: POWER.USER })
@@ -172,7 +159,7 @@ describe('user pagination', () => {
       ]);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBodyWithKeyValue.query);
+      const userListExpected = generateUserExpectedList(requestBodyWithKeyValue.query, userLength);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)

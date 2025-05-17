@@ -34,7 +34,9 @@
     "test.user.pagination": "npm run test.requirement -- __test__/apis/user/pagination.test.js",
     "test.user.pagination.silent": "npm run test.requirement -- __test__/apis/user/pagination.test.js --silent",
     "test.user.detail": "npm run test.requirement -- __test__/apis/user/user-detail.test.js",
-    "test.user.detail.silent": "npm run test.requirement -- __test__/apis/user/user_detail.test.js --silent"
+    "test.user.detail.silent": "npm run test.requirement -- __test__/apis/user/user_detail.test.js --silent",
+    "test.user.all": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js",
+    "test.user.all.silent": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",
