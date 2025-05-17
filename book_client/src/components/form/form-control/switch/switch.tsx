@@ -12,7 +12,7 @@ type SwitchPropsType = FormControlProps
 
 function Switch({
   name,
-  value,
+  value = false,
   label,
   className,
   labelClass,

@@ -6,7 +6,7 @@ from 'views/login-group/reset-password/admin-reset-password/admin-reset-password
 import Home from 'views/home/home';
 import Personal from 'views/personal/personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
-import UserDetail, { loadUserDetail } from 'views/user/user-detail/user-detail';
+import UserDetail from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category/category';
 import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
@@ -101,7 +101,6 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: path.ID,
             element: <AdminRequire><UserDetail /></AdminRequire>,
-            loader: loadUserDetail,
             handle: {
               crumb: ({ pathname, name }: NavigationRouteMatchType) =>
                 <span key={pathname}>{name}</span>
