@@ -10,6 +10,7 @@ const {
 const authentication = require('#middlewares/auth/authentication');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD } = require('#constants');
+const { BOOK, COMMON } = require('#messages');
 const {
   promiseAll,
   getExtName,
@@ -51,13 +52,12 @@ const cpUpload = multer().fields([
  * @return {Promise} - The promise filtered.
  */
 const filterResponse = (promise) =>
-  promise.then(async (data) => {
-    const result = { ...await data.json(), status: data.status };
+  promise.then((data) => {
     // if status === 200, return data, else return data as error.
     if (data.status === HTTP_CODE.CREATED) {
-      return result;
+      return data;
     }
-    return Promise.reject(result);
+    return Promise.reject(data);
   });
 
 /**
@@ -239,7 +239,7 @@ class BookRouter extends Router {
       maxCount: 8
     }
   ])
-  @validation(BookCreate, { error_message: 'Creating book information failed!' })
+  @validation(BookCreate, { error_message: BOOK.CREATE_BOOK_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _saveBookInfo(req, res, next, self) {
@@ -254,7 +254,6 @@ class BookRouter extends Router {
     const images = req.body.images.map((image, index) => ({
       image,
       name: req.body.imageNames[index],
-      bookId: req.body.bookId,
     }));
 
     delete req.body.imageNames;
@@ -348,7 +347,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(BookAuthors, { error_message: 'Create book authors failed!' })
+  @validation(BookAuthors, { error_message: BOOK.SAVE_BOOK_AUTHOR_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _saveBookAuthors(req, res, next, self) {
@@ -378,34 +377,43 @@ class BookRouter extends Router {
       }
     ],
     {
-      error_message: 'Create book failed!',
+      error_message: BOOK.CREATE_BOOK_FAIL,
       groups: ['create']
     }
   )
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(BookCreatedResponse)
   _createBookInformation(req, res, next, self) {
-    const url = `${req.protocol}:${req.get('host')}${req.baseUrl}`;
+    const url = getOriginInternalServerUrl(req);
     const bookId = Date.now();
     const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
-      () => filterResponse(fetchHelper(`${url}/save-book-info`, METHOD.POST, book)),
-      () => filterResponse(fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf)),
-      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
+      () => fetchHelper(`${url}/save-book-info`, METHOD.POST, book),
+      () => fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf),
+      () => fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
           'Content-Type': 'application/json'
         },
         JSON.stringify({ authors }))
-      ),
     ])
-    .then(results => {
-      if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
-        return Promise.reject('Create book failed!');
+    .then((results) => {
+      const error = results.find(result => [HTTP_CODE.BAD_REQUEST, HTTP_CODE.SERVER_ERROR].includes(result.status));
+      if (error) {
+        if (error.status === HTTP_CODE.BAD_REQUEST) {
+          return Promise.reject({
+            ...messageCreator(BOOK.CREATE_BOOK_FAIL),
+            status: HTTP_CODE.BAD_REQUEST,
+          });
+        } else {
+          return Promise.reject({
+            ...messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
+            status: HTTP_CODE.SERVER_ERROR,
+          });
+        }
       }
-
       return convertDtoToZodObject(BookCreated, {
-        ...messageCreator('Book created success!'),
-        bookId: bookId.toString()
+        ...messageCreator(BOOK.CREATE_BOOK_SUCCESS),
+        bookId: bookId.toString(),
       });
     });
   }

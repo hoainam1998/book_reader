@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 const { plainToInstance } = require('class-transformer');
 const { saveFile, createFolder, deleteFile } = require('./handle-file');
-const { convertFileToBase64, getExtName, createFile } = require('./handle-file-buffer');
+const { convertFileToBase64, getExtName, createFile, isEmptyFile } = require('./handle-file-buffer');
 const {
   signingResetPasswordToken,
   verifyResetPasswordToken,
@@ -192,6 +192,7 @@ module.exports = freezing({
   getGeneratorFunctionData,
   convertFileToBase64,
   getExtName,
+  isEmptyFile,
   saveFile,
   createFolder,
   createFile,

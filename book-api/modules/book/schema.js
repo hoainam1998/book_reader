@@ -13,6 +13,7 @@ const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.j
 const PaginationResponse = require('#dto/common/pagination-response');
 const BookDTO = require('#dto/book/book');
 const BookDetailDTO = require('#dto/book/book-detail');
+const { BOOK } = require('#messages');
 const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
 
@@ -72,9 +73,6 @@ const BOOK_INFORMATION_INPUT_TYPE = new GraphQLInputObjectType({
           name: {
             type: GraphQLString
           },
-          bookId: {
-            type: GraphQLID
-          }
         }
       })),
     },
@@ -187,7 +185,7 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (book, args) => {
         await book.saveBookInfo(args.book);
-        return messageCreator('Book has been created!');
+        return messageCreator(BOOK.BOOK_CREATED);
       }
     },
     updateBookInfo: {
@@ -219,9 +217,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (book, { bookId, pdf }) => {
         return handleResolveResult(async () => {
           await book.savePdfFile(bookId, pdf);
-          return messageCreator('Save pdf file success!');
+          return messageCreator(BOOK.PDF_SAVED);
         }, {
-          RECORD_NOT_FOUND: 'Book not found!'
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
         });
       }
     },
@@ -266,14 +264,12 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: async (book, { authors }) => {
-        const authorList = authors.reduce((authorListMapping, author) => {
-          authorListMapping.push({ author_id: author.authorId, book_id: author.bookId });
-          return authorListMapping;
-        }, []);
+        const authorList = authors.map((author) =>
+          ({ author_id: author.authorId, book_id: author.bookId }));
 
-        await book.deleteBookAuthor(authorList[0].authorId);
+        await book.deleteBookAuthor(authorList[0].book_id);
         await book.saveBookAuthor(authorList);
-        return messageCreator('Create book authors success!');
+        return messageCreator(BOOK.CREATE_BOOK_AUTHOR_SUCCESS);
       }
     }
   }

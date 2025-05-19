@@ -377,7 +377,9 @@ const validation = (...args) => {
         // In case validateInfo is object, default request data passed type will be 'body'
         if (Array.isArray(validateInfo)) {
           validateInfo.forEach(({ validate_class, request_data_passed_type }) => {
-            handleByType(validate_class, request_data_passed_type);
+            if (lastRun) {
+              handleByType(validate_class, request_data_passed_type);
+            }
           });
         } else {
           handleByType(validateInfo, request_data_passed_type);

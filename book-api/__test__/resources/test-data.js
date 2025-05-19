@@ -53,7 +53,7 @@ const generateExpectedObject = (requestBodyQuery, queryFieldExpectedTypes, exclu
  * @param {string[]} [excludeFields=[]] - The fields should remove.
  * @return {object[]} - The expected user list.
  */
-const generateUserExpectedList = (requestBodyQuery, length, excludeFields= []) => {
+const generateUserExpectedList = (requestBodyQuery, length, excludeFields = []) => {
   return Array.apply(null, Array(length)).map(() => {
     return generateExpectedObject(requestBodyQuery, userQueryFieldExpectedTypes, excludeFields);
   });
