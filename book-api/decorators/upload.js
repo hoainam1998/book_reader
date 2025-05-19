@@ -2,16 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const { UPLOAD_MODE, HTTP_CODE } = require('#constants');
 const { COMMON } = require('#messages');
-const { convertFileToBase64, messageCreator } = require('#utils');
+const { convertFileToBase64, messageCreator, isEmptyFile } = require('#utils');
 const Logger = require('#services/logger');
-
-/**
- * Check file is empty or not.
- *
- * @param {multer.File} file - The multer file.
- * @returns {boolean} - True if file is empty, other false.
- */
-const isEmptyFile = (file) => file.size === 0;
 
 const storage = multer.memoryStorage();
 
@@ -56,7 +48,7 @@ module.exports = (mode, fields, maxCount) => {
       uploadHandle(request, response, (err) => {
         if (err) {
           Logger.error('Upload file!', err.message);
-          response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message));
+          return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message));
         } else {
           // run by mode, and convert file to base64 string.
           switch (mode) {
@@ -73,14 +65,50 @@ module.exports = (mode, fields, maxCount) => {
               }
               break;
             case UPLOAD_MODE.ARRAY:
-              args[0].body[fields] = request.files.map(file => convertFileToBase64(file));
-              break;
-            case UPLOAD_MODE.FIELDS:
-              fields.forEach(({ name }) => {
-                if (request.files[name]) {
-                  request.body[name] = request.files[name].map(file => convertFileToBase64(file));
+              let haveEmptyFile = false;
+              args[0].body[fields] = request.files.map(file => {
+                if (isEmptyFile(file)) {
+                  haveEmptyFile = true;
+                } else {
+                  return convertFileToBase64(file);
                 }
               });
+              if (haveEmptyFile) {
+                return response.status(HTTP_CODE.BAD_REQUEST)
+                  .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(fields)));
+              }
+              break;
+            case UPLOAD_MODE.FIELDS:
+              let nameOfFieldHaveEmptyFile = '';
+              if (request.files) {
+                const fieldName = fields.find(({ name }) => {
+                  if (request.files[name]) {
+                    request.body[name] = request.files[name].map(file => {
+                      if (isEmptyFile(file)) {
+                        nameOfFieldHaveEmptyFile = name;
+                      } else {
+                        return convertFileToBase64(file);
+                      }
+                    });
+                    return false;
+                  } else {
+                    return true;
+                  }
+                });
+
+                if (nameOfFieldHaveEmptyFile) {
+                  return response.status(HTTP_CODE.BAD_REQUEST)
+                    .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(nameOfFieldHaveEmptyFile)));
+                }
+
+                if (fieldName) {
+                  return response.status(HTTP_CODE.BAD_REQUEST)
+                    .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(fieldName.name)));
+                }
+              } else {
+                return response.status(HTTP_CODE.BAD_REQUEST)
+                  .json(messageCreator(COMMON.FILE_IS_EMPTY));
+              }
               break;
             default: break;
           }

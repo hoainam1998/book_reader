@@ -1,6 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const { HTTP_CODE } = require('#constants');
+const { COMMON } = require('#messages');
+const { messageCreator, isEmptyFile } = require('#utils');
 const Logger = require('#services/logger');
 
 const storage = multer.diskStorage({
@@ -21,7 +23,7 @@ const upload = multer({
     if (extensionFileIsValid) {
       cb(null, true);
     } else {
-      cb(null, false);
+      cb(new Error(COMMON.FILE_NOT_PDF));
     }
   }
 });
@@ -42,9 +44,21 @@ module.exports = (field) => {
       uploadHandle(request, response, (err) => {
         if (err) {
           Logger.error('Upload Pdf', err.message);
-          response.status(HTTP_CODE.BAD_REQUEST).json({ message: err.message });
+          return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(err.message));
         } else {
-          request.body[field] = request.file ? `${field}/${request.file.filename}` : undefined;
+          if (request.file) {
+            if (isEmptyFile(request.file)) {
+              return response.status(HTTP_CODE.BAD_REQUEST)
+                .json(messageCreator(COMMON.FILE_IS_EMPTY));
+            }
+            request.body[field] = `${field}/${request.file.filename}`;
+          } else {
+            if (Object.prototype.isEmpty.call(request.body)) {
+              originalMethod.apply(null, args);
+            }
+            return response.status(HTTP_CODE.BAD_REQUEST)
+              .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(field)));
+          }
           originalMethod.apply(null, args);
         }
       });

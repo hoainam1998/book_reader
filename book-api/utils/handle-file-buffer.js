@@ -23,8 +23,17 @@ const getExtName = (file) => path.extname(file.originalname);
  */
 const createFile = (file) => new File([file.buffer], file.originalname, { type: file.mimetype });
 
+/**
+ * Check file is empty or not.
+ *
+ * @param {multer.File} file - The multer file.
+ * @returns {boolean} - True if file is empty, other false.
+ */
+const isEmptyFile = (file) => file.size === 0;
+
 module.exports = {
   convertFileToBase64,
   getExtName,
   createFile,
+  isEmptyFile,
 };

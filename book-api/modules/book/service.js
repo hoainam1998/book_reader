@@ -29,7 +29,9 @@ class BookService extends Service {
   }
 
   saveBookInfo(book) {
-    const { name, avatar, publishedTime, publishedDay, categoryId, bookId } = book;
+    const { name, avatar, publishedTime, publishedDay, images, categoryId, bookId } = book;
+    const bookImageData = images.map(img => ({ ...img, book_id: bookId }));
+
     return this.PrismaInstance.book.create({
       data: {
         book_id: bookId,
@@ -37,17 +39,12 @@ class BookService extends Service {
         avatar,
         published_day: publishedDay,
         published_time: publishedTime,
-        category_id: categoryId
+        category_id: categoryId,
+        book_image: {
+          create: bookImageData
+        },
       },
-    }).then(() => {
-      return this.PrismaInstance.book_image.createMany({
-        data: book.images.map(img => {
-          img = { ...img, book_id: img.bookId };
-          delete img.bookId;
-          return img;
-        })
-      }).catch(error => { throw error; });
-    }).catch(error =>  { throw error; });
+    });
   }
 
   savePdfFile(bookId, pdf) {
@@ -138,10 +135,9 @@ class BookService extends Service {
             delete img.bookId;
             return img;
           })
-        }).catch(error => { throw error; });
-      }).catch(error => { throw error; });
-    })
-    .catch(error =>  { throw error; });
+        });
+      });
+    });
   }
 
   getBookDetail(bookId, select) {
@@ -206,7 +202,9 @@ class BookService extends Service {
 
   deleteBookAuthor(bookId) {
     return this.PrismaInstance.book_author.deleteMany({
-      book_id: bookId
+      where: {
+        book_id: bookId
+      }
     });
   }
 }

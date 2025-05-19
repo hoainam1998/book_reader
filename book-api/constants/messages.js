@@ -14,7 +14,10 @@ module.exports = deepFreeze({
     REGISTER_EMAIL_NOT_MATCH: 'Register email is not match!',
     FILE_NOT_IMAGE: 'File must be an image file!',
     FILE_IS_EMPTY: 'File is empty!',
+    FIELD_NOT_PROVIDE: '{0} do not provide!',
     REQUEST_DATA_EMPTY: 'Request data is empty!',
+    FILE_FIELD_EMPTY: 'Files of {0} are empty!',
+    FILE_NOT_PDF: 'File is not pdf file!',
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',
@@ -52,4 +55,14 @@ module.exports = deepFreeze({
     NOT_PERMISSION: 'You do not have permission to perform this operation!',
     UPDATE_PASSWORD: 'Update your password success. Please check your email!'
   },
+  BOOK: {
+    CREATE_BOOK_FAIL: 'Create book was failed!',
+    CREATE_BOOK_SUCCESS: 'Create book was success!',
+    BOOK_CREATED: 'Book has been created!',
+    PDF_SAVED: 'Save pdf file success!',
+    BOOK_NOT_FOUND: 'The book not found!',
+    SAVE_PDF_FAIL: 'Saving pdf file failed!',
+    CREATE_BOOK_AUTHOR_SUCCESS: 'Create book authors success!',
+    SAVE_BOOK_AUTHOR_FAIL: 'Save book authors failed!',
+  }
 });
