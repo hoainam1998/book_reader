@@ -64,5 +64,7 @@ module.exports = deepFreeze({
     SAVE_PDF_FAIL: 'Saving pdf file failed!',
     CREATE_BOOK_AUTHOR_SUCCESS: 'Create book authors success!',
     SAVE_BOOK_AUTHOR_FAIL: 'Save book authors failed!',
+    INTRODUCE_FILE_SAVE: 'Introduce file was saved!',
+    SAVE_INTRODUCE_FAIL: 'Save introduce file was failed!',
   }
 });

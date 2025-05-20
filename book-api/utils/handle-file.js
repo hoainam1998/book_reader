@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const { mkdir } = require('fs/promises');
 
 /**
@@ -28,7 +29,7 @@ const saveFile = (filePath, content) => {
  * Create folder at specific path.
  *
  * @param {string} filePath - path to stored file.
- * @return {Promise<string>} promise contain file path.
+ * @return {Promise<string>} - The promise contain file path.
  */
 const createFolder = (path) => {
   return mkdir(path, { recursive: true });
