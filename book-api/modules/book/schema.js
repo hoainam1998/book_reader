@@ -144,9 +144,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (book, { name, html, json, bookId }) => {
         return handleResolveResult(async () => {
           await book.saveIntroduceHtmlFile(name, html, json, bookId);
-          return messageCreator('Introduce file created!');
+          return messageCreator(BOOK.INTRODUCE_FILE_SAVE);
         }, {
-          RECORD_NOT_FOUND: 'Book not found!'
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND
         });
       }
     },
@@ -172,7 +172,7 @@ const mutation = new GraphQLObjectType({
           await book.saveIntroduceHtmlFile(name, html, json, bookId);
           return messageCreator('Introduce file created!');
         }, {
-          RECORD_NOT_FOUND: 'Can not introduce file!'
+          RECORD_NOT_FOUND: 'Can not find introduce file!'
         });
       }
     },

@@ -38,7 +38,9 @@
     "test.user.all": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js",
     "test.user.all.silent": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js --silent",
     "test.book.create-book": "npm run test.requirement -- __test__/apis/book/create-book.test.js",
-    "test.book.create-book.silent": "npm run test.requirement -- __test__/apis/book/create-book.test.js --silent"
+    "test.book.create-book.silent": "npm run test.requirement -- __test__/apis/book/create-book.test.js --silent",
+    "test.book.save-introduce": "npm run test.requirement -- __test__/apis/book/save-introduce.test.js",
+    "test.book.save-introduce.silent": "npm run test.requirement -- __test__/apis/book/save-introduce.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

@@ -134,7 +134,7 @@ class BookRouter extends Router {
     this.post('/pagination', authentication, this._paginationBook);
   }
 
-  @validation(IntroduceHTMLFileSave, { error_message: 'Saving introduce file failed!' })
+  @validation(IntroduceHTMLFileSave, { error_message: BOOK.SAVE_INTRODUCE_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _saveIntroduceHtmlFile(req, res, next, self) {
