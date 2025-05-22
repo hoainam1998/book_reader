@@ -1,1 +1,2 @@
-module.exports = jest.mock('node-fetch');
+const fetchMock = require('jest-fetch-mock');
+fetchMock.enableMocks();

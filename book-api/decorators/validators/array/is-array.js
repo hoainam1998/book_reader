@@ -1,4 +1,4 @@
-const isArray = (value, type, message) => {
+const isArray = (value, type, message, allowedOneElement) => {
   const checker = () => {
     if (Array.isArray(value)) {
       if (['array', 'object', 'boolean', 'number', 'string'].includes(type)) {
@@ -9,6 +9,8 @@ const isArray = (value, type, message) => {
         }
       }
       return true;
+    } else if (allowedOneElement) {
+      return typeof value === type;
     }
     return false;
   };
@@ -22,7 +24,7 @@ const IsArray = (type = undefined, message, options) => {
   if (options) {
     return {
       groups: options.groups,
-      validator: (value) => isArray(value, type, message)
+      validator: (value) => isArray(value, type, message, options.allowedOneElement)
     };
   } else {
     return (value) => isArray(value, type, message);

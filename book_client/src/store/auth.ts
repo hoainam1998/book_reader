@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Store from './store';
 import { SilentPromise } from 'services';
-import { UserLogin, ApiKeyStorage, UserStorage, LocalStorage } from 'storage';
+import { UserLogin, ApiKeyStorage, UserStorage, Storage } from 'storage';
 
 enum Role {
   ADMIN = 'Admin',
@@ -92,7 +92,7 @@ class AuthStore extends Store<UserLogin | null> {
   }
 
   logout(): void {
-    LocalStorage.removeAll();
+    Storage.removeAll();
     SilentPromise.clearRequestMemory();
     this.CurrentStore = null;
   }

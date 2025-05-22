@@ -60,11 +60,16 @@ module.exports = deepFreeze({
     CREATE_BOOK_SUCCESS: 'Create book was success!',
     BOOK_CREATED: 'Book has been created!',
     PDF_SAVED: 'Save pdf file success!',
+    PDF_UPDATED: 'Update pdf file success!',
+    UPDATE_PDF_FAIL: 'Update pdf file was failed!',
     BOOK_NOT_FOUND: 'The book not found!',
     SAVE_PDF_FAIL: 'Saving pdf file failed!',
     CREATE_BOOK_AUTHOR_SUCCESS: 'Create book authors success!',
     SAVE_BOOK_AUTHOR_FAIL: 'Save book authors failed!',
     INTRODUCE_FILE_SAVE: 'Introduce file was saved!',
     SAVE_INTRODUCE_FAIL: 'Save introduce file was failed!',
+    UPDATE_BOOK_SUCCESS: 'Updating book success!',
+    UPDATE_BOOK_FAIL: 'Updating book failed!',
+    BOOK_UPDATED: 'Book has been updated!',
   }
 });

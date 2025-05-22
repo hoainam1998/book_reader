@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
@@ -9,7 +8,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
-const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
+const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const saveIntroduceFileUrl = `${PATH.BOOK}/save-introduce`;
 const mockBook = BookDummyData.MockData;
 
@@ -45,10 +44,11 @@ describe('save introduce', () => {
 
   describe(createDescribeTest(METHOD.POST, saveIntroduceFileUrl), () => {
     test('save introduce success', (done) => {
-      const writeFile = jest.spyOn(fs, 'writeFile');
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
-      expect.hasAssertions();
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -91,9 +91,10 @@ describe('save introduce', () => {
     });
 
     test('save introduce failed with authentication token unset', (done) => {
-      const writeFile = jest.spyOn(fs, 'writeFile');
-      expect.hasAssertions();
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -114,9 +115,10 @@ describe('save introduce', () => {
     });
 
     test('save introduce failed with session expired', (done) => {
-      const writeFile = jest.spyOn(fs, 'writeFile');
-      expect.hasAssertions();
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
 
+      expect.hasAssertions();
       destroySession()
         .then((responseSign) => {
           globalThis.api
@@ -156,9 +158,10 @@ describe('save introduce', () => {
       }
     ])('save introduce failed with $describe', ({ expected, cause, status }, done) => {
       globalThis.prismaClient.book.update.mockRejectedValue(cause);
-      const writeFile = jest.spyOn(fs, 'writeFile');
-      expect.hasAssertions();
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
@@ -199,7 +202,9 @@ describe('save introduce', () => {
     });
 
     test('save introduce failed with request body are empty', (done) => {
-      const writeFile = jest.spyOn(fs, 'writeFile');
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
+
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
@@ -223,7 +228,8 @@ describe('save introduce', () => {
 
     test('save introduce failed with request body are missing field', (done) => {
       // missing bookId
-      const writeFile = jest.spyOn(fs, 'writeFile');
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
       const badRequestBody = Object.assign({}, requestBody);
       delete badRequestBody.bookId;
 
@@ -252,10 +258,11 @@ describe('save introduce', () => {
 
     test('save introduce failed with output validate error', (done) => {
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
-      const writeFile = jest.spyOn(fs, 'writeFile');
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
-      expect.hasAssertions();
 
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api

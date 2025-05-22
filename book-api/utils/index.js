@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const { plainToInstance } = require('class-transformer');
 const { saveFile, createFolder, deleteFile } = require('./handle-file');
 const { convertFileToBase64, getExtName, createFile, isEmptyFile } = require('./handle-file-buffer');

@@ -198,9 +198,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (book, args) => {
         return handleResolveResult(async () => {
           await book.updateBookInfo(args.book);
-          return messageCreator('Book has been updated!');
+          return messageCreator(BOOK.BOOK_UPDATED);
         }, {
-          RECORD_NOT_FOUND: 'Book not found!'
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
         });
       }
     },
@@ -240,9 +240,9 @@ const mutation = new GraphQLObjectType({
         return handleResolveResult(async () => {
           await book.deletePdfFile(bookId, name);
           await book.savePdfFile(bookId, pdf);
-          return messageCreator('Update pdf file success!');
+          return messageCreator(BOOK.PDF_UPDATED);
         }, {
-          RECORD_NOT_FOUND: 'Can not found pdf file!'
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
         });
       }
     },
