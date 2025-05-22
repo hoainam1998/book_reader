@@ -246,7 +246,7 @@ function BookInformation(): JSX.Element {
           .then((res) => setAuthorsList(res.data))
           .catch(() => setAuthorsList([]));
         getAllBooks()
-          .then((res) => setBookNames(res.data.map(({ name }: { name: string}) => name)));
+          .then((res) => setBookNames(res.data.map(({ name }: { name: string }) => name)));
       }
     };
   }, []);

@@ -94,6 +94,7 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: 'new',
             element: <AdminRequire><UserDetail /></AdminRequire>,
+            errorElement: <ApiError alignCenter />,
             handle: {
               crumb: ({ pathname }: UIMatch) => <span key={pathname}>New</span>
             }
@@ -101,6 +102,7 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: path.ID,
             element: <AdminRequire><UserDetail /></AdminRequire>,
+            errorElement: <ApiError alignCenter />,
             handle: {
               crumb: ({ pathname, name }: NavigationRouteMatchType) =>
                 <span key={pathname}>{name}</span>
@@ -129,6 +131,7 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: path.ID,
             element: <BookDetail />,
+            errorElement: <ApiError alignCenter />,
             loader: loadAllCategory,
             handle: {
               crumb: ({ pathname, name }: NavigationRouteMatchType) =>
@@ -138,6 +141,7 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: path.NEW,
             element: <BookDetail />,
+            errorElement: <ApiError alignCenter />,
             loader: loadAllCategory,
             handle: {
               crumb: ({ pathname }: UIMatch) =>
@@ -167,6 +171,7 @@ const adminRoutes: RoutePropsUnion[] = [
           {
             path: path.NEW,
             element: <AuthorDetail />,
+            errorElement: <ApiError alignCenter />,
             handle: {
               crumb: ({ pathname }: UIMatch) =>
                 <span key={pathname}>New</span>

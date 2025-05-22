@@ -104,9 +104,9 @@ function BookConclusion(): JSX.Element {
   useModalNavigation({ body: bodyModal, footer: footerModal, onLeaveAction: deleteAllStorage });
 
   const complete = useCallback(() => {
-    showToast('Add book', 'This book has been added success!');
-    deleteAllStorage(true);
+    showToast('Add book!', 'This book has been added success!');
     navigate(`${paths.HOME}/${paths.BOOK}`);
+    deleteAllStorage(true);
   }, []);
 
   useEffect(() => {

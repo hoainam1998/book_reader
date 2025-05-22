@@ -7,6 +7,7 @@ import type { Field } from 'components/table/table';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
+import paths from 'router/paths';
 import { bookPagination, getBookDetail } from '../fetcher';
 import store from 'store/book';
 import { openFile, showToast } from 'utils';
@@ -121,7 +122,7 @@ function BookList(): JSX.Element {
 
   return (
     <section className="book-list">
-      <HeaderDashboard disabled={total === 0} add={() => navigate('new')} search={search} />
+      <HeaderDashboard disabled={total === 0} add={() => navigate(paths.NEW)} search={search} />
       <Table<BookType>
         key={_keyword}
         responsive
