@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
@@ -8,73 +9,48 @@ const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
-const createBookUrl = `${PATH.BOOK}/create-book`;
-const saveBookInfoUrl = `${PATH.BOOK}/save-book-info`;
-const savePdfFileUrl = `${PATH.BOOK}/save-pdf`;
-const saveBookAuthorUrl = `${PATH.BOOK}/save-book-authors`;
+const updateBookUrl = `${PATH.BOOK}/update-book`;
+const updateBookInfoUrl = `${PATH.BOOK}/update-book-info`;
+const updatePdfFileUrl = `${PATH.BOOK}/update-pdf`;
 
 const mockBook = BookDummyData.MockData;
 
-const requestBody = [
-  {
-    authorId: Date.now().toString(),
-    bookId: mockBook.book_id,
-  },
-  {
-    authorId: Date.now().toString(),
-    bookId: mockBook.book_id,
-  }
-];
-
-const createDataInsert = (authors) => {
-  const objectMapping = {
-    authorId: 'author_id',
-    bookId: 'book_id',
-  };
-
-  return authors.map((author) => {
-    return Object.entries(author).reduce((newAuthor, [key, value]) => {
-      newAuthor[objectMapping[key]] = value;
-      return newAuthor;
-    }, {});
-  });
-};
-
-describe('create book', () => {
-  commonTest('create book api common test', [
+describe('update book', () => {
+  commonTest('update book api common test', [
     {
       name: 'url test',
       describe: 'url is invalid',
       url: `${PATH.BOOK}/unknown`,
-      method: METHOD.POST.toLowerCase(),
+      method: METHOD.PUT.toLowerCase(),
     },
     {
       name: 'method test',
       describe: 'method not allowed',
-      url: createBookUrl,
+      url: updateBookUrl,
       method: METHOD.GET.toLowerCase(),
     },
     {
       name: 'cors test',
-      describe: 'create book api cors',
-      url: createBookUrl,
-      method: METHOD.POST.toLowerCase(),
+      describe: 'update book api cors',
+      url: updateBookUrl,
+      method: METHOD.PUT.toLowerCase(),
       origin: process.env.ORIGIN_CORS,
     }
-  ], 'create book common test');
+  ], 'update book common test');
 
-  describe(createDescribeTest(METHOD.POST, createBookUrl), () => {
-    test('create book will be success', (done) => {
+  describe(createDescribeTest(METHOD.POST, updateBookUrl), () => {
+    test('update book will be success', (done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify({}), { status: HTTP_CODE.CREATED }));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
+            .field('bookId', mockBook.book_id)
             .field('name', mockBook.name)
             .field('publishedTime', mockBook.published_time)
             .field('publishedDay', mockBook.published_day)
@@ -90,16 +66,16 @@ describe('create book', () => {
               expect(fetch).toHaveBeenCalledTimes(3);
               expect(fetch.mock.calls).toEqual([
                 [
-                  expect.stringContaining('/save-book-info'),
+                  expect.stringContaining('/update-book-info'),
                   expect.objectContaining({
-                    method: METHOD.POST,
+                    method: METHOD.PUT,
                     body: expect.any(FormData)
                   }),
                 ],
                 [
-                  expect.stringContaining('/save-pdf'),
+                  expect.stringContaining('/update-pdf'),
                   expect.objectContaining({
-                    method: METHOD.POST,
+                    method: METHOD.PUT,
                     body: expect.any(FormData)
                   }),
                 ],
@@ -115,20 +91,19 @@ describe('create book', () => {
                 ]
               ]);
               expect(response.body).toEqual({
-                message: BOOK.CREATE_BOOK_SUCCESS,
-                bookId: expect.any(String),
+                message: BOOK.UPDATE_BOOK_SUCCESS,
               });
               done();
             });
         });
     });
 
-    test('create book failed with authentication token not set', (done) => {
+    test('update book failed with authentication token not set', (done) => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
@@ -143,12 +118,12 @@ describe('create book', () => {
         });
     });
 
-    test('create book failed with session expired', (done) => {
+    test('update book failed with session expired', (done) => {
       expect.hasAssertions();
       destroySession()
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .expect('Content-Type', /application\/json/)
@@ -169,7 +144,7 @@ describe('create book', () => {
         describe: 'bad request',
         status: HTTP_CODE.BAD_REQUEST,
         expected: {
-          message: BOOK.CREATE_BOOK_FAIL,
+          message: BOOK.UPDATE_BOOK_FAIL,
         }
       },
       {
@@ -179,17 +154,18 @@ describe('create book', () => {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         }
       }
-    ])('create book failed with $describe', ({ status, expected }, done) => {
+    ])('update book failed with $describe', ({ status, expected }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
+            .field('bookId', mockBook.book_id)
             .field('name', mockBook.name)
             .field('publishedTime', mockBook.published_time)
             .field('publishedDay', mockBook.published_day)
@@ -204,9 +180,9 @@ describe('create book', () => {
               expect(fetch).toHaveBeenCalledTimes(1);
               expect(fetch.mock.calls).toEqual([
                 [
-                  expect.stringContaining('/save-book-info'),
+                  expect.stringContaining('/update-book-info'),
                   expect.objectContaining({
-                    method: METHOD.POST,
+                    method: METHOD.PUT,
                     body: expect.any(FormData)
                   }),
                 ],
@@ -217,12 +193,12 @@ describe('create book', () => {
         });
     });
 
-    test('create book failed with request body empty', (done) => {
+    test('update book failed with request body empty', (done) => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .expect('Content-Type', /application\/json/)
@@ -230,7 +206,7 @@ describe('create book', () => {
             .then((response) => {
               expect(fetch).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
                 errors: [COMMON.REQUEST_DATA_EMPTY]
               });
               done();
@@ -238,15 +214,16 @@ describe('create book', () => {
           });
     });
 
-    test('create book failed with request body are missing field', (done) => {
+    test('update book failed with request body are missing field', (done) => {
       // missing authors
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
+            .field('bookId', mockBook.book_id)
             .field('name', mockBook.name)
             .field('publishedTime', mockBook.published_time)
             .field('publishedDay', mockBook.published_day)
@@ -259,7 +236,7 @@ describe('create book', () => {
             .then((response) => {
               expect(fetch).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
                 errors: expect.any(Array),
               });
               expect(response.body.errors).toHaveLength(1)
@@ -268,15 +245,16 @@ describe('create book', () => {
           });
     });
 
-    test('create book failed with request files are missing field', (done) => {
+    test('update book failed with request files are missing field', (done) => {
       // missing images
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
+            .field('bookId', mockBook.book_id)
             .field('name', mockBook.name)
             .field('publishedTime', mockBook.published_time)
             .field('publishedDay', mockBook.published_day)
@@ -289,7 +267,7 @@ describe('create book', () => {
             .then((response) => {
               expect(fetch).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
                 errors: expect.any(Array),
               });
               expect(response.body.errors.length).toBeGreaterThanOrEqual(1)
@@ -298,7 +276,7 @@ describe('create book', () => {
           });
     });
 
-    test('create book failed output validate error', (done) => {
+    test('update book failed output validate error', (done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify({}), { status: HTTP_CODE.CREATED }));
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
@@ -306,10 +284,11 @@ describe('create book', () => {
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(createBookUrl)
+            .put(updateBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
+            .field('bookId', mockBook.book_id)
             .field('name', mockBook.name)
             .field('publishedTime', mockBook.published_time)
             .field('publishedDay', mockBook.published_day)
@@ -324,16 +303,16 @@ describe('create book', () => {
               expect(fetch).toHaveBeenCalledTimes(3);
               expect(fetch.mock.calls).toEqual([
                 [
-                  expect.stringContaining('/save-book-info'),
+                  expect.stringContaining('/update-book-info'),
                   expect.objectContaining({
-                    method: METHOD.POST,
+                    method: METHOD.PUT,
                     body: expect.any(FormData)
                   }),
                 ],
                 [
-                  expect.stringContaining('/save-pdf'),
+                  expect.stringContaining('/update-pdf'),
                   expect.objectContaining({
-                    method: METHOD.POST,
+                    method: METHOD.PUT,
                     body: expect.any(FormData)
                   }),
                 ],
@@ -357,21 +336,24 @@ describe('create book', () => {
     });
   });
 
-  commonTest('create book api common test', [
+  commonTest('update book api common test', [
     {
       name: 'cors test',
-      describe: 'create book  api cors',
-      url: saveBookInfoUrl,
-      method: METHOD.POST.toLowerCase(),
+      describe: 'update book  api cors',
+      url: updateBookInfoUrl,
+      method: METHOD.PUT.toLowerCase(),
     }
-  ], 'create book');
+  ], 'update book');
 
-  describe(createDescribeTest(METHOD.POST, saveBookInfoUrl), () => {
-    test('save book info success', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
+  describe(createDescribeTest(METHOD.POST, updateBookInfoUrl), () => {
+    test('update book info success', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book_image.deleteMany.mockResolvedValue();
+      globalThis.prismaClient.book_image.createMany.mockResolvedValue();
+
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -386,46 +368,61 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.CREATED)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
-            data: {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
               book_id: mockBook.book_id,
+            },
+            data: {
               name: mockBook.name,
               avatar: expect.any(String),
               published_time: mockBook.published_time,
               published_day: mockBook.published_day,
               category_id: mockBook.category_id,
-              book_image: {
-                create:  [
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
-                  },
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
-                  }
-                ],
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
+            data: [
+                {
+                image: expect.any(String),
+                name: `${mockBook.name}1.png`,
+                book_id: mockBook.book_id,
+              },
+              {
+                image: expect.any(String),
+                name: `${mockBook.name}2.png`,
+                book_id: mockBook.book_id,
               }
-          }
-        });
-        expect(response.body).toEqual({
-          message: BOOK.BOOK_CREATED,
-        });
-        done();
+            ]
+          });
+          expect(response.body).toEqual({
+            message: BOOK.BOOK_UPDATED,
+          });
+          done();
       });
     });
 
-    test('save book info failed with request body are empty', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
+    test('update book info failed with request body are empty', (done) => {
+      globalThis.prismaClient.book.update = jest.fn();
+      globalThis.prismaClient.book.deleteMany = jest.fn();
+      globalThis.prismaClient.book.createMany = jest.fn();
 
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_IS_EMPTY,
           });
@@ -433,17 +430,17 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with request files are missing', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with request files are missing', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('images'),
           });
@@ -451,12 +448,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with avatar file do not provide', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with avatar file do not provide', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -470,7 +465,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('avatar'),
           });
@@ -478,12 +475,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with avatar is empty file', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with avatar is empty file', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -498,7 +493,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_FIELD_EMPTY.format('avatar'),
           });
@@ -506,12 +503,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with avatar is not image file', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with avatar is not image file', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -524,7 +519,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_IMAGE
           });
@@ -532,12 +529,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with image file is empty file', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with image file is empty file', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -552,7 +547,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_FIELD_EMPTY.format('images'),
           });
@@ -560,12 +557,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with image is not image file', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with image is not image file', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -579,7 +574,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_IMAGE,
           });
@@ -587,12 +584,10 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with image do not provide', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
+    test('update book info failed with image do not provide', (done) => {
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -605,7 +600,9 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('images'),
           });
@@ -613,13 +610,12 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with request body are missing', (done) => {
+    test('update book info failed with request body are missing', (done) => {
       // missing categoryId
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
 
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .field('publishedTime', mockBook.published_time)
@@ -632,9 +628,11 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+            message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
             errors: expect.any(Array),
           });
           expect(response.body.errors).toHaveLength(1);
@@ -642,13 +640,11 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with undefined request body', (done) => {
+    test('update book info failed with undefined request body', (done) => {
       // categoryIds do not define.
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
-
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .field('publishedTime', mockBook.published_time)
@@ -662,9 +658,11 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+            message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
             errors: expect.any(Array),
           });
           expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
@@ -672,13 +670,15 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with output validate error', (done) => {
-      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
+    test('update book info failed with output validate error', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book_image.deleteMany.mockResolvedValue();
+      globalThis.prismaClient.book_image.createMany.mockResolvedValue();
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .field('publishedTime', mockBook.published_time)
@@ -692,42 +692,53 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
-            data: {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
               book_id: mockBook.book_id,
+            },
+            data: {
               name: mockBook.name,
               avatar: expect.any(String),
               published_time: mockBook.published_time,
               published_day: mockBook.published_day,
               category_id: mockBook.category_id,
-              book_image: {
-                create:  [
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
-                  },
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
-                  }
-                ],
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
+            data: [
+                {
+                image: expect.any(String),
+                name: `${mockBook.name}1.png`,
+                book_id: mockBook.book_id,
+              },
+              {
+                image: expect.any(String),
+                name: `${mockBook.name}2.png`,
+                book_id: mockBook.book_id,
               }
-          }
-        });
-        expect(response.body).toEqual({
-          message: COMMON.OUTPUT_VALIDATE_FAIL,
-        });
-        done();
+            ]
+          });
+          expect(response.body).toEqual({
+            message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
       });
     });
 
-    test('save book info failed with server error', (done) => {
-      globalThis.prismaClient.book.create.mockRejectedValue(ServerError);
+    test('update book info failed with update method get server error', (done) => {
+      globalThis.prismaClient.book.update.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
       globalThis.api
-        .post(saveBookInfoUrl)
+        .put(updateBookInfoUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .field('publishedTime', mockBook.published_time)
@@ -741,28 +752,129 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.SERVER_ERROR)
         .then((response) => {
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
-            data: {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
               book_id: mockBook.book_id,
+            },
+            data: {
               name: mockBook.name,
               avatar: expect.any(String),
               published_time: mockBook.published_time,
               published_day: mockBook.published_day,
               category_id: mockBook.category_id,
-              book_image: {
-                create:  [
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
-                  },
-                  {
-                    image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
-                  }
-                ],
-              }
             }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message:COMMON.INTERNAL_ERROR_MESSAGE,
+          });
+          done();
+      });
+    });
+
+    test('update book info failed with deleteMany method get server error', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue();
+      globalThis.prismaClient.book_image.deleteMany.mockRejectedValue(ServerError);
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updateBookInfoUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', mockBook.name)
+        .field('publishedTime', mockBook.published_time)
+        .field('publishedDay', mockBook.published_day)
+        .field('imageNames',`${mockBook.name}1.png`)
+        .field('imageNames',`${mockBook.name}2.png`)
+        .field('categoryId', mockBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+       // .expect(HTTP_CODE.SERVER_ERROR)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+            data: {
+              name: mockBook.name,
+              avatar: expect.any(String),
+              published_time: mockBook.published_time,
+              published_day: mockBook.published_day,
+              category_id: mockBook.category_id,
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message:COMMON.INTERNAL_ERROR_MESSAGE,
+          });
+          done();
+      });
+    });
+
+    test('update book info failed with createMany method get server error', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue();
+      globalThis.prismaClient.book_image.deleteMany.mockResolvedValue();
+      globalThis.prismaClient.book_image.createMany.mockRejectedValue(ServerError);
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updateBookInfoUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', mockBook.name)
+        .field('publishedTime', mockBook.published_time)
+        .field('publishedDay', mockBook.published_day)
+        .field('imageNames',`${mockBook.name}1.png`)
+        .field('imageNames',`${mockBook.name}2.png`)
+        .field('categoryId', mockBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.SERVER_ERROR)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+            data: {
+              name: mockBook.name,
+              avatar: expect.any(String),
+              published_time: mockBook.published_time,
+              published_day: mockBook.published_day,
+              category_id: mockBook.category_id,
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
+            data: [
+                {
+                image: expect.any(String),
+                name: `${mockBook.name}1.png`,
+                book_id: mockBook.book_id,
+              },
+              {
+                image: expect.any(String),
+                name: `${mockBook.name}2.png`,
+                book_id: mockBook.book_id,
+              }
+            ]
           });
           expect(response.body).toEqual({
             message:COMMON.INTERNAL_ERROR_MESSAGE,
@@ -770,41 +882,230 @@ describe('create book', () => {
           done();
       });
     });
-  });
 
-  commonTest('save pdf file api common test', [
-    {
-      name: 'cors test',
-      describe: 'save pdf file api cors',
-      url: savePdfFileUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'save pdf file');
-
-  describe(createDescribeTest(METHOD.POST, savePdfFileUrl), () => {
-    test('save pfd file success', (done) => {
-      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+    test('update book info failed with update method get not found error', (done) => {
+      globalThis.prismaClient.book.update.mockRejectedValue(PrismaNotFoundError);
+      globalThis.prismaClient.book_image.deleteMany.mockResolvedValue();
+      globalThis.prismaClient.book_image.createMany.mockResolvedValue();
 
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updateBookInfoUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', mockBook.name)
+        .field('publishedTime', mockBook.published_time)
+        .field('publishedDay', mockBook.published_day)
+        .field('imageNames',`${mockBook.name}1.png`)
+        .field('imageNames',`${mockBook.name}2.png`)
+        .field('categoryId', mockBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_FOUND)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+            data: {
+              name: mockBook.name,
+              avatar: expect.any(String),
+              published_time: mockBook.published_time,
+              published_day: mockBook.published_day,
+              category_id: mockBook.category_id,
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: BOOK.BOOK_NOT_FOUND,
+          });
+          done();
+      });
+    });
+
+    test('update book info failed with deleteMany method get not found error', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue();
+      globalThis.prismaClient.book_image.deleteMany.mockRejectedValue(PrismaNotFoundError);
+      globalThis.prismaClient.book_image.createMany.mockResolvedValue();
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updateBookInfoUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', mockBook.name)
+        .field('publishedTime', mockBook.published_time)
+        .field('publishedDay', mockBook.published_day)
+        .field('imageNames',`${mockBook.name}1.png`)
+        .field('imageNames',`${mockBook.name}2.png`)
+        .field('categoryId', mockBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_FOUND)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+            data: {
+              name: mockBook.name,
+              avatar: expect.any(String),
+              published_time: mockBook.published_time,
+              published_day: mockBook.published_day,
+              category_id: mockBook.category_id,
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: BOOK.BOOK_NOT_FOUND,
+          });
+          done();
+      });
+    });
+
+    test('update book info failed with createMany method get not found error', (done) => {
+      globalThis.prismaClient.book.update.mockResolvedValue();
+      globalThis.prismaClient.book_image.deleteMany.mockResolvedValue();
+      globalThis.prismaClient.book_image.createMany.mockRejectedValue(PrismaNotFoundError);
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updateBookInfoUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', mockBook.name)
+        .field('publishedTime', mockBook.published_time)
+        .field('publishedDay', mockBook.published_day)
+        .field('imageNames',`${mockBook.name}1.png`)
+        .field('imageNames',`${mockBook.name}2.png`)
+        .field('categoryId', mockBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_FOUND)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+            data: {
+              name: mockBook.name,
+              avatar: expect.any(String),
+              published_time: mockBook.published_time,
+              published_day: mockBook.published_day,
+              category_id: mockBook.category_id,
+            }
+          });
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id,
+            },
+          });
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
+            data: [
+                {
+                image: expect.any(String),
+                name: `${mockBook.name}1.png`,
+                book_id: mockBook.book_id,
+              },
+              {
+                image: expect.any(String),
+                name: `${mockBook.name}2.png`,
+                book_id: mockBook.book_id,
+              }
+            ]
+          });
+          expect(response.body).toEqual({
+            message: BOOK.BOOK_NOT_FOUND,
+          });
+          done();
+      });
+    });
+  });
+
+  commonTest('update pdf file api common test', [
+    {
+      name: 'cors test',
+      describe: 'update pdf file api cors',
+      url: updatePdfFileUrl,
+      method: METHOD.PUT.toLowerCase(),
+    }
+  ], 'save pdf file');
+
+  describe(createDescribeTest(METHOD.POST, updatePdfFileUrl), () => {
+    test('update pdf file success', (done) => {
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updatePdfFileUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.CREATED)
         .then((response) => {
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
               book_id: mockBook.book_id
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            select: {
+              pdf: true
+            },
           });
+          expect(unLink).toHaveBeenCalledTimes(1);
+          expect(unLink).toHaveBeenCalledWith(
+            expect.stringContaining(`/public/${mockBook.pdf}`.replace(/\//gm, '\\')),
+            expect.any(Function)
+          );
           expect(response.body).toEqual({
-            message: BOOK.PDF_SAVED
+            message: BOOK.PDF_UPDATED,
+          });
+          done();
+        });
+    });
+
+    test('do not update pdf file', (done) => {
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
+      expect.hasAssertions();
+      globalThis.api
+        .put(updatePdfFileUrl)
+        .field('bookId', mockBook.book_id)
+        .field('name', 'new_pdf_file')
+        .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.CREATED)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+            where: {
+              book_id: mockBook.book_id
+            },
+            select: {
+              pdf: true
+            },
+          });
+          expect(unLink).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: BOOK.PDF_UPDATED,
           });
           done();
         });
@@ -827,61 +1128,69 @@ describe('create book', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
       }
-    ])('save pdf file failed with $describe', ({ cause, expected, status }, done) => {
-      globalThis.prismaClient.book.update.mockRejectedValue(cause);
+    ])('update pdf file failed with $describe', ({ cause, expected, status }, done) => {
+      globalThis.prismaClient.book.findUniqueOrThrow.mockRejectedValue(cause);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(status)
         .then((response) => {
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
               book_id: mockBook.book_id
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            select: {
+              pdf: true
+            },
           });
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual(expected);
           done();
         });
     });
 
-    test('save pfd file failed with request data are empty', (done) => {
+    test('update pdf file failed with request data are empty', (done) => {
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
+            message: getInputValidateMessage(BOOK.UPDATE_PDF_FAIL),
             errors: [COMMON.REQUEST_DATA_EMPTY],
           });
           done();
         });
     });
 
-    test('save pfd file failed with request data are missing field', (done) => {
+    test('update pdf file failed with request data are missing field', (done) => {
       // missing bookId
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
+            message: getInputValidateMessage(BOOK.UPDATE_PDF_FAIL),
             errors: expect.any(Array),
           });
           expect(response.body.errors).toHaveLength(1);
@@ -889,11 +1198,13 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with undefined request data field', (done) => {
+    test('update pdf file failed with undefined request data field', (done) => {
       // bookIds do not define.
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('bookIds', [])
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
@@ -901,8 +1212,9 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
+            message: getInputValidateMessage(BOOK.UPDATE_PDF_FAIL),
             errors: expect.any(Array),
           });
           expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
@@ -910,17 +1222,20 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with request files are missing field', (done) => {
+    test('update pdf file failed with request files are missing field', (done) => {
       // missing pdf file
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('pdf')
           });
@@ -928,10 +1243,12 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with pdf is empty file', (done) => {
+    test('update pdf file failed with pdf is empty file', (done) => {
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/empty-pdf.pdf'))
@@ -939,6 +1256,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_IS_EMPTY
           });
@@ -946,10 +1264,12 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with pdf is not pdf file', (done) => {
+    test('update pdf file failed with pdf is not pdf file', (done) => {
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .set('Connection', 'keep-alive')
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
@@ -958,6 +1278,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_PDF,
           });
@@ -965,199 +1286,35 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with output validate error', (done) => {
+    test('update pdf file failed with output validate error', (done) => {
       jest.spyOn(OutputValidate, 'prepare')
         .mockImplementation(() => OutputValidate.parse({}));
-      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
 
       expect.hasAssertions();
       globalThis.api
-        .post(savePdfFileUrl)
+        .put(updatePdfFileUrl)
         .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'))
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
               book_id: mockBook.book_id
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            select: {
+              pdf: true
+            },
           });
-          expect(response.body).toEqual({
-            message: COMMON.OUTPUT_VALIDATE_FAIL,
-          });
-          done();
-        });
-    });
-  });
-
-  commonTest('save book author api common test', [
-    {
-      name: 'cors test',
-      describe: 'save book author api cors',
-      url: savePdfFileUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'save book author');
-
-  describe(createDescribeTest(METHOD.POST, saveBookAuthorUrl), () => {
-    test('save book author success', (done) => {
-      const dataInsert = createDataInsert(requestBody);
-
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.CREATED)
-        .send({
-          authors: requestBody
-        })
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledWith({
-            data: dataInsert,
-          });
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
-            where: {
-              book_id: requestBody[0].bookId
-            }
-          });
-          expect(response.body).toEqual({
-            message: BOOK.CREATE_BOOK_AUTHOR_SUCCESS
-          });
-          done();
-        });
-    });
-
-    test('save book author failed with request body are empty', (done) => {
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .send({})
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
-          expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
-            errors: [COMMON.REQUEST_DATA_EMPTY]
-          });
-          done();
-        });
-    });
-
-    test('save book author failed with undefined request body field', (done) => {
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .send({
-          author: []
-        })
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
-          expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
-            errors: expect.any(Array),
-          });
-          done();
-        });
-    });
-
-    test('save book author failed with deleteMany method get server error', (done) => {
-      globalThis.prismaClient.book_author.deleteMany.mockRejectedValue(ServerError);
-
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.SERVER_ERROR)
-        .send({
-          authors: requestBody
-        })
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
-            where: {
-              book_id: requestBody[0].bookId
-            }
-          });
-          expect(response.body).toEqual({
-            message: COMMON.INTERNAL_ERROR_MESSAGE,
-          });
-          done();
-        });
-    });
-
-    test('save book author failed with createMany method get server error', (done) => {
-      globalThis.prismaClient.book_author.createMany.mockRejectedValue(ServerError);
-      globalThis.prismaClient.book_author.deleteMany.mockReset();
-
-      const dataInsert = createDataInsert(requestBody);
-
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.SERVER_ERROR)
-        .send({
-          authors: requestBody
-        })
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledWith({
-            data: dataInsert,
-          });
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
-            where: {
-              book_id: requestBody[0].bookId
-            }
-          });
-          expect(response.body).toEqual({
-            message: COMMON.INTERNAL_ERROR_MESSAGE,
-          });
-          done();
-        });
-    });
-
-    test('save book author failed with output validate error', (done) => {
-      globalThis.prismaClient.book_author.createMany.mockReset();
-      globalThis.prismaClient.book_author.deleteMany.mockReset();
-
-      jest.spyOn(OutputValidate, 'prepare')
-        .mockImplementation(() => OutputValidate.parse({}));
-      const dataInsert = createDataInsert(requestBody);
-
-      expect.hasAssertions();
-      globalThis.api
-        .post(saveBookAuthorUrl)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .send({
-          authors: requestBody
-        })
-        .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledWith({
-            data: dataInsert,
-          });
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
-            where: {
-              book_id: requestBody[0].bookId
-            }
-          });
+          expect(unLink).toHaveBeenCalledTimes(1);
+          expect(unLink).toHaveBeenCalledWith(
+            expect.stringContaining(`/public/${mockBook.pdf}`.replace(/\//gm, '\\')),
+            expect.any(Function)
+          );
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });

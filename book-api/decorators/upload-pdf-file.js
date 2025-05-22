@@ -55,6 +55,7 @@ module.exports = (field) => {
           } else {
             if (Object.prototype.isEmpty.call(request.body)) {
               originalMethod.apply(null, args);
+              return;
             }
             return response.status(HTTP_CODE.BAD_REQUEST)
               .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(field)));

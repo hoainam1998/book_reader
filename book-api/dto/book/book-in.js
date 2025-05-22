@@ -91,7 +91,7 @@ const BookCreate = (validators, className) => {
     images;
 
     @validators(
-      IsArray('string', 'imageNames must be an array!'),
+      IsArray('string', 'imageNames must be an array!', { allowedOneElement: 'imagesName must be a string!' }),
     )
     imageNames;
   }, className);

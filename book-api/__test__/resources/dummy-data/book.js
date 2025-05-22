@@ -19,7 +19,7 @@ class BookDummyData extends DummyDataApi {
     super({
       book_id: Date.now().toString(),
       name: 'book 1',
-      pdf: 'pdf/new_pdf_file',
+      pdf: 'pdf/new_pdf_file.pdf',
       published_day: Date.now().toString(),
       published_time: 1,
       category_id: Date.now().toString(),

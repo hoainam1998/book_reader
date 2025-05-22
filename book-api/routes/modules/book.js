@@ -10,7 +10,7 @@ const {
 const authentication = require('#middlewares/auth/authentication');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD } = require('#constants');
-const { BOOK, COMMON } = require('#messages');
+const { BOOK } = require('#messages');
 const {
   promiseAll,
   getExtName,
@@ -52,12 +52,12 @@ const cpUpload = multer().fields([
  * @return {Promise} - The promise filtered.
  */
 const filterResponse = (promise) =>
-  promise.then((data) => {
+  promise.then(async (data) => {
     // if status === 200, return data, else return data as error.
     if (data.status === HTTP_CODE.CREATED) {
       return data;
     }
-    return Promise.reject(data);
+    return Promise.reject({ ...await data.json(), status: data.status });
   });
 
 /**
@@ -253,7 +253,7 @@ class BookRouter extends Router {
 
     const images = req.body.images.map((image, index) => ({
       image,
-      name: req.body.imageNames[index],
+      name: Array.isArray(req.body.imageNames) ? req.body.imageNames[index] : req.body.imageNames,
     }));
 
     delete req.body.imageNames;
@@ -278,7 +278,7 @@ class BookRouter extends Router {
       maxCount: 8
     }
   ])
-  @validation(BookCreate, { error_message: 'Updating book information failed!' })
+  @validation(BookCreate, { error_message: BOOK.UPDATE_BOOK_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateBookInfo(req, res, next, self) {
@@ -292,8 +292,7 @@ class BookRouter extends Router {
 
     const images = req.body.images.map((image, index) => ({
       image,
-      name: req.body.imageNames[index],
-      bookId: req.body.bookId,
+      name: Array.isArray(req.body.imageNames) ? req.body.imageNames[index] : req.body.imageNames,
     }));
 
     delete req.body.imageNames;
@@ -328,7 +327,7 @@ class BookRouter extends Router {
   }
 
   @uploadPdf('pdf')
-  @validation(PdfFileSaved, { error_message: 'Updating pdf file failed!' })
+  @validation(PdfFileSaved, { error_message: BOOK.UPDATE_PDF_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updatePdf(req, res, next, self) {
@@ -389,28 +388,14 @@ class BookRouter extends Router {
     const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
-      () => fetchHelper(`${url}/save-book-info`, METHOD.POST, book),
-      () => fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf),
-      () => fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
-          'Content-Type': 'application/json'
+      () => filterResponse(fetchHelper(`${url}/save-book-info`, METHOD.POST, book )),
+      () => filterResponse(fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf)),
+      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
+          'Content-Type': 'application/json',
         },
-        JSON.stringify({ authors }))
+        JSON.stringify({ authors })))
     ])
-    .then((results) => {
-      const error = results.find(result => [HTTP_CODE.BAD_REQUEST, HTTP_CODE.SERVER_ERROR].includes(result.status));
-      if (error) {
-        if (error.status === HTTP_CODE.BAD_REQUEST) {
-          return Promise.reject({
-            ...messageCreator(BOOK.CREATE_BOOK_FAIL),
-            status: HTTP_CODE.BAD_REQUEST,
-          });
-        } else {
-          return Promise.reject({
-            ...messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
-            status: HTTP_CODE.SERVER_ERROR,
-          });
-        }
-      }
+    .then(() => {
       return convertDtoToZodObject(BookCreated, {
         ...messageCreator(BOOK.CREATE_BOOK_SUCCESS),
         bookId: bookId.toString(),
@@ -430,7 +415,7 @@ class BookRouter extends Router {
       },
     ],
     {
-      error_message: 'Update book failed!',
+      error_message: BOOK.UPDATE_BOOK_FAIL,
       groups: ['update']
     }
   )
@@ -447,14 +432,10 @@ class BookRouter extends Router {
       () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
           'Content-Type': 'application/json'
         },
-        JSON.stringify({ authors }))
-      ),
+        JSON.stringify({ authors })))
     ])
-    .then(results => {
-      if (results.some(result => result.status === HTTP_CODE.SERVER_ERROR)) {
-        return Promise.reject('Updating book failed!');
-      }
-      return messageCreator('Updating book success!');
+    .then(() => {
+      return messageCreator(BOOK.UPDATE_BOOK_SUCCESS);
     });
   }
 }

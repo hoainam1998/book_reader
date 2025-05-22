@@ -30,7 +30,6 @@ class BookService extends Service {
 
   saveBookInfo(book) {
     const { name, avatar, publishedTime, publishedDay, images, categoryId, bookId } = book;
-    const bookImageData = images.map(img => ({ ...img, book_id: bookId }));
 
     return this.PrismaInstance.book.create({
       data: {
@@ -41,7 +40,7 @@ class BookService extends Service {
         published_time: publishedTime,
         category_id: categoryId,
         book_image: {
-          create: bookImageData
+          create: images
         },
       },
     });
@@ -71,11 +70,7 @@ class BookService extends Service {
       const oldPdfFile = `pdf/${name}.pdf`
       if (result.pdf !== oldPdfFile) {
         const filePath = join(__dirname, `../../public/${result.pdf}`);
-        try {
-          fs.unlinkSync(filePath);
-        } catch (err) {
-          throw err;
-        }
+        return deleteFile(filePath);
       }
     });
   }
@@ -109,14 +104,14 @@ class BookService extends Service {
   }
 
   updateBookInfo(book) {
-    const { name, pdf, publishedTime, publishedDay, categoryId, bookId } = book;
+    const { name, avatar, publishedTime, publishedDay, categoryId, bookId } = book;
     return this.PrismaInstance.book.update({
       where: {
         book_id: bookId
       },
       data: {
         name,
-        pdf,
+        avatar,
         published_time: publishedTime,
         published_day: publishedDay,
         category_id: categoryId,
@@ -130,11 +125,7 @@ class BookService extends Service {
       })
       .then(() => {
         return this.PrismaInstance.book_image.createMany({
-          data: book.images.map(img => {
-            img = { ...img, book_id: img.bookId };
-            delete img.bookId;
-            return img;
-          })
+          data: book.images.map(img => ({ ...img, book_id: bookId }))
         });
       });
     });
