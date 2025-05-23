@@ -44,7 +44,9 @@
     "test.book.update-book": "npm run test.requirement -- __test__/apis/book/update-book.test.js",
     "test.book.update-book.silent": "npm run test.requirement -- __test__/apis/book/update-book.test.js --silent",
     "test.book.detail": "npm run test.requirement -- __test__/apis/book/book-detail.test.js",
-    "test.book.detail.silent": "npm run test.requirement -- __test__/apis/book/book-detail.test.js --silent"
+    "test.book.detail.silent": "npm run test.requirement -- __test__/apis/book/book-detail.test.js --silent",
+    "test.book.pagination": "npm run test.requirement -- __test__/apis/book/pagination.test.js",
+    "test.book.pagination.silent": "npm run test.requirement -- __test__/apis/book/pagination.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

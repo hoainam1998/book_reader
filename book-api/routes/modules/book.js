@@ -204,7 +204,7 @@ class BookRouter extends Router {
     return self.execute(query, undefined, req.body.query);
   }
 
-  @validation(BookPagination, { error_message: 'Loading books failed!' })
+  @validation(BookPagination, { error_message: BOOK.LOAD_BOOKS_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(BookPaginationResponse)
   _paginationBook(req, res, next, self) {

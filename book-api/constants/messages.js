@@ -63,6 +63,7 @@ module.exports = deepFreeze({
     PDF_UPDATED: 'Update pdf file success!',
     UPDATE_PDF_FAIL: 'Update pdf file was failed!',
     BOOK_NOT_FOUND: 'The book not found!',
+    BOOKS_EMPTY: 'Books are empty!',
     SAVE_PDF_FAIL: 'Saving pdf file failed!',
     CREATE_BOOK_AUTHOR_SUCCESS: 'Create book authors success!',
     SAVE_BOOK_AUTHOR_FAIL: 'Save book authors failed!',
@@ -72,5 +73,6 @@ module.exports = deepFreeze({
     UPDATE_BOOK_FAIL: 'Updating book failed!',
     BOOK_UPDATED: 'Book has been updated!',
     LOAD_BOOK_DETAIL_FAIL: 'Load book information was failed!',
+    LOAD_BOOKS_FAIL: 'Loading books was failed!',
   }
 });

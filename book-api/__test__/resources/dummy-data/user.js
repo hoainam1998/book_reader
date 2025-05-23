@@ -43,6 +43,7 @@ class UserDummyData extends DummyDataApi {
   /**
   * Return query object with type accord with expected types.
   *
+  * @static
   * @param {object} query - The requirement query object.
   * @param {array} [excludeFields=[]] - The fields should be remove.
   * @return {object} - The expected object.
