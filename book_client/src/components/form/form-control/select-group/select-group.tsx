@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {
   JSX,
   useCallback,
@@ -122,8 +121,9 @@ function SelectGroup<T>({
 
       onFocus();
       if (options) {
-        onSelectValue(options[event.target.selectedIndex]);
-        updateOptionSelected!(options[event.target.selectedIndex]);
+        const optionSelected = options[event.target.selectedIndex];
+        onSelectValue(optionSelected);
+        updateOptionSelected!(optionSelected);
       }
     }, [options]);
 
@@ -196,7 +196,7 @@ function SelectGroup<T>({
 
   const canNotClear = useMemo<boolean>(() => optionSelected.size === 0, [optionSelected.size]);
 
-  const onOptionChanged = useCallback(() => {
+  const onOptionChanged = useCallback((): void => {
     onChange(Array.from(optionSelected.values()).map(o => o.value));
   }, [optionSelected]);
 
@@ -267,22 +267,28 @@ function SelectGroup<T>({
   }, [items, optionsWithPlaceHolder]);
 
   useLayoutEffect(() => {
-    if (values.length && optionsWithPlaceHolder.length) {
+    let valuesMapWithItems = values;
+    if (selectItems.length !== values.length && selectItems.length > 0) {
+      valuesMapWithItems = selectItems.map((_, index) => values[index]);
+    }
 
-      const { selectItems, optionsSelected }
-        = values.reduce<{ selectItems: JSX.Element[], optionsSelected: Map<string, OptionType<T>> }>
-        ((mappingObject, value) => {
+    if (values.length && optionsWithPlaceHolder.length) {
+      const { selectedItems, optionsSelected }
+        = valuesMapWithItems.reduce<{ selectedItems: JSX.Element[], optionsSelected: Map<string, OptionType<T>> }>
+        ((mappingObject, value, index) => {
           const option = optionsWithPlaceHolder.find((o) => o.value === value);
           if (option) {
             const selectItemId = id();
-            mappingObject.selectItems.push(<SelectionItem id={selectItemId} />);
+            mappingObject.selectedItems.push(<SelectionItem id={selectItemId} />);
             mappingObject.optionsSelected.set(selectItemId, option);
+          } else {
+            mappingObject.selectedItems.push(selectItems[index]);
           }
           return mappingObject;
-      }, { selectItems: [], optionsSelected: new Map<string, OptionType<T>>([]) });
+      }, { selectedItems: [], optionsSelected: new Map<string, OptionType<T>>([]) });
 
       setOptionSelected(optionsSelected);
-      setSelectItems(selectItems);
+      setSelectItems(selectedItems);
     }
   }, [values, optionsWithPlaceHolder]);
 

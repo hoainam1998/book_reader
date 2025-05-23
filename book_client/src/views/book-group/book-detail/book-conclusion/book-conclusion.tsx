@@ -103,8 +103,12 @@ function BookConclusion(): JSX.Element {
 
   useModalNavigation({ body: bodyModal, footer: footerModal, onLeaveAction: deleteAllStorage });
 
-  const complete = useCallback(() => {
-    showToast('Add book!', 'This book has been added success!');
+  const complete = useCallback((): void => {
+    if (window.location.pathname.includes(paths.NEW)) {
+      showToast('Add book!', 'This book has been added success!');
+    } else {
+      showToast('Update book!', 'This book has been updated success!');
+    }
     navigate(`${paths.HOME}/${paths.BOOK}`);
     deleteAllStorage(true);
   }, []);
