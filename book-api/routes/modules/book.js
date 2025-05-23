@@ -174,7 +174,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(BookDetail, { error_message: 'Getting book information failed!' })
+  @validation(BookDetail, { error_message: BOOK.LOAD_BOOK_DETAIL_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(BookDetailResponse)
   _getBookDetail(req, res, next, self) {

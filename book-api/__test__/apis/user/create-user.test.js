@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');

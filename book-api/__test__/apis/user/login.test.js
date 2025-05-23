@@ -1,4 +1,3 @@
-const fetch = require('node-fetch');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { plainToInstance } = require('class-transformer');

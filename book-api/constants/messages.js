@@ -71,5 +71,6 @@ module.exports = deepFreeze({
     UPDATE_BOOK_SUCCESS: 'Updating book success!',
     UPDATE_BOOK_FAIL: 'Updating book failed!',
     BOOK_UPDATED: 'Book has been updated!',
+    LOAD_BOOK_DETAIL_FAIL: 'Load book information was failed!',
   }
 });

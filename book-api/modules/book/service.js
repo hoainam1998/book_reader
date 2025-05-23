@@ -132,7 +132,7 @@ class BookService extends Service {
   }
 
   getBookDetail(bookId, select) {
-    return this.PrismaInstance.book.findFirstOrThrow({
+    return this.PrismaInstance.book.findUniqueOrThrow({
       where: {
         book_id: bookId
       },
