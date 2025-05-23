@@ -1,5 +1,6 @@
 /**
  * Class support organization dummy data and behavior attach with them.
+ *
  * @class
  */
 class DummyDataApi {
@@ -21,6 +22,10 @@ class DummyDataApi {
     return this._mockData;
   }
 
+  get ExpectedTypes() {
+    return this._expectedTypes;
+  }
+
   /**
   * Return query object with type accord with expected types.
   *
@@ -35,7 +40,7 @@ class DummyDataApi {
           return queryExpected;
         }
       }
-      queryExpected[field] = this._expectedTypes[field];
+      queryExpected[field] = this.ExpectedTypes[field];
       return queryExpected;
     }, {});
   }

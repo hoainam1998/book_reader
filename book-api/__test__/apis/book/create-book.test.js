@@ -26,6 +26,12 @@ const requestBody = [
   }
 ];
 
+  /**
+  * Format authors with new properties.
+  *
+  * @param {array} authors - The authors.
+  * @return {array} - The new authors.
+  */
 const createDataInsert = (authors) => {
   const objectMapping = {
     authorId: 'author_id',

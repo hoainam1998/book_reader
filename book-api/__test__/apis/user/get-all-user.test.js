@@ -2,12 +2,12 @@ const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
+const UserDummyData = require('#test/resources/dummy-data/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, mockUser, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const { createMockUserList, generateUserExpectedList } = require('#test/resources/test-data');
 const allUserUrl = `${PATH.USER}/all`;
 
 const requestBody = {
@@ -51,8 +51,8 @@ describe('get all user', () => {
   describe(createDescribeTest(METHOD.POST, allUserUrl), () => {
     test('get all user success', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userExpectedList = generateUserExpectedList(requestBody.query, userLength);
-      globalThis.prismaClient.user.findMany.mockResolvedValue(createMockUserList(userLength));
+      const userExpectedList = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
+      globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -89,8 +89,8 @@ describe('get all user', () => {
       };
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userExpectedList = generateUserExpectedList(requestBody.query, userLength);
-      globalThis.prismaClient.user.findMany.mockResolvedValue(createMockUserList(userLength));
+      const userExpectedList = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
+      globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -127,8 +127,8 @@ describe('get all user', () => {
 
     test('get all user success with user has user role', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userExpectedList = generateUserExpectedList(requestBody.query, userLength, ['userId', 'mfaEnable', 'isAdmin']);
-      globalThis.prismaClient.user.findMany.mockResolvedValue(createMockUserList(userLength));
+      const userExpectedList = UserDummyData.generateUserExpectedList(requestBody.query, userLength, ['userId', 'mfaEnable', 'isAdmin']);
+      globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
 
       expect.hasAssertions();
       signedTestCookie({ ...sessionData.user, role: POWER.USER })
@@ -256,7 +256,7 @@ describe('get all user', () => {
 
     test('get all user failed with output validate error', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      globalThis.prismaClient.user.findMany.mockResolvedValue(createMockUserList(userLength));
+      globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
       jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
         () => GraphqlResponse.dto.parse({
           data: []

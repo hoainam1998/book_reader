@@ -299,7 +299,7 @@ const query = new GraphQLObjectType({
         return handleResolveResult(async () => {
           return convertDtoToZodObject(BookDetailDTO, await book.getBookDetail(bookId, context));
         }, {
-          RECORD_NOT_FOUND: 'Book not found!'
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
         });
       }
     },

@@ -1,4 +1,5 @@
 const { ServerError } = require('#test/mocks/other-errors');
+const UserDummyData = require('#test/resources/dummy-data/user');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
@@ -7,7 +8,6 @@ const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const { createMockUserList, generateUserExpectedList } = require('#test/resources/test-data');
 const paginationUrl = `${PATH.USER}/pagination`;
 
 const requestBody = {
@@ -54,11 +54,11 @@ describe('user pagination', () => {
   describe(createDescribeTest(METHOD.POST, paginationUrl), () => {
     test('user pagination success', (done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        createMockUserList(userLength),
+        UserDummyData.createMockUserList(userLength),
         userLength,
       ]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBody.query, userLength);
+      const userListExpected = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -101,12 +101,12 @@ describe('user pagination', () => {
 
     test('user pagination success with user role', (done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        createMockUserList(userLength),
+        UserDummyData.createMockUserList(userLength),
         userLength,
       ]);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBody.query, userLength, ['userId', 'mfaEnable', 'isAdmin']);
+      const userListExpected = UserDummyData.generateUserExpectedList(requestBody.query, userLength, ['userId', 'mfaEnable', 'isAdmin']);
 
       expect.hasAssertions();
       signedTestCookie({ ...sessionData.user, role: POWER.USER })
@@ -154,12 +154,12 @@ describe('user pagination', () => {
       };
 
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        createMockUserList(userLength),
+        UserDummyData.createMockUserList(userLength),
         userLength,
       ]);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = generateUserExpectedList(requestBodyWithKeyValue.query, userLength);
+      const userListExpected = UserDummyData.generateUserExpectedList(requestBodyWithKeyValue.query, userLength);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -381,7 +381,7 @@ describe('user pagination', () => {
 
     test('user pagination failed with output validate error', (done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        createMockUserList(userLength),
+        UserDummyData.createMockUserList(userLength),
         userLength,
       ]);
 

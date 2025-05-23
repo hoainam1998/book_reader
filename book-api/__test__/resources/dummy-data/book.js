@@ -24,7 +24,25 @@ class BookDummyData extends DummyDataApi {
       published_time: 1,
       category_id: Date.now().toString(),
       introduce_file: 'html/new_file.html, json/new_file.json',
-      avatar: 'avatar'
+      book_image: [
+        {
+          image: 'image 1',
+          name: 'name 1'
+        },
+        {
+          image: 'image 2',
+          name: 'name 2'
+        }
+      ],
+      book_author: [
+        {
+          author_id: Date.now().toString(),
+        },
+        {
+          author_id: Date.now().toString(),
+        }
+      ],
+      avatar: 'avatar',
     }, {
       bookId: expect.any(String),
       name: expect.any(String),
@@ -32,6 +50,13 @@ class BookDummyData extends DummyDataApi {
       publishedDay: expect.any(String),
       publishedTime: expect.any(Number),
       avatar: expect.any(String),
+      images: expect.any(Array),
+      authors: expect.any(Array),
+      categoryId: expect.any(String),
+      introduce: {
+        html: expect.any(String),
+        json: expect.any(String),
+      },
     });
   }
 

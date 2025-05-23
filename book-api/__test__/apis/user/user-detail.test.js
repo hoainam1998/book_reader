@@ -1,15 +1,17 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const UserDummyData = require('#test/resources/dummy-data/user');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
+const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const { userQueryFieldExpectedTypes, generateExpectedObject } = require('#test/resources/test-data');
 const userDetailUrl = `${PATH.USER}/user-detail`;
+
+const mockUser = UserDummyData.MockData;
 
 const requestBody = {
   userId: mockUser.user_id,
@@ -50,7 +52,7 @@ describe('user detail', () => {
 
   describe(createDescribeTest(METHOD.POST, userDetailUrl), () => {
     test('get user detail will be success', (done) => {
-      const userDetailExpected = generateExpectedObject(requestBody.query, userQueryFieldExpectedTypes);
+      const userDetailExpected = UserDummyData.generateExpectedObject(requestBody.query);
       globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');

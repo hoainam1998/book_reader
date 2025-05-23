@@ -42,7 +42,9 @@
     "test.book.save-introduce": "npm run test.requirement -- __test__/apis/book/save-introduce.test.js",
     "test.book.save-introduce.silent": "npm run test.requirement -- __test__/apis/book/save-introduce.test.js --silent",
     "test.book.update-book": "npm run test.requirement -- __test__/apis/book/update-book.test.js",
-    "test.book.update-book.silent": "npm run test.requirement -- __test__/apis/book/update-book.test.js --silent"
+    "test.book.update-book.silent": "npm run test.requirement -- __test__/apis/book/update-book.test.js --silent",
+    "test.book.detail": "npm run test.requirement -- __test__/apis/book/book-detail.test.js",
+    "test.book.detail.silent": "npm run test.requirement -- __test__/apis/book/book-detail.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",
