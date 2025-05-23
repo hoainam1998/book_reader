@@ -26,6 +26,10 @@ class DummyDataApi {
     return this._expectedTypes;
   }
 
+  set ExpectedTypes(value) {
+    this._expectedTypes = value;
+  }
+
   /**
   * Return query object with type accord with expected types.
   *

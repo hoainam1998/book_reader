@@ -334,7 +334,7 @@ const query = new GraphQLObjectType({
             total: 0
           };
           graphqlNotFoundErrorOption.response = response;
-          throw new GraphQLError('Books not found!', graphqlNotFoundErrorOption);
+          throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(BookDTO, books.map(book => ({ ...book, category: book.category.name }))),

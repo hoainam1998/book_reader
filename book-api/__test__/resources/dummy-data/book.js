@@ -43,6 +43,9 @@ class BookDummyData extends DummyDataApi {
         }
       ],
       avatar: 'avatar',
+      category: {
+        name: 'category name'
+      },
     }, {
       bookId: expect.any(String),
       name: expect.any(String),
@@ -53,6 +56,7 @@ class BookDummyData extends DummyDataApi {
       images: expect.any(Array),
       authors: expect.any(Array),
       categoryId: expect.any(String),
+      category: expect.any(String),
       introduce: {
         html: expect.any(String),
         json: expect.any(String),
@@ -64,9 +68,18 @@ class BookDummyData extends DummyDataApi {
     return BookDummyData.default.MockData;
   }
 
+  static set ExpectedTypes(value) {
+    BookDummyData.default.ExpectedTypes = value;
+  }
+
+  static get ExpectedTypes() {
+    return BookDummyData.default.ExpectedTypes;
+  }
+
   /**
   * Return query object with type accord with expected types.
   *
+  * @static
   * @param {object} query - The requirement query object.
   * @param {array} [excludeFields=[]] - The fields should be remove.
   * @return {object} - The expected object.
@@ -74,6 +87,32 @@ class BookDummyData extends DummyDataApi {
   static generateExpectedObject(query, excludeFields = []) {
     return BookDummyData.default.generateExpectedObject(query, excludeFields);
   }
+
+  /**
+   * Create the expected book list.
+   *
+   * @static
+   * @param {object} requestBodyQuery - The request body query.
+   * @param {number} length - The number book create.
+   * @param {string[]} [excludeFields=[]] - The fields should remove.
+   * @return {object[]} - The expected book list.
+   */
+  static generateBookExpectedList(requestBodyQuery, length, excludeFields = []) {
+    return Array.apply(null, Array(length)).map(() => {
+      return BookDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
+    });
+  };
+
+  /**
+   * Create the book list for test.
+   *
+   * @static
+   * @param {number} length - The number of books who want to create.
+   * @return {object[]} - The book list.
+   */
+  static createMockBookList (length) {
+    return Array.apply(null, Array(length)).map(() => BookDummyData.MockData);
+  };
 };
 
 module.exports = BookDummyData;
