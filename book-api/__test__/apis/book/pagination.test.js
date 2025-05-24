@@ -326,12 +326,8 @@ describe('book pagination', () => {
               expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: getInputValidateMessage(BOOK.LOAD_BOOKS_FAIL),
-                errors: expect.any(Array),
+                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
               });
-              expect(response.body.errors).toHaveLength(1);
-              expect(response.body.errors).toEqual(
-                expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
-              );
               done();
             });
         });

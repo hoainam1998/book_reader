@@ -917,12 +917,8 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
-            errors: expect.any(Array),
+            errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
           });
-          expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
-          expect(response.body.errors).toEqual(
-            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
-          );
           done();
         });
     });
