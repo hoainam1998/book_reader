@@ -170,9 +170,9 @@ const mutation = new GraphQLObjectType({
         return handleResolveResult(async () => {
           await book.deleteIntroduceFile(bookId);
           await book.saveIntroduceHtmlFile(name, html, json, bookId);
-          return messageCreator('Introduce file created!');
+          return messageCreator(BOOK.INTRODUCE_FILE_SAVE);
         }, {
-          RECORD_NOT_FOUND: 'Can not find introduce file!'
+          RECORD_NOT_FOUND: BOOK.INTRODUCE_FILE_NOT_FOUND
         });
       }
     },

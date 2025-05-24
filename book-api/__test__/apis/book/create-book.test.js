@@ -648,8 +648,9 @@ describe('create book', () => {
         });
     });
 
-    test('save book info failed with undefined request body', (done) => {
+    test('save book info failed with undefine request body field', (done) => {
       // categoryIds do not define.
+      const undefineField = 'categoryIds';
       globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
 
       expect.hasAssertions();
@@ -661,7 +662,8 @@ describe('create book', () => {
         .field('publishedDay', mockBook.published_day)
         .field('imageNames',`${mockBook.name}1.png`)
         .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryIds', [])
+        .field('categoryId', mockBook.category_id)
+        .field(undefineField, [Date.now().toString()])
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -674,6 +676,9 @@ describe('create book', () => {
             errors: expect.any(Array),
           });
           expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
+          expect(response.body.errors).toEqual(
+            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+          );
           done();
         });
     });
@@ -895,12 +900,15 @@ describe('create book', () => {
         });
     });
 
-    test('save pfd file failed with undefined request data field', (done) => {
+    test('save pfd file failed with undefine request data field', (done) => {
       // bookIds do not define.
+      const undefineField = 'bookIds';
+
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookIds', [])
+        .field(undefineField, [Date.now().toString()])
+        .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
@@ -912,6 +920,9 @@ describe('create book', () => {
             errors: expect.any(Array),
           });
           expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+          expect(response.body.errors).toEqual(
+            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+          );
           done();
         });
     });
@@ -1059,21 +1070,23 @@ describe('create book', () => {
         });
     });
 
-    test('save book author failed with undefined request body field', (done) => {
+    test('save book author failed with undefine request body field', (done) => {
+      // author is undefine field.
+      const undefineField = 'author';
       expect.hasAssertions();
       globalThis.api
         .post(saveBookAuthorUrl)
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .send({
-          author: []
+          [undefineField]: []
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
-            errors: expect.any(Array),
+            errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
           });
           done();
         });

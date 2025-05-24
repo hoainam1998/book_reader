@@ -1,7 +1,8 @@
-const fs = require('fs');
 const { join } = require('path');
 const { saveFile, deleteFile } = require('#utils');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const Service = require('#services/prisma');
+const { BOOK } = require('#messages');
 
 class BookService extends Service {
 
@@ -91,7 +92,7 @@ class BookService extends Service {
         const jsonFilePath = join(__dirname, `../../public/${filePath[1].trim()}`);
         return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
       }
-      throw new Error('Can not found introduce file!');
+      throw new PrismaClientKnownRequestError(BOOK.INTRODUCE_FILE_NOT_FOUND, { code: 'P2025' });
     });
   }
 

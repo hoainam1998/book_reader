@@ -640,8 +640,10 @@ describe('update book', () => {
         });
     });
 
-    test('update book info failed with undefined request body', (done) => {
+    test('update book info failed with undefine request body field', (done) => {
       // categoryIds do not define.
+      const undefineField = 'categoryIds';
+
       expect.hasAssertions();
       globalThis.api
         .put(updateBookInfoUrl)
@@ -651,7 +653,8 @@ describe('update book', () => {
         .field('publishedDay', mockBook.published_day)
         .field('imageNames',`${mockBook.name}1.png`)
         .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryIds', [])
+        .field('categoryId', mockBook.category_id)
+        .field(undefineField, [Date.now().toString()])
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -663,9 +666,8 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
-            errors: expect.any(Array),
+            errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
           });
-          expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
           done();
         });
     });
@@ -1200,12 +1202,14 @@ describe('update book', () => {
 
     test('update pdf file failed with undefined request data field', (done) => {
       // bookIds do not define.
+      const undefineField = 'bookIds';
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       expect.hasAssertions();
       globalThis.api
         .put(updatePdfFileUrl)
-        .field('bookIds', [])
+        .field(undefineField, Date.now().toString())
+        .field('bookId', mockBook.book_id)
         .field('name', mockBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
@@ -1218,6 +1222,9 @@ describe('update book', () => {
             errors: expect.any(Array),
           });
           expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+          expect(response.body.errors).toEqual(
+            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+          );
           done();
         });
     });
