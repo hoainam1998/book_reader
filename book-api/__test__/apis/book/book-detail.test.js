@@ -181,7 +181,8 @@ describe('get book detail', () => {
 
     test('get book detail failed with undefine request body field', (done) => {
       // bookIds is undefine filed
-      const badRequestBody = { ...requestBody, bookIds: [Date.now.toString()] };
+      const undefineField = 'bookIds';
+      const badRequestBody = { ...requestBody, [undefineField]: [Date.now.toString()] };
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
@@ -197,9 +198,8 @@ describe('get book detail', () => {
               expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: getInputValidateMessage(BOOK.LOAD_BOOK_DETAIL_FAIL),
-                errors: expect.any(Array),
+                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
               });
-              expect(response.body.errors).toHaveLength(1);
               done();
             });
         });

@@ -18,6 +18,7 @@ module.exports = deepFreeze({
     REQUEST_DATA_EMPTY: 'Request data is empty!',
     FILE_FIELD_EMPTY: 'Files of {0} are empty!',
     FILE_NOT_PDF: 'File is not pdf file!',
+    FIELD_NOT_EXPECT: `{0} is not expected!`,
   },
   USER: {
     USER_NOT_FOUND: 'User not found!',
@@ -62,6 +63,7 @@ module.exports = deepFreeze({
     PDF_SAVED: 'Save pdf file success!',
     PDF_UPDATED: 'Update pdf file success!',
     UPDATE_PDF_FAIL: 'Update pdf file was failed!',
+    UPDATE_INTRODUCE_FAIL: 'Update introduce file was failed!',
     BOOK_NOT_FOUND: 'The book not found!',
     BOOKS_EMPTY: 'Books are empty!',
     SAVE_PDF_FAIL: 'Saving pdf file failed!',
@@ -74,5 +76,6 @@ module.exports = deepFreeze({
     BOOK_UPDATED: 'Book has been updated!',
     LOAD_BOOK_DETAIL_FAIL: 'Load book information was failed!',
     LOAD_BOOKS_FAIL: 'Loading books was failed!',
+    INTRODUCE_FILE_NOT_FOUND: 'Can not found introduce file!',
   }
 });

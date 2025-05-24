@@ -274,7 +274,8 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed with bad request', (done) => {
+    test('book pagination failed with request body are missing field', (done) => {
+      // missing query field.
       const badRequestBody = {
         pageSize: requestBody.pageSize,
         pageNumber: requestBody.pageNumber,
@@ -299,6 +300,34 @@ describe('book pagination', () => {
                 errors: expect.any(Array),
               });
               expect(response.body.errors).toHaveLength(1);
+              done();
+            });
+        });
+    });
+
+    test('book pagination failed with undefine request body', (done) => {
+      // search is undefine field
+      const undefineField = 'search';
+      const badRequestBody = { ...requestBody, [undefineField]: '' };
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(paginationUrl)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .set('authorization', authenticationToken)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .expect('Content-Type', /application\/json/)
+            .send(badRequestBody)
+            .then((response) => {
+              expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(BOOK.LOAD_BOOKS_FAIL),
+                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
+              });
               done();
             });
         });

@@ -9,7 +9,7 @@ const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const saveIntroduceFileUrl = `${PATH.BOOK}/save-introduce`;
+const updateIntroduceFileUrl = `${PATH.BOOK}/update-introduce`;
 const mockBook = BookDummyData.MockData;
 
 const requestBody = {
@@ -19,8 +19,8 @@ const requestBody = {
   bookId: mockBook.book_id,
 };
 
-describe('save introduce', () => {
-  commonTest('save introduce api common test', [
+describe('update introduce', () => {
+  commonTest('update introduce api common test', [
     {
       name: 'url test',
       describe: 'url is invalid',
@@ -30,36 +30,61 @@ describe('save introduce', () => {
     {
       name: 'method test',
       describe: 'method not allowed',
-      url: saveIntroduceFileUrl,
+      url: updateIntroduceFileUrl,
       method: METHOD.GET.toLowerCase(),
     },
     {
       name: 'cors test',
-      describe: 'save introduce api cors',
-      url: saveIntroduceFileUrl,
+      describe: 'update introduce api cors',
+      url: updateIntroduceFileUrl,
       method: METHOD.POST.toLowerCase(),
       origin: process.env.ORIGIN_CORS,
     }
-  ], 'save introduce common test');
+  ], 'update introduce common test');
 
-  describe(createDescribeTest(METHOD.POST, saveIntroduceFileUrl), () => {
-    test('save introduce success', (done) => {
+  describe(createDescribeTest(METHOD.POST, updateIntroduceFileUrl), () => {
+    test('update introduce success', (done) => {
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim().replace(/\//gm, '\\');
+      const jsonFilePath = jsonFile.trim().replace(/\//gm, '\\');
+      const bookName = mockBook.name.replace(/\s/, '-');
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.CREATED)
             .then((response) => {
-              const bookName = mockBook.name.replace(/\s/, '-');
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  book_id: requestBody.bookId
+                },
+                select: {
+                  introduce_file: true,
+                },
+              });
+              expect(unLink).toHaveBeenCalledTimes(2);
+              expect(unLink.mock.calls).toEqual([
+                [
+                  expect.stringContaining(`\\public\\${htmlFilePath}`),
+                  expect.any(Function),
+                ],
+                [
+                  expect.stringContaining(`\\public\\${jsonFilePath}`),
+                  expect.any(Function),
+                ]
+              ]);
               expect(writeFile).toHaveBeenCalledTimes(2);
               expect(writeFile.mock.calls).toEqual([
                 [
@@ -90,20 +115,24 @@ describe('save introduce', () => {
         });
     });
 
-    test('save introduce failed with authentication token unset', (done) => {
+    test('update introduce failed with authentication token unset', (done) => {
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .then((response) => {
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
               expect(writeFile).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.USER_UNAUTHORIZED,
@@ -114,21 +143,25 @@ describe('save introduce', () => {
         });
     });
 
-    test('save introduce failed with session expired', (done) => {
+    test('update introduce failed with session expired', (done) => {
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       expect.hasAssertions();
       destroySession()
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .then((response) => {
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
               expect(writeFile).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.WORKING_SESSION_EXPIRE,
@@ -141,38 +174,116 @@ describe('save introduce', () => {
 
     test.each([
       {
-        describe: 'book not found',
+        describe: 'book not found by findUniqueOrThrow method',
         expected: {
-          message: BOOK.BOOK_NOT_FOUND
+          message: BOOK.INTRODUCE_FILE_NOT_FOUND
         },
         cause: PrismaNotFoundError,
         status: HTTP_CODE.NOT_FOUND,
       },
       {
-        describe: 'server error',
+        describe: 'server error by findUniqueOrThrow method',
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         cause: ServerError,
         status: HTTP_CODE.SERVER_ERROR,
       }
-    ])('save introduce failed with $describe', ({ expected, cause, status }, done) => {
-      globalThis.prismaClient.book.update.mockRejectedValue(cause);
+    ])('update introduce failed with $describe', ({ expected, cause, status }, done) => {
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.findUniqueOrThrow.mockRejectedValue(cause);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(status)
             .then((response) => {
-              const bookName = mockBook.name.replace(/\s/, '-');
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  book_id: requestBody.bookId
+                },
+                select: {
+                  introduce_file: true,
+                },
+              });
+              expect(unLink).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(writeFile).not.toHaveBeenCalled();
+              expect(response.body).toEqual(expected);
+              done();
+            });
+        });
+    });
+
+    test.each([
+      {
+        describe: 'book not found by update method',
+        expected: {
+          message: BOOK.INTRODUCE_FILE_NOT_FOUND
+        },
+        cause: PrismaNotFoundError,
+        status: HTTP_CODE.NOT_FOUND,
+      },
+      {
+        describe: 'server error by update method',
+        expected: {
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
+        },
+        cause: ServerError,
+        status: HTTP_CODE.SERVER_ERROR,
+      }
+    ])('update introduce failed with $describe', ({ expected, cause, status }, done) => {
+      const writeFile = jest.spyOn(fs, 'writeFile')
+        .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim().replace(/\//gm, '\\');
+      const jsonFilePath = jsonFile.trim().replace(/\//gm, '\\');
+      const bookName = mockBook.name.replace(/\s/, '-');
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.update.mockRejectedValue(cause);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .put(updateIntroduceFileUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
+            .expect('Content-Type', /application\/json/)
+            .expect(status)
+            .then((response) => {
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  book_id: requestBody.bookId
+                },
+                select: {
+                  introduce_file: true,
+                },
+              });
+              expect(unLink).toHaveBeenCalledTimes(2);
+              expect(unLink.mock.calls).toEqual([
+                [
+                  expect.stringContaining(`\\public\\${htmlFilePath}`),
+                  expect.any(Function),
+                ],
+                [
+                  expect.stringContaining(`\\public\\${jsonFilePath}`),
+                  expect.any(Function),
+                ]
+              ]);
               expect(writeFile).toHaveBeenCalledTimes(2);
               expect(writeFile.mock.calls).toEqual([
                 [
@@ -201,15 +312,16 @@ describe('save introduce', () => {
         });
     });
 
-    test('save introduce failed with request body are empty', (done) => {
+    test('update introduce failed with request body are empty', (done) => {
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .expect('Content-Type', /application\/json/)
@@ -217,8 +329,10 @@ describe('save introduce', () => {
             .then((response) => {
               expect(writeFile).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.SAVE_INTRODUCE_FAIL),
+                message: getInputValidateMessage(BOOK.UPDATE_INTRODUCE_FAIL),
                 errors: [COMMON.REQUEST_DATA_EMPTY]
               });
               done();
@@ -226,10 +340,11 @@ describe('save introduce', () => {
         });
     });
 
-    test('save introduce failed with request body are missing field', (done) => {
+    test('update introduce failed with request body are missing field', (done) => {
       // missing bookId
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       const badRequestBody = Object.assign({}, requestBody);
       delete badRequestBody.bookId;
 
@@ -237,7 +352,7 @@ describe('save introduce', () => {
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(badRequestBody)
@@ -245,9 +360,11 @@ describe('save introduce', () => {
             .expect(HTTP_CODE.BAD_REQUEST)
             .then((response) => {
               expect(writeFile).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.SAVE_INTRODUCE_FAIL),
+                message: getInputValidateMessage(BOOK.UPDATE_INTRODUCE_FAIL),
                 errors: expect.any(Array),
               });
               expect(response.body.errors).toHaveLength(1);
@@ -256,18 +373,19 @@ describe('save introduce', () => {
         });
     });
 
-    test('save introduce failed with undefine request body field', (done) => {
-      // bookIds is undefine field.
-      const undefineField = 'bookIds';
+    test('update introduce failed with undefine request body', (done) => {
+      // bookIds is undefine field
+      const expectedFieldName = 'bookIds';
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
-      const badRequestBody = Object.assign({ [undefineField]: [] }, requestBody);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      const badRequestBody = Object.assign({ [expectedFieldName]: [] }, requestBody);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(badRequestBody)
@@ -275,34 +393,61 @@ describe('save introduce', () => {
             .expect(HTTP_CODE.BAD_REQUEST)
             .then((response) => {
               expect(writeFile).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.SAVE_INTRODUCE_FAIL),
-                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
+                message: getInputValidateMessage(BOOK.UPDATE_INTRODUCE_FAIL),
+                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(expectedFieldName))]),
               });
               done();
             });
         });
     });
 
-    test('save introduce failed with output validate error', (done) => {
-      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+    test('update introduce failed with output validate error', (done) => {
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       const writeFile = jest.spyOn(fs, 'writeFile')
         .mockImplementation((filePath, content, callback) => callback());
-      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim().replace(/\//gm, '\\');
+      const jsonFilePath = jsonFile.trim().replace(/\//gm, '\\');
+      const bookName = mockBook.name.replace(/\s/, '-');
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
-            .post(saveIntroduceFileUrl)
+            .put(updateIntroduceFileUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
             .then((response) => {
-              const bookName = mockBook.name.replace(/\s/, '-');
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  book_id: requestBody.bookId
+                },
+                select: {
+                  introduce_file: true,
+                },
+              });
+              expect(unLink).toHaveBeenCalledTimes(2);
+              expect(unLink.mock.calls).toEqual([
+                [
+                  expect.stringContaining(`\\public\\${htmlFilePath}`),
+                  expect.any(Function),
+                ],
+                [
+                  expect.stringContaining(`\\public\\${jsonFilePath}`),
+                  expect.any(Function),
+                ]
+              ]);
               expect(writeFile).toHaveBeenCalledTimes(2);
               expect(writeFile.mock.calls).toEqual([
                 [

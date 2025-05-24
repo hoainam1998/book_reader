@@ -1,4 +1,5 @@
 const Singleton = require('#services/singleton');
+const { COMMON } = require('#messages');
 
 /**
 * Class support validation request body object.
@@ -42,7 +43,7 @@ class Validator extends Singleton {
       return fieldsOfClass.concat(dataKeys).reduce((errors, key, index, array) => {
         if (index === array.lastIndexOf(key)) {
           if (array.lastIndexOf(key) === array.indexOf(key) && !fieldsOfClass.includes(key)) {
-            errors.push(`${key} is not expected!`);
+            errors.push(COMMON.FIELD_NOT_EXPECT.format(key));
             delete data[key];
           }
         }

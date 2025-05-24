@@ -154,7 +154,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(IntroduceHTMLFileSave, { error_message: 'Updating introduce file failed!' })
+  @validation(IntroduceHTMLFileSave, { error_message: BOOK.UPDATE_INTRODUCE_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateIntroduceHtmlFile(req, res, next, self) {
