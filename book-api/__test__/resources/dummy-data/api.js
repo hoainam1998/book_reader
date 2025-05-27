@@ -18,26 +18,45 @@ class DummyDataApi {
     this._expectedTypes = expectedTypes;
   }
 
-  get MockData() {
-    return this._mockData;
+  /**
+  * Access mock data.
+  *
+  * @static
+  * @return {object} The mock data.
+  */
+  static get MockData() {
+    return this.default._mockData;
   }
 
-  get ExpectedTypes() {
-    return this._expectedTypes;
+  /**
+  * Access expect types.
+  *
+  * @static
+  * @return {object} The expected types.
+  */
+  static get ExpectedTypes() {
+    return this.default._expectedTypes;
   }
 
-  set ExpectedTypes(value) {
-    this._expectedTypes = value;
+  /**
+  * Set expect types.
+  *
+  * @static
+  * @param {object} value - The new expect types.
+  */
+  static set ExpectedTypes(value) {
+    this.default._expectedTypes = value;
   }
 
   /**
   * Return query object with type accord with expected types.
   *
+  * @static
   * @param {object} query - The requirement query object.
   * @param {array} [excludeFields=[]] - The fields should be remove.
   * @return {object} - The expected object.
   */
-  generateExpectedObject(query, excludeFields = []) {
+  static generateExpectedObject(query, excludeFields = []) {
     return Object.keys(query).reduce((queryExpected, field) => {
       if (excludeFields.length) {
         if (excludeFields.includes(field)) {

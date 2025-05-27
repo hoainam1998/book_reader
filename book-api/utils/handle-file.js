@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-const { mkdir } = require('fs/promises');
+const fsPromise = require('fs/promises');
 
 /**
  * Write contents to file and save it to specific folder.
  *
  * @param {string} filePath - path to stored file.
- * @param {string} success - content of file.
+ * @param {string} content - content of file.
  * @return {Promise<string>} - promise contain file path.
  */
 const saveFile = (filePath, content) => {
@@ -32,7 +32,7 @@ const saveFile = (filePath, content) => {
  * @return {Promise<string>} - The promise contain file path.
  */
 const createFolder = (path) => {
-  return mkdir(path, { recursive: true });
+  return fsPromise.mkdir(path, { recursive: true });
 };
 
 /**

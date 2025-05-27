@@ -10,6 +10,7 @@ const {
   IsPositive,
   IsGraphqlSelect,
   IsOptional,
+  IsGreaterThan,
 } = require('#decorators/validators');
 
 const AuthorSave = (validators, className) => {
@@ -40,7 +41,8 @@ const AuthorSave = (validators, className) => {
     yearOfBirth;
 
     @validators(
-      IsNumeric('yearOfDead must be a numeric!')
+      IsNumeric('yearOfDead must be a numeric!'),
+      IsGreaterThan('yearOfDead must greater than yearOfBirth', { valueCompare: 'yearOfBirth' }),
     )
     yearOfDead;
 
