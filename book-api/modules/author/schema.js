@@ -205,9 +205,9 @@ const mutation = new GraphQLObjectType({
         return handleResolveResult(async () => {
           await service.deleteStoryFile(author.authorId);
           await service.updateAuthor(author);
-          return messageCreator('Author updated success!');
+          return messageCreator(AUTHOR.UPDATE_AUTHOR_SUCCESS);
         }, {
-          RECORD_NOT_FOUND: 'Authors not found!'
+          RECORD_NOT_FOUND: AUTHOR.AUTHOR_NOT_FOUND,
         });
       }
     },

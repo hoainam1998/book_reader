@@ -57,7 +57,7 @@ class AuthorRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(AuthorSave, { error_message: 'Updating author failed!', groups: ['update'] })
+  @validation(AuthorSave, { error_message: AUTHOR.UPDATE_AUTHOR_FAIL, groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updateAuthor(req, res, next, self) {

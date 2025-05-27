@@ -5,16 +5,19 @@
  */
 class DummyDataApi {
   _mockData;
+  _requestData;
   _expectedTypes;
 
   /**
   * Create dummy data instance.
   *
   * @param {object} mockData - The mocking data.
+  * @param {object} mockRequestData - The mocking request data.
   * @param {object} expectedTypes - Expected type of mock data.
   */
-  constructor(mockData, expectedTypes) {
+  constructor(mockData, mockRequestData, expectedTypes) {
     this._mockData = mockData;
+    this._requestData = mockRequestData || mockData;
     this._expectedTypes = expectedTypes;
   }
 
@@ -26,6 +29,16 @@ class DummyDataApi {
   */
   static get MockData() {
     return this.default._mockData;
+  }
+
+  /**
+  * Access mock request data.
+  *
+  * @static
+  * @return {object} The mock request data.
+  */
+  static get MockRequestData() {
+    return this.default._requestData;
   }
 
   /**

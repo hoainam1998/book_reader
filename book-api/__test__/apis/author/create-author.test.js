@@ -13,6 +13,7 @@ const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('
 const createAuthorUrl = `${PATH.AUTHOR}/create`;
 
 const mockAuthor = AuthorDummyData.MockData;
+const mockRequestAuthor = AuthorDummyData.MockRequestData;
 
 describe('create author', () => {
   commonTest('create author api common test', [
@@ -43,24 +44,23 @@ describe('create author', () => {
       const mkdir = jest.spyOn(fsPromise, 'mkdir').mockImplementation((filePath, object) => Promise.resolve(filePath));
       const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
 
-      // expect.hasAssertions();
+      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
-            //.expect(HTTP_CODE.CREATED)
+            .expect(HTTP_CODE.CREATED)
             .then((response) => {
-              console.log(response.body);
               expect(mkdir).toHaveBeenCalledTimes(2);
               expect(mkdir).toHaveBeenCalledWith(
                 expect.stringMatching(
@@ -72,16 +72,16 @@ describe('create author', () => {
               expect(writeFile.mock.calls).toEqual([
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.html,
+                  mockRequestAuthor.story.html,
                   expect.any(Function),
                 ],
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.json,
+                  mockRequestAuthor.story.json,
                   expect.any(Function)
                 ],
               ]);
@@ -89,12 +89,12 @@ describe('create author', () => {
               expect(globalThis.prismaClient.author.create).toHaveBeenCalledWith({
                 data: {
                   author_id: expect.any(String),
-                  name: mockAuthor.name,
-                  sex: mockAuthor.sex,
+                  name: mockRequestAuthor.name,
+                  sex: mockRequestAuthor.sex,
                   avatar: expect.any(String),
-                  year_of_birth: mockAuthor.yearOfBirth,
-                  year_of_dead: mockAuthor.yearOfDead,
-                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockAuthor.name}.html, \/json\/author\/{1}\/${mockAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
+                  year_of_birth: mockRequestAuthor.year_of_birth,
+                  year_of_dead: mockRequestAuthor.year_of_dead,
+                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockRequestAuthor.name}.html, \/json\/author\/{1}\/${mockRequestAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
                 }
               });
               expect(response.body).toEqual({
@@ -117,12 +117,12 @@ describe('create author', () => {
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
@@ -149,12 +149,12 @@ describe('create author', () => {
           globalThis.api
             .post(createAuthorUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
@@ -209,11 +209,11 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -245,12 +245,12 @@ describe('create author', () => {
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .field(undefineField, [Date.now().toString()])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -278,12 +278,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
             .then((response) => {
@@ -311,12 +311,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/pdf/empty-pdf.pdf'))
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -343,12 +343,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/empty.png'))
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -375,12 +375,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'))
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.SERVER_ERROR)
@@ -414,12 +414,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfDead)
-            .field('yearOfDead', mockAuthor.yearOfBirth)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_dead)
+            .field('yearOfDead', mockRequestAuthor.year_of_birth)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -447,12 +447,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'))
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.SERVER_ERROR)
@@ -468,16 +468,16 @@ describe('create author', () => {
               expect(writeFile.mock.calls).toEqual([
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.html,
+                  mockRequestAuthor.story.html,
                   expect.any(Function),
                 ],
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.json,
+                  mockRequestAuthor.story.json,
                   expect.any(Function)
                 ],
               ]);
@@ -502,12 +502,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'))
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.SERVER_ERROR)
@@ -523,16 +523,16 @@ describe('create author', () => {
               expect(writeFile.mock.calls).toEqual([
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.html,
+                  mockRequestAuthor.story.html,
                   expect.any(Function),
                 ],
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.json,
+                  mockRequestAuthor.story.json,
                   expect.any(Function)
                 ],
               ]);
@@ -540,12 +540,12 @@ describe('create author', () => {
               expect(globalThis.prismaClient.author.create).toHaveBeenCalledWith({
                 data: {
                   author_id: expect.any(String),
-                  name: mockAuthor.name,
-                  sex: mockAuthor.sex,
+                  name: mockRequestAuthor.name,
+                  sex: mockRequestAuthor.sex,
                   avatar: expect.any(String),
-                  year_of_birth: mockAuthor.yearOfBirth,
-                  year_of_dead: mockAuthor.yearOfDead,
-                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockAuthor.name}.html, \/json\/author\/{1}\/${mockAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
+                  year_of_birth: mockRequestAuthor.year_of_birth,
+                  year_of_dead: mockRequestAuthor.year_of_dead,
+                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockRequestAuthor.name}.html, \/json\/author\/{1}\/${mockRequestAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
                 }
               });
               expect(response.body).toEqual({
@@ -569,12 +569,12 @@ describe('create author', () => {
             .post(createAuthorUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockAuthor.name)
-            .field('sex', mockAuthor.sex)
-            .field('yearOfBirth', mockAuthor.yearOfBirth)
-            .field('yearOfDead', mockAuthor.yearOfDead)
-            .field('storyHtml', mockAuthor.story.html)
-            .field('storyJson', mockAuthor.story.json)
+            .field('name', mockRequestAuthor.name)
+            .field('sex', mockRequestAuthor.sex)
+            .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+            .field('yearOfDead', mockRequestAuthor.year_of_dead)
+            .field('storyHtml', mockRequestAuthor.story.html)
+            .field('storyJson', mockRequestAuthor.story.json)
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
@@ -590,16 +590,16 @@ describe('create author', () => {
               expect(writeFile.mock.calls).toEqual([
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.html,
+                  mockRequestAuthor.story.html,
                   expect.any(Function),
                 ],
                 [
                   expect.stringMatching(
-                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
+                    new RegExp(`${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`.replace(/\\/gm, '\\\\').format('\\d+'), 'gm'),
                   'gm'),
-                  mockAuthor.story.json,
+                  mockRequestAuthor.story.json,
                   expect.any(Function)
                 ],
               ]);
@@ -607,12 +607,12 @@ describe('create author', () => {
               expect(globalThis.prismaClient.author.create).toHaveBeenCalledWith({
                 data: {
                   author_id: expect.any(String),
-                  name: mockAuthor.name,
-                  sex: mockAuthor.sex,
+                  name: mockRequestAuthor.name,
+                  sex: mockRequestAuthor.sex,
                   avatar: expect.any(String),
-                  year_of_birth: mockAuthor.yearOfBirth,
-                  year_of_dead: mockAuthor.yearOfDead,
-                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockAuthor.name}.html, \/json\/author\/{1}\/${mockAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
+                  year_of_birth: mockRequestAuthor.year_of_birth,
+                  year_of_dead: mockRequestAuthor.year_of_dead,
+                  story: expect.stringMatching(new RegExp(`\/html\/author\/{0}\/${mockRequestAuthor.name}.html, \/json\/author\/{1}\/${mockRequestAuthor.name}.json`.format('\\d+', '\\d+'), 'gm')),
                 }
               });
               expect(response.body).toEqual({

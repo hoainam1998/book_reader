@@ -14,15 +14,16 @@ const savePdfFileUrl = `${PATH.BOOK}/save-pdf`;
 const saveBookAuthorUrl = `${PATH.BOOK}/save-book-authors`;
 
 const mockBook = BookDummyData.MockData;
+const mockRequestBook = BookDummyData.MockRequestData;
 
 const requestBody = [
   {
     authorId: Date.now().toString(),
-    bookId: mockBook.book_id,
+    bookId: mockRequestBook.book_id,
   },
   {
     authorId: Date.now().toString(),
-    bookId: mockBook.book_id,
+    bookId: mockRequestBook.book_id,
   }
 ];
 
@@ -81,10 +82,10 @@ describe('create book', () => {
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
-            .field('name', mockBook.name)
-            .field('publishedTime', mockBook.published_time)
-            .field('publishedDay', mockBook.published_day)
-            .field('categoryId', mockBook.category_id)
+            .field('name', mockRequestBook.name)
+            .field('publishedTime', mockRequestBook.published_time)
+            .field('publishedDay', mockRequestBook.published_day)
+            .field('categoryId', mockRequestBook.category_id)
             .field('authors', Date.now().toString())
             .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -196,10 +197,10 @@ describe('create book', () => {
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
-            .field('name', mockBook.name)
-            .field('publishedTime', mockBook.published_time)
-            .field('publishedDay', mockBook.published_day)
-            .field('categoryId', mockBook.category_id)
+            .field('name', mockRequestBook.name)
+            .field('publishedTime', mockRequestBook.published_time)
+            .field('publishedDay', mockRequestBook.published_day)
+            .field('categoryId', mockRequestBook.category_id)
             .field('authors', Date.now().toString())
             .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -253,10 +254,10 @@ describe('create book', () => {
             .post(createBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockBook.name)
-            .field('publishedTime', mockBook.published_time)
-            .field('publishedDay', mockBook.published_day)
-            .field('categoryId', mockBook.category_id)
+            .field('name', mockRequestBook.name)
+            .field('publishedTime', mockRequestBook.published_time)
+            .field('publishedDay', mockRequestBook.published_day)
+            .field('categoryId', mockRequestBook.category_id)
             .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
             .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -283,10 +284,10 @@ describe('create book', () => {
             .post(createBookUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockBook.name)
-            .field('publishedTime', mockBook.published_time)
-            .field('publishedDay', mockBook.published_day)
-            .field('categoryId', mockBook.category_id)
+            .field('name', mockRequestBook.name)
+            .field('publishedTime', mockRequestBook.published_time)
+            .field('publishedDay', mockRequestBook.published_day)
+            .field('categoryId', mockRequestBook.category_id)
             .field('authors', Date.now().toString())
             .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -316,10 +317,10 @@ describe('create book', () => {
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('Connection', 'keep-alive')
-            .field('name', mockBook.name)
-            .field('publishedTime', mockBook.published_time)
-            .field('publishedDay', mockBook.published_day)
-            .field('categoryId', mockBook.category_id)
+            .field('name', mockRequestBook.name)
+            .field('publishedTime', mockRequestBook.published_time)
+            .field('publishedDay', mockRequestBook.published_day)
+            .field('categoryId', mockRequestBook.category_id)
             .field('authors', Date.now().toString())
             .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
             .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -379,13 +380,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('categoryId', mockBook.category_id)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('categoryId', mockRequestBook.category_id)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -395,21 +396,21 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
             data: {
-              book_id: mockBook.book_id,
-              name: mockBook.name,
+              book_id: mockRequestBook.book_id,
+              name: mockRequestBook.name,
               avatar: expect.any(String),
-              published_time: mockBook.published_time,
-              published_day: mockBook.published_day,
-              category_id: mockBook.category_id,
+              published_time: mockRequestBook.published_time,
+              published_day: mockRequestBook.published_day,
+              category_id: mockRequestBook.category_id,
               book_image: {
                 create:  [
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
+                    name: `${mockRequestBook.name}1.png`,
                   },
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
+                    name: `${mockRequestBook.name}2.png`,
                   }
                 ],
               }
@@ -464,13 +465,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
@@ -491,13 +492,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -519,13 +520,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/pdf/empty-pdf.pdf'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -545,13 +546,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -573,13 +574,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('pdf/empty-pdf.pdf'))
         .expect('Content-Type', /application\/json/)
@@ -600,13 +601,13 @@ describe('create book', () => {
       globalThis.api
         .post(saveBookInfoUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -626,12 +627,12 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(saveBookInfoUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -656,13 +657,13 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(saveBookInfoUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .field(undefineField, [Date.now().toString()])
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -690,13 +691,13 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(saveBookInfoUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -706,21 +707,21 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
             data: {
-              book_id: mockBook.book_id,
-              name: mockBook.name,
+              book_id: mockRequestBook.book_id,
+              name: mockRequestBook.name,
               avatar: expect.any(String),
-              published_time: mockBook.published_time,
-              published_day: mockBook.published_day,
-              category_id: mockBook.category_id,
+              published_time: mockRequestBook.published_time,
+              published_day: mockRequestBook.published_day,
+              category_id: mockRequestBook.category_id,
               book_image: {
                 create:  [
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
+                    name: `${mockRequestBook.name}1.png`,
                   },
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
+                    name: `${mockRequestBook.name}2.png`,
                   }
                 ],
               }
@@ -739,13 +740,13 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(saveBookInfoUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
-        .field('publishedTime', mockBook.published_time)
-        .field('publishedDay', mockBook.published_day)
-        .field('imageNames',`${mockBook.name}1.png`)
-        .field('imageNames',`${mockBook.name}2.png`)
-        .field('categoryId', mockBook.category_id)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames',`${mockRequestBook.name}1.png`)
+        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -755,21 +756,21 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
             data: {
-              book_id: mockBook.book_id,
-              name: mockBook.name,
+              book_id: mockRequestBook.book_id,
+              name: mockRequestBook.name,
               avatar: expect.any(String),
-              published_time: mockBook.published_time,
-              published_day: mockBook.published_day,
-              category_id: mockBook.category_id,
+              published_time: mockRequestBook.published_time,
+              published_day: mockRequestBook.published_day,
+              category_id: mockRequestBook.category_id,
               book_image: {
                 create:  [
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}1.png`,
+                    name: `${mockRequestBook.name}1.png`,
                   },
                   {
                     image: expect.any(String),
-                    name: `${mockBook.name}2.png`,
+                    name: `${mockRequestBook.name}2.png`,
                   }
                 ],
               }
@@ -799,8 +800,8 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.CREATED)
@@ -808,7 +809,7 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockBook.book_id
+              book_id: mockRequestBook.book_id
             },
             data:{
               pdf: expect.any(String)
@@ -844,8 +845,8 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(status)
@@ -853,7 +854,7 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockBook.book_id
+              book_id: mockRequestBook.book_id
             },
             data:{
               pdf: expect.any(String)
@@ -885,7 +886,7 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('name', mockBook.name)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -908,8 +909,8 @@ describe('create book', () => {
       globalThis.api
         .post(savePdfFileUrl)
         .field(undefineField, [Date.now().toString()])
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -928,8 +929,8 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
@@ -945,8 +946,8 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/empty-pdf.pdf'))
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -964,8 +965,8 @@ describe('create book', () => {
       globalThis.api
         .post(savePdfFileUrl)
         .set('Connection', 'keep-alive')
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/images/application.png'))
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -986,8 +987,8 @@ describe('create book', () => {
       expect.hasAssertions();
       globalThis.api
         .post(savePdfFileUrl)
-        .field('bookId', mockBook.book_id)
-        .field('name', mockBook.name)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
         .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'))
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -995,7 +996,7 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockBook.book_id
+              book_id: mockRequestBook.book_id
             },
             data:{
               pdf: expect.any(String)
