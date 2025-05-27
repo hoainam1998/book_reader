@@ -64,30 +64,6 @@ class BookDummyData extends DummyDataApi {
     });
   }
 
-  static get MockData() {
-    return BookDummyData.default.MockData;
-  }
-
-  static set ExpectedTypes(value) {
-    BookDummyData.default.ExpectedTypes = value;
-  }
-
-  static get ExpectedTypes() {
-    return BookDummyData.default.ExpectedTypes;
-  }
-
-  /**
-  * Return query object with type accord with expected types.
-  *
-  * @static
-  * @param {object} query - The requirement query object.
-  * @param {array} [excludeFields=[]] - The fields should be remove.
-  * @return {object} - The expected object.
-  */
-  static generateExpectedObject(query, excludeFields = []) {
-    return BookDummyData.default.generateExpectedObject(query, excludeFields);
-  }
-
   /**
    * Create the expected book list.
    *

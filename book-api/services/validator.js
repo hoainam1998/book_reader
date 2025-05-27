@@ -70,7 +70,7 @@ class Validator extends Singleton {
     */
     const validating = (validateFn, value, isOptional, results, errors) => {
       if ((isOptional && value) || !isOptional) {
-        const result = validateFn(value);
+        const result = validateFn(value, this);
 
         if (result) {
           results.errors.push(result);
@@ -98,7 +98,7 @@ class Validator extends Singleton {
               // if group name is duplicate, proved we will validate keys according this group.
               const isDuplicate = groupNames.filter(
                 (groupName, index, array) => array.indexOf(groupName) !== index && array.lastIndexOf(groupName) === index).length;
-              if (isDuplicate) {
+              if (isDuplicate || validator.relation) {
                 validating(validateFn, this[key], this.validators[name][key].isOptional, results, errors);
               }
             } else if (typeof validator === 'function') {

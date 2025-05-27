@@ -5,6 +5,7 @@ const MessageSerializerResponse = require('#dto/common/message-serializer-respon
 const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out');
 const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter } = require('#dto/author/author-in');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
+const { AUTHOR } = require('#messages');
 
 /**
  * Organize author routes.
@@ -28,7 +29,7 @@ class AuthorRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(AuthorSave, { error_message: 'Creating author failed!', groups: ['create'] })
+  @validation(AuthorSave, { error_message: AUTHOR.CREATE_AUTHOR_FAIL, groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _createAuthor(req, res, next, self) {
@@ -42,7 +43,6 @@ class AuthorRouter extends Router {
 
     return self.execute(query, {
       author: {
-        authorId: Date.now().toString(),
         name: req.body.name,
         sex: +req.body.sex,
         avatar: req.body.avatar,

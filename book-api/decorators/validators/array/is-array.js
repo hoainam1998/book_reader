@@ -23,7 +23,7 @@ const isArray = (value, type, message, allowedOneElement) => {
 const IsArray = (type = undefined, message, options) => {
   if (options) {
     return {
-      groups: options.groups,
+      groups: options.groups || [],
       validator: (value) => isArray(value, type, message, options.allowedOneElement)
     };
   } else {

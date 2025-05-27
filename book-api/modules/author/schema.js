@@ -9,11 +9,11 @@ const {
   GraphQLError
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const PaginationResponse = require('#dto/common/pagination-response');
 const AuthorDTO = require('#dto/author/author');
 const AuthorDetailDTO = require('#dto/author/author-detail');
-const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
+const { AUTHOR } = require('#messages');
+const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
 const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
 
@@ -39,25 +39,25 @@ const AUTHOR_INPUT_TYPE = new GraphQLNonNull(new GraphQLInputObjectType({
   name: 'AuthorInformation',
   fields: {
     authorId: {
-      type: GraphQLString
+      type: GraphQLID
     },
     name: {
-      type: GraphQLString
+      type: new GraphQLNonNull(GraphQLString),
     },
     sex: {
-      type: GraphQLInt
+      type: new GraphQLNonNull(GraphQLInt)
     },
     avatar: {
-      type: GraphQLString
+      type: new GraphQLNonNull(GraphQLString)
     },
     yearOfBirth: {
-      type: GraphQLInt
+      type: new GraphQLNonNull(GraphQLInt)
     },
     yearOfDead: {
-      type: GraphQLInt
+      type: new GraphQLNonNull(GraphQLInt)
     },
     story: {
-      type: new GraphQLInputObjectType({
+      type: new GraphQLNonNull(new GraphQLInputObjectType({
         name: 'StoryInput',
         fields: {
           html: {
@@ -67,7 +67,7 @@ const AUTHOR_INPUT_TYPE = new GraphQLNonNull(new GraphQLInputObjectType({
             type: GraphQLString
           }
         }
-      })
+      })),
     }
   }
 }));
@@ -191,7 +191,7 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (service, { author }) => {
         await service.createAuthor(author);
-        return messageCreator('The author created success!');
+        return messageCreator(AUTHOR.CREATE_AUTHOR_SUCCESS);
       }
     },
     update: {

@@ -8,7 +8,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
-const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
+const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const getBookDetailUrl = `${PATH.BOOK}/detail`;
 const mockBook = BookDummyData.MockData;
 

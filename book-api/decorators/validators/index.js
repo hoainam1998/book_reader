@@ -11,6 +11,7 @@ const IsOptional = require('./common/is-optional');
 const IsBase64Image = require('./string/is-base64-image');
 const IsBoolean = require('./boolean/is-boolean');
 const IsGraphqlSelect = require('./custom/is-graphql-select');
+const IsGreaterThan = require('./custom/is-greater-than');
 const IsId = require('./custom/is-id');
 const IsIds = require('./custom/is-ids');
 const IsMulterFile = require('./custom/is-multer-file');
@@ -27,6 +28,7 @@ module.exports = {
   Length,
   IsBase64Image,
   IsGraphqlSelect,
+  IsGreaterThan,
   IsOptional,
   IsBoolean,
   IsId,

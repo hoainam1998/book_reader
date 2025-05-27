@@ -36,22 +36,6 @@ class UserDummyData extends DummyDataApi {
     );
   }
 
-  static get MockData() {
-    return UserDummyData.default.MockData;
-  }
-
-  /**
-  * Return query object with type accord with expected types.
-  *
-  * @static
-  * @param {object} query - The requirement query object.
-  * @param {array} [excludeFields=[]] - The fields should be remove.
-  * @return {object} - The expected object.
-  */
-  static generateExpectedObject(query, excludeFields = []) {
-    return UserDummyData.default.generateExpectedObject(query, excludeFields);
-  }
-
   /**
    * Create the expected user list.
    *

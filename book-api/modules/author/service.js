@@ -113,10 +113,11 @@ class AuthorService extends Service {
 
   createAuthor(author) {
     const filePath = (extName, path) => `${path}/${author.name}.${extName}`;
+    const authorId = Date.now().toString();
 
     return Promise.all([
-      createFolder(join(__dirname, `../../public/html/author/${author.authorId}`)),
-      createFolder(join(__dirname, `../../public/json/author/${author.authorId}`))
+      createFolder(join(__dirname, `../../public/html/author/${authorId}`)),
+      createFolder(join(__dirname, `../../public/json/author/${authorId}`))
     ]).then((urls) => {
       const extNames = ['html', 'json'];
 
@@ -136,7 +137,7 @@ class AuthorService extends Service {
 
         return this.PrismaInstance.author.create({
           data: {
-            author_id: author.authorId,
+            author_id: authorId,
             name: author.name,
             sex: author.sex,
             avatar: author.avatar,

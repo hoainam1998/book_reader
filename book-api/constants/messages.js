@@ -77,5 +77,9 @@ module.exports = deepFreeze({
     LOAD_BOOK_DETAIL_FAIL: 'Load book information was failed!',
     LOAD_BOOKS_FAIL: 'Loading books was failed!',
     INTRODUCE_FILE_NOT_FOUND: 'Can not found introduce file!',
+  },
+  AUTHOR: {
+    CREATE_AUTHOR_SUCCESS: 'Create author was success!',
+    CREATE_AUTHOR_FAIL: 'Create author was failed!',
   }
 });
