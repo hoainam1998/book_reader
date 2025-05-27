@@ -46,7 +46,9 @@ class BookDummyData extends DummyDataApi {
       category: {
         name: 'category name'
       },
-    }, {
+    },
+    null,
+    {
       bookId: expect.any(String),
       name: expect.any(String),
       pdf: expect.any(String),

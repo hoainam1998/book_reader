@@ -19,6 +19,7 @@ class UserDummyData extends DummyDataApi {
   constructor() {
     super(
       mockUser,
+      null,
       {
         userId: expect.any(String),
         name: expect.any(String),

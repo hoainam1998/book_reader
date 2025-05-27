@@ -74,7 +74,7 @@ class AuthorService extends Service {
     return this.getAuthorDetail(authorId, {
       story: true
     }).then(author => {
-      const storyFile = author.story.split(', ');
+      const storyFile = author.story.split(',');
       const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
       const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
       return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);

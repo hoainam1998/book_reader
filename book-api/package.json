@@ -50,7 +50,9 @@
     "test.book.update-introduce": "npm run test.requirement -- __test__/apis/book/update-introduce.test.js",
     "test.book.update-introduce.silent": "npm run test.requirement -- __test__/apis/book/update-introduce.test.js --silent",
     "test.author.create-author": "npm run test.requirement -- __test__/apis/author/create-author.test.js",
-    "test.author.create-author.silent": "npm run test.requirement -- __test__/apis/author/create-author.test.js --silent"
+    "test.author.create-author.silent": "npm run test.requirement -- __test__/apis/author/create-author.test.js --silent",
+    "test.author.update-author": "npm run test.requirement -- __test__/apis/author/update-author.test.js",
+    "test.author.update-author.silent": "npm run test.requirement -- __test__/apis/author/update-author.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",
