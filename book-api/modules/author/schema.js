@@ -110,14 +110,14 @@ const query = new GraphQLObjectType({
       }),
       args: {
         authorId: {
-          type: GraphQLID
+          type: new GraphQLNonNull(GraphQLID)
         }
       },
       resolve: async (author, { authorId }, context) => {
         return handleResolveResult(async () => {
           return convertDtoToZodObject(AuthorDetailDTO, await author.getAuthorDetail(authorId, context));
         }, {
-          RECORD_NOT_FOUND: 'Author not found!'
+          RECORD_NOT_FOUND: AUTHOR.AUTHOR_NOT_FOUND,
         });
       }
     },

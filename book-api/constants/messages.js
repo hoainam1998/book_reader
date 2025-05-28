@@ -84,5 +84,6 @@ module.exports = deepFreeze({
     UPDATE_AUTHOR_FAIL: 'Update author was failed!',
     UPDATE_AUTHOR_SUCCESS: 'Update author was success!',
     AUTHOR_NOT_FOUND: 'The author not found!',
+    LOAD_AUTHOR_DETAIL_FAIL: 'Load author detail was failed!',
   }
 });
