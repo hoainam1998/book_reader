@@ -85,7 +85,7 @@ class AuthorRouter extends Router {
     });
   }
 
-  @validation(AuthorDetail, { error_message: 'Getting author details failed!' })
+  @validation(AuthorDetail, { error_message: AUTHOR.LOAD_AUTHOR_DETAIL_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AuthorDetailResponse)
   _getAuthorDetail(req, res, next, self) {

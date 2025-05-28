@@ -1,14 +1,19 @@
 const DummyDataApi = require('./api');
 
-const mockData = {
+const mockData = Object.defineProperty({
   author_id: Date.now().toString(),
   name: 'author name',
   sex: 0,
   avatar: 'avatar',
   year_of_birth: 1900,
   year_of_dead: 2000,
-  story: `/html/author/${Date.now()}/author name.html, /json/author/${Date.now()}/author name.json`
-};
+}, 'story',
+  {
+    get() {
+      return `/html/author/${this.author_id}//${this.name}.html, /json/author/${this.author_id}/${this.name}.json`;
+    }
+  }
+);
 
 const requestData = {
   ...mockData,
@@ -33,6 +38,10 @@ class AuthorDummyData extends DummyDataApi {
       yearOfBirth: expect.any(Number),
       yearOfDead: expect.any(Number),
       story: expect.any(String),
+      storyFile: {
+        html: expect.any(String),
+        json: expect.any(String),
+      },
     });
   }
 }

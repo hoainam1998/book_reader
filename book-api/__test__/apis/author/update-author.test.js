@@ -1,4 +1,3 @@
-const fsPromise = require('fs/promises');
 const fs = require('fs');
 const path = require('path');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
@@ -17,27 +16,27 @@ const mockAuthor = AuthorDummyData.MockData;
 const mockRequestAuthor = AuthorDummyData.MockRequestData;
 
 describe('update author', () => {
-  // commonTest('update author api common test', [
-  //   {
-  //     name: 'url test',
-  //     describe: 'url is invalid',
-  //     url: `${PATH.BOOK}/unknown`,
-  //     method: METHOD.POST.toLowerCase(),
-  //   },
-  //   {
-  //     name: 'method test',
-  //     describe: 'method not allowed',
-  //     url: updateAuthorUrl,
-  //     method: METHOD.GET.toLowerCase(),
-  //   },
-  //   {
-  //     name: 'cors test',
-  //     describe: 'update author api cors',
-  //     url: updateAuthorUrl,
-  //     method: METHOD.POST.toLowerCase(),
-  //     origin: process.env.ORIGIN_CORS,
-  //   }
-  // ], 'update author common test');
+  commonTest('update author api common test', [
+    {
+      name: 'url test',
+      describe: 'url is invalid',
+      url: `${PATH.BOOK}/unknown`,
+      method: METHOD.POST.toLowerCase(),
+    },
+    {
+      name: 'method test',
+      describe: 'method not allowed',
+      url: updateAuthorUrl,
+      method: METHOD.GET.toLowerCase(),
+    },
+    {
+      name: 'cors test',
+      describe: 'update author api cors',
+      url: updateAuthorUrl,
+      method: METHOD.POST.toLowerCase(),
+      origin: process.env.ORIGIN_CORS,
+    }
+  ], 'update author common test');
 
   describe(createDescribeTest(METHOD.POST, updateAuthorUrl), () => {
     test('update author will be success', (done) => {
