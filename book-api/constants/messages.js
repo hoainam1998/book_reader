@@ -91,5 +91,8 @@ module.exports = deepFreeze({
   CATEGORY: {
     CREATE_CATEGORY_SUCCESS: 'Create category was success!',
     CREATE_CATEGORY_FAIL: 'Create category was failed!',
+    UPDATE_CATEGORY_SUCCESS: 'Update category was success!',
+    UPDATE_CATEGORY_FAIL: 'Update category was failed!',
+    CATEGORY_NOT_FOUND: 'The category not found!',
   }
 });

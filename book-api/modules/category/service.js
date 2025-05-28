@@ -47,16 +47,11 @@ class CategoryService extends Service {
   }
 
   update(category) {
-    const data = {
-      name: category.name,
-    };
-
-    if (category.avatar) {
-      data.avatar = category.avatar;
-    }
-
     return this.PrismaInstance.category.update({
-      data,
+      data: {
+        avatar: category.avatar,
+        name: category.name,
+      },
       where: {
         category_id: category.categoryId
       },

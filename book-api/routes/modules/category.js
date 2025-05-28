@@ -88,11 +88,11 @@ class CategoryRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(CategoryValidator, { groups: ['update'], error_message: 'Update category is not success!' })
+  @validation(CategoryValidator, { error_message: CATEGORY.UPDATE_CATEGORY_FAIL, groups: ['update'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _update(req, res, next, self) {
-    const query = `mutation UpdateCategory($category: CategoryInput) {
+    const query = `mutation UpdateCategory($category: CategoryInput!) {
       category {
         update (category: $category) {
           message
