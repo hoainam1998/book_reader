@@ -174,6 +174,7 @@ describe('author detail', () => {
     });
 
     test('get author detail failed with the request body is missing field', (done) => {
+      // missing authorId
       const badRequestBody = { ...requestBody };
       delete badRequestBody.authorId;
 

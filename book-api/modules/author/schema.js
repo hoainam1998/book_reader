@@ -151,8 +151,8 @@ const query = new GraphQLObjectType({
             list: [],
             total: 0
           };
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
-          throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
+          graphqlNotFoundErrorOption.response = response;
+          throw new GraphQLError(AUTHOR.AUTHORS_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(AuthorDTO, authors),

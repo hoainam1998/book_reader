@@ -31,7 +31,7 @@ class AuthorDummyData extends DummyDataApi {
       mockData,
       requestData,
       {
-      author_id: expect.any(String),
+      authorId: expect.any(String),
       name: expect.any(String),
       sex: expect.any(Number),
       avatar: expect.any(String),
@@ -44,6 +44,32 @@ class AuthorDummyData extends DummyDataApi {
       },
     });
   }
+
+  /**
+   * Create the expected author list.
+   *
+   * @static
+   * @param {object} requestBodyQuery - The request body query.
+   * @param {number} length - The number author create.
+   * @param {string[]} [excludeFields=[]] - The fields should remove.
+   * @return {object[]} - The expected author list.
+   */
+  static generateAuthorExpectedList(requestBodyQuery, length, excludeFields = []) {
+    return Array.apply(null, Array(length)).map(() => {
+      return AuthorDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
+    });
+  };
+
+  /**
+   * Create the author list for test.
+   *
+   * @static
+   * @param {number} length - The number of authors who want to create.
+   * @return {object[]} - The author list.
+   */
+  static createMockAuthorList (length) {
+    return Array.apply(null, Array(length)).map(() => AuthorDummyData.MockData);
+  };
 }
 
 module.exports = AuthorDummyData;
