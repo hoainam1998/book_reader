@@ -5,7 +5,7 @@ class CategoryService extends Service {
   create(category) {
     return this.PrismaInstance.category.create({
       data: {
-        category_id: category.categoryId,
+        category_id: Date.now().toString(),
         name: category.name,
         avatar: category.avatar
       },

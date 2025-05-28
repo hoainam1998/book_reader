@@ -23,9 +23,18 @@ const requestData = {
   },
 };
 
+/**
+ * The class store author data and behavior of them.
+ *
+ * @class
+ * @extends DummyDataApi
+ */
 class AuthorDummyData extends DummyDataApi {
   static default = new AuthorDummyData();
 
+  /**
+  * Create author dummy data instance.
+  */
   constructor() {
     super(
       mockData,
