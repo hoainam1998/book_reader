@@ -1,39 +1,38 @@
 const { ServerError } = require('#test/mocks/other-errors');
-const BookDummyData = require('#test/resources/dummy-data/book');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
+const AuthorDummyData = require('#test/resources/dummy-data/author');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
-const { USER, BOOK, COMMON } = require('#messages');
+const { USER, AUTHOR, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const paginationUrl = `${PATH.BOOK}/pagination`;
-const bookLength = 2;
+const paginationUrl = `${PATH.AUTHOR}/pagination`;
+const authorLength = 2;
 
-BookDummyData.ExpectedTypes = Object.assign(BookDummyData.ExpectedTypes, { introduce: expect.any(String) });
+AuthorDummyData.ExpectedTypes = Object.assign(AuthorDummyData.ExpectedTypes, { storyFile: expect.any(String) });
 
 const requestBody = {
   query: {
-    bookId: true,
+    authorId: true,
     name: true,
-    pdf: true,
-    publishedTime: true,
-    publishedDay: true,
-    category: true,
-    introduce: true,
+    sex: true,
     avatar: true,
+    storyFile: true,
+    yearOfBirth: true,
+    yearOfDead: true,
   },
   pageSize: 10,
   pageNumber: 1,
 };
 
-describe('book pagination', () => {
-  commonTest('book pagination api common test', [
+describe('author pagination', () => {
+  commonTest('author pagination api common test', [
     {
       name: 'url test',
       describe: 'url is invalid',
-      url: `${PATH.BOOK}/unknown`,
+      url: `${PATH.AUTHOR}/unknown`,
       method: METHOD.POST.toLowerCase(),
     },
     {
@@ -44,179 +43,130 @@ describe('book pagination', () => {
     },
     {
       name: 'cors test',
-      describe: 'book pagination api cors',
+      describe: 'author pagination api cors',
       url: paginationUrl,
       method: METHOD.POST.toLowerCase(),
       origin: process.env.ORIGIN_CORS,
     }
-  ], 'book pagination common test');
+  ], 'author pagination common test');
 
   describe(createDescribeTest(METHOD.POST, paginationUrl), () => {
-    test('book pagination success', (done) => {
+    test('author pagination success', (done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        BookDummyData.createMockBookList(bookLength),
-        bookLength,
+        AuthorDummyData.createMockAuthorList(authorLength),
+        authorLength,
       ]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const bookListExpected = BookDummyData.generateBookExpectedList(requestBody.query, bookLength);
+      const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
             .expect(HTTP_CODE.OK)
             .expect('Content-Type', /application\/json/)
-            .send(requestBody)
             .then((response) => {
               const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                   select: selectExpected,
                   orderBy: {
-                    book_id: 'desc'
+                    author_id: 'desc'
                   },
                   take: requestBody.pageSize,
                   skip: offset
                 })
               );
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
-                list: bookListExpected,
-                total: bookLength,
+                list: authorListExpected,
+                total: authorLength,
               });
               done();
             });
         });
     });
 
-    test('book pagination success with search key', (done) => {
-      const requestBodyWithKeyValue = {
+    test('author pagination success with search key', (done) => {
+      const requestBodyWithSearchKey = {
         ...requestBody,
-        keyword: 'book name'
+        keyword: 'author name',
       };
 
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        BookDummyData.createMockBookList(bookLength),
-        bookLength,
+        AuthorDummyData.createMockAuthorList(authorLength),
+        authorLength,
       ]);
-
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const bookListExpected = BookDummyData.generateBookExpectedList(requestBodyWithKeyValue.query, bookLength);
+      const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
             .set('authorization', authenticationToken)
             .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBodyWithSearchKey)
             .expect(HTTP_CODE.OK)
             .expect('Content-Type', /application\/json/)
-            .send(requestBodyWithKeyValue)
             .then((response) => {
               const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                   select: selectExpected,
                   where: {
                     name: {
-                      contains: requestBodyWithKeyValue.keyword
+                      contains: requestBodyWithSearchKey.keyword
                     }
                   },
                   orderBy: {
-                    book_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset,
-                })
-              );
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  where: {
-                    name: {
-                      contains: requestBodyWithKeyValue.keyword
-                    }
-                  }
-                })
-              );
-              expect(response.body).toEqual({
-                list: bookListExpected,
-                total: bookLength,
-              });
-              done();
-            });
-        });
-    });
-
-    test('book pagination failed books are empty', (done) => {
-      globalThis.prismaClient.$transaction.mockResolvedValue([
-        [],
-        0,
-      ]);
-      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-
-      expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(paginationUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.NOT_FOUND)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
-              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  orderBy: {
-                    book_id: 'desc'
+                    author_id: 'desc'
                   },
                   take: requestBody.pageSize,
                   skip: offset
                 })
               );
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledWith({
+                where: {
+                  name: {
+                    contains: requestBodyWithSearchKey.keyword
+                  }
+                },
+              });
               expect(response.body).toEqual({
-                list: [],
-                total: 0,
+                list: authorListExpected,
+                total: authorLength,
               });
               done();
             });
         });
     });
 
-    test('book pagination failed authentication token unset', (done) => {
-      expect.hasAssertions();
+    test('author pagination failed with authentication token unset', (done) => {
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .expect('Content-Type', /application\/json/)
-            .send(requestBody)
             .then((response) => {
               expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.USER_UNAUTHORIZED,
                 errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -226,21 +176,20 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed session expired', (done) => {
-      expect.hasAssertions();
+    test('author pagination failed with session expired', (done) => {
       destroySession()
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .expect('Content-Type', /application\/json/)
-            .send(requestBody)
             .then((response) => {
               expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.WORKING_SESSION_EXPIRE,
                 errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -250,23 +199,63 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed with request body are empty', (done) => {
-      expect.hasAssertions();
+    test('author pagination failed with authors are empty', (done) => {
+      globalThis.prismaClient.$transaction.mockResolvedValue([
+        [],
+        0,
+      ]);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
+            .expect(HTTP_CODE.NOT_FOUND)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
+              const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  select: selectExpected,
+                  orderBy: {
+                    author_id: 'desc'
+                  },
+                  take: requestBody.pageSize,
+                  skip: offset
+                })
+              );
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
+              expect(response.body).toEqual({
+                list: [],
+                total: 0
+              });
+              done();
+            });
+        });
+    });
+
+    test('author pagination failed with request body are empty', (done) => {
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(paginationUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
             .expect(HTTP_CODE.BAD_REQUEST)
             .expect('Content-Type', /application\/json/)
-            .send({})
             .then((response) => {
               expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
                 errors: [COMMON.REQUEST_DATA_EMPTY]
               });
               done();
@@ -274,29 +263,26 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed with request body are missing field', (done) => {
+    test('author pagination failed with request body is missing field', (done) => {
       // missing query field.
-      const badRequestBody = {
-        pageSize: requestBody.pageSize,
-        pageNumber: requestBody.pageNumber,
-      };
+      const badRequestBody = { ...requestBody };
+      delete badRequestBody.query;
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(badRequestBody)
             .expect(HTTP_CODE.BAD_REQUEST)
             .expect('Content-Type', /application\/json/)
-            .send(badRequestBody)
             .then((response) => {
               expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
                 errors: expect.any(Array),
               });
               expect(response.body.errors).toHaveLength(1);
@@ -305,27 +291,26 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed with undefine request body field', (done) => {
-      // search is undefine field
-      const undefineField = 'search';
-      const badRequestBody = { ...requestBody, [undefineField]: '' };
+    test('author pagination failed with undefine request body field', (done) => {
+      // authorId is undefine field
+      const undefineField = 'authorId';
+      const badRequestBody = { ...requestBody, [undefineField]: Date.now().toString() };
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(badRequestBody)
             .expect(HTTP_CODE.BAD_REQUEST)
             .expect('Content-Type', /application\/json/)
-            .send(badRequestBody)
             .then((response) => {
               expect(globalThis.prismaClient.$transaction).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.findMany).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.count).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
                 errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
               });
               done();
@@ -333,90 +318,80 @@ describe('book pagination', () => {
         });
     });
 
-    test('book pagination failed with output validate error', (done) => {
+    test('author pagination failed with output validate error', (done) => {
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       globalThis.prismaClient.$transaction.mockResolvedValue([
-        BookDummyData.createMockBookList(bookLength),
-        bookLength,
+        AuthorDummyData.createMockAuthorList(authorLength),
+        authorLength,
       ]);
-
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
-        () => GraphqlResponse.dto.parse({
-          data: {
-            list: [],
-            total: 0,
-          }
-        })
-      );
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
             .expect(HTTP_CODE.BAD_REQUEST)
             .expect('Content-Type', /application\/json/)
-            .send(requestBody)
             .then((response) => {
               const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                   select: selectExpected,
                   orderBy: {
-                    book_id: 'desc'
+                    author_id: 'desc'
                   },
                   take: requestBody.pageSize,
                   skip: offset
                 })
               );
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
-                message: COMMON.OUTPUT_VALIDATE_FAIL,
+                message: COMMON.OUTPUT_VALIDATE_FAIL
               });
               done();
             });
         });
     });
 
-    test('book pagination failed with server error', (done) => {
+    test('author pagination failed with server error', (done) => {
       globalThis.prismaClient.$transaction.mockRejectedValue(ServerError);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
-      expect.hasAssertions();
       signedTestCookie(sessionData.user)
         .then((responseSign) => {
           globalThis.api
             .post(paginationUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(requestBody)
             .expect(HTTP_CODE.SERVER_ERROR)
             .expect('Content-Type', /application\/json/)
-            .send(requestBody)
             .then((response) => {
               const selectExpected = parseToPrismaSelect.mock.results[0].value;
               const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
                 expect.objectContaining({
                   select: selectExpected,
                   orderBy: {
-                    book_id: 'desc'
+                    author_id: 'desc'
                   },
                   take: requestBody.pageSize,
                   skip: offset
                 })
               );
-              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
-                message: COMMON.INTERNAL_ERROR_MESSAGE,
+                message: COMMON.INTERNAL_ERROR_MESSAGE
               });
               done();
             });
