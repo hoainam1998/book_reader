@@ -71,12 +71,12 @@ const mutation = new GraphQLObjectType({
     },
     update: {
       ...CATEGORY_MUTATION_DECLARE,
-      resolve: async (category, args) => {
+      resolve: async (service, { category }) => {
         return handleResolveResult(async () => {
-          await category.update(args.category);
-          return messageCreator('Update category success!');
+          await service.update(category);
+          return messageCreator(CATEGORY.UPDATE_CATEGORY_SUCCESS);
         }, {
-          RECORD_NOT_FOUND: 'Category not found!'
+          RECORD_NOT_FOUND: CATEGORY.CATEGORY_NOT_FOUND,
         });
       }
     }
