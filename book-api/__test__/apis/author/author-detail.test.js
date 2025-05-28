@@ -166,7 +166,7 @@ describe('author detail', () => {
               expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: getInputValidateMessage(AUTHOR.LOAD_AUTHOR_DETAIL_FAIL),
-                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format('authorIds'))]),
+                errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
               });
               done();
             });
