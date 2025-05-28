@@ -6,6 +6,7 @@ const { CategoryPagination, CategoryValidator, CategoryDeleteParamsValidator } =
 const { CategoryPaginationResponse, CategoryDetailResponse, AllCategoryResponse } = require('#dto/category/category-out');
 const { CategoryDetailValidator, AllCategory } = require('#dto/category/category-in');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
+const { CATEGORY } = require('#messages');
 
 /**
  * Organize category routes.
@@ -68,11 +69,11 @@ class CategoryRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(CategoryValidator, { groups: ['create'] })
+  @validation(CategoryValidator, { error_message: CATEGORY.CREATE_CATEGORY_FAIL , groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _create(req, res, next, self) {
-    const query = `mutation CreateCategory($category: CategoryInput) {
+    const query = `mutation CreateCategory($category: CategoryInput!) {
       category {
         create (category:$category) {
           message
@@ -80,7 +81,6 @@ class CategoryRouter extends Router {
       }
     }`;
     const variables = {
-      categoryId: Date.now(),
       name: req.body.name,
       avatar: req.body.avatar
     };

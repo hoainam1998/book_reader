@@ -9,13 +9,13 @@ const {
   GraphQLBoolean,
   GraphQLNonNull
 } = require('graphql');
-const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const { plainToInstance } = require('class-transformer');
-const { graphqlErrorOption, graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
+const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const { CategoriesDTO, CategoryDTO } = require('#dto/category/category');
 const PaginationResponse = require('#dto/common/pagination-response');
+const { CATEGORY } = require('#messages');
 
 const CATEGORY_TYPE = new GraphQLObjectType({
   name: 'Category',
@@ -42,10 +42,10 @@ const CATEGORY_INPUT_TYPE = new GraphQLInputObjectType({
       type: GraphQLID
     },
     name: {
-      type: GraphQLString
+      type: new GraphQLNonNull(GraphQLString)
     },
     avatar: {
-      type: GraphQLString
+      type: new GraphQLNonNull(GraphQLString)
     }
   },
 });
@@ -54,7 +54,7 @@ const CATEGORY_MUTATION_DECLARE = {
   type: ResponseType,
   args: {
     category: {
-      type: CATEGORY_INPUT_TYPE
+      type: new GraphQLNonNull(CATEGORY_INPUT_TYPE),
     }
   }
 };
@@ -64,9 +64,9 @@ const mutation = new GraphQLObjectType({
   fields: {
     create: {
       ...CATEGORY_MUTATION_DECLARE,
-      resolve: async (category, args) => {
-        await category.create(args.category);
-        return messageCreator('Create category success!');
+      resolve: async (service, { category }) => {
+        await service.create(category);
+        return messageCreator(CATEGORY.CREATE_CATEGORY_SUCCESS);
       }
     },
     update: {

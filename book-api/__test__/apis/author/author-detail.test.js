@@ -8,7 +8,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { AUTHOR, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
-const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
+const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const authorDetailUrl = `${PATH.AUTHOR}/detail`;
 
 const mockAuthor = AuthorDummyData.MockData;

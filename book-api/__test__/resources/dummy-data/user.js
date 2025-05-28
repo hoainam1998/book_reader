@@ -12,9 +12,6 @@ class UserDummyData extends DummyDataApi {
 
   /**
    * Create user dummy data instance.
-   *
-   * @param {object} mockData - The mocking data.
-   * @param {object} expectedTypes - Expected type of mock data.
    */
   constructor() {
     super(

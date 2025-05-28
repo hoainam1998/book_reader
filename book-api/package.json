@@ -56,7 +56,9 @@
     "test.author.detail": "npm run test.requirement -- __test__/apis/author/author-detail.test.js",
     "test.author.detail.silent": "npm run test.requirement -- __test__/apis/author/author-detail.test.js --silent",
     "test.author.pagination": "npm run test.requirement -- __test__/apis/author/pagination.test.js",
-    "test.author.pagination.silent": "npm run test.requirement -- __test__/apis/author/pagination.test.js --silent"
+    "test.author.pagination.silent": "npm run test.requirement -- __test__/apis/author/pagination.test.js --silent",
+    "test.category.create-category": "npm run test.requirement -- __test__/apis/category/create-category.test.js",
+    "test.category.create-category.silent": "npm run test.requirement -- __test__/apis/category/create-category.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",
