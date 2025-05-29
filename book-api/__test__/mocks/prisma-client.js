@@ -32,6 +32,9 @@ module.exports = jest.mock('#services/prisma-client', () => ({
   category: {
     create: jest.fn().mockResolvedValue(),
     update: jest.fn().mockResolvedValue(),
+    findMany: jest.fn().mockResolvedValue(),
+    count: jest.fn().mockResolvedValue(),
+    findUniqueOrThrow: jest.fn().mockResolvedValue(),
   },
   $transaction: jest.fn().mockResolvedValue(),
 }));

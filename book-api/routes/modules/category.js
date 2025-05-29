@@ -75,7 +75,7 @@ class CategoryRouter extends Router {
   _create(req, res, next, self) {
     const query = `mutation CreateCategory($category: CategoryInput!) {
       category {
-        create (category:$category) {
+        create (category: $category) {
           message
         }
       }
@@ -107,7 +107,7 @@ class CategoryRouter extends Router {
     return self.execute(query, { category: variables });
   }
 
-  @validation(CategoryDetailValidator, { error_message: 'Get category detail failed.' })
+  @validation(CategoryDetailValidator, { error_message: CATEGORY.LOAD_CATEGORY_DETAIL_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(CategoryDetailResponse)
   _getDetail(req, res, next, self) {
