@@ -3,7 +3,7 @@ const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/librar
 const {
   graphqlErrorOption,
   graphqlNotFoundErrorOption,
-  graphqlUnauthorizedErrorOption
+  graphqlUnauthorizedErrorOption,
 } = require('../modules/common-schema');
 
 /*
@@ -13,6 +13,7 @@ const PRISMA_ERROR_CODE = Object.freeze({
   RECORD_NOT_FOUND: 'P2025',
   UNIQUE_DUPLICATE: 'P2002',
   UNAUTHORIZED: 'P2025',
+  FOREIGN_KEY_CONFLICT: 'P2003',
 });
 
 /**
@@ -49,6 +50,9 @@ const handleError = (err, messages, errorCodes) => {
       case PRISMA_ERROR_CODE.UNIQUE_DUPLICATE:
         message = messages['UNIQUE_DUPLICATE'] || 'Data is duplicate!';
         throw new GraphQLError(message, graphqlErrorOption);
+      case PRISMA_ERROR_CODE.FOREIGN_KEY_CONFLICT:
+        message = messages['FOREIGN_KEY_CONFLICT'] || 'Can not delete this record!';
+        throw new  GraphQLError(message, graphqlErrorOption);
       default:
         throw new GraphQLError(err.meta.cause, graphqlErrorOption);
     }

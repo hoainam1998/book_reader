@@ -152,12 +152,13 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID)
         }
       },
-      resolve: async (category, { categoryId }) => {
+      resolve: async (service, { categoryId }) => {
         return handleResolveResult(async () => {
-          await category.delete(categoryId);
-          return messageCreator('Delete category success!');
+          await service.delete(categoryId);
+          return messageCreator(CATEGORY.DELETE_CATEGORY_SUCCESS);
         }, {
-          RECORD_NOT_FOUND: 'Category not found!'
+          RECORD_NOT_FOUND: CATEGORY.CATEGORY_NOT_FOUND,
+          FOREIGN_KEY_CONFLICT: CATEGORY.CATEGORY_USED,
         });
       }
     }

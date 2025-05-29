@@ -121,8 +121,11 @@ class CategoryRouter extends Router {
     return self.execute(query, { categoryId: req.body.categoryId }, req.body.query);
   }
 
-  @validation(CategoryDeleteParamsValidator, { request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM })
-  @validateResultExecute(HTTP_CODE.CREATED)
+  @validation(CategoryDeleteParamsValidator, {
+    error_message: CATEGORY.DELETE_CATEGORY_FAIL,
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM
+  })
+  @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _delete(req, res, next, self) {
     const query = `query DeleteCategory($categoryId: ID!) {

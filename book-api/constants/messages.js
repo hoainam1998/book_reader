@@ -97,5 +97,8 @@ module.exports = deepFreeze({
     LOAD_CATEGORY_DETAIL_FAIL: 'Load category detail was failed!',
     CATEGORIES_EMPTY: 'Categories are empty!',
     LOAD_CATEGORIES_FAIL: 'Loading categories was failed!',
+    DELETE_CATEGORY_FAIL: 'Delete category was failed!',
+    CATEGORY_USED: 'The category is already used!',
+    DELETE_CATEGORY_SUCCESS: 'Delete category was success!',
   }
 });
