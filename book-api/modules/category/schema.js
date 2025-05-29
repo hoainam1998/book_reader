@@ -137,11 +137,11 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
         }
       },
-      resolve: async (category, { categoryId }, context) => {
+      resolve: async (service, { categoryId }, context) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(CategoryDTO, await category.detail(categoryId, context));
+          return convertDtoToZodObject(CategoryDTO, await service.detail(categoryId, context));
         }, {
-          RECORD_NOT_FOUND: 'Category not found!'
+          RECORD_NOT_FOUND: CATEGORY.CATEGORY_NOT_FOUND,
         });
       }
     },
