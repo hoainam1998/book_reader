@@ -102,7 +102,7 @@ class AuthorRouter extends Router {
     req.body.query);
   }
 
-  @validation(AuthorPagination, { error_message: AUTHOR.LOAD_BOOKS_FAIL })
+  @validation(AuthorPagination, { error_message: AUTHOR.LOAD_AUTHORS_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AuthorPaginationResponse)
   _pagination(req, res, next, self) {

@@ -255,7 +255,7 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_AUTHORS_FAIL),
                 errors: [COMMON.REQUEST_DATA_EMPTY]
               });
               done();
@@ -282,7 +282,7 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_AUTHORS_FAIL),
                 errors: expect.any(Array),
               });
               expect(response.body.errors).toHaveLength(1);
@@ -310,7 +310,7 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.author.count).not.toHaveBeenCalled();
               expect(response.body).toEqual({
-                message: getInputValidateMessage(AUTHOR.LOAD_BOOKS_FAIL),
+                message: getInputValidateMessage(AUTHOR.LOAD_AUTHORS_FAIL),
                 errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
               });
               done();
