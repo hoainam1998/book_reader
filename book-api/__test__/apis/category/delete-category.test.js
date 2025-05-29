@@ -194,7 +194,7 @@ describe('delete category', () => {
               .expect(status)
               .expect('Content-Type', /application\/json/)
               .then((response) => {
-              expect(globalThis.prismaClient.category.delete).toHaveBeenCalledTimes(1);
+                expect(globalThis.prismaClient.category.delete).toHaveBeenCalledTimes(1);
                 expect(globalThis.prismaClient.category.delete).toHaveBeenCalledWith({
                   where: {
                     category_id: mockRequestCategory.category_id,
