@@ -44,7 +44,7 @@ class CategoryRouter extends Router {
     return self.execute(query, undefined, req.body.query);
   }
 
-  @validation(CategoryPagination, { error_message: 'Load categories failed!' })
+  @validation(CategoryPagination, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(CategoryPaginationResponse)
   _pagination(req, res, next, self) {

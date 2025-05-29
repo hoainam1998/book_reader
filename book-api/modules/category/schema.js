@@ -117,15 +117,15 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLInt)
         }
       },
-      resolve: async (category, { pageNumber, pageSize }) => {
-        const [categories, total] = await category.pagination(pageSize, pageNumber);
+      resolve: async (service, { pageNumber, pageSize }) => {
+        const [categories, total] = await service.pagination(pageSize, pageNumber);
         const response = convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(CategoriesDTO, categories),
           total: parseInt(total || 0)
         });
         if (categories.length === 0) {
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response };
-          throw new GraphQLError('Categories not found!', graphqlNotFoundErrorOption);
+          graphqlNotFoundErrorOption.response = response;
+          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
         }
         return response;
       }
