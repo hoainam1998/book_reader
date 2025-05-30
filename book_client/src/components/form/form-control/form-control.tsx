@@ -79,7 +79,12 @@ function FormControl({
         {children}
       </GridItem>
       <GridItem lg={12} className="error-feedback">
-        { errors.map((error, index) => <span key={index}>{error}</span>) }
+        { errors.map((error, index) => (
+          <>
+            <span key={index}>{error}</span>
+            <br/>
+          </>
+        )) }
       </GridItem>
     </fieldset>
   );
