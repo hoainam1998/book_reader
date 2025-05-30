@@ -10,7 +10,7 @@ import { OptionPrototype } from 'components/form/form-control/form-control';
 import Radio from 'components/form/form-control/radio/radio';
 import Editor from 'components/editor/editor';
 import useForm, { RuleType } from 'hooks/useForm';
-import { required, matchPattern, maxLength } from 'hooks/useValidate';
+import { required, matchPattern, maxLength, lessThanOrEqual, greaterThan } from 'hooks/useValidate';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import { showToast, convertBase64ToSingleFile, getJsonFileContent } from 'utils';
@@ -43,7 +43,12 @@ const rules: RuleType<AuthorStateType> = {
   sex: { required },
   avatar: { required },
   yearOfBirth: { required, matchPattern: matchPattern(/^[1-2][0-9]{3}$/) },
-  yearOfDead: { required, matchPattern: matchPattern(/^[1-2][0-9]{3}$/) },
+  yearOfDead: {
+    required,
+    matchPattern: matchPattern(/^[1-2][0-9]{3}$/),
+    lessThanOrEqual: lessThanOrEqual(new Date().getFullYear()),
+    greaterThan: greaterThan('yearOfBirth'),
+  },
   story: { required }
 };
 
