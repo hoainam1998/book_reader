@@ -34,13 +34,14 @@ export default function (
       const subUrl = args[0];
       args[0] = request.BaseUrl ? `${request.BaseUrl}/${subUrl}` : subUrl;
       if (keepAlive) {
-        return originalMethod.apply(this, args).catch((error: AxiosError) => {
-          if (shouldResolveError(error) && notFoundAllowed) {
-            return error.response;
-          } else {
-            throw error;
-          }
-        });
+        return originalMethod.apply(this, args)
+          .catch((error: AxiosError) => {
+            if (shouldResolveError(error) && notFoundAllowed) {
+              return error.response;
+            } else {
+              throw error;
+            }
+          });
       }
       return new SilentPromise((resolve, reject, final) => {
         originalMethod.apply(this, args)

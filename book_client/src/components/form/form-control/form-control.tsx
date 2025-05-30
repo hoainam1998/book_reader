@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {
   JSX,
   ReactElement,
@@ -9,6 +8,7 @@ import {
   ReactNode,
   useImperativeHandle,
   CSSProperties,
+  Fragment,
 } from 'react';
 import { GridItem } from 'components/grid/grid';
 import { clsx } from 'utils';
@@ -80,10 +80,10 @@ function FormControl({
       </GridItem>
       <GridItem lg={12} className="error-feedback">
         { errors.map((error, index) => (
-          <>
-            <span key={index}>{error}</span>
+          <Fragment key={index}>
+            <span>{error}</span>
             <br/>
-          </>
+          </Fragment>
         )) }
       </GridItem>
     </fieldset>

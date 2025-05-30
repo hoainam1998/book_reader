@@ -1,7 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { CategoryService, BookService, AuthorService, RequestBody, IQueryType } from 'services';
-import { handleNotfoundApiError } from 'utils';
 
 const loadAllCategory = (): Promise<AxiosResponse> => {
   return CategoryService.post('all', {
@@ -47,7 +46,7 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
 
   return BookService.post('detail', {
     query: select,
-    bookId
+    bookId,
   });
 };
 
@@ -122,23 +121,21 @@ const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse>
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
   const keyword: string | null = url.searchParams.get('keyword');
 
-  return handleNotfoundApiError(
-    BookService.post('pagination', {
-      query: {
-        bookId: true,
-        name: true,
-        pdf: true,
-        publishedTime: true,
-        publishedDay: true,
-        category: true,
-        introduce: true,
-        avatar: true
-      },
-      pageSize,
-      pageNumber,
-      keyword
-    })
-  );
+  return BookService.KeepAlive.NotFoundAccepted.post('pagination', {
+    query: {
+      bookId: true,
+      name: true,
+      pdf: true,
+      publishedTime: true,
+      publishedDay: true,
+      category: true,
+      introduce: true,
+      avatar: true
+    },
+    pageSize,
+    pageNumber,
+    keyword
+  });
 };
 
 export {

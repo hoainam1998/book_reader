@@ -2,17 +2,9 @@ import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { UserService, RequestBody } from 'services';
 import { UserType } from 'interfaces';
-import { showToast } from 'utils';
-
-export const handlePromise = (promise: Promise<AxiosResponse>): Promise<AxiosResponse> => {
-  return promise.then((res) => {
-    showToast('User', res.data?.message);
-    return res;
-  });
-};
 
 export const addUser = (user: UserType): Promise<AxiosResponse> => {
-  return handlePromise(UserService.post('create-user', user));
+  return UserService.post('create-user', user);
 };
 
 export const updateMfaState = (userId: string, mfaEnable: boolean): Promise<AxiosResponse> => {
@@ -32,7 +24,7 @@ export const updatePower = (userId: string, power: boolean): Promise<AxiosRespon
 };
 
 export const deleteUser = (userId: string): Promise<AxiosResponse> => {
-  return handlePromise(UserService.delete(`delete-user/${userId}`));
+  return UserService.delete(`delete-user/${userId}`);
 };
 
 export const updateUser = (user: UserType): Promise<AxiosResponse> => {

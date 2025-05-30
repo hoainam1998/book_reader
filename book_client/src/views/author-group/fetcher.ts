@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { AuthorService } from 'services';
-import { handleNotfoundApiError, showToast } from 'utils';
+import { showToast } from 'utils';
 import path from 'router/paths';
 
 export const authorPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {
@@ -10,22 +10,20 @@ export const authorPagination = ({ request }: LoaderFunctionArgs): Promise<Axios
   const pageNumber: number = parseInt(url.searchParams.get('pageNumber') || '1');
   const keyword: string | null = url.searchParams.get('keyword');
 
-  return handleNotfoundApiError(
-    AuthorService.post('pagination', {
-      query: {
-        authorId: true,
-        name: true,
-        sex: true,
-        avatar: true,
-        storyFile: true,
-        yearOfBirth: true,
-        yearOfDead: true,
-      },
-      pageSize,
-      pageNumber,
-      keyword
-    })
-  );
+  return AuthorService.KeepAlive.NotFoundAccepted.post('pagination', {
+    query: {
+      authorId: true,
+      name: true,
+      sex: true,
+      avatar: true,
+      storyFile: true,
+      yearOfBirth: true,
+      yearOfDead: true
+    },
+    pageSize,
+    pageNumber,
+    keyword
+  });
 };
 
 export const createAuthor = (formData: FormData): Promise<AxiosResponse> => {
@@ -52,7 +50,7 @@ export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosR
       },
     },
   }).catch((err) => {
-    showToast('Author detail', err.response.data.message);
+    showToast('Author detail!', err.response.data.message);
     return redirect(`${path.HOME}/${path.AUTHOR}`);
   });
 };
