@@ -18,11 +18,11 @@ export const createCategory = (formData: FormData): Promise<AxiosResponse> => {
 };
 
 export const updateCategory = (formData: FormData): Promise<AxiosResponse> => {
-  return CategoryService.put('update', formData);
+  return CategoryService.NotFoundAccepted.put('update', formData);
 };
 
 export const deleteCategory = (categoryId: string): Promise<AxiosResponse> => {
-  return CategoryService.delete(`delete/${categoryId}`);
+  return CategoryService.NotFoundAccepted.delete(`delete/${categoryId}`);
 };
 
 export const loadInitCategory = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse> => {

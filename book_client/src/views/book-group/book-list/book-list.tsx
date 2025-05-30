@@ -64,7 +64,7 @@ let _pageSize: number = 10;
 
 function BookList(): JSX.Element {
   const fetcher = useFetcher();
-  const loaderData = useLoaderData() as unknown;
+  const loaderData = useLoaderData() as AxiosResponse;
   const navigate = useNavigate();
 
   const books = useMemo<BookType[]>(() => {
@@ -72,14 +72,14 @@ function BookList(): JSX.Element {
       return fetcher.data.data.list;
     }
     return (loaderData as AxiosResponse).data.list || [];
-  }, [fetcher.data]);
+  }, [fetcher.data, loaderData.data]);
 
   const total = useMemo<number>(() => {
     if (fetcher.data) {
       return fetcher.data.data.total;
     }
     return (loaderData as AxiosResponse).data.total || 0;
-  }, [fetcher.data]);
+  }, [fetcher.data, loaderData.data]);
 
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
     const { bookId } = slotProp;

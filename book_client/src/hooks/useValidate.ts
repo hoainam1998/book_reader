@@ -153,7 +153,6 @@ export const notSameWith: ValidateFunction =
 export const lessThanOrEqual: ValidateFunction =
   (...args) =>
   <T>(currentValue: any, state: T, field: string) => {
-    console.log(field);
     const valueCompare: number = args[0] as number;
     const message: string = args[1] ? args[1] as string : '';
 
