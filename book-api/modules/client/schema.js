@@ -14,7 +14,9 @@ const { compare } = require('bcrypt');
 const ClientDTO = require('#dto/client/client');
 const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
+const ForgetPassword = require('#dto/client/forget-password');
 const handleResolveResult = require('#utils/handle-resolve-result');
+const { READER } = require('#messages');
 
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
@@ -66,21 +68,34 @@ const mutation = new GraphQLObjectType({
       }
     },
     forgetPassword: {
-      type: ResponseType,
+      type: new GraphQLObjectType({
+        name: 'ForgetPasswordInputType',
+        fields: {
+          message: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          password: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          resetPasswordToken: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+        },
+      }),
       args: {
         email: {
           type: new GraphQLNonNull(GraphQLString)
         },
-        passwordResetToken: {
-          type: new GraphQLNonNull(GraphQLString)
-        },
       },
-      resolve: async (service, { email, passwordResetToken }) => {
+      resolve: async (service, { email}) => {
         return handleResolveResult(async () => {
-          await service.forgetPassword(email, passwordResetToken);
-          return messageCreator('Reset password link already sent to your email!');
+          const reader = await service.forgetPassword(email);
+          return convertDtoToZodObject(
+            ForgetPassword,
+            Object.assign(reader, messageCreator(READER.SEND_RESET_PASSWORD_SUCCESS))
+            );
         }, {
-          RECORD_NOT_FOUND: 'Email not found!'
+          RECORD_NOT_FOUND: READER.EMAIL_NOT_FOUND,
         });
       }
     },

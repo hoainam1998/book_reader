@@ -70,22 +70,6 @@ class EmailService {
   }
 
   /**
-  * Sending email contain reset password link.
-  * @static
-  * @param {string} email - The receiver.
-  * @param {string} link - The reset password link.
-  * @return {Promise} - The email sent result.
-  */
-  static sendResetPasswordEmail(email, link) {
-    const subject = 'Reset password';
-    const html = `
-      <h3>Click this link to navigate to reset password page</h3>
-      <a href=${link} target="_blank">${link}</a>
-    `;
-    return this.self._sendEmail(email, subject, html);
-  }
-
-  /**
   * Sending email contain new password and reset password link.
   * @static
   * @param {string} email - The receiver.

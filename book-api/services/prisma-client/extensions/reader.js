@@ -1,4 +1,3 @@
-const { sign } = require('jsonwebtoken');
 const { compare } = require('bcrypt');
 const { passwordHashing } = require('#utils');
 
@@ -12,15 +11,10 @@ module.exports = (prisma) => {
   return {
     create: async ({ args, query }) => {
       const password = await passwordHashing(args.data.password);
-      const token = sign(
-        { email: args.data.email },
-        process.env.CLIENT_LOGIN_SECRET_KEY
-      );
 
       args.data = {
         ...args.data,
         password,
-        login_token: token,
         reader_id: Date.now().toString(),
       };
 
@@ -33,13 +27,6 @@ module.exports = (prisma) => {
           email: args.where.email
         }
       });
-
-      if (args.data.email && args.data.email !== oldUser.email) {
-        args.data.email = sign(
-          { email: args.data.email },
-          process.env.CLIENT_LOGIN_SECRET_KEY
-        );
-      }
 
       if (args.data.password) {
         if (!await compare(args.data.password, oldUser.password)) {

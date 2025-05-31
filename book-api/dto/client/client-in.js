@@ -32,11 +32,6 @@ const ForgetPassword = (validators, className) => {
       IsEmail('email invalid!')
     )
     email;
-
-    @validators(
-      IsString('resetToken must be a string!')
-    )
-    resetToken;
   }, className);
 };
 

@@ -100,5 +100,10 @@ module.exports = deepFreeze({
     DELETE_CATEGORY_FAIL: 'Delete category was failed!',
     CATEGORY_USED: 'The category is already used!',
     DELETE_CATEGORY_SUCCESS: 'Delete category was success!',
+  },
+  READER: {
+    SEND_RESET_PASSWORD_SUCCESS: 'Reset password link already sent to your email!',
+    EMAIL_NOT_FOUND: 'The email not found!',
+    GENERATE_RESET_PASSWORD_FAIL: 'Generate reset password was failed!',
   }
 });

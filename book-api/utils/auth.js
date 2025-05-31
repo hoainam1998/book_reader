@@ -20,9 +20,17 @@ const signingResetPasswordToken = (email, expires = '1h') => {
  * Verify reset password token.
  *
  * @param {string} resetPasswordToken - The reset password token.
- * @return {boolean} - The verify result.
+ * @return {object} - The verify result.
  */
 const verifyResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
+
+/**
+ * Verify client reset password token.
+ *
+ * @param {string} resetPasswordToken - The reset password token.
+ * @return {object} - The verify result.
+ */
+const verifyClientResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswordToken, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY);
 
 /**
  * Signing login token with payload is email and userId.
@@ -34,10 +42,18 @@ const verifyResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswor
 const signLoginToken = (userId, email, power) => jwt.sign({ userId, email, power }, process.env.SECRET_KEY, { expiresIn: '1h' });
 
 /**
+ * Signing client reset password token.s
+ *
+ * @param {string} email - An email register.
+ * @return {string} - The client reset password token.
+ */
+const signClientResetPasswordToken = (email) => jwt.sign({ email }, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY, { expiresIn: '1h' });
+
+/**
  * Verify login token.
  *
  * @param {string} loginToken - The login token.
- * @return {string} - The data decoded.
+ * @return {object} - The data decoded.
  */
 const verifyLoginToken = (loginToken) => jwt.verify(loginToken, process.env.SECRET_KEY);
 
@@ -84,10 +100,12 @@ const generateOtp = () => {
 
 module.exports = {
   signingResetPasswordToken,
+  signClientResetPasswordToken,
   passwordHashing,
   autoGeneratePassword,
   generateOtp,
   verifyResetPasswordToken,
+  verifyClientResetPasswordToken,
   signLoginToken,
   verifyLoginToken,
 };
