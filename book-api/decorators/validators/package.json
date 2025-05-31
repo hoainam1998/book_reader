@@ -1,6 +1,7 @@
 {
   "imports": {
-    "#helpers": "./helpers.js"
+    "#helpers": "./helpers.js",
+    "#constants": "../../constants/index.js"
   },
   "exports": {
     "*.js": "*.js"

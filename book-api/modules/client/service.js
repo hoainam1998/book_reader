@@ -1,4 +1,5 @@
-const Service = require("#services/prisma");
+const Service = require('#services/prisma');
+const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils');
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password) {
@@ -12,15 +13,19 @@ class ClientService extends Service {
     });
   }
 
-  forgetPassword(email, resetToken) {
+  forgetPassword(email) {
+    const resetToken = signClientResetPasswordToken(email);
+    const randomPassword = autoGeneratePassword();
     return this.PrismaInstance.reader.update({
       where: {
         email,
       },
       data: {
         reset_password_token: resetToken,
+        password: randomPassword,
       }
-    });
+    })
+    .then((client) => ({ ...client, plain_password: randomPassword }));
   }
 
   resetPassword(token, email, password) {

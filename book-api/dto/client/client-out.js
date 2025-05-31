@@ -3,6 +3,7 @@ const { getGraphqlFinalData } = require('#utils');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const { zodValidateClassWrapper } = require('#decorators');
 const ClientDTO = require('./client');
+const ForgetPassword = require('#dto/client/forget-password');
 
 class ClientDetailResponse extends GraphqlResponse {
   @Expose({ toClassOnly: true })
@@ -12,6 +13,15 @@ class ClientDetailResponse extends GraphqlResponse {
   }
 }
 
+class ForgetPasswordResponse extends GraphqlResponse {
+  @Expose({ toClassOnly: true })
+  @Type(() => ForgetPassword)
+  get response() {
+    return getGraphqlFinalData(this.data);
+  }
+}
+
 module.exports = {
   ClientDetailResponse: zodValidateClassWrapper(ClientDetailResponse, ClientDTO),
+  ForgetPasswordResponse: zodValidateClassWrapper(ForgetPasswordResponse, ForgetPassword),
 };

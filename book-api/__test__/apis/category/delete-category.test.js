@@ -35,7 +35,7 @@ describe('delete category', () => {
     }
   ], 'delete category common test');
 
-  describe(createDescribeTest(METHOD.POST, deleteCategoryUrl), () => {
+  describe(createDescribeTest(METHOD.DELETE, deleteCategoryUrl), () => {
     test('delete category success', (done) => {
       globalThis.prismaClient.category.delete.mockResolvedValue(mockCategory);
 
