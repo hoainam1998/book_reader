@@ -61,9 +61,9 @@ const mutation = new GraphQLObjectType({
       resolve: async (service, { firstName, lastName, email, password }) => {
         return handleResolveResult(async () => {
           await service.signUp(firstName, lastName, email, password);
-          return messageCreator('Reader signup success!');
+          return messageCreator(READER.SIGNUP_SUCCESS);
         }, {
-          UNIQUE_DUPLICATE: 'Email already exist!'
+          UNIQUE_DUPLICATE: READER.EMAIL_EXIST,
         });
       }
     },

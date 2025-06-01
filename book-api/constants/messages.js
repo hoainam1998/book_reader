@@ -105,5 +105,8 @@ module.exports = deepFreeze({
     SEND_RESET_PASSWORD_SUCCESS: 'Reset password link already sent to your email!',
     EMAIL_NOT_FOUND: 'The email not found!',
     GENERATE_RESET_PASSWORD_FAIL: 'Generate reset password was failed!',
+    EMAIL_EXIST: 'Email already exist!',
+    SIGNUP_SUCCESS: 'The reader signup was success!',
+    SIGNUP_FAIL: 'Signup was failed!',
   }
 });

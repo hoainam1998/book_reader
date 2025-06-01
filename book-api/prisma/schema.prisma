@@ -94,7 +94,6 @@ model reader {
   avatar                    String?         @db.Text
   email                     String          @unique @db.VarChar(100)
   sex                       Int             @default(0) @db.UnsignedTinyInt
-  login_token               String          @db.Text
   reset_password_token      String?         @db.Text
   book_reader               book_reader[]
 }
