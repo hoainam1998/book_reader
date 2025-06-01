@@ -22,7 +22,7 @@ describe('client signup', () => {
     {
       name: 'url test',
       describe: 'url is invalid',
-      url: `${PATH.CATEGORY}/unknown`,
+      url: `${PATH.CLIENT}/unknown`,
       method: METHOD.POST.toLowerCase(),
     },
     {
