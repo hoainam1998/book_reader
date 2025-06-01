@@ -68,7 +68,9 @@
     "test.category.delete-category": "npm run test.requirement -- __test__/apis/category/delete-category.test.js",
     "test.category.delete-category.silent": "npm run test.requirement -- __test__/apis/category/delete-category.test.js --silent",
     "test.client.forget-password": "npm run test.requirement -- __test__/apis/client/forget-password.test.js",
-    "test.client.forget-password.silent": "npm run test.requirement -- __test__/apis/client/forget-password.test.js --silent"
+    "test.client.forget-password.silent": "npm run test.requirement -- __test__/apis/client/forget-password.test.js --silent",
+    "test.client.sign-up": "npm run test.requirement -- __test__/apis/client/sign-up.test.js",
+    "test.client.sign-up.silent": "npm run test.requirement -- __test__/apis/client/sign-up.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

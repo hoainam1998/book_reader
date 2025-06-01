@@ -31,7 +31,7 @@ class ClientRouter extends Router {
     this.post('/login', this._login);
   }
 
-  @validation(SignUp, { error_message: 'Sign up was failed!' })
+  @validation(SignUp, { error_message: READER.SIGNUP_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _signup(req, res, next, self) {
