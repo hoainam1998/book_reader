@@ -1,11 +1,15 @@
 import { JSX, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Form from 'components/form/form';
 import Input from 'components/form/form-control/input/input';
 import Grid, { GridItem } from 'components/grid/grid';
 import ClientLoginWrapper from 'views/login-group/login-wrapper/client-login-wrapper/client-login-wrapper';
 import { email, matchPattern, required } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
+import { signUp } from './fetcher';
+import { showToast } from 'utils';
 import constants from 'read-only-variables';
+import path from 'router/paths';
 
 type SingUpFieldType = {
   firstName: string;
@@ -34,6 +38,7 @@ const rules: RuleType<SingUpFieldType> = {
 const formId: string = 'signup-form';
 
 function Signup(): JSX.Element {
+  const navigate = useNavigate();
   const { firstName, lastName, email, password, handleSubmit, validate } = useForm<
     SingUpFieldType,
     RuleType<SingUpFieldType>
@@ -42,7 +47,12 @@ function Signup(): JSX.Element {
   const onSubmit = useCallback((): void => {
     handleSubmit();
     if (!validate.error) {
-      // onLogin(email.value, password.value, reset);
+      signUp(state)
+        .then((response) => {
+          showToast('Sign up!', response.data.message);
+          navigate(path.LOGIN);
+        })
+        .catch((error) => showToast('Sign up!', error.response.data.message));
     }
   }, []);
 

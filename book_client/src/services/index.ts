@@ -86,4 +86,5 @@ export const CategoryService = new Service('/category');
 export const BookService = new Service('/book');
 export const UserService = new Service('/user');
 export const AuthorService = new Service('/author');
+export const ClientService = new Service('/client');
 export { SilentPromise, Request, Service, RequestBody, IQueryType };
