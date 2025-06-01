@@ -117,44 +117,44 @@ function Table<T>({
     <Fragment>
       { total === 0
         ? <Error image="empty" message={emptyMessage} />
-        :<section>
-          <div className="table-wrapper">
-            <table className={clsx('table', responsive && 'responsive-table', classes)} ref={tableRef}>
-              <colgroup>
-                <List<Field> items={fields} render={(field) => (<col width={field.width}/>)} />
-              </colgroup>
-              <thead style={{ top }} className="position-sticky">
-                <tr>
-                  <List<Field> items={fields} render={(field) =>
-                    (<th style={field.style}>{field.label || field.key}</th>)} />
-                </tr>
-              </thead>
-              <tbody>
-                <List<T> items={data} render={(item, index) =>
-                  <tr data-testid={`row-${index}`}>
-                    <TableCell<T>
-                    item={item}
-                    fields={fields}
-                    cells={Children.toArray(children) as ReactElement[]}
-                    />
+        : <section>
+            <div className="table-wrapper">
+              <table className={clsx('table', responsive && 'responsive-table', classes)} ref={tableRef}>
+                <colgroup>
+                  <List<Field> items={fields} render={(field) => (<col width={field.width}/>)} />
+                </colgroup>
+                <thead style={{ top }} className="position-sticky">
+                  <tr>
+                    <List<Field> items={fields} render={(field) =>
+                      (<th style={field.style}>{field.label || field.key}</th>)} />
                   </tr>
-                } />
-              </tbody>
-            </table>
-          </div>
-          { totalPageNumber > 0 &&
-            <div className="table-footer">
-              <Select<number>
-                value={pageSize}
-                onChange={pageSizeChange}
-                options={options}
-                name="page-size"
-                className="un-grid"
-                selectClass="page-size" />
-              <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
+                </thead>
+                <tbody>
+                  <List<T> items={data} render={(item, index) =>
+                    <tr data-testid={`row-${index}`}>
+                      <TableCell<T>
+                      item={item}
+                      fields={fields}
+                      cells={Children.toArray(children) as ReactElement[]}
+                      />
+                    </tr>
+                  } />
+                </tbody>
+              </table>
             </div>
+            { totalPageNumber > 0 &&
+              <div className="table-footer">
+                <Select<number>
+                  value={pageSize}
+                  onChange={pageSizeChange}
+                  options={options}
+                  name="page-size"
+                  className="un-grid"
+                  selectClass="page-size" />
+                <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
+              </div>
           }
-      </section>
+        </section>
       }
     </Fragment>
   );
