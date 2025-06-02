@@ -31,16 +31,29 @@ class ClientService extends Service {
     .then((client) => ({ ...client, plain_password: randomPassword }));
   }
 
-  resetPassword(token, email, password) {
-    return this.PrismaInstance.reader.update({
+  resetPassword(token, email, oldPassword, password) {
+    return this.PrismaInstance.reader.findFirstOrThrow({
       where: {
-        email,
-        reset_password_token: token
+        reset_password_token: token,
+        email: email,
       },
-      data: {
-        password,
-        reset_password_token: null
+      select: {
+        password: true,
+      },
+    }).then(async (client) => {
+      if (await compare(oldPassword, client.password)) {
+        return this.PrismaInstance.reader.update({
+          where: {
+            email,
+            reset_password_token: token
+          },
+          data: {
+            password,
+            reset_password_token: null
+          }
+        });
       }
+      throw new PrismaClientKnownRequestError(READER.OLD_PASSWORD_NOT_MATCH, { code: 'P2025' });
     });
   }
 

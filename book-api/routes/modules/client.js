@@ -99,13 +99,13 @@ class ClientRouter extends Router {
     });
   }
 
-  @validation(ResetPassword, { error_message: 'Reset password failed!' })
+  @validation(ResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _resetPassword(req, res, next, self) {
-    const query = `mutation ResetPassword($token: String!, $email: String!, $password: String!) {
+    const query = `mutation ResetPassword($token: String!, $email: String!, $oldPassword: String!, $password: String!) {
       client {
-        resetPassword(token: $token, email: $email, password: $password) {
+        resetPassword(token: $token, email: $email, oldPassword: $oldPassword, password: $password) {
           message
         }
       }
@@ -116,27 +116,27 @@ class ClientRouter extends Router {
       if (decodedClient.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator('Register email is not match!')
+          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH)
         };
       }
     } catch (err) {
-      if (err.message === 'jwt expired') {
+      if (err.name === 'TokenExpiredError') {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator('Reset password token have been expired time!')
+          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED)
         };
-      } else if (err.message === 'invalid signature') {
+      } else {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator('Token is invalid!')
+          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID)
         };
       }
-      throw err;
     }
 
     return self.execute(query, {
       email: req.body.email,
       token: req.body.token,
+      oldPassword: req.body.oldPassword,
       password: req.body.password,
     });
   }
