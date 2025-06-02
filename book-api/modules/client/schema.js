@@ -113,20 +113,19 @@ const mutation = new GraphQLObjectType({
         email: {
           type: new GraphQLNonNull(GraphQLString)
         },
+        oldPassword: {
+          type: new GraphQLNonNull(GraphQLString)
+        },
         password: {
           type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: async (service, { token, email, password }, context) => {
+      resolve: async (service, { token, email, oldPassword, password }) => {
         return handleResolveResult(async () => {
-          const client = await service.getClientDetail(email, context);
-          if (client.reset_password_token !== token) {
-            throw new GraphQLError('Reset password token is valid!', graphqlUnauthorizedErrorOption);
-          }
-          await service.resetPassword(token, email, password);
-          return messageCreator('Reset password link already sent to your email!');
+          await service.resetPassword(token, email, oldPassword, password);
+          return messageCreator(READER.RESET_PASSWORD_SUCCESS);
         }, {
-          UNAUTHORIZED: 'User not found!'
+          UNAUTHORIZED: READER.USER_NOT_FOUND,
         });
       }
     }

@@ -38,14 +38,19 @@ const ForgetPassword = (validators, className) => {
 const ResetPassword = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsEmail('email invalid!')
+      IsEmail('email invalid!'),
     )
     email;
 
     @validators(
-      IsString('token must be a string!')
+      IsString('token must be a string!'),
     )
     token;
+
+    @validators(
+      IsPassword('Invalid password!'),
+    )
+    oldPassword;
 
     @validators(
       IsPassword('Invalid password!'),
