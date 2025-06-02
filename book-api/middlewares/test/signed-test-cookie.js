@@ -5,7 +5,11 @@
  * @param {Object} res - express response.
  */
 const signedTestCookie = (req, res) => {
-  req.session.user = req.body
+  let name = 'user';
+  if (req.query.name) {
+    name = req.query.name;
+  }
+  req.session[name] = req.body;
   res.end();
 };
 

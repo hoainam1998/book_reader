@@ -36,10 +36,18 @@ const verifyClientResetPasswordToken = (resetPasswordToken) => jwt.verify(resetP
  * Signing login token with payload is email and userId.
  *
  * @param {string} userId - The userId.
- * @param {string} email - An email.
+ * @param {string} email - An email register.
  * @return {string} - The login token.
  */
 const signLoginToken = (userId, email, power) => jwt.sign({ userId, email, power }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+/**
+ * Signing client login token with payload is email.
+ *
+ * @param {string} email - An email register.
+ * @return {string} - The client login token.
+ */
+const signClientLoginToken = (email) => jwt.sign({ email }, process.env.CLIENT_LOGIN_SECRET_KEY);
 
 /**
  * Signing client reset password token.s
@@ -101,6 +109,7 @@ const generateOtp = () => {
 module.exports = {
   signingResetPasswordToken,
   signClientResetPasswordToken,
+  signClientLoginToken,
   passwordHashing,
   autoGeneratePassword,
   generateOtp,

@@ -31,10 +31,11 @@ const randomPassword = autoGeneratePassword();
  * role: string,
  * mfaEnable: boolean
  * }} sessionJson - express request.
+ * @param {string} [name="user"] - The session name.
  * @return {Promise} - The supertest promise.
  */
-const signedTestCookie = (sessionJson) => {
-  return globalThis.api.post('/signed-test-cookie').send(sessionJson);
+const signedTestCookie = (sessionJson, name = 'user') => {
+  return globalThis.api.post(`/signed-test-cookie?name=${name}`).send(sessionJson);
 };
 
 /**

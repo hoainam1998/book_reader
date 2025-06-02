@@ -70,7 +70,9 @@
     "test.client.forget-password": "npm run test.requirement -- __test__/apis/client/forget-password.test.js",
     "test.client.forget-password.silent": "npm run test.requirement -- __test__/apis/client/forget-password.test.js --silent",
     "test.client.sign-up": "npm run test.requirement -- __test__/apis/client/sign-up.test.js",
-    "test.client.sign-up.silent": "npm run test.requirement -- __test__/apis/client/sign-up.test.js --silent"
+    "test.client.sign-up.silent": "npm run test.requirement -- __test__/apis/client/sign-up.test.js --silent",
+    "test.client.login": "npm run test.requirement -- __test__/apis/client/login.test.js",
+    "test.client.login.silent": "npm run test.requirement -- __test__/apis/client/login.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

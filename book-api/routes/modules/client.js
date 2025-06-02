@@ -1,9 +1,16 @@
 const Router = require('../router');
+const ErrorCode = require('#services/error-code');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, CLIENT_RESET_PASSWORD_URL } = require('#constants');
-const { READER, COMMON } = require('#messages');
-const { messageCreator, fetchHelper, getOriginInternalServerUrl, verifyClientResetPasswordToken } = require('#utils');
+const { READER, USER, COMMON } = require('#messages');
+const {
+  messageCreator,
+  fetchHelper,
+  getOriginInternalServerUrl,
+  verifyClientResetPasswordToken,
+  getGeneratorFunctionData,
+} = require('#utils');
 const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse } = require('#dto/client/client-out');
@@ -138,6 +145,15 @@ class ClientRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(ClientDetailResponse)
   _login(req, res, nest, self) {
+    if (req.session.client) {
+      if (req.body.email === req.session.client.email) {
+        return {
+          status: HTTP_CODE.UNAUTHORIZED,
+          json: messageCreator(USER.ALREADY_LOGIN, ErrorCode.TOKEN_EXPIRED),
+        };
+      }
+    }
+
     const query = `query Login($email: String!, $password: String!) {
       client {
         login(email: $email, password: $password) ${
@@ -146,10 +162,21 @@ class ClientRouter extends Router {
       }
     }`;
 
-    return self.execute(query, {
+    const promise = self.execute(query, {
       email: req.body.email,
       password: req.body.password,
     }, req.body.query);
+
+    return getGeneratorFunctionData(promise).then((result) => {
+      const client = result?.data?.client?.login;
+      if (client) {
+        req.session.client = {
+          email: client.email || req.body.email,
+          apiKey: client.apiKey,
+        };
+      }
+      return result;
+    });
   }
 }
 

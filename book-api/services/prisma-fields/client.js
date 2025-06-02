@@ -7,11 +7,11 @@ const PrismaField = require('./prisma-field');
 */
 class ClientPrismaField extends PrismaField {
   _fields = {
+    clientId: 'reader_id',
     firstName: 'first_name',
     lastName: 'last_name',
     avatar: 'avatar',
     email: 'email',
-    apiKey: 'login_token',
   };
 }
 

@@ -1,5 +1,8 @@
 const Service = require('#services/prisma');
+const { compare } = require('bcrypt');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils');
+const { READER } = require('#messages');
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password) {
@@ -55,6 +58,17 @@ class ClientService extends Service {
       },
       select,
     });
+  }
+
+  login(email, password, select) {
+    select = { ...select, password: true };
+    return this.getClientDetail(email, select)
+      .then(async (client) => {
+        if (await compare(password, client.password)) {
+          return client;
+        }
+        throw new PrismaClientKnownRequestError(READER.PASSWORD_NOT_MATCH, { code: 'P2025' });
+      });
   }
 }
 

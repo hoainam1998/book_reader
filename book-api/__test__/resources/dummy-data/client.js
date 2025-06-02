@@ -1,5 +1,10 @@
 const DummyDataApi = require('./api');
-const { autoGeneratePassword, passwordHashing, signClientResetPasswordToken } = require('#utils');
+const {
+  autoGeneratePassword,
+  passwordHashing,
+  signClientResetPasswordToken,
+  signClientLoginToken
+} = require('#utils');
 const randomPassword = autoGeneratePassword();
 
 /**
@@ -24,13 +29,15 @@ class ClientDummyData extends DummyDataApi {
       },
       null,
       {
-        readerId: expect.any(String),
+        clientId: expect.any(String),
         lastName: expect.any(String),
         firstName: expect.any(String),
         password: expect.any(String),
         avatar: expect.any(String),
         email: expect.any(String),
         sex: expect.any(Number),
+        apiKey: expect.any(String),
+        passwordMustChange: expect.any(Boolean),
       }
     );
   }
@@ -53,6 +60,26 @@ class ClientDummyData extends DummyDataApi {
    */
   static get password() {
     return randomPassword;
+  }
+
+  /**
+   * Access session data.
+   *
+   * @static
+   * @return {{
+   * client: {
+   * email: string,
+   * apiKey: string
+   * }
+   * }} - The session data.
+   */
+  static get session() {
+    return {
+      client: {
+        email: this.MockData.email,
+        apiKey: signClientLoginToken(this.MockData.email),
+      }
+    };
   }
 }
 

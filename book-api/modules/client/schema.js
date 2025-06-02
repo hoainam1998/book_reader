@@ -10,7 +10,6 @@ const {
   GraphQLNonNull,
   GraphQLFloat
 } = require('graphql');
-const { compare } = require('bcrypt');
 const ClientDTO = require('#dto/client/client');
 const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
@@ -21,6 +20,9 @@ const { READER } = require('#messages');
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
   fields: {
+    clientId: {
+      type: GraphQLID
+    },
     firstName: {
       type: GraphQLString
     },
@@ -35,7 +37,10 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     },
     apiKey: {
       type: GraphQLString,
-    }
+    },
+    passwordMustChange: {
+      type: GraphQLBoolean,
+    },
   }
 });
 
@@ -132,7 +137,7 @@ const query = new GraphQLObjectType({
   name: 'ClientQuery',
   fields: {
     login: {
-      type: CLIENT_DETAIL_TYPE,
+      type: new GraphQLNonNull(CLIENT_DETAIL_TYPE),
       args: {
         email: {
           type: new GraphQLNonNull(GraphQLString)
@@ -143,14 +148,9 @@ const query = new GraphQLObjectType({
       },
       resolve: async (service, { email, password }, context) => {
         return handleResolveResult(async () => {
-          const select = { ...context, password: true };
-          const client = await service.getClientDetail(email, select);
-          if (await compare(password, client.password)) {
-            return convertDtoToZodObject(ClientDTO, client);
-          }
-          throw new GraphQLError('Password is incorrect!', graphqlUnauthorizedErrorOption);
+          return convertDtoToZodObject(ClientDTO, await service.login(email, password, context));
         }, {
-          UNAUTHORIZED: 'User not found!'
+          UNAUTHORIZED: READER.USER_NOT_FOUND,
         });
       }
     }
