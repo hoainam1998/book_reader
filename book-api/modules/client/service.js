@@ -35,7 +35,7 @@ class ClientService extends Service {
     return this.PrismaInstance.reader.findFirstOrThrow({
       where: {
         reset_password_token: token,
-        email: email,
+        email,
       },
       select: {
         password: true,
