@@ -1,7 +1,7 @@
 module.exports = jest.mock('#services/prisma-client', () => ({
   user: {
-    findFirstOrThrow: jest.fn().mockResolvedValue(new Promise(() => {})),
-    update: jest.fn().mockResolvedValue(new Promise(() => {})),
+    findFirstOrThrow: jest.fn().mockResolvedValue(),
+    update: jest.fn().mockResolvedValue(),
     create: jest.fn().mockResolvedValue(),
     count: jest.fn().mockResolvedValue(),
     findMany: jest.fn().mockResolvedValue(),
@@ -40,6 +40,7 @@ module.exports = jest.mock('#services/prisma-client', () => ({
   reader: {
     update: jest.fn().mockResolvedValue(),
     create: jest.fn().mockResolvedValue(),
+    findFirstOrThrow: jest.fn().mockResolvedValue(),
   },
   $transaction: jest.fn().mockResolvedValue(),
 }));

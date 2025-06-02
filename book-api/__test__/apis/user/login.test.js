@@ -181,8 +181,6 @@ describe('login api', () => {
   ], 'login internal');
 
   describe(createDescribeTest(METHOD.POST, internalLoginApiUrl), () => {
-    afterEach(() => jest.restoreAllMocks());
-
     test('login internal api will be success', async () => {
       const passwordHash = await passwordHashing(mockUser.password);
 
@@ -192,8 +190,8 @@ describe('login api', () => {
       });
 
       const response = await globalThis.api.post(internalLoginApiUrl).send(requestBody);
-
       const plainUser = plainToInstance(UserDTO, mockUser);
+
       expect.hasAssertions();
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith(
