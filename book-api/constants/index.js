@@ -43,5 +43,4 @@ module.exports = deepFreeze({
     PASSWORD: /[A-Za-z0-9@$#%!^&*()]{8}/,
   },
   RESET_PASSWORD_URL: `${process.env.ORIGIN_CORS}/reset-password?token={0}`,
-  CLIENT_RESET_PASSWORD_URL: `${process.env.ORIGIN_CORS}?token={0}`,
 });

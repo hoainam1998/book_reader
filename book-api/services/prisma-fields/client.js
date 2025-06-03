@@ -12,6 +12,7 @@ class ClientPrismaField extends PrismaField {
     lastName: 'last_name',
     avatar: 'avatar',
     email: 'email',
+    resetPasswordToken: 'reset_password_token',
   };
 }
 

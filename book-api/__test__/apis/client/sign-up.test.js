@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const ClientDummyData = require('#test/resources/dummy-data/client');
@@ -6,6 +7,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
+const { signClientResetPasswordToken } = require('#utils');
 const clientSignupUrl = `${PATH.CLIENT}/sign-up`;
 
 const mockRequestClient = ClientDummyData.MockRequestData;
@@ -42,6 +44,8 @@ describe('client signup', () => {
 
   describe(createDescribeTest(METHOD.POST, clientSignupUrl), () => {
     test('client signup will be success', (done) => {
+      const mockResetPasswordToken = signClientResetPasswordToken(mockRequestClient.email);
+      const signResult = jest.spyOn(jwt, 'sign').mockImplementation(() => mockResetPasswordToken);
       globalThis.prismaClient.reader.create.mockResolvedValue(mockRequestClient);
 
       expect.hasAssertions();
@@ -58,6 +62,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              reset_password_token: signResult.mock.results[0].value,
             },
           });
           expect(response.body).toEqual({
@@ -133,6 +138,8 @@ describe('client signup', () => {
     });
 
     test('client signup failed with email already exist', (done) => {
+      const mockResetPasswordToken = signClientResetPasswordToken(mockRequestClient.email);
+      const signResult = jest.spyOn(jwt, 'sign').mockImplementation(() => mockResetPasswordToken);
       globalThis.prismaClient.reader.create.mockRejectedValue(PrismaDuplicateError);
 
       expect.hasAssertions();
@@ -149,6 +156,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              reset_password_token: signResult.mock.results[0].value,
             },
           });
           expect(response.body).toEqual({
@@ -160,6 +168,8 @@ describe('client signup', () => {
 
     test('client signup failed with output validate error', (done) => {
       globalThis.prismaClient.reader.create.mockReset();
+      const mockResetPasswordToken = signClientResetPasswordToken(mockRequestClient.email);
+      const signResult = jest.spyOn(jwt, 'sign').mockImplementation(() => mockResetPasswordToken);
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
@@ -176,6 +186,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              reset_password_token: signResult.mock.results[0].value,
             },
           });
           expect(response.body).toEqual({
@@ -186,6 +197,8 @@ describe('client signup', () => {
     });
 
     test('client signup failed with server error', (done) => {
+      const mockResetPasswordToken = signClientResetPasswordToken(mockRequestClient.email);
+      const signResult = jest.spyOn(jwt, 'sign').mockImplementation(() => mockResetPasswordToken);
       globalThis.prismaClient.reader.create.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
@@ -202,6 +215,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              reset_password_token: signResult.mock.results[0].value,
             },
           });
           expect(response.body).toEqual({

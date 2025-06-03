@@ -173,7 +173,7 @@ describe('client login', () => {
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
       expect(response.body).toEqual({
-        message: getInputValidateMessage(READER.LOGIN_FAILED),
+        message: getInputValidateMessage(USER.LOGIN_FAIL),
         errors: [COMMON.REQUEST_DATA_EMPTY],
       });
     });
@@ -189,7 +189,7 @@ describe('client login', () => {
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
       expect(response.body).toEqual({
-        message: getInputValidateMessage(READER.LOGIN_FAILED),
+        message: getInputValidateMessage(USER.LOGIN_FAIL),
         errors: expect.any(Array),
       });
       expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
@@ -206,7 +206,7 @@ describe('client login', () => {
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
       expect(response.body).toEqual({
-        message: getInputValidateMessage(READER.LOGIN_FAILED),
+        message: getInputValidateMessage(USER.LOGIN_FAIL),
         errors: expect.arrayContaining([expect.stringMatching(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
       });
     });

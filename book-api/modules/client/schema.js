@@ -38,6 +38,9 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     apiKey: {
       type: GraphQLString,
     },
+    resetPasswordToken: {
+      type: GraphQLString,
+    },
     passwordMustChange: {
       type: GraphQLBoolean,
     },

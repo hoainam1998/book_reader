@@ -45,7 +45,7 @@ const ResetPassword = (validators, className) => {
     @validators(
       IsString('token must be a string!'),
     )
-    token;
+    resetPasswordToken;
 
     @validators(
       IsPassword('Invalid password!'),
