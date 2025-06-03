@@ -6,12 +6,14 @@ const { READER } = require('#messages');
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password) {
+    const resetToken = signClientResetPasswordToken(email);
     return this.PrismaInstance.reader.create({
       data: {
         first_name: firstName,
         last_name: lastName,
         email,
         password,
+        reset_password_token: resetToken,
       },
     });
   }

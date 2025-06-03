@@ -110,7 +110,6 @@ module.exports = deepFreeze({
     SIGNUP_FAIL: 'Signup was failed!',
     USER_NOT_FOUND: 'The user not found!',
     PASSWORD_NOT_MATCH: 'Password not match!',
-    LOGIN_FAILED: 'Login was failed!',
     OLD_PASSWORD_NOT_MATCH: 'Old password not match!',
     RESET_PASSWORD_SUCCESS: 'Reset password was success!',
   }

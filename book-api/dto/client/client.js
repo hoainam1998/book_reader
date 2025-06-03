@@ -48,6 +48,11 @@ class ClientDTO extends OutputValidate {
     return signClientLoginToken(this.email);
   }
 
+  @Type(() => String)
+  get resetPasswordToken() {
+    return this.reset_password_token;
+  }
+
   @Type(() => Boolean)
   get passwordMustChange() {
     return !!this.reset_password_token;

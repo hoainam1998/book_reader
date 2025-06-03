@@ -2,7 +2,7 @@ const Router = require('../router');
 const ErrorCode = require('#services/error-code');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, CLIENT_RESET_PASSWORD_URL } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -93,7 +93,7 @@ class ClientRouter extends Router {
     })
     .then((json) => {
       const { resetPasswordToken, message, password } = json;
-      const link = CLIENT_RESET_PASSWORD_URL.format(resetPasswordToken);
+      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
         .then(() => messageCreator(message));
     });
@@ -111,8 +111,15 @@ class ClientRouter extends Router {
       }
     }`;
 
+    if (req.body.password === req.body.oldPassword) {
+      return {
+        status: HTTP_CODE.UNAUTHORIZED,
+        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE)
+      };
+    }
+
     try {
-      const decodedClient = verifyClientResetPasswordToken(req.body.token);
+      const decodedClient = verifyClientResetPasswordToken(req.body.resetPasswordToken);
       if (decodedClient.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
@@ -133,15 +140,22 @@ class ClientRouter extends Router {
       }
     }
 
-    return self.execute(query, {
+    const promise = self.execute(query, {
       email: req.body.email,
-      token: req.body.token,
+      token: req.body.resetPasswordToken,
       oldPassword: req.body.oldPassword,
       password: req.body.password,
     });
+
+    return getGeneratorFunctionData(promise).then((result) => {
+      if (result?.data?.client?.resetPassword?.message) {
+        req.session.destroy();
+      }
+      return result;
+    });
   }
 
-  @validation(Login, { error_message: 'Login was failed!' })
+  @validation(Login, { error_message: USER.LOGIN_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(ClientDetailResponse)
   _login(req, res, nest, self) {

@@ -15,7 +15,7 @@ const mockRequestClient = ClientDummyData.MockRequestData;
 const clientMock = ClientDummyData.MockData;
 
 const requestBody = {
-  token: ClientDummyData.resetPasswordToken,
+  resetPasswordToken: ClientDummyData.resetPasswordToken,
   email: mockRequestClient.email,
   oldPassword: ClientDummyData.password,
   password: autoGeneratePassword(),
@@ -61,7 +61,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -71,7 +71,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         data: {
@@ -81,6 +81,26 @@ describe('reset password', () => {
       });
       expect(response.body).toEqual({
         message: READER.RESET_PASSWORD_SUCCESS,
+      });
+    });
+
+    test('reset password failed new password and old password are same', async () => {
+      const badRequestBody = {
+        ...requestBody,
+        password: requestBody.oldPassword,
+      };
+
+      expect.hasAssertions();
+      const response = await globalThis.api
+        .post(resetPasswordUrl)
+        .send(badRequestBody)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.UNAUTHORIZED);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
+      expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+      expect(response.body).toEqual({
+        message: USER.OLD_AND_NEW_PASSWORD_IS_SAME,
+        errorCode: ErrorCode.DATA_IS_DUPLICATE,
       });
     });
 
@@ -228,7 +248,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -238,7 +258,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         data: {
@@ -263,7 +283,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -292,7 +312,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -302,7 +322,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         data: {
@@ -327,7 +347,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -356,7 +376,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         select: {
@@ -366,7 +386,7 @@ describe('reset password', () => {
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
         where: {
-          reset_password_token: requestBody.token,
+          reset_password_token: requestBody.resetPasswordToken,
           email: requestBody.email,
         },
         data: {

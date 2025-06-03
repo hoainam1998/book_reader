@@ -1,9 +1,10 @@
+const jwt = require('jsonwebtoken');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
-const { HTTP_CODE, METHOD, PATH, CLIENT_RESET_PASSWORD_URL, REGEX } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, RESET_PASSWORD_URL, REGEX } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const { signClientResetPasswordToken } = require('#utils');
 const commonTest = require('#test/apis/common/common');
@@ -71,7 +72,7 @@ describe('forget-password', () => {
           expect(sendEmail).toHaveBeenCalledTimes(1);
           expect(sendEmail).toHaveBeenCalledWith(
             requestBody.email,
-            CLIENT_RESET_PASSWORD_URL.format(forgetPasswordResponse.resetPasswordToken),
+            RESET_PASSWORD_URL.format(forgetPasswordResponse.resetPasswordToken),
             forgetPasswordResponse.password,
           );
           expect(response.body).toEqual({
@@ -250,10 +251,11 @@ describe('forget-password', () => {
     });
 
     test('generate reset password token failed with output validate error', (done) => {
-      const resetPasswordToken = signClientResetPasswordToken(clientMock.email);
+      const mockResultSignResetPasswordToken = signClientResetPasswordToken(clientMock.email);
+      const signResult = jest.spyOn(jwt, 'sign').mockImplementation(() => mockResultSignResetPasswordToken);
       globalThis.prismaClient.reader.update.mockResolvedValue({
         ...clientMock,
-        reset_password_token: resetPasswordToken,
+        reset_password_token: mockResultSignResetPasswordToken,
       });
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
@@ -264,6 +266,7 @@ describe('forget-password', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
+          const resetPasswordToken = signResult.mock.results[0].value;
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
             where: {
