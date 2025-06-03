@@ -13,18 +13,14 @@ import auth from 'store/auth';
 import { showToast } from 'utils';
 import { getResetPasswordToken, resetPassword } from './fetcher';
 
-type ResetAdminPasswordFieldType = ResetPasswordFieldType & {
-  oldPassword: string;
-};
-
-const state: ResetAdminPasswordFieldType = {
+const state: ResetPasswordFieldType = {
   email: '',
   oldPassword: '',
   password: '',
   passwordAgain: '',
 };
 
-const rules: RuleType<ResetAdminPasswordFieldType> = {
+const rules: RuleType<ResetPasswordFieldType> = {
   email: { required, email },
   oldPassword: {
     required,
@@ -45,8 +41,8 @@ const formId: string = 'login-form';
 
 function AdminResetPassword(): JSX.Element {
   const { email, oldPassword, password, passwordAgain, handleSubmit, reset, validate } = useForm<
-  ResetAdminPasswordFieldType,
-    RuleType<ResetAdminPasswordFieldType>
+  ResetPasswordFieldType,
+  RuleType<ResetPasswordFieldType>
   >(state, rules, formId);
   const token: string | undefined = useLoaderData() as string | undefined;
   const navigate = useNavigate();
@@ -65,11 +61,11 @@ function AdminResetPassword(): JSX.Element {
       resetPassword(body)
         .then((response) => {
           auth.destroyResetPasswordToken();
-          reset();
-          showToast('Reset password', response.data.message);
+          showToast('Reset password!', response.data.message);
           navigate(paths.LOGIN);
         })
-        .catch((error) => showToast('Reset password', error.response.data.message));
+        .catch((error) => showToast('Reset password!', error.response.data.message))
+        .then(reset);
     }
   }, [validate.values]);
 

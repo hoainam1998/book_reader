@@ -3,7 +3,7 @@ import { stringRandom as id } from 'utils';
 
 type PromiseOperationCallbackType = (
   resolve: (data: any) => void,
-  reject: (error: any) => void,
+  reject: (error: any, alwayRunCatch: boolean) => void,
   final: () => void)
 => void;
 
@@ -58,7 +58,7 @@ export default class SilentPromise {
     SilentPromise.addRequest(requestId, this);
     cb(
       (data: AxiosResponse) => this.resolve(requestId, data),
-      (error: AxiosError) => this.reject(requestId, error),
+      (error: AxiosError, alwayRunCatch: boolean) => this.reject(requestId, error, alwayRunCatch),
       () => this.final(requestId)
     );
   }
@@ -112,6 +112,7 @@ export default class SilentPromise {
   * Run then callback, if it was provided.
   *
   * @public
+  * @param {string} requestId - The request id.
   * @param {AxiosResponse} data - The promise resolve data.
   */
   resolve(requestId: string, data: AxiosResponse): void {
@@ -128,12 +129,21 @@ export default class SilentPromise {
   * Run catch callback, if it was provided.
   *
   * @public
+  * @param {string} requestId - The request id.
   * @param {AxiosError} error- The promise rejected error.
   */
-  reject(requestId: string, error: AxiosError): void {
+  reject(requestId: string, error: AxiosError, alwayRunCatch: boolean): void {
     const context = SilentPromise.getCurrentRequest(requestId);
     if (context && context._catchCallback) {
-      context._catchCallback(error);
+      if (alwayRunCatch) {
+        context._catchCallback(error);
+      } else {
+        const ignoreAxiosErrorNames = [AxiosError.ERR_NETWORK, AxiosError.ECONNABORTED, AxiosError.ETIMEDOUT];
+        if (!ignoreAxiosErrorNames.includes(error.code || '')) {
+          context._catchCallback(error);
+        }
+      }
+
       if (!context._finallyCallback) {
         SilentPromise.freeingRequest(requestId);
       }
@@ -144,6 +154,7 @@ export default class SilentPromise {
   * Run finally callback, if it was provided.
   *
   * @public
+  * @param {string} requestId - The request id.
   */
   final(requestId: string): void {
     const context = SilentPromise.getCurrentRequest(requestId);
@@ -184,6 +195,7 @@ export default class SilentPromise {
   * Note: I will re-update this function if it out of date.
   *
   * @public
+  * @param {() => void} callback - The final callback.
   */
   finally(callback: () => void): void {
     this._finallyCallback = callback;

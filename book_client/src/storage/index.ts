@@ -25,6 +25,9 @@ export type BookInfoType = {
 
 export type UserLogin = {
   userId: string;
+  clientId?: string;
+  firstName?: string;
+  lastName?: string;
   name: string;
   email: string;
   avatar: string;
