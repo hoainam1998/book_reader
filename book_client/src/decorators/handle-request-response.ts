@@ -31,6 +31,7 @@ export default function (
       const request = (this as unknown as Request);
       const notFoundAllowed = request.NotFoundAllowed;
       const keepAlive = request.KeepAlive;
+      const alwayRunCatch = request.AlwayRunCatch;
       const subUrl = args[0];
       args[0] = request.BaseUrl ? `${request.BaseUrl}/${subUrl}` : subUrl;
       if (keepAlive) {
@@ -50,7 +51,7 @@ export default function (
             if (shouldResolveError(error) && notFoundAllowed) {
               resolve(error.response);
             } else {
-              reject(error);
+              reject(error, alwayRunCatch);
             }
           })
           .finally(final);

@@ -18,6 +18,7 @@ export type RequestBody = {
  * @abstract
  */
 export default abstract class RequestBase {
+  private _alwayRunCatchCallback: boolean = false;
   abstract post(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse>;
   abstract put(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse>;
   abstract get(subUrl: string): Promise<AxiosResponse>;
@@ -25,11 +26,32 @@ export default abstract class RequestBase {
 
   /**
   * Turn on _notFoundAllowed flag, which determinate not found error should be resolve or not.
-  * @return {RequestBase} - The request object.
+  *
+  * @return {Request} - The request object.
   */
-  get NotFoundAccepted(): RequestBase {
+  get NotFoundAccepted(): Request {
     const that = this instanceof Request ? this : new Request(false, (this as unknown as Service).Url);
     that.NotFoundAllowed = true;
     return that;
+  }
+
+  /**
+  * Turn on _alwayRunCatchCallback flag, which determinate catch call back should run in all cases or not.
+  *
+  * @return {RequestBase} - The request object.
+  */
+  get AlwayRunCatchCallback(): RequestBase {
+    const that = this instanceof Request ? this : new Request(false, (this as unknown as Service).Url);
+    that._alwayRunCatchCallback = true;
+    return that;
+  }
+
+  /**
+  * Access _alwayRunCatchCallback flag.
+  *
+  * @return {RequestBase} - The request object.
+  */
+  get AlwayRunCatch(): boolean {
+    return this._alwayRunCatchCallback;
   }
 };

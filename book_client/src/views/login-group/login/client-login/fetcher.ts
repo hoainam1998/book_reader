@@ -1,18 +1,20 @@
 import { AxiosResponse } from 'axios';
-import { UserService, RequestBody } from 'services';
+import { ClientService, RequestBody } from 'services';
 
 export const login = (email: string, password: string): Promise<AxiosResponse> => {
   const body: RequestBody = {
     email,
     password,
     query: {
-      name: true,
+      clientId: true,
+      firstName: true,
+      lastName: true,
       avatar: true,
       email: true,
-      mfaEnable: true,
-      password: true,
+      resetPasswordToken: true,
+      passwordMustChange: true,
       apiKey: true,
     },
   };
-  return UserService.post('login', body);
+  return ClientService.post('login', body);
 };

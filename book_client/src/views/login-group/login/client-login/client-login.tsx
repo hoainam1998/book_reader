@@ -5,7 +5,7 @@ import LoginForm from '../login-form/login-form';
 import auth from 'store/auth';
 import { login } from './fetcher';
 import path from 'router/paths';
-import { showToast } from 'utils';
+import { showToast, generateResetPasswordLink } from 'utils';
 import './style.scss';
 
 function AdminLogin(): JSX.Element {
@@ -18,13 +18,15 @@ function AdminLogin(): JSX.Element {
         delete userLogin.apiKey;
         auth.saveUserLogin(userLogin);
         auth.saveApiKey(res.data.apiKey);
-        if (res.data.mfaEnable === false) {
-          navigate(path.HOME);
+
+        if (res.data.passwordMustChange) {
+          navigate(generateResetPasswordLink(res.data.resetPasswordToken));
         } else {
-          navigate(path.OTP);
+          auth.IsLogged = true;
+          navigate(path.HOME);
         }
       })
-      .catch((error) => showToast('OTP', error.response.data.message))
+      .catch((error) => showToast('Login!', error.response.data.message))
       .finally(reset);
   }, []);
 
