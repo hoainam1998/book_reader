@@ -1,25 +1,32 @@
-import { ReactNode } from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper } from './element-wrapper';
 import Modal from 'components/modal/modal';
-import { SCREEN_SIZE } from 'enums';
+import { ModalPropsType } from 'interfaces';
 
 const bodyDOM: HTMLElement = document.body;
 const modalContainer: HTMLDivElement = createElementWrapper('modal-container', 'modal-container');
 
-type ModalUtilProps = {
-  children: ReactNode | ReactNode[];
-  title: string;
-  size?: SCREEN_SIZE;
-  onOpen?: () => void;
+type ModalPropsShowingType = Omit<ModalPropsType, 'onClose'> & {
   onClose?: () => void;
 };
 
 /**
  * Create a root to show modal, when hide it, using root.unmount.
  */
-const showModal = (props: ModalUtilProps): void => {
-  const { children, title, size, onClose, onOpen } = props;
+const showModal = (props: ModalPropsShowingType): void => {
+  const {
+    children,
+    title,
+    size,
+    onClose,
+    onOpen,
+    headerClass,
+    bodyClass,
+    footerClass,
+    headerStyle,
+    bodyStyle,
+    footerStyle,
+  } = props;
 
   if (!bodyDOM.contains(modalContainer)) {
     bodyDOM.appendChild(modalContainer);
@@ -31,7 +38,19 @@ const showModal = (props: ModalUtilProps): void => {
       modalContainer.remove();
       root.unmount();
     };
-    root.render(<Modal title={title} size={size} onClose={hideModal}>{children}</Modal>);
+    root.render(
+      <Modal
+        title={title}
+        size={size}
+        headerClass={headerClass}
+        bodyClass={bodyClass}
+        footerClass={footerClass}
+        headerStyle={headerStyle}
+        bodyStyle={bodyStyle}
+        footerStyle={footerStyle}
+        onClose={hideModal}>
+          {children}
+      </Modal>);
   }
 };
 

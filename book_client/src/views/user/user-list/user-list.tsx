@@ -124,8 +124,11 @@ function UserList(): JSX.Element {
 
     const deleteUser = useCallback((): void => {
       _deleteUser(userId).
-        then(() => fetchUser(_pageSize, 1))
-        .catch((res) => showToast('User', res.response.data.message));
+        then((res) => {
+          fetchUser(_pageSize, 1);
+          showToast('Delete user!', res.data.message);
+        })
+        .catch((error) => showToast('Delete user!', error.response.data.message));
     }, [userId]);
 
     return (

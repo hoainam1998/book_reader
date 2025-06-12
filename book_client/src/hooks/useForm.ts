@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { ChangeEvent, DependencyList } from 'react';
 import useValidate, {
   ValidateFunction,
@@ -58,6 +57,7 @@ export default <T extends Object, R>(
   dependencyList?: DependencyList
 ): FormValidateProps => {
   const validateObject: ErrorInfo = useValidate<T, R>(state, rules, dependencyList);
+  const originState: typeof state = { ...state };
 
   const formControlProps: FormValidateProps = {
     validate: validateObject,
@@ -79,7 +79,11 @@ export default <T extends Object, R>(
       Object.keys(state).forEach((key: string) => {
         const keyValidateObject = validateObject[key]!;
         keyValidateObject.dirty = false;
-        keyValidateObject.watch('', key);
+        if (originState[key as keyof T] !== undefined) {
+          keyValidateObject.watch(originState[key as keyof T], key);
+        } else {
+          keyValidateObject.watch('', key);
+        }
       });
       document.forms.namedItem(formId)?.reset();
     }

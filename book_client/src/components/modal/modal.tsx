@@ -1,17 +1,10 @@
-/* eslint-disable no-unused-vars */
-import React, { Children, JSX, ReactNode } from 'react';
+import React, { Children, JSX } from 'react';
 import { isSlot } from 'components/slot/slot';
 import RenderCondition from 'components/render-condition/render-condition';
-import { ModalSlotPropsType } from './interface';
+import { ModalPropsType } from 'interfaces';
 import { customError, clsx } from 'utils';
 import { SCREEN_SIZE } from 'enums';
 import './style.scss';
-
-type ModalPropsType = {
-  title: string;
-  children: ReactNode[] | ReactNode;
-  size?: SCREEN_SIZE;
-} & ModalSlotPropsType;
 
 type ModalSlotsType = {
   header: React.ReactNode;
@@ -30,7 +23,18 @@ const slotMapping = (child: JSX.Element, onClose: ModalPropsType['onClose'], slo
   }
 };
 
-function Modal({ onClose, children, title, size = SCREEN_SIZE.MEDIUM }: ModalPropsType): JSX.Element {
+function Modal({
+  onClose,
+  children,
+  title,
+  size = SCREEN_SIZE.MEDIUM,
+  headerClass,
+  bodyClass,
+  footerClass,
+  headerStyle,
+  bodyStyle,
+  footerStyle,
+}: ModalPropsType): JSX.Element {
   const slots: ModalSlotsType = {
     header: null,
     body: null,
@@ -51,7 +55,7 @@ function Modal({ onClose, children, title, size = SCREEN_SIZE.MEDIUM }: ModalPro
 
   return (
     <div className={clsx('modal', size)}>
-      <div className="header-modal">
+      <div className={clsx('header-modal', headerClass)} style={headerStyle}>
         <RenderCondition condition={Boolean(header)} then={header} not={
           <>
             <h3>{title}</h3>
@@ -61,8 +65,8 @@ function Modal({ onClose, children, title, size = SCREEN_SIZE.MEDIUM }: ModalPro
           </>
         } />
       </div>
-      <div className="body-modal">{body}</div>
-      <div className="footer-modal">{footer}</div>
+      <div className={clsx('body-modal', bodyClass)} style={bodyStyle}>{body}</div>
+      <div className={clsx('footer-modal', footerClass)} style={footerStyle}>{footer}</div>
     </div>
   );
 }

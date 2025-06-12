@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { JSX, useCallback, useEffect } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import Form from 'components/form/form';
@@ -11,6 +10,7 @@ import constants from 'read-only-variables';
 import paths from 'router/paths';
 import auth from 'store/auth';
 import { showToast } from 'utils';
+import { logout } from 'views/login-group/login/admin-login/fetcher';
 import { getResetPasswordToken, resetPassword } from './fetcher';
 
 const state: ResetPasswordFieldType = {
@@ -58,14 +58,27 @@ function AdminResetPassword(): JSX.Element {
         resetPasswordToken: token,
       };
 
-      resetPassword(body)
-        .then((response) => {
-          auth.destroyResetPasswordToken();
-          showToast('Reset password!', response.data.message);
-          navigate(paths.LOGIN);
-        })
-        .catch((error) => showToast('Reset password!', error.response.data.message))
-        .then(reset);
+      const handleResetPassword = () => {
+        resetPassword(body)
+          .then((response) => {
+            navigate(paths.LOGIN);
+            showToast('Reset password!', response.data.message);
+          })
+          .catch((error) => showToast('Reset password!', error.response.data.message))
+          .finally(reset);
+      };
+
+      if (auth.PasswordMustChange) {
+        logout()
+          .then(() => {
+            auth.logout();
+            handleResetPassword();
+          })
+          .catch(() => showToast('Reset password!', 'Reset password was failed!. Something wrong are happening!'))
+          .finally(reset);
+      } else {
+        handleResetPassword();
+      }
     }
   }, [validate.values]);
 
