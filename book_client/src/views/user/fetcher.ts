@@ -24,7 +24,7 @@ export const updatePower = (userId: string, power: boolean): Promise<AxiosRespon
 };
 
 export const deleteUser = (userId: string): Promise<AxiosResponse> => {
-  return UserService.delete(`delete-user/${userId}`);
+  return UserService.delete(`delete/${userId}`);
 };
 
 export const updateUser = (user: UserType): Promise<AxiosResponse> => {

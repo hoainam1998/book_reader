@@ -37,6 +37,8 @@
     "test.user.detail.silent": "npm run test.requirement -- __test__/apis/user/user_detail.test.js --silent",
     "test.user.all": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js",
     "test.user.all.silent": "npm run test.requirement -- __test__/apis/user/get-all-user.test.js --silent",
+    "test.user.delete": "npm run test.requirement -- __test__/apis/user/delete-user.test.js",
+    "test.user.delete.silent": "npm run test.requirement -- __test__/apis/user/delete-user.test.js --silent",
     "test.book.create-book": "npm run test.requirement -- __test__/apis/book/create-book.test.js",
     "test.book.create-book.silent": "npm run test.requirement -- __test__/apis/book/create-book.test.js --silent",
     "test.book.save-introduce": "npm run test.requirement -- __test__/apis/book/save-introduce.test.js",
@@ -85,6 +87,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.2",
     "class-transformer": "^0.5.1",
+    "connect-redis": "^8.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.1",
@@ -97,7 +100,9 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.15",
     "prisma": "^6.1.0",
-    "reflect-metadata": "^0.2.2"
+    "redis": "^5.5.5",
+    "reflect-metadata": "^0.2.2",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.24.5",
@@ -129,8 +134,11 @@
     "./modules/*": "./src/modules/*.js",
     "./routes/*.js": "./routes/*.js"
   },
-   "nodemonConfig": {
-    "ignore": ["__test__", "public"]
+  "nodemonConfig": {
+    "ignore": [
+      "__test__",
+      "public"
+    ]
   },
   "jest": {
     "roots": [

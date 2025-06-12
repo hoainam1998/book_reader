@@ -106,8 +106,8 @@ describe('login api', () => {
         .then((response) => {
           expect(fetch).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: USER.ALREADY_LOGIN,
-            errorCode: ErrorCode.TOKEN_EXPIRED
+            message: USER.ONLY_ONE_DEVICE,
+            errorCode: ErrorCode.ONLY_ALLOW_ONE_DEVICE,
           });
           done();
         });

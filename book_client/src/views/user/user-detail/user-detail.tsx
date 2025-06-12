@@ -74,7 +74,7 @@ function UserDetail(): JSX.Element {
     },
     firstName: { required },
     lastName: { required },
-    sex: { required },
+    sex: {},
     phone: {
       required,
       phoneDuplicateValidate: phoneDuplicateValidate('Phone is duplicate!'),
@@ -113,7 +113,7 @@ function UserDetail(): JSX.Element {
     promise.then((res) => {
       reset();
       showToast(title, res.data.message);
-      setTimeout(backToUserList, 100);
+      setTimeout(backToUserList, 200);
     })
     .catch((error) => showToast(title, error.response.data.message));
   }, []);

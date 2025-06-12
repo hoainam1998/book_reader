@@ -1,12 +1,20 @@
 const Router = require('../router');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL, POWER } = require('#constants');
+const {
+  UPLOAD_MODE,
+  HTTP_CODE,
+  REQUEST_DATA_PASSED_TYPE,
+  METHOD,
+  RESET_PASSWORD_URL,
+  POWER,
+} = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
   fetchHelper,
   getOriginInternalServerUrl,
   verifyResetPasswordToken,
+  getGeneratorFunctionData,
 } = require('#utils');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
@@ -15,6 +23,7 @@ const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
 const onlyAdminAllowed = require('#middlewares/auth/only-admin-allowed');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
+const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const {
   UserPagination,
   LoginResponse,
@@ -77,16 +86,16 @@ class UserRouter extends Router {
     this.post('/pagination', authentication, this._pagination);
     this.post('/update-mfa', authentication, onlyAdminAllowed, this._updateMfaState);
     this.post('/update-power', authentication, onlyAdminAllowed, this._updatePower);
-    this.post('/reset-password', this._resetPassword);
-    this.delete('/delete-user/:id', authentication, onlyAdminAllowed, this._deleteUser);
+    this.post('/reset-password', onlyAllowOneDevice, this._resetPassword);
+    this.delete('/delete/:id', authentication, onlyAdminAllowed, this._deleteUser);
     this.post('/user-detail', authentication, onlyAdminAllowed, this._getUserDetail);
     this.put('/update-user', authentication, onlyAdminAllowed, this._updateUser);
     this.put('/update-person', authentication, this._updatePerson);
     this.post('/send-otp', loginRequire, otpAllowed, this._sendOtpCode);
     this.post('/update-otp', allowInternalCall, this._updateOtpCode);
     this.post('/login-process', allowInternalCall, this._login);
-    this.post('/login', this._loginWithSession);
-    this.get('/logout', authentication, this._logout);
+    this.post('/login', onlyAllowOneDevice, this._loginWithSession);
+    this.get('/logout', loginRequire, this._logout);
     this.post('/verify-otp', loginRequire, otpAllowed, this._verifyOtpWithSession);
     this.post('/verify-otp-process', allowInternalCall, this._verifyOtp);
     this.post('/forget-password-process', allowInternalCall, this._forgetPasswordProcess);
@@ -189,7 +198,7 @@ class UserRouter extends Router {
     error_message: USER.DELETE_USER_FAIL,
     request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM
   })
-  @validateResultExecute(HTTP_CODE.CREATED)
+  @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _deleteUser(req, res, next, self) {
     const query = `mutation DeleteUser($userId: ID!) {
@@ -200,7 +209,17 @@ class UserRouter extends Router {
       }
     }`;
 
-    return self.execute(query, { userId: req.params.id });
+    return self.Service.deleteUserSessionId(req.params.id)
+      .then((user) => {
+        return new Promise((resolve) => {
+          return req.sessionStore.destroy(user.session_id, function () {
+            if (self.Socket.Clients.has(req.params.id)) {
+              self.Socket.Clients.get(req.params.id).send({ delete: true });
+            }
+            resolve(getGeneratorFunctionData(self.execute(query, { userId: req.params.id })));
+          });
+        });
+      });
   }
 
   @validation(UserUpdate, { error_message: USER.UPDATE_USER_FAIL, groups: ['update'] })
@@ -479,7 +498,7 @@ class UserRouter extends Router {
   _loginWithSession(req, res, next, self) {
     const url = getOriginInternalServerUrl(req);
 
-    if (req.session.user) {
+    if (req.session?.user) {
       if (req.body.email === req.session.user.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
@@ -502,14 +521,17 @@ class UserRouter extends Router {
       return Promise.reject({ ...await json, status: response.status });
     })
     .then((json) => {
-      req.session.user = {
-        userId: json.userId,
-        email: json.email,
-        mfaEnable: json.mfaEnable,
-        apiKey: json.apiKey,
-        role: json.role,
-      };
-      return json;
+      return self.Service.updateUserSessionId(req.session.id, json.userId)
+        .then(() => {
+          req.session.user = {
+            userId: json.userId,
+            email: json.email,
+            mfaEnable: json.mfaEnable,
+            apiKey: json.apiKey,
+            role: json.role,
+          };
+        return json;
+      });
     });
   }
 

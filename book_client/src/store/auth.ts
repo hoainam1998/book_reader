@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import Store from './store';
 import { SilentPromise } from 'services';
+import startSocket from 'services/socket-setup';
 import { UserLogin, ApiKeyStorage, UserStorage, Storage } from 'storage';
 
 enum Role {
@@ -83,6 +84,7 @@ class AuthStore extends Store<UserLogin | null> {
 
   saveApiKey(apiKey: string): void {
     ApiKeyStorage.setItem(apiKey);
+    startSocket();
   }
 
   saveUserLogin(user: UserLogin): void {

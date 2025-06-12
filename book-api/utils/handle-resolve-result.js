@@ -5,16 +5,7 @@ const {
   graphqlNotFoundErrorOption,
   graphqlUnauthorizedErrorOption,
 } = require('../modules/common-schema');
-
-/*
-* Prisma error code enum defined.
-*/
-const PRISMA_ERROR_CODE = Object.freeze({
-  RECORD_NOT_FOUND: 'P2025',
-  UNIQUE_DUPLICATE: 'P2002',
-  UNAUTHORIZED: 'P2025',
-  FOREIGN_KEY_CONFLICT: 'P2003',
-});
+const { PRISMA_ERROR_CODE } = require('#constants');
 
 /**
  * @typedef PrismaErrorCodeMessages

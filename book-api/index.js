@@ -4,6 +4,7 @@ require('./global/index');
 config();
 const express = require('express');
 const session = require('express-session');
+const { RedisStore } = require('connect-redis');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { GraphQLObjectType, GraphQLSchema } = require('graphql');
@@ -18,8 +19,10 @@ const validateUrl = require('#middlewares/validate-url');
 const unknownError = require('#middlewares/unknown-error');
 const signedTestCookie = require('#middlewares/test/signed-test-cookie');
 const destroySession = require('#middlewares/test/destroy-session');
+const clearAllSession = require('#middlewares/test/clear-all-session');
 const PrismaClient = require('#services/prisma-client');
 const Logger = require('#services/logger');
+const RedisClient = require('#services/redis');
 
 const corsOptions = {
   origin: process.env.ORIGIN_CORS,
@@ -33,6 +36,10 @@ const layers = [];
 
 const app = express();
 app.use(session({
+  store: new RedisStore({
+    client: RedisClient,
+    prefix: 'book-app:',
+  }),
   resave: false,
   saveUninitialized: false,
   secret: process.env.SESSION_ID_TOKEN,
@@ -44,6 +51,7 @@ app.use(bodyParser.json({ limit: '5mb' }));
 if (process.env.NODE_ENV === 'test') {
   app.post('/signed-test-cookie', signedTestCookie);
   app.get('/destroy-session', destroySession);
+  app.get('/clear-all-session', clearAllSession);
 }
 app.use(unknownError);
 app.use((req, res, next) => validateUrl(req, res, next, layers));
@@ -77,6 +85,8 @@ try {
     }
   });
 
+  FactoryRouter.RedisClient = RedisClient;
+  FactoryRouter.PrismaClient = PrismaClient;
   FactoryRouter.getRoutes(express, new GraphQLSchema({ query, mutation })).forEach(({ route, path }) => app.use(path, route.Router));
 } catch (err) {
   Logger.error('Book api building schema', err.message);

@@ -33,7 +33,7 @@ const authentication = (req, res, next) => {
     }
 
     // if session have not, also return unauthorized message.
-    if (!req.session.isDefined('user')){
+    if (!req.session.isDefined('user')) {
       logger.warn('session is out of date');
       return res.status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(USER.WORKING_SESSION_EXPIRE, ErrorCode.WORKING_SESSION_ENDED));

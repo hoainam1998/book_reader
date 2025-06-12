@@ -1,9 +1,8 @@
-/* eslint-disable no-unused-vars */
 import { useCallback, JSX, useEffect, useState, useMemo } from 'react';
 import { Blocker } from 'react-router-dom';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import { ModalSlotPropsType } from 'components/modal/interface';
+import { ModalSlotPropsType } from 'interfaces';
 import { showModal } from 'utils';
 import { tablet, desktop, extra } from '../static/js/break-point';
 import { useBlockerContext } from 'contexts/blocker';

@@ -13,7 +13,7 @@ import Button from 'components/button/button';
 import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
 import Slot from 'components/slot/slot';
-import { ModalSlotPropsType } from 'components/modal/interface';
+import { ModalSlotPropsType } from 'interfaces';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentWillMount from 'hooks/useComponentWillMount';
 import { getCategoryDetail } from 'views/category/fetcher';

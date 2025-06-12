@@ -20,3 +20,8 @@ export enum UNAUTHORIZED_ERROR_CODE {
 export enum NOT_FOUND_ERROR_CODE {
   URL_NOT_FOUND = 'URL_NOT_FOUND',
 };
+
+export enum SOCKET_NAME {
+  USER = 'user',
+  CLIENT = 'client',
+};

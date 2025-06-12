@@ -54,7 +54,8 @@ module.exports = deepFreeze({
     USER_FINISH_LOGIN: 'User has already completely logged in!',
     DUPLICATE_EMAIL_OR_PHONE_NUMBER: 'Email or phone number have been duplicate. Please enter another one!',
     NOT_PERMISSION: 'You do not have permission to perform this operation!',
-    UPDATE_PASSWORD: 'Update your password success. Please check your email!'
+    UPDATE_PASSWORD: 'Update your password success. Please check your email!',
+    ONLY_ONE_DEVICE: 'Do not allow multiple account on the same only one device!',
   },
   BOOK: {
     CREATE_BOOK_FAIL: 'Create book was failed!',
