@@ -10,7 +10,7 @@ const signedTestCookie = (req, res) => {
     name = req.query.name;
   }
   req.session[name] = req.body;
-  res.end();
+  res.send({ sessionId: req.session.id });
 };
 
 module.exports = signedTestCookie;

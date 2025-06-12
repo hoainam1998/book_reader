@@ -1,4 +1,5 @@
 const request = require('supertest');
+const { Socket } = require('#services/socket');
 const { createServer } = require('http');
 const app = require('#app');
 const Logger = require('#services/logger');
@@ -19,6 +20,7 @@ class TestServer {
 
   /**
   * Create test server instance.
+  *
   * @constructs
   */
   constructor() {
@@ -94,6 +96,7 @@ class TestServer {
   static closeTestServer(done, serverName) {
     TestServer.testServerInstance._server.close(() => {
       Logger.log('Close test server!', `${serverName} test server was closed!`);
+      Socket.close();
       done();
     });
   }

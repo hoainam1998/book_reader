@@ -39,6 +39,15 @@ const signedTestCookie = (sessionJson, name = 'user') => {
 };
 
 /**
+ * Call request to clear all session for testing.
+ *
+ * @return {Promise} - The supertest promise.
+ */
+const clearAllSession = () => {
+  return globalThis.api.get('/clear-all-session');
+};
+
+/**
  * Call request to destroy session for testing.
  *
  * @return {Promise} - The supertest promise.
@@ -74,5 +83,6 @@ module.exports = {
   randomPassword,
   signedTestCookie,
   destroySession,
+  clearAllSession,
   getResetPasswordLink,
 };

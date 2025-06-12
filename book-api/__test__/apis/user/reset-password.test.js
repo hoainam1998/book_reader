@@ -6,7 +6,7 @@ const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { autoGeneratePassword, passwordHashing, signingResetPasswordToken } = require('#utils');
 const { COMMON, USER } = require('#messages');
-const { resetPasswordToken, mockUser } = require('#test/resources/auth');
+const { resetPasswordToken, mockUser, signedTestCookie, sessionData } = require('#test/resources/auth');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const resetPasswordUrl = `${PATH.USER}/reset-password`;
@@ -83,6 +83,37 @@ describe('reset password', () => {
       });
     });
 
+    test('reset password success with user already login', (done) => {
+      const oldPassword = autoGeneratePassword();
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then(() => {
+          signedTestCookie(sessionData.user)
+            .then((responseSign) => {
+              globalThis.api.post(resetPasswordUrl)
+                .set('Cookie', [responseSign.header['set-cookie']])
+                .send({
+                  resetPasswordToken,
+                  email: mockUser.email,
+                  oldPassword,
+                  password: mockUser.password,
+                })
+                .expect(HTTP_CODE.UNAUTHORIZED)
+                .expect('Content-Type', /application\/json/)
+                .then((response) => {
+                  expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
+                  expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+                  expect(response.body).toEqual({
+                    message: USER.ONLY_ONE_DEVICE,
+                    errorCode: ErrorCode.ONLY_ALLOW_ONE_DEVICE,
+                  });
+                  done();
+                })
+            });
+        })
+    });
+
     test('old password is same with new password', async () => {
       const oldPassword = autoGeneratePassword();
 
@@ -104,7 +135,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with bad request', async () => {
+    test('reset password failed with bad request', async () => {
       const oldPassword = autoGeneratePassword();
 
       const response = await globalThis.api.post(resetPasswordUrl)
@@ -125,7 +156,7 @@ describe('reset password', () => {
       expect(response.body.errors).toHaveLength(1);
     });
 
-    test('failed with email not register', async () => {
+    test('reset password failed with email not register', async () => {
       const oldPassword = autoGeneratePassword();
 
       const response = await globalThis.api.post(resetPasswordUrl)
@@ -146,7 +177,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with user not found', async () => {
+    test('reset password failed with user not found', async () => {
       globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(PrismaNotFoundError);
       const oldPassword = autoGeneratePassword();
 
@@ -167,7 +198,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with invalid payload token', async () => {
+    test('reset password failed with invalid payload token', async () => {
       const oldPassword = autoGeneratePassword();
       const verifyMock = jest.spyOn(jwt, 'verify').mockReturnValue(undefined);
 
@@ -190,7 +221,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with token has expired', async () => {
+    test('reset password failed with token has expired', async () => {
       const oldPassword = autoGeneratePassword();
       const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() => {
         throw new TokenExpiredError('jwt expired');
@@ -215,7 +246,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with invalid token', async () => {
+    test('reset password failed with invalid token', async () => {
       const oldPassword = autoGeneratePassword();
       const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() =>  {
         throw new JsonWebTokenError('jwt malformed');
@@ -240,7 +271,7 @@ describe('reset password', () => {
       });
     });
 
-    test('failed with server error', async () => {
+    test('reset password failed with server error', async () => {
       globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(ServerError);
       const oldPassword = autoGeneratePassword();
 

@@ -42,5 +42,11 @@ module.exports = deepFreeze({
   REGEX: {
     PASSWORD: /[A-Za-z0-9@$#%!^&*()]{8}/,
   },
+  PRISMA_ERROR_CODE: {
+    RECORD_NOT_FOUND: 'P2025',
+    UNIQUE_DUPLICATE: 'P2002',
+    UNAUTHORIZED: 'P2025',
+    FOREIGN_KEY_CONFLICT: 'P2003',
+  },
   RESET_PASSWORD_URL: `${process.env.ORIGIN_CORS}/reset-password?token={0}`,
 });

@@ -5,6 +5,7 @@ const CategoryPrismaField = require('#services/prisma-fields/category');
 const BookPrismaField = require('#services/prisma-fields/book');
 const AuthorPrismaField = require('#services/prisma-fields/author');
 const ClientPrismaField = require('#services/prisma-fields/client');
+const Router = require('./router');
 const CategoryRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/category')));
 const BookRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/book')));
 const UserRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/user')));
@@ -47,6 +48,26 @@ class RouterFactory {
         route: new ClientRouter(express, new GraphqlExecute(schema, ClientPrismaField))
       }
     ];
+  }
+
+  /**
+  * Assign prisma client for rooter.
+  *
+  * @static
+  * @param {object} value - The prisma client object.
+  */
+  static set PrismaClient(value) {
+    Router.PrismaClient = value;
+  }
+
+  /**
+  * Assign redis client for rooter.
+  *
+  * @static
+  * @param {object} value - The redis client object.
+  */
+  static set RedisClient(value) {
+    Router.RedisClient = value;
   }
 }
 

@@ -62,6 +62,12 @@ class ErrorCode {
   * @static
   */
   static DATA_IS_DUPLICATE = 'DATA_IS_DUPLICATE';
+
+  /**
+  * Only allow the one user on the one device.
+  * @static
+  */
+  static ONLY_ALLOW_ONE_DEVICE = 'ONLY_ALLOW_ONE_DEVICE';
 }
 
 module.exports = ErrorCode;

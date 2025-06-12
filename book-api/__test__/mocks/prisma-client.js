@@ -6,6 +6,7 @@ module.exports = jest.mock('#services/prisma-client', () => ({
     count: jest.fn().mockResolvedValue(),
     findMany: jest.fn().mockResolvedValue(),
     findUniqueOrThrow: jest.fn().mockResolvedValue(),
+    delete: jest.fn().mockResolvedValue(),
   },
   book: {
     create: jest.fn().mockResolvedValue(),
