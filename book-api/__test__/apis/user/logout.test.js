@@ -40,6 +40,24 @@ describe('logout api', () => {
             .expect(HTTP_CODE.OK)
             .expect('Content-Type', /application\/json/)
             .then((response) => {
+              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith({
+                where: {
+                  user_id: sessionData.user.userId
+                },
+                select: {
+                  session_id: true,
+                }
+              });
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+                where: {
+                  user_id: sessionData.user.userId
+                },
+                data: {
+                  session_id: null
+                }
+              });
               expect(response.body).toEqual({
                 message: USER.LOGOUT_SUCCESS,
               });

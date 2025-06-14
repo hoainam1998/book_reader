@@ -2,6 +2,9 @@ const { WebSocketServer } = require('ws');
 const Logger = require('#services/logger');
 const logger = new Logger('web-socket');
 
+const NORMAL_CLOSE_CODE = 1000;
+const SOCKET_CLOSE = 'User was logout!';
+
 /**
  * Web socket wrapper class. It help send message with default content.
  *
@@ -134,7 +137,12 @@ class Socket {
 
       ws.on('message', function message(data) {
         const message = JSON.parse(data);
-        Socket.instance.Clients.set(message.id, new WsClient(ws, message.name ));
+        if (message.isClose) {
+          Socket.instance.Clients.delete(message.id);
+          ws.close(NORMAL_CLOSE_CODE, SOCKET_CLOSE);
+        } else {
+          Socket.instance.Clients.set(message.id, new WsClient(ws, message.name));
+        }
       });
     });
 

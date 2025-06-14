@@ -1,4 +1,4 @@
-const { HTTP_CODE } = require('#constants');
+const { HTTP_CODE, REDIS_PREFIX } = require('#constants');
 const { COMMON, USER } = require('#messages');
 const utils = require('#utils');
 const { messageCreator } = utils;
@@ -16,7 +16,7 @@ const logger = new Logger('Authentication');
  */
 module.exports = async (req, res, next) => {
   try {
-    const user = await req.sessionStore.client.get(`book-app:${req.session.id}`);
+    const user = await req.sessionStore.client.get(`${REDIS_PREFIX}${req.session.id}`);
     if (user) {
       res.status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(USER.ONLY_ONE_DEVICE, ErrorCode.ONLY_ALLOW_ONE_DEVICE));

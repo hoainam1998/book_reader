@@ -4,6 +4,7 @@ import ForgetPassword from 'views/login-group/forget-password/forget-password';
 import ResetPassword,
 { getResetPasswordToken }
 from 'views/login-group/reset-password/client-reset-password/client-reset-password';
+import ApiError from 'components/error/api-error/api-error';
 import Signup from 'views/login-group/signup/signup';
 import Home from 'views/home/client/home';
 import LoginRequire from 'guard/login-require';
@@ -13,7 +14,8 @@ import path from './paths';
 const clientRoutes: RoutePropsUnion[] = [
   {
     path: path.ROOT,
-    element: <Navigate replace to={path.LOGIN} />
+    element: <Navigate replace to={path.LOGIN} />,
+    errorElement: <ApiError alignCenter />,
   },
   {
     path: path.LOGIN,
@@ -21,16 +23,16 @@ const clientRoutes: RoutePropsUnion[] = [
   },
   {
     path: path.FORGET_PASSWORD,
-    element: <ForgetPassword />
+    element: <LoginRequire><ForgetPassword /></LoginRequire>,
   },
   {
     path: path.RESET_PASSWORD,
-    element: <ResetPassword />,
+    element: <LoginRequire><ResetPassword /></LoginRequire>,
     loader: getResetPasswordToken,
   },
   {
     path: path.SIGN_UP,
-    element: <Signup />
+    element: <LoginRequire><Signup /></LoginRequire>,
   },
   {
     path: path.HOME,

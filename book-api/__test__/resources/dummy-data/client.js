@@ -76,6 +76,7 @@ class ClientDummyData extends DummyDataApi {
   static get session() {
     return {
       client: {
+        clientId: this.MockData.reader_id,
         email: this.MockData.email,
         apiKey: signClientLoginToken(this.MockData.email),
       }

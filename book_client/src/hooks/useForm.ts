@@ -1,4 +1,4 @@
-import { ChangeEvent, DependencyList } from 'react';
+import { ChangeEvent, DependencyList, useEffect } from 'react';
 import useValidate, {
   ValidateFunction,
   ValidateProcess,
@@ -50,6 +50,8 @@ const validateValue = (event: ChangeEvent): any => {
   }
 };
 
+let originState: any = null;
+
 export default <T extends Object, R>(
   state: T,
   rules: R,
@@ -57,7 +59,9 @@ export default <T extends Object, R>(
   dependencyList?: DependencyList
 ): FormValidateProps => {
   const validateObject: ErrorInfo = useValidate<T, R>(state, rules, dependencyList);
-  const originState: typeof state = { ...state };
+  if (!originState) {
+    originState = { ...state };
+  }
 
   const formControlProps: FormValidateProps = {
     validate: validateObject,
@@ -79,12 +83,13 @@ export default <T extends Object, R>(
       Object.keys(state).forEach((key: string) => {
         const keyValidateObject = validateObject[key]!;
         keyValidateObject.dirty = false;
-        if (originState[key as keyof T] !== undefined) {
+        if (originState && originState[key as keyof T] !== undefined) {
           keyValidateObject.watch(originState[key as keyof T], key);
         } else {
           keyValidateObject.watch('', key);
         }
       });
+      originState = null;
       document.forms.namedItem(formId)?.reset();
     }
   };
@@ -107,6 +112,10 @@ export default <T extends Object, R>(
       }
     };
   });
+
+  useEffect(() => {
+    return formControlProps.reset;
+  }, []);
 
   return formControlProps;
 };

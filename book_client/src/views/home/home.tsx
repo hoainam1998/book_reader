@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 import Menu from 'components/menu/menu';
-import Header from 'components/header/header';
+import Header from 'components/header/admin-header/header';
 import Content from 'components/content/content';
 import Footer from 'components/footer/footer';
 import './style.scss';

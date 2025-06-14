@@ -39,6 +39,37 @@ class SharedService {
       data: {
         session_id: sessionId,
       },
+    }).catch((error) => {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+          throw {
+            status: HTTP_CODE.UNAUTHORIZED,
+            ...messageCreator(USER.USER_NOT_FOUND)
+          };
+        }
+      }
+      throw error;
+    });
+  }
+
+  updateClientSessionId(sessionId, clientId) {
+    return this.PrismaClient.reader.update({
+      where: {
+        reader_id: clientId,
+      },
+      data: {
+        session_id: sessionId,
+      },
+    }).catch((error) => {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+          throw {
+            status: HTTP_CODE.UNAUTHORIZED,
+            ...messageCreator(USER.USER_NOT_FOUND)
+          };
+        }
+      }
+      throw error;
     });
   }
 
@@ -59,6 +90,37 @@ class SharedService {
           session_id: null
         }
       }).then(() => user);
+    })
+    .catch((error) => {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+          throw {
+            status: HTTP_CODE.NOT_FOUND,
+            ...messageCreator(USER.USER_NOT_FOUND)
+          };
+        }
+      }
+      throw error;
+    });
+  }
+
+  deleteClientSessionId(clientId) {
+    const where = {
+      reader_id: clientId,
+    };
+
+    return this.PrismaClient.reader.findFirstOrThrow({
+      where,
+      select: {
+        session_id: true,
+      }
+    }).then((client) => {
+      return this.PrismaClient.reader.update({
+        where,
+        data: {
+          session_id: null
+        }
+      }).then(() => client);
     })
     .catch((error) => {
       if (error instanceof PrismaClientKnownRequestError) {

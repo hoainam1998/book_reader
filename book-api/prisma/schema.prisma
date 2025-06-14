@@ -89,6 +89,7 @@ model user {
 
 model reader {
   reader_id                 String          @id @db.VarChar(20)
+  session_id                String?         @unique @db.VarChar(200)
   last_name                 String          @db.VarChar(200)
   first_name                String          @db.VarChar(200)
   password                  String          @db.VarChar(100)

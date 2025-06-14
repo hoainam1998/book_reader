@@ -1,7 +1,7 @@
 const { config } = require('dotenv');
 require('reflect-metadata');
 require('./global/index');
-config();
+config({ path: '.env' });
 const express = require('express');
 const session = require('express-session');
 const { RedisStore } = require('connect-redis');
@@ -14,7 +14,7 @@ const startUser = require('./modules/user');
 const startAuthor = require('./modules/author');
 const startClient = require('./modules/client');
 const FactoryRouter = require('./routes/factory');
-const { METHOD } = require('#constants');
+const { METHOD, REDIS_PREFIX } = require('#constants');
 const validateUrl = require('#middlewares/validate-url');
 const unknownError = require('#middlewares/unknown-error');
 const signedTestCookie = require('#middlewares/test/signed-test-cookie');
@@ -38,7 +38,7 @@ const app = express();
 app.use(session({
   store: new RedisStore({
     client: RedisClient,
-    prefix: 'book-app:',
+    prefix: REDIS_PREFIX,
   }),
   resave: false,
   saveUninitialized: false,
