@@ -577,9 +577,11 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _logout(req, res, next, self) {
-    return new Promise((resolve) => {
-      req.session.destroy(() => resolve(messageCreator(USER.LOGOUT_SUCCESS)));
-    });
+    return self.Service.deleteUserSessionId(req.session.user.userId)
+      .then(async () => {
+        await req.session.destroy();
+        return messageCreator(USER.LOGOUT_SUCCESS);
+      });
   }
 }
 

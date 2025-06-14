@@ -49,4 +49,5 @@ module.exports = deepFreeze({
     FOREIGN_KEY_CONFLICT: 'P2003',
   },
   RESET_PASSWORD_URL: `${process.env.ORIGIN_CORS}/reset-password?token={0}`,
+  REDIS_PREFIX: 'book-app:',
 });

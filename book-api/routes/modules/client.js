@@ -2,6 +2,8 @@ const Router = require('../router');
 const ErrorCode = require('#services/error-code');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
+const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
+const clientLoginRequire = require('#middlewares/auth/client-login-require');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
@@ -31,11 +33,12 @@ class ClientRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/sign-up', this._signup);
-    this.post('/forget-password', this._forgetPassword);
+    this.post('/sign-up', onlyAllowOneDevice, this._signup);
+    this.post('/forget-password', onlyAllowOneDevice, this._forgetPassword);
     this.post('/generated-reset-password-token', allowInternalCall, this._generatedResetPassword);
-    this.post('/reset-password', this._resetPassword);
-    this.post('/login', this._login);
+    this.post('/reset-password', onlyAllowOneDevice, this._resetPassword);
+    this.post('/login', onlyAllowOneDevice, this._login);
+    this.post('/logout', clientLoginRequire, this._logout);
   }
 
   @validation(SignUp, { error_message: READER.SIGNUP_FAIL })
@@ -184,13 +187,28 @@ class ClientRouter extends Router {
     return getGeneratorFunctionData(promise).then((result) => {
       const client = result?.data?.client?.login;
       if (client) {
-        req.session.client = {
-          email: client.email || req.body.email,
-          apiKey: client.apiKey,
-        };
+        return self.Service.updateClientSessionId(req.session.id, client.clientId)
+          .then(() => {
+            req.session.client = {
+              clientId: client.clientId,
+              email: client.email || req.body.email,
+              apiKey: client.apiKey,
+            };
+            return client;
+          });
       }
       return result;
     });
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+   _logout(req, res, next, self) {
+    return self.Service.deleteClientSessionId(req.session.client.clientId)
+      .then(async () => {
+        await req.session.destroy();
+        return messageCreator(USER.LOGOUT_SUCCESS);
+      });
   }
 }
 

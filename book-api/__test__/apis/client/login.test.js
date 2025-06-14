@@ -83,7 +83,7 @@ describe('client login', () => {
       expect(response.body).toEqual(clientExpected);
     });
 
-    test('login success in case user was reset password', async () => {
+    test('login success in after user was reset password', async () => {
       ClientDummyData.ExpectedTypes = Object.assign(ClientDummyData.ExpectedTypes, { apiKey: null });
       globalThis.prismaClient.reader.findFirstOrThrow.mockResolvedValue({
         ...clientMock,
@@ -112,7 +112,57 @@ describe('client login', () => {
         },
         select: { ...selectExpected, password: true },
       });
+      expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
+        where: {
+          reader_id: clientMock.reader_id,
+        },
+        data: {
+          session_id: expect.any(String),
+        },
+      });
       expect(response.body).toEqual(clientExpected);
+    });
+
+    test('login failed with update session id error', async () => {
+      globalThis.prismaClient.reader.findFirstOrThrow.mockResolvedValue({
+        ...clientMock,
+        password: await clientMock.password,
+      });
+      globalThis.prismaClient.reader.update.mockRejectedValue(PrismaNotFoundError);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
+      expect.hasAssertions();
+      const response = await globalThis.api.post(loginUrl).send(requestBody);
+      const selectExpected = parseToPrismaSelect.mock.results[0].value;
+      expect(response.header['content-type']).toMatch(/application\/json/);
+      expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            {
+              email: requestBody.email,
+            },
+            {
+               reader_id: requestBody.email,
+            },
+          ],
+        },
+        select: { ...selectExpected, password: true },
+      });
+      expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
+        where: {
+          reader_id: clientMock.reader_id,
+        },
+        data: {
+          session_id: expect.any(String),
+        },
+      });
+      expect(response.body).toEqual({
+        message: USER.USER_NOT_FOUND,
+      });
     });
 
     test('login failed due user is already login', async () => {
@@ -126,8 +176,8 @@ describe('client login', () => {
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
       expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
       expect(response.body).toEqual({
-        message: USER.ALREADY_LOGIN,
-        errorCode: ErrorCode.TOKEN_EXPIRED,
+        message: USER.ONLY_ONE_DEVICE,
+        errorCode: ErrorCode.ONLY_ALLOW_ONE_DEVICE,
       });
     });
 
@@ -255,6 +305,7 @@ describe('client login', () => {
     });
 
     test('login failed with output validate error', async () => {
+      globalThis.prismaClient.reader.update.mockResolvedValue(clientMock);
       globalThis.prismaClient.reader.findFirstOrThrow.mockResolvedValue({
         ...clientMock,
         password: await clientMock.password,

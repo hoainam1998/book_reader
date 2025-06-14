@@ -17,6 +17,7 @@ const requestBody = {
   email: mockUser.email,
   password: mockUser.password,
   query: {
+    userId: true,
     name: true,
     apiKey: true,
     avatar: true,
@@ -54,14 +55,17 @@ describe('login api', () => {
     afterEach(() => fetch.mockReset());
 
     test('login success', (done) => {
+      const plainUser = plainToInstance(UserDTO, mockUser);
       fetch.mockResolvedValue(new Response(JSON.stringify({
-        name: 'nguyen nam',
-        email: 'namdang201999@gmail.com',
-        avatar: 'avatar',
+        userId: mockUser.user_id,
+        name: plainUser.name,
+        email: mockUser.email,
+        avatar: mockUser.avatar,
         mfaEnable: true,
         apiKey: null,
         power: 0,
       })));
+      globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
       globalThis.api.post(loginUrl)
@@ -69,7 +73,6 @@ describe('login api', () => {
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          const plainUser = plainToInstance(UserDTO, mockUser);
           expect(fetch).toHaveBeenCalledTimes(1);
           expect(fetch).toHaveBeenCalledWith(
             expect.stringContaining(loginUrl),
@@ -85,6 +88,15 @@ describe('login api', () => {
           expect(response.header).toMatchObject({
             'set-cookie': expect.arrayContaining([expect.any(String)])
           });
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+            where: {
+              user_id: mockUser.user_id,
+            },
+            data: {
+              session_id: expect.any(String),
+            },
+          });
           expect(response.body).toMatchObject({
             name: plainUser.name,
             avatar: plainUser.avatar,
@@ -92,6 +104,52 @@ describe('login api', () => {
             mfaEnable: plainUser.mfaEnable
           });
           sessionToken = response.header['set-cookie'];
+          done();
+        });
+    });
+
+    test('login failed with update session id throw error', (done) => {
+      const plainUser = plainToInstance(UserDTO, mockUser);
+      fetch.mockResolvedValue(new Response(JSON.stringify({
+        userId: mockUser.user_id,
+        name: plainUser.name,
+        email: mockUser.email,
+        avatar: mockUser.avatar,
+        mfaEnable: true,
+        apiKey: null,
+        power: 0,
+      })));
+      globalThis.prismaClient.user.update.mockRejectedValue(PrismaNotFoundError)
+
+      expect.hasAssertions();
+      globalThis.api.post(loginUrl)
+        .send(requestBody)
+        .expect(HTTP_CODE.UNAUTHORIZED)
+        .expect('Content-Type', /application\/json/)
+        .then((response) => {
+          expect(fetch).toHaveBeenCalledTimes(1);
+          expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining(loginUrl),
+            expect.objectContaining({
+              method: METHOD.POST,
+              headers: expect.objectContaining({
+                'Content-Type': 'application/json'
+              }),
+              body: JSON.stringify(requestBody)
+            })
+          );
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+            where: {
+              user_id: mockUser.user_id,
+            },
+            data: {
+              session_id: expect.any(String),
+            },
+          });
+          expect(response.body).toEqual({
+            message: USER.USER_NOT_FOUND,
+          });
           done();
         });
     });

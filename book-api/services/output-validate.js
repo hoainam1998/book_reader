@@ -53,7 +53,7 @@ class Validate extends Singleton {
     Validate.parse = (dtoValue) => {
       const { data, response } = dtoValue;
 
-      if (recursiveCheck(data ?? response)) {
+      if (recursiveCheck(data ?? response ?? dtoValue)) {
         return {
           success: true,
           data: response
