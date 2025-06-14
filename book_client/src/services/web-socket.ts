@@ -47,6 +47,10 @@ class WebSocketInit {
       if (WebSocketInit._onMessageCallback) {
         WebSocketInit.Ws.onmessage = WebSocketInit._onMessageCallback;
       }
+
+      WebSocketInit.Ws.onclose = function (event) {
+        console.log(`[Socket close] ${event.reason}`);
+      };
     }
   }
 
@@ -78,6 +82,17 @@ class WebSocketInit {
    */
   static set onMessage(callback: (event: Event) => void) {
     WebSocketInit._onMessageCallback = callback;
+  }
+
+  /**
+   * Send request to close ws on server side.
+   *
+   * @static
+   */
+  static close(id?: string): void {
+    if (WebSocketInit.Ws && id) {
+      WebSocketInit.Ws.send(JSON.stringify({ isClose: true, id }));
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import Header from '../header';
+import Header from '../admin-header/header';
 import { render, screen } from '@testing-library/react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 

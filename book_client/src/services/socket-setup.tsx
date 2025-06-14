@@ -53,7 +53,7 @@ userSocket?.messageController((data) => {
 });
 
 export default () => {
-  WebSocketInit.onOpen = function(event) {
+  WebSocketInit.onOpen = function() {
     const user = UserStorage.getItem();
     (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
   };

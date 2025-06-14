@@ -2,6 +2,7 @@
 import Store from './store';
 import { SilentPromise } from 'services';
 import startSocket from 'services/socket-setup';
+import WebSocketInit from 'services/web-socket';
 import { UserLogin, ApiKeyStorage, UserStorage, Storage } from 'storage';
 
 enum Role {
@@ -94,6 +95,7 @@ class AuthStore extends Store<UserLogin | null> {
   }
 
   logout(): void {
+    WebSocketInit.close(this.CurrentStore!.userId);
     Storage.removeAll();
     SilentPromise.clearRequestMemory();
     this.CurrentStore = null;
