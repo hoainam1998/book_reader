@@ -38,3 +38,10 @@ export type ModalPropsType = {
   onOpen?: () => void;
   onClose: () => void;
 };
+
+export type NavLinkPropsType = {
+  path: string;
+  label: string;
+  image: string;
+  children?: NavLinkPropsType[];
+};

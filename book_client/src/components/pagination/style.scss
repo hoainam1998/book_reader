@@ -24,3 +24,11 @@
     pointer-events: none;
   }
 }
+
+.horizontal-pagination {
+  flex-direction: column;
+
+  & .direction {
+    rotate: 90deg;
+  }
+}

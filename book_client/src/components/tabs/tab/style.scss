@@ -1,0 +1,33 @@
+.tab {
+  .tab-header {
+    width: 100px;
+    height: 30px;
+    border: 1px solid $placeholder;
+    border-left: none;
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+    padding-top: 3px;
+    cursor: pointer;
+    text-align: center;
+
+    .tab-title {
+      font-weight: bold;
+      position: relative;
+      display: block;
+      cursor: inherit;
+
+      & > input[name="tab"] {
+        opacity: 0;
+        position: absolute;
+      }
+    }
+  }
+
+  &:first-child .tab-header {
+    border-left: 1px solid $placeholder;
+  }
+}
+
+.tab-active {
+  background-color: $table-row-even-color;
+}

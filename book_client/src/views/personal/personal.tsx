@@ -14,11 +14,9 @@ import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store, { UserLogin } from 'store/auth';
 import path from 'router/paths';
-import { getAllUsers } from 'views/user/fetcher';
-import { updatePerson } from './fetcher';
 import { logout } from 'views/login-group/login/admin-login/fetcher';
 import useComponentDidMount from 'hooks/useComponentDidMount';
-import { convertBase64ToSingleFile, showToast } from 'utils';
+import { clsx, convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
 import { HaveLoadedFnType, UserType } from 'interfaces';
 import './style.scss';
@@ -40,7 +38,12 @@ const state: PersonalType = {
 const formId: string = 'personal-form';
 const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) => ({ label, value: index }));
 
-function Personal(): JSX.Element {
+type PersonalPropsType = {
+  update: (formData: FormData) => Promise<AxiosResponse>;
+  getAllUsers: (userId: string) => Promise<AxiosResponse>;
+};
+
+function Personal({ update, getAllUsers }: PersonalPropsType): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
   const [phones, setPhones] = useState<string[]>([]);
   const [reLogin, setReLogin] = useState<boolean>(false);
@@ -114,9 +117,9 @@ function Personal(): JSX.Element {
   const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
     if (!validate.error) {
-      updatePerson(formData)
+      update(formData)
         .then((res) => {
-          showToast('Update your information', res.data.message);
+          showToast('Update your information!', res.data.message);
           setReLogin(true);
           logout()
             .then(() => {
@@ -124,7 +127,7 @@ function Personal(): JSX.Element {
               setTimeout(() => navigate(path.LOGIN), 200);
             });
         })
-        .catch((err) => showToast('Personal', err.response.data.message));
+        .catch((err) => showToast('Update your information!', err.response.data.message));
     }
   }, []);
 
@@ -168,7 +171,10 @@ function Personal(): JSX.Element {
   return (
     <BlockerProvider isNavigate={validate.dirty && !reLogin}>
       <PersonalForm>
-        <section className="personal flex-center">
+        <section className={clsx({
+          'client-personal': globalThis.isClient,
+          'admin-personal flex-center': !globalThis.isClient,
+          })}>
           <Form id={formId} onSubmit={onSubmit} className="user-form hight-light form-size">
             <Grid
               lg={2}

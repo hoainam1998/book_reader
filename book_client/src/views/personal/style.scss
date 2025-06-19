@@ -1,4 +1,4 @@
-.personal {
+.admin-personal {
   height: 100vh;
   flex-direction: column;
   padding: 20px;
@@ -20,4 +20,10 @@
 
 .align-items-center {
   align-items: center;
+}
+
+.client-personal {
+  padding: 5px;
+  width: 75%;
+  margin: auto;
 }

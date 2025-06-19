@@ -1,0 +1,26 @@
+.horizontal-book {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  padding: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+  & > .book-avatar {
+    width: 55px;
+  }
+
+  &-info {
+    &-name {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+      overflow: hidden;
+      text-wrap: wrap;
+    }
+
+    &-author-name {
+      font-size: 13px;
+    }
+  }
+}

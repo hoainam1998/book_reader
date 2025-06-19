@@ -1,0 +1,23 @@
+.client-header-wrapper {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  width: calc(100vw - 12vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 30px;
+  background-color: $black-client-primary-color;
+
+  &:after {
+    content: '';
+  }
+
+  .client-search {
+    background-color: $black-client-primary-color;
+
+    input[type="text"] {
+      width: 300px;
+    }
+  }
+}

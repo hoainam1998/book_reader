@@ -3,7 +3,6 @@ import React, { JSX } from 'react';
 export type SlotProps<T> = {
   name: string;
   children?: React.ReactNode;
-  // eslint-disable-next-line no-unused-vars
   render?: (slotProps: T) => React.ReactNode;
 };
 
