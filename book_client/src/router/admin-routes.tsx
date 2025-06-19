@@ -3,8 +3,8 @@ import AdminLogin from 'views/login-group/login/admin-login/admin-login';
 import AdminResetPassword,
 { getResetPasswordToken }
 from 'views/login-group/reset-password/admin-reset-password/admin-reset-password';
-import Home from 'views/home/home';
-import Personal from 'views/personal/personal';
+import Home from 'views/home/admin/home';
+import AdminPersonal from 'views/personal/admin-personal/admin-personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
 import UserDetail from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category/category';
@@ -45,7 +45,7 @@ const adminRoutes: RoutePropsUnion[] = [
   },
   {
     path: path.PERSONAL,
-    element: <LoginRequire><Personal /></LoginRequire>
+    element: <LoginRequire><AdminPersonal /></LoginRequire>
   },
   {
     path: path.HOME,

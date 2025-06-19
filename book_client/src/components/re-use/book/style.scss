@@ -1,0 +1,43 @@
+.book {
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  padding: 7px;
+  cursor: pointer;
+
+  & > .item-book-avatar {
+    height: 200px;
+    width: 100%;
+  }
+
+  & > .book-quick-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    & > a .author-avatar {
+      height: 50px;
+      width: 50px;
+    }
+
+    & > .left-info {
+      .book-name {
+        font-weight: bold;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        text-wrap: wrap;
+        line-height: 17px;
+      }
+
+      .author-name {
+        font-weight: normal;
+      }
+    }
+  }
+}
+
+a:has(.book), a:has(.author-name) {
+  text-decoration: none;
+  color: inherit;
+}

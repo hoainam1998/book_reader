@@ -14,6 +14,7 @@ import './style.scss';
 type PaginationProps = {
   pageNumber: number;
   onChange: (page: number) => void;
+  horizontal?: boolean;
 };
 
 type PageButton = {
@@ -134,7 +135,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
   }
 };
 
-function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
+function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.Element {
   const pages = useMemo<Node<PageButton>[]>(() => {
     const paginationArray: PageButton[] = [];
 
@@ -179,7 +180,7 @@ function Pagination({ pageNumber, onChange }: PaginationProps): JSX.Element {
   }, [pageNumber]);
 
   return (
-    <ul className="pagination">
+    <ul className={clsx('pagination', horizontal && 'horizontal-pagination')}>
       <li>
         <Button className="pagination-button direction"
           disabled={disablePrevious}

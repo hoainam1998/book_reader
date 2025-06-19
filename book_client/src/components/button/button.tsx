@@ -1,4 +1,4 @@
-import { MouseEventHandler, JSX, ReactNode, useMemo } from 'react';
+import { MouseEventHandler, JSX, ReactNode, useMemo, useRef, forwardRef, useImperativeHandle, Ref } from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -14,9 +14,10 @@ function Button({
   children,
   className,
   variant,
+  disabled,
   onClick,
-  disabled
-}: ButtonPropsType): JSX.Element {
+}: ButtonPropsType, ref: Ref<HTMLElement>): JSX.Element {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const buttonTypeClass: string = useMemo<string>(() => {
     if (variant) {
       if (globalThis.isClient && variant === 'submit') {
@@ -28,14 +29,21 @@ function Button({
     return '';
   }, [variant]);
 
+  useImperativeHandle(
+    ref,
+    (): HTMLElement => buttonRef.current!,
+    []
+  );
+
   return (
     <button
       className={clsx('button', className, buttonTypeClass)}
       onClick={onClick}
-      disabled={disabled}>
+      disabled={disabled}
+      ref={buttonRef}>
         {children}
     </button>
   );
 }
 
-export default Button;
+export default forwardRef(Button);

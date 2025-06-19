@@ -1,0 +1,17 @@
+.tab-header-custom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  & > .tab-icon {
+    height: 20px;
+    width: 20px;
+    margin-right: 7px;
+  }
+}
+
+.author-book-link {
+  text-decoration: underline;
+  color: inherit;
+  font-weight: bold;
+}

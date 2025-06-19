@@ -2,17 +2,18 @@ import { JSX, useCallback, useState, useRef, useMemo } from 'react';
 import Button from 'components/button/button';
 import Input from 'components/form/form-control/input/input';
 import RenderCondition from 'components/render-condition/render-condition';
+import { clsx } from 'utils';
 import './style.scss';
 
 type HeaderDashboardPropsType = {
   disabled?: boolean;
   hiddenNewBtn?: boolean;
-  add: () => void;
-  // eslint-disable-next-line no-unused-vars
+  className?: string;
+  add?: () => void;
   search: (keyword: string) => void;
 };
 
-function HeaderDashboard({ disabled, hiddenNewBtn, add, search }: HeaderDashboardPropsType): JSX.Element {
+function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: HeaderDashboardPropsType): JSX.Element {
   const headerRef = useRef<HTMLDivElement>(null);
   const [isClear, setIsClear] = useState<boolean>(false);
   const [disableSearchButton, setDisableSearchButton] = useState<boolean>(true);
@@ -47,10 +48,10 @@ function HeaderDashboard({ disabled, hiddenNewBtn, add, search }: HeaderDashboar
   }, []);
 
   return (
-    <div className="header-dashboard position-sticky" ref={headerRef} style={{ top }}>
+    <div className={clsx('header-dashboard position-sticky', className)} ref={headerRef} style={{ top }}>
       <RenderCondition
         condition={showNewBtn}
-        then={<Button variant="success" className="add-new" onClick={add}>+New</Button>} />
+        then={<Button variant="success" className="add-new" onClick={add!}>+New</Button>} />
       <Input
         label=""
         value={keyword}
@@ -58,7 +59,7 @@ function HeaderDashboard({ disabled, hiddenNewBtn, add, search }: HeaderDashboar
         className="un-grid"
         labelClass="label-search"
         inputColumnSize={{
-          sm: 12
+          sm: 12,
         }}
         disabled={disabled}
         onChange={(e) => setClearFlag((e.target as any).value)}

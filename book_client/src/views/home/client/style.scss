@@ -1,0 +1,15 @@
+.client-layout {
+  display: flex;
+  align-items: stretch;
+
+  .client-home {
+    width: calc(100vw - 12vw);
+    margin-left: 12vw;
+    margin-top: 60px;
+
+    & > .client-content {
+      max-height: calc(100vh - 60px);
+      padding: 0 7px 7px 7px;
+    }
+  }
+}

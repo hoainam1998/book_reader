@@ -4,13 +4,8 @@ import List from 'components/list/list';
 import routes from 'router/admin-routes';
 import { clsx } from 'utils';
 import path from 'router/paths';
+import { NavLinkPropsType } from 'interfaces';
 import './style.scss';
-
-type NavLinkPropsType = {
-  path: string;
-  label: string;
-  image: string;
-};
 
 function Menu(): JSX.Element {
 

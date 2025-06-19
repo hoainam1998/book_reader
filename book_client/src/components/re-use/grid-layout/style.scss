@@ -1,0 +1,77 @@
+$cols: ("four": 4, "five": 5);
+
+@each $name, $val in $cols {
+  .#{$name}-column {
+    grid-template-columns: repeat($val, 1fr);
+  }
+}
+
+.grid-layout-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  .top-operation {
+    position: sticky;
+    z-index: 1;
+    background-color: $white-color;
+    top: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    margin-bottom: 7px;
+    border-bottom: 1px solid $black-client-primary-color;
+
+    & > .result-info span:last-child {
+      font-style: italic;
+      font-size: 14px;
+    }
+  }
+
+  .grid-layout {
+    display: grid;
+    grid-gap: 10px;
+  }
+
+  .grid-layout-btn-group {
+    float: right;
+
+    & > button {
+      width: 30px;
+      height: 30px;
+      padding: 5px;
+      margin-right: 5px;
+
+      &:last-of-type {
+        margin-right: unset;
+      }
+
+      & > img {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    &:after {
+      clear: both;
+    }
+  }
+}
+
+.grid-content {
+  display: flex;
+  position: relative;
+
+  & > *:first-child {
+    width: calc(100% - 35px);
+  }
+
+  .grid-pagination {
+    width: 35px;
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    padding: 0 5px;
+  }
+}

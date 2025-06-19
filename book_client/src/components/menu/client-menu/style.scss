@@ -1,0 +1,79 @@
+.client-menu-wrapper {
+  width: 12vw;
+  height: 100vh;
+  padding: 7px;
+  background-color: $white-color;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+
+  .menu {
+    background: $black-client-primary-color;
+    border-radius: 5px;
+    padding: 5px;
+    max-height: calc(100vh - 127px - 14px - 7px);
+    overflow-y: auto;
+
+    &-item {
+      padding: 4px 7px;
+      border-radius: 5px;
+
+      & > a {
+        text-decoration: none;
+        color: $black-color;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        & > .name {
+          font-weight: bold;
+          color: $white-color;
+          font-size: 13px;
+        }
+      }
+
+      &:hover:not(li:has( > .active)) {
+        border-radius: 5px;
+        background: $switch-checked;
+      }
+    }
+  }
+
+  .user-login-box {
+    margin-top: 7px;
+    background-color: $black-client-primary-color;
+    border-radius: 5px;
+    padding: 7px;
+
+    .user-login-quick-info {
+      & > * {
+        display: block;
+        margin: auto;
+        text-align: center;
+        color: $white-color;
+      }
+    }
+
+    & .separate-line {
+      margin: 7px 0;
+    }
+
+    .personal-operator-btn {
+      display: flex;
+      justify-content: space-between;
+      gap: 5px;
+    }
+
+    .flex-basic-50 {
+      flex-basis: 50%;
+    }
+  }
+}
+
+.menu-item:has( > .active) {
+  background-color: $red-client-primary-color;
+}
+
+.link-disabled {
+  pointer-events: none;
+}
