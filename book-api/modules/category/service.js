@@ -12,9 +12,19 @@ class CategoryService extends Service {
     });
   }
 
-  all(select) {
+  all(hasRelation, select) {
+    const condition = hasRelation
+    ? {
+      where: {
+        book: {
+          some: {}
+        }
+      },
+    } : {};
+
     return this.PrismaInstance.category.findMany({
-      select
+      ...condition,
+      select,
     });
   }
 

@@ -88,8 +88,13 @@ const query = new GraphQLObjectType({
   fields: {
     all: {
       type: new GraphQLList(CATEGORY_TYPE),
-      resolve: async (category, args, context) => {
-        const categories = await category.all(context);
+      args: {
+        haveValue: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+        }
+      },
+      resolve: async (category, { haveValue }, context) => {
+        const categories = await category.all(haveValue, context);
         if (categories.length === 0) {
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
           throw new GraphQLError('Categories not found!', graphqlNotFoundErrorOption );
