@@ -12,7 +12,7 @@ const { plainToInstance } = require('class-transformer');
 const PaginationResponse = require('#dto/common/pagination-response');
 const AuthorDTO = require('#dto/author/author');
 const AuthorDetailDTO = require('#dto/author/author-detail');
-const { AUTHOR } = require('#messages');
+const { AUTHOR, CATEGORY } = require('#messages');
 const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
 const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
@@ -171,7 +171,18 @@ const query = new GraphQLObjectType({
         const authors = await author.getAuthors(authorIds, context);
         if (!checkArrayHaveValues(authors)) {
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
-          throw new GraphQLError('Authors not found!', graphqlNotFoundErrorOption);
+          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
+        }
+        return convertDtoToZodObject(AuthorDTO, authors);
+      }
+    },
+    menu: {
+      type: AUTHOR_LIST,
+      resolve: async (author, args, context) => {
+        const authors = await author.loadAuthorMenu(context);
+        if (!checkArrayHaveValues(authors)) {
+          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
+          throw new GraphQLError(AUTHOR.AUTHOR_NOT_FOUND, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(AuthorDTO, authors);
       }

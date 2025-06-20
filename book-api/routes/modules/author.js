@@ -3,7 +3,7 @@ const { validateResultExecute, upload, serializer, validation } = require('#deco
 const authentication = require('#middlewares/auth/authentication');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out');
-const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter } = require('#dto/author/author-in');
+const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter, AuthorMenu } = require('#dto/author/author-in');
 const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
 const { AUTHOR } = require('#messages');
 
@@ -26,6 +26,7 @@ class AuthorRouter extends Router {
     this.post('/detail', authentication, this._getAuthorDetail);
     this.put('/update', authentication, this._updateAuthor);
     this.post('/filter', authentication, this._getAuthors);
+    this.post('/menu', authentication, this._loadAuthorMenu);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
@@ -143,6 +144,21 @@ class AuthorRouter extends Router {
       { authorIds: req.body.authorIds },
       req.body.query
     );
+  }
+
+  @validation(AuthorMenu, { error_message: AUTHOR.MENU })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AllAuthorResponse)
+  _loadAuthorMenu(req, res, next, self) {
+    const query = `query AuthorMenu {
+      author {
+        menu ${
+          req.body.query
+        }
+      }
+    }`;
+
+    return self.execute(query, undefined, req.body.query);
   }
 }
 
