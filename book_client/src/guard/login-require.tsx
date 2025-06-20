@@ -11,6 +11,8 @@ const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
   const isOtp = useMatch(path.OTP);
   const isPersonal = useMatch(path.PERSONAL);
   const isResetPassword = useMatch(path.RESET_PASSWORD);
+  const isSignup = useMatch(path.SIGN_UP);
+  const isForgetPassword = useMatch(path.FORGET_PASSWORD);
 
   if (auth.IsLogged) {
     if (auth.MfaEnable) {
@@ -37,6 +39,10 @@ const LoginRequire = ({ children }: GuardPropsType): JSX.Element => {
     if (!isResetPassword) {
       return <Navigate to={generateResetPasswordLink(auth.ResetPasswordToken)} />;
     }
+    return children;
+  }
+
+  if (isSignup || isForgetPassword) {
     return children;
   }
 

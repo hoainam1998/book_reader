@@ -147,7 +147,6 @@ function BookInformation(): JSX.Element {
   const categories: CategoryOptionsType[] = loaderData?.data || [];
 
   const authorInfoShowing = ({ avatar, name }: AuthorSelectType): JSX.Element => {
-
     return (
       <div className="author-select-wrapper">
         <img src={avatar} alt="avatar"/>

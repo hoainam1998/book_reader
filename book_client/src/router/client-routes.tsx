@@ -18,7 +18,7 @@ import path from './paths';
 const clientRoutes: RoutePropsUnion[] = [
   {
     path: path.ROOT,
-    element: <Navigate replace to={path.HOME} />,
+    element: <Navigate replace to={path.LOGIN} />,
     errorElement: <ApiError alignCenter />,
   },
   {
