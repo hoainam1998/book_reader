@@ -35,7 +35,6 @@ class CategoryRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllCategoryResponse)
   _getAll(req, res, next, self) {
-    console.log(req.path);
     const query = `query AllCategory($haveValue: Boolean!) {
       category {
         all (haveValue: $haveValue) ${
