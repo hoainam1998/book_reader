@@ -17,6 +17,7 @@ const requestBody = {
   lastName: mockRequestClient.last_name,
   email: mockRequestClient.email,
   password: ClientDummyData.password,
+  sex: mockRequestClient.sex.toString(),
 };
 
 describe('client signup', () => {
@@ -62,6 +63,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              sex: +requestBody.sex,
               reset_password_token: signResult.mock.results[0].value,
             },
           });
@@ -156,6 +158,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              sex: +requestBody.sex,
               reset_password_token: signResult.mock.results[0].value,
             },
           });
@@ -186,6 +189,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              sex: +requestBody.sex,
               reset_password_token: signResult.mock.results[0].value,
             },
           });
@@ -215,6 +219,7 @@ describe('client signup', () => {
               last_name: requestBody.lastName,
               email: requestBody.email,
               password: requestBody.password,
+              sex: +requestBody.sex,
               reset_password_token: signResult.mock.results[0].value,
             },
           });

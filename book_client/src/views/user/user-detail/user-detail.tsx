@@ -16,10 +16,9 @@ import { required, email as emailValidate, ErrorFieldInfo, matchPattern } from '
 import { addUser, updateUser, getAllUsers, getUserDetail } from '../fetcher';
 import { showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
-import { HaveLoadedFnType } from 'interfaces';
+import { HaveLoadedFnType, UserType } from 'interfaces';
 import paths from 'router/paths';
 import constants from 'read-only-variables';
-import { UserType } from 'interfaces';
 import './style.scss';
 
 type AllUserType = Pick<UserType, 'email' | 'phone'>[];

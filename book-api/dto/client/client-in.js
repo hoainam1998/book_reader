@@ -1,6 +1,6 @@
 const { classCreator, Validation } = require('../helper.js');
 const { Validator } = require('#services/validator');
-const { IsString, IsEmail, IsPassword } = require('#decorators/validators');
+const { IsString, IsEmail, IsPassword, IsNumeric } = require('#decorators/validators');
 
 const SignUp = (validators, className) => {
   return classCreator(class extends Validator {
@@ -23,6 +23,11 @@ const SignUp = (validators, className) => {
       IsPassword('Invalid password!'),
     )
     password;
+
+    @validators(
+      IsNumeric('sex must be a numeric!')
+    )
+    sex;
   }, className);
 };
 
