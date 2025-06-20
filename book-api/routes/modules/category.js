@@ -28,20 +28,24 @@ class CategoryRouter extends Router {
     this.post('/detail', authentication, this._getDetail);
     this.delete('/delete/:id', authentication, this._delete);
     this.post('/pagination', authentication, this._pagination);
+    this.post('/menu-categories', authentication, this._getAll);
   }
 
   @validation(AllCategory, { error_message: 'Load all categories failed!' })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllCategoryResponse)
   _getAll(req, res, next, self) {
-    const query = `query AllCategory {
+    console.log(req.path);
+    const query = `query AllCategory($haveValue: Boolean!) {
       category {
-        all ${
+        all (haveValue: $haveValue) ${
           req.body.query
         }
       }
     }`;
-    return self.execute(query, undefined, req.body.query);
+    return self.execute(query, {
+      haveValue: req.path === '/menu-categories',
+    }, req.body.query);
   }
 
   @validation(CategoryPagination, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })
