@@ -21,10 +21,10 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
   fields: {
     clientId: {
-      type: GraphQLID
+      type: GraphQLID,
     },
     firstName: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     lastName: {
       type: GraphQLString,
@@ -64,11 +64,14 @@ const mutation = new GraphQLObjectType({
         },
         password: {
           type: new GraphQLNonNull(GraphQLString)
+        },
+        sex: {
+          type: new GraphQLNonNull(GraphQLInt)
         }
       },
-      resolve: async (service, { firstName, lastName, email, password }) => {
+      resolve: async (service, { firstName, lastName, email, password, sex }) => {
         return handleResolveResult(async () => {
-          await service.signUp(firstName, lastName, email, password);
+          await service.signUp(firstName, lastName, email, password, sex);
           return messageCreator(READER.SIGNUP_SUCCESS);
         }, {
           UNIQUE_DUPLICATE: READER.EMAIL_EXIST,

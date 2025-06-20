@@ -5,7 +5,7 @@ const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils')
 const { READER } = require('#messages');
 
 class ClientService extends Service {
-  signUp(firstName, lastName, email, password) {
+  signUp(firstName, lastName, email, password, sex) {
     const resetToken = signClientResetPasswordToken(email);
     return this.PrismaInstance.reader.create({
       data: {
@@ -13,6 +13,7 @@ class ClientService extends Service {
         last_name: lastName,
         email,
         password,
+        sex,
         reset_password_token: resetToken,
       },
     });

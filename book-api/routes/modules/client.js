@@ -45,15 +45,18 @@ class ClientRouter extends Router {
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _signup(req, res, next, self) {
-    const query = `mutation SignUp ($firstName: String!, $lastName: String!, $email: String!, $password: String!) {
+    const query = `mutation SignUp ($firstName: String!, $lastName: String!, $email: String!, $password: String!, $sex: Int!) {
       client {
-        signup(firstName: $firstName, lastName: $lastName, email: $email, password: $password) {
+        signup(firstName: $firstName, lastName: $lastName, email: $email, password: $password, sex: $sex) {
           message
         }
       }
     }`;
 
-    return self.execute(query, req.body);
+    return self.execute(query, {
+      ...req.body,
+      sex: +req.body.sex,
+    });
   }
 
   @validation(ForgetPassword, { error_message: READER.GENERATE_RESET_PASSWORD_FAIL })
