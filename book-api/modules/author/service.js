@@ -61,6 +61,17 @@ class AuthorService extends Service {
     });
   }
 
+  loadAuthorMenu(select) {
+    return this.PrismaInstance.author.findMany({
+      select,
+      where: {
+        book_author: {
+          some: {}
+        }
+      }
+    });
+  }
+
   getAuthorDetail(authorId, select) {
     return this.PrismaInstance.author.findUniqueOrThrow({
       where: {

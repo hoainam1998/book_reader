@@ -88,6 +88,7 @@ module.exports = deepFreeze({
     LOAD_AUTHOR_DETAIL_FAIL: 'Load author detail was failed!',
     AUTHORS_EMPTY: 'Authors are empty!',
     LOAD_AUTHORS_FAIL: 'Loading authors information failed!',
+    MENU: 'Loading author menu failed!',
   },
   CATEGORY: {
     CREATE_CATEGORY_SUCCESS: 'Create category was success!',

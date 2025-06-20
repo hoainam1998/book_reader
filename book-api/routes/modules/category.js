@@ -28,10 +28,10 @@ class CategoryRouter extends Router {
     this.post('/detail', authentication, this._getDetail);
     this.delete('/delete/:id', authentication, this._delete);
     this.post('/pagination', authentication, this._pagination);
-    this.post('/menu-categories', authentication, this._getAll);
+    this.post('/menu', authentication, this._getAll);
   }
 
-  @validation(AllCategory, { error_message: 'Load all categories failed!' })
+  @validation(AllCategory, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllCategoryResponse)
   _getAll(req, res, next, self) {
@@ -43,7 +43,7 @@ class CategoryRouter extends Router {
       }
     }`;
     return self.execute(query, {
-      haveValue: req.path === '/menu-categories',
+      haveValue: req.path === '/menu',
     }, req.body.query);
   }
 

@@ -113,9 +113,19 @@ const AuthorFilter = (validators, className) => {
   }, className);
 };
 
+const AuthorMenu = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
+
 module.exports = {
   AuthorSave: Validation(AuthorSave),
   AuthorPagination: Validation(AuthorPagination),
   AuthorDetail: Validation(AuthorDetail),
   AuthorFilter: Validation(AuthorFilter),
+  AuthorMenu: Validation(AuthorMenu),
 };
