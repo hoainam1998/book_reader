@@ -15,10 +15,10 @@
     overflow-y: auto;
 
     &-item {
-      padding: 4px 7px;
       border-radius: 5px;
 
       & > a {
+        padding: 4px 7px;
         text-decoration: none;
         color: $black-color;
         display: flex;
