@@ -13,6 +13,7 @@ const {
   IsBase64Image,
   IsMulterFile,
   IsArray,
+  IsObject,
 } = require('#decorators/validators');
 
 const BookPagination = (validators, className) => {
@@ -38,6 +39,12 @@ const BookPagination = (validators, className) => {
       IsString('keyword must be string!')
     )
     keyword;
+
+    @validators(
+      IsOptional(),
+      IsObject('by must be object')
+    )
+    by;
   }, className);
 };
 

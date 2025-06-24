@@ -131,7 +131,7 @@ class BookRouter extends Router {
     this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
-    this.post('/pagination', authentication, this._paginationBook);
+    this.post('/pagination', this._paginationBook);
   }
 
   @validation(IntroduceHTMLFileSave, { error_message: BOOK.SAVE_INTRODUCE_FAIL })
@@ -208,13 +208,16 @@ class BookRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(BookPaginationResponse)
   _paginationBook(req, res, next, self) {
-    const query = `query BookPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
+    const query = `query BookPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String, $by: ByCondition) {
       book {
-        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
+        pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword, by: $by) {
           list ${
             req.body.query
           },
-          total
+          total,
+          page,
+          pages,
+          pageSize
         }
       }
     }`;
@@ -223,7 +226,8 @@ class BookRouter extends Router {
       {
         pageNumber: req.body.pageNumber,
         pageSize: req.body.pageSize,
-        keyword: req.body.keyword
+        keyword: req.body.keyword,
+        by: req.body?.by,
       },
       req.body.query
     );

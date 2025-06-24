@@ -47,6 +47,12 @@ class BookDTO extends OutputValidate {
   get categoryId() {
     return this.category_id;
   }
+
+  @Type(() => Array)
+  get authors() {
+    return this.book_author
+      .map(({ author }) => ({ ...author, authorId: author.author_id }));
+  }
 };
 
 module.exports = BookDTO;
