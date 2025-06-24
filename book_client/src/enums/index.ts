@@ -1,8 +1,4 @@
 /* eslint-disable no-unused-vars */
-export enum HTTP_CODE {
-  NOT_FOUND = 404,
-}
-
 export enum SCREEN_SIZE {
   LARGE = 'lg',
   MEDIUM = 'md',
@@ -24,4 +20,10 @@ export enum NOT_FOUND_ERROR_CODE {
 export enum SOCKET_NAME {
   USER = 'user',
   CLIENT = 'client',
+};
+
+export enum ALL_BOOK_BY {
+  ALL = 'ALL',
+  AUTHOR = 'AUTHOR',
+  CATEGORY = 'CATEGORY',
 };

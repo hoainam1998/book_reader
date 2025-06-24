@@ -14,12 +14,27 @@
     align-items: center;
     gap: 10px;
 
-    & > a .author-avatar {
-      height: 50px;
-      width: 50px;
+    & > .author-images {
+      border-radius: 4px;
+      overflow: hidden;
+      flex-basis: 20%;
+
+      .author-avatar {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    & > .multiple-images {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 25px;
+      border: 1px solid $border-input-color;
     }
 
     & > .left-info {
+      flex-basis: 80%;
+
       .book-name {
         font-weight: bold;
         display: -webkit-box;

@@ -4,6 +4,7 @@ import { HaveLoadedFnType, NavLinkPropsType } from 'interfaces';
 import path from 'router/paths';
 import Button from 'components/button/button';
 import useComponentWillMount from 'hooks/useComponentWillMount';
+import { useClientPaginationContext } from 'contexts/client-pagination';
 import { stringRandom as id, clsx } from 'utils';
 import { getMenuItem } from './fetcher';
 import './style.scss';
@@ -21,7 +22,7 @@ const itemsMenu: NavLinkPropsType[] = [
   },
   {
     path: path.AUTHORS,
-    label: 'Category',
+    label: 'Author',
     image: 'writer.png',
   }
 ];
@@ -30,7 +31,11 @@ type MenuItemApi = {
   [key: string]: string;
 };
 
-const menuItemMapping = (menuItems: MenuItemApi[], parentPath: string): NavLinkPropsType[] => {
+const menuItemMapping = (
+  menuItems: MenuItemApi[],
+  parentPath: string,
+  onChange: (id: string, path: string) => void
+): NavLinkPropsType[] => {
   const idField = {
     [path.CATEGORIES]: 'categoryId',
     [path.AUTHORS]: 'authorId',
@@ -40,7 +45,9 @@ const menuItemMapping = (menuItems: MenuItemApi[], parentPath: string): NavLinkP
     const item = {
       label: menuItem.name,
       image: menuItem.avatar,
+      id: menuItem[idField[parentPath as keyof typeof idField]],
       path: `${parentPath}/${menuItem[idField[parentPath as keyof typeof idField]]}`,
+      loader: onChange,
     };
 
     return item;
@@ -55,7 +62,11 @@ const createItemMenu = (item: NavLinkPropsType): ReactElement => {
         ({ isActive }) => isActive
           ? clsx('active', isDisableLink && 'link-disabled')
           : clsx(isDisableLink && 'link-disabled')
-        }>
+        }
+        onClick={(event) => {
+          event.preventDefault();
+          item.loader!(item.id!, item.path);
+        }}>
         {
           ([path.AUTHORS, path.CATEGORIES, path.ALL] as string[]).includes(item.path)
           ? <img src={require(`images/${item.image}`)} height="35" width="35" />
@@ -67,16 +78,19 @@ const createItemMenu = (item: NavLinkPropsType): ReactElement => {
   );
 };
 
-const flatItemsMenu = (items: NavLinkPropsType[], level: () => number = () => 0): any[] => {
+const flatItemsMenu = (
+  items: NavLinkPropsType[],
+  level: () => number = () => 0
+): ReactElement[] => {
   return items.flatMap((item) => {
     let currentLevel: number = level();
     const levelUp = () => currentLevel > 0 ? currentLevel -= 1: currentLevel;
     if (item.children) {
       return (
         <Fragment key={id()}>
-          { createItemMenu(item) }
+          {createItemMenu(item)}
           <ul style={{ paddingLeft: `${++currentLevel * 20}px` }}>
-            { flatItemsMenu(item.children, levelUp) }
+            {flatItemsMenu(item.children, levelUp)}
           </ul>
         </Fragment>
       );
@@ -88,9 +102,22 @@ const flatItemsMenu = (items: NavLinkPropsType[], level: () => number = () => 0)
 function Menu(): JSX.Element {
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<NavLinkPropsType[]>(itemsMenu);
+  const { onPageChange, setConditions } = useClientPaginationContext();
+
   const navigateToPersonal = useCallback((): void => {
     navigate(`${path.HOME}${path.PERSONAL}`);
   }, []);
+
+  const loader = useCallback((): (id: string, subUrl: string) => void => {
+    if (onPageChange) {
+      return (id: string, subUrl: string): void => {
+        navigate(`${path.HOME}/${subUrl}`);
+        setConditions({ id });
+        onPageChange(1, { id });
+      };
+    }
+    return () => {};
+  }, [onPageChange]);
 
   useComponentWillMount((haveFetched: HaveLoadedFnType) => {
     return () => {
@@ -98,22 +125,24 @@ function Menu(): JSX.Element {
         const allMenuItem = itemsMenu[0];
         const categoryMenu = itemsMenu[1];
         const authorMenu = itemsMenu[2];
-        getMenuItem().then((result) => {
-          const menu = result.map((result) => {
-            if (result.config.url?.includes('category')) {
-              categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES);
-              return categoryMenu;
-            } else {
-              authorMenu.children = menuItemMapping(result.data, path.AUTHORS);
-              return authorMenu;
-            }
+        if (onPageChange) {
+          getMenuItem().then((result) => {
+            const menu = result.map((result) => {
+              if (result.config.url?.includes('category')) {
+                categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader());
+                return categoryMenu;
+              } else {
+                authorMenu.children = menuItemMapping(result.data, path.AUTHORS, loader());
+                return authorMenu;
+              }
+            });
+            menu.unshift(allMenuItem);
+            setMenuItems(menu);
           });
-          menu.unshift(allMenuItem);
-          setMenuItems(menu);
-        });
+        }
       }
     };
-  }, []);
+  }, [loader]);
 
   return (
     <section className="client-menu-wrapper">

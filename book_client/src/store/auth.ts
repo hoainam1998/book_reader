@@ -95,7 +95,7 @@ class AuthStore extends Store<UserLogin | null> {
   }
 
   logout(): void {
-    WebSocketInit.close(this.CurrentStore!.userId);
+    WebSocketInit.close(this.CurrentStore?.userId);
     Storage.removeAll();
     SilentPromise.clearRequestMemory();
     this.CurrentStore = null;

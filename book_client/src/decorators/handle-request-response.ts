@@ -10,8 +10,11 @@ import { Request } from 'services';
  * @returns {boolean} - The checking result.
  */
 const shouldResolveError = (error: AxiosError): boolean => {
-  return error.request.status === HttpStatusCode.NotFound
-    && (error.response as AxiosResponse).data.errorCode !== NOT_FOUND_ERROR_CODE.URL_NOT_FOUND;
+  if (error.request?.status) {
+    return error.request.status === HttpStatusCode.NotFound
+      && (error.response as AxiosResponse).data.errorCode !== NOT_FOUND_ERROR_CODE.URL_NOT_FOUND;
+  }
+  return false;
 };
 
 /**

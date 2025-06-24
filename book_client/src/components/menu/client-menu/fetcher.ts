@@ -18,5 +18,5 @@ export const getMenuItem = (): Promise<AxiosResponse[]> => {
     }
   });
 
-  return Promise.all([getAuthorItems, getCategoryItems]);
+  return Promise.all([getCategoryItems, getAuthorItems]);
 };

@@ -177,6 +177,10 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
       (pageList[0] as Node<PageButton>).data.active = true;
       previousSelectedPage = (pageList[0] as Node<PageButton>);
     }
+
+    if (pages && pages.length) {
+      setPage(pages[0]);
+    }
   }, [pageNumber]);
 
   return (
