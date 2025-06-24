@@ -9,6 +9,10 @@ class PaginationResponse extends OutputValidate {
   @Expose({ toClassOnly: true })
   @Type(() => Number)
   total;
+
+  @Expose({ toClassOnly: true })
+  @Type(() => Number)
+  pageNumber;
 }
 
 module.exports = PaginationResponse;

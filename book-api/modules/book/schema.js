@@ -50,6 +50,22 @@ const BOOK_TYPE = new GraphQLObjectType({
     avatar: {
       type: GraphQLString
     },
+    authors: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLObjectType({
+        name: 'Authors',
+        fields: {
+          authorId: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          name: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          avatar: {
+            type: new GraphQLNonNull(GraphQLString),
+          }
+        }
+      })))
+    },
     ...COMMON_BOOK_FIELD,
   }
 });
@@ -312,7 +328,16 @@ const query = new GraphQLObjectType({
           },
           total: {
             type: new GraphQLNonNull(GraphQLInt)
-          }
+          },
+          page: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pages: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pageSize: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
         }
       }),
       args: {
@@ -324,21 +349,40 @@ const query = new GraphQLObjectType({
         },
         keyword: {
           type: GraphQLString
+        },
+        by: {
+          type: new GraphQLInputObjectType({
+            name: 'ByCondition',
+            fields: {
+              authorId: {
+                type: GraphQLString,
+              },
+              categoryId: {
+                type: GraphQLString,
+              }
+            }
+          }),
         }
       },
-      resolve: async (book, { pageNumber, pageSize, keyword }, context) => {
-        const [books, total] = await book.pagination(pageSize, pageNumber, keyword, context);
+      resolve: async (book, { pageNumber, pageSize, keyword, by }, context) => {
+        const [books, total, pages] = await book.pagination(pageSize, pageNumber, keyword, by, context);
         if (!checkArrayHaveValues(books)) {
           const response = {
             list: [],
-            total: 0
+            total: 0,
+            page: pageNumber,
+            pages,
+            pageSize,
           };
           graphqlNotFoundErrorOption.response = response;
           throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(BookDTO, books.map(book => ({ ...book, category: book.category.name }))),
-          total: parseInt(total || 0)
+          total: parseInt(total || 0),
+          page: pageNumber,
+          pages,
+          pageSize,
         });
       }
     }

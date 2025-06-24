@@ -1,5 +1,5 @@
 const { join } = require('path');
-const { saveFile, deleteFile } = require('#utils');
+const { saveFile, deleteFile, calcPages } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const Service = require('#services/prisma');
 const { BOOK } = require('#messages');
@@ -147,43 +147,75 @@ class BookService extends Service {
     });
   }
 
-  pagination(pageSize, pageNumber, keyword, select) {
+  pagination(pageSize, pageNumber, keyword, by, select) {
+    let searchByForeignId = {};
+
+    if (by) {
+      if (by.authorId) {
+        searchByForeignId = {
+          book_author: {
+            some: {
+              author_id: by.authorId,
+            }
+          },
+        };
+      } else {
+        searchByForeignId = {
+          category_id: by.categoryId,
+        };
+      }
+    }
+
     const offset = (pageNumber - 1) * pageSize;
+    let promiseResult;
     if (keyword) {
-      return this.PrismaInstance.$transaction([
+      promiseResult = this.PrismaInstance.$transaction([
         this.PrismaInstance.book.findMany({
           take: pageSize,
           skip: offset,
           where: {
             name: {
               contains: keyword
-            }
+            },
+            ...searchByForeignId,
           },
           orderBy: {
             book_id: 'desc',
           },
-          select
+          select,
         }),
         this.PrismaInstance.book.count({
           where: {
             name: {
               contains: keyword
-            }
+            },
+            ...searchByForeignId,
           }
         }),
       ]);
+    } else {
+      promiseResult = this.PrismaInstance.$transaction([
+        this.PrismaInstance.book.findMany({
+          where: searchByForeignId,
+          take: pageSize,
+            skip: offset,
+            orderBy: {
+              book_id: 'desc',
+            },
+            select,
+        }),
+        this.PrismaInstance.book.count({
+          where: searchByForeignId,
+        }),
+      ]);
     }
-    return this.PrismaInstance.$transaction([
-      this.PrismaInstance.book.findMany({
-        take: pageSize,
-          skip: offset,
-          orderBy: {
-            book_id: 'desc',
-          },
-          select
-      }),
-      this.PrismaInstance.book.count(),
-    ]);
+
+    return promiseResult.then((results) => {
+      const total = results[1];
+      const pages = calcPages(pageSize, total);
+      results.push(pages);
+      return results;
+    });
   }
 
   saveBookAuthor(authors) {

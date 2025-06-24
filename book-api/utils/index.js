@@ -62,6 +62,19 @@ const messageCreator = (message, errorCode) => convertDtoToZodObject(MessageResp
 const checkArrayHaveValues = (array) => Array.isArray(array) && array.length > 0;
 
 /**
+ * Calculator number of page.
+ *
+ * @param {number} pageSize - Page size.
+ * @param {total} total - Total of page.
+ * @returns {number} - The pages.
+ */
+const calcPages = (pageSize, total) => {
+  const originPages = Math.floor(+total / +pageSize);
+  const remainPages = +total % +pageSize;
+  return originPages + (remainPages > 0 ? 1 : 0);
+};
+
+/**
  * Parse graphql select object to selected string.
  *
  * @param {Object} graphqlSelectObject - ex({ userId: true, name: true, json: { field1: true, field2: false } }).
@@ -188,6 +201,7 @@ const freezing = (utilsObject) => {
 
 module.exports = freezing({
   deepFreeze,
+  calcPages,
   messageCreator,
   graphqlQueryParser,
   getGraphqlFinalData,

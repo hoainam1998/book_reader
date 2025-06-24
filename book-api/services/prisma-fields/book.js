@@ -27,9 +27,15 @@ class BookPrismaField extends PrismaField {
     authors: {
       as: 'book_author',
       select: {
-        author_id: true
+        author: {
+          select: {
+            author_id: true,
+            avatar: true,
+            name: true,
+          }
+        }
       }
-    }
+    },
   };
 }
 
