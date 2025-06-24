@@ -97,7 +97,7 @@ const query = new GraphQLObjectType({
         const categories = await category.all(haveValue, context);
         if (!checkArrayHaveValues(categories)) {
           graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
-          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption );
+          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(CategoryDTO, categories);
       },
@@ -114,7 +114,7 @@ const query = new GraphQLObjectType({
           },
           pageNumber: {
             type: new GraphQLNonNull(GraphQLInt)
-          }
+          },
         }
       }),
       args: {
@@ -123,7 +123,7 @@ const query = new GraphQLObjectType({
         },
         pageSize: {
           type: new GraphQLNonNull(GraphQLInt)
-        }
+        },
       },
       resolve: async (service, { pageNumber, pageSize }) => {
         const [categories, total] = await service.pagination(pageSize, pageNumber);

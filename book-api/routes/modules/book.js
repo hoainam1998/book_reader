@@ -131,7 +131,7 @@ class BookRouter extends Router {
     this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
-    this.post('/pagination', this._paginationBook);
+    this.post('/pagination', authentication, this._paginationBook);
   }
 
   @validation(IntroduceHTMLFileSave, { error_message: BOOK.SAVE_INTRODUCE_FAIL })

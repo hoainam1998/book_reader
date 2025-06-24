@@ -337,7 +337,7 @@ const query = new GraphQLObjectType({
           },
           pageSize: {
             type: new GraphQLNonNull(GraphQLInt)
-          }
+          },
         }
       }),
       args: {
@@ -372,7 +372,7 @@ const query = new GraphQLObjectType({
             total: 0,
             page: pageNumber,
             pages,
-            pageSize: pageSize,
+            pageSize,
           };
           graphqlNotFoundErrorOption.response = response;
           throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
@@ -382,7 +382,7 @@ const query = new GraphQLObjectType({
           total: parseInt(total || 0),
           page: pageNumber,
           pages,
-          pageSize: pageSize,
+          pageSize,
         });
       }
     }
