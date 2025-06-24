@@ -8,7 +8,7 @@ import GridOutlet from 'components/grid-outlet/grid-outlet';
 import ApiError from 'components/error/api-error/api-error';
 import Signup from 'views/login-group/signup/signup';
 import Home from 'views/home/client/home';
-import AllBooks from 'views/all-books/all-books';
+import AllBooks from 'views/all-book/all-book';
 import { ClientBookDetail, ClientAuthorDetail } from 'views/client-detail/client-detail';
 import ClientPersonal from 'views/personal/client-personal/client-personal';
 import LoginRequire from 'guard/login-require';

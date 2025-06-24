@@ -1,68 +1,43 @@
-import {
-  JSX,
-  ReactElement,
-  useCallback,
-  useMemo,
-  useRef,
-  useImperativeHandle,
-  forwardRef,
-  cloneElement,
-  Ref,
-} from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { JSX, useCallback } from 'react';
+import List from 'components/list/list';
+import { useNavigate } from 'react-router-dom';
+import { BookPropsType } from 'interfaces';
 import path from 'router/paths';
+import { clsx } from 'utils';
 import './style.scss';
 
-type NavigateAuthorDetailPropsType = {
-  children: ReactElement;
-};
-
-const NavigateAuthorDetail = forwardRef(
-  function({ children }: NavigateAuthorDetailPropsType, ref: Ref<HTMLElement | undefined | null>): JSX.Element {
-    const authorLInkRef = useRef<HTMLElement>(null);
-    const authorDetailPath = useMemo<string>(() => `${path.HOME}/${path.AUTHOR}/123`, []);
-
-    useImperativeHandle(
-      ref,
-      () => authorLInkRef.current!.parentElement,
-      []
-    );
-
-    return (
-      <Link to={authorDetailPath}>
-        { cloneElement(children, { ref: authorLInkRef }) }
-      </Link>
-    );
-  }
-);
-
-function Book(): JSX.Element {
+function Book({ bookId, name, avatar, authors }: BookPropsType): JSX.Element {
   const navigate = useNavigate();
-  const authorNameLink = useRef<HTMLElement>(null);
-  const authorAvatarLink = useRef<HTMLElement>(null);
-  const bookAuthorDetail = useMemo<string>(() => `${path.HOME}/${path.BOOK}/123`, []);
 
-  const navigateToBookDetail = useCallback((event: any): void => {
-    event.stopPropagation();
+  const navigateToBookDetail = useCallback((): void => {
+    const bookAuthorDetail =`${path.HOME}/${path.BOOK}/${bookId}`;
+    navigate(bookAuthorDetail);
+  }, []);
+
+  const navigateToAuthorDetail = useCallback((event: any, authorId: string): void => {
     event.preventDefault();
-    const authorLinks = [authorNameLink.current, authorAvatarLink.current];
-    if (!authorLinks.includes(event.target) && !authorLinks.includes(event.target.parentElement)) {
-      navigate(bookAuthorDetail);
-    }
+    event.stopPropagation();
+    const authorDetailPath = `${path.HOME}/${path.AUTHOR}/${authorId}`;
+    navigate(authorDetailPath);
   }, []);
 
   return (
     <div className="book" onClick={navigateToBookDetail}>
-      <img className="item-book-avatar" src={require('images/application.png')} />
+      <img className="item-book-avatar" src={avatar} />
       <div className="book-quick-info">
-        <NavigateAuthorDetail ref={authorAvatarLink}>
-          <img src={require('images/application.png')} className="author-avatar" height="100px" width="100px" />
-        </NavigateAuthorDetail>
+        <div className={clsx('author-images', { 'multiple-images': authors.length > 1 })}>
+          <List<typeof authors[0]> items={authors}
+            render={({ avatar }) => (<img src={avatar} className="author-avatar" />)}/>
+        </div>
         <div className="left-info">
-          <h4 className="book-name">name</h4>
-          <NavigateAuthorDetail ref={authorNameLink}>
-            <h5 className="author-name">author name</h5>
-          </NavigateAuthorDetail>
+          <h4 className="book-name">{name}</h4>
+          <ul>
+            <List<typeof authors[0]> items={authors} render={({ authorId, name }) => (
+              <li>
+                <h5 className="author-name" onClick={(event) => navigateToAuthorDetail(event, authorId)}>{name}</h5>
+              </li>
+            )} />
+          </ul>
         </div>
       </div>
     </div>

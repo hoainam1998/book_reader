@@ -43,5 +43,23 @@ export type NavLinkPropsType = {
   path: string;
   label: string;
   image: string;
+  id?: string;
   children?: NavLinkPropsType[];
+  loader?: (id: string, path: string) => void;
+};
+
+export type BookPropsType = {
+  name: string;
+  avatar: string;
+  bookId: string;
+  authors: {
+    authorId: string;
+    name: string;
+    avatar: string;
+  }[];
+};
+
+export type PaginationCondition = {
+  id?: string;
+  keyword?: string;
 };

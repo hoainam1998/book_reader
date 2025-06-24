@@ -35,6 +35,13 @@ $cols: ("four": 4, "five": 5);
 
   .grid-layout-btn-group {
     float: right;
+    display: flex;
+    align-items: center;
+
+    & > .page-nav {
+      font-size: 14px;
+      margin-right: 7px;
+    }
 
     & > button {
       width: 30px;
