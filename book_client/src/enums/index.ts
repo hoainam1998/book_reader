@@ -21,9 +21,3 @@ export enum SOCKET_NAME {
   USER = 'user',
   CLIENT = 'client',
 };
-
-export enum ALL_BOOK_BY {
-  ALL = 'ALL',
-  AUTHOR = 'AUTHOR',
-  CATEGORY = 'CATEGORY',
-};

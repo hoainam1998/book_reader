@@ -3,8 +3,8 @@ import List from 'components/list/list';
 import { useNavigate } from 'react-router-dom';
 import { BookPropsType } from 'interfaces';
 import path from 'router/paths';
-import './style.scss';
 import { clsx } from 'utils';
+import './style.scss';
 
 function Book({ bookId, name, avatar, authors }: BookPropsType): JSX.Element {
   const navigate = useNavigate();
