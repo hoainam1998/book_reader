@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import {
   useCallback,
   useMemo,
@@ -8,6 +7,7 @@ import {
 } from 'react';
 import Button from 'components/button/button';
 import LinkedList, { Node } from './double-linked-list';
+import { useClientPaginationContext } from 'contexts/client-pagination';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -37,7 +37,10 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
     previousSelectedPage.data.active = false;
   }
 
-  pageActive.data.active = true;
+  if (pageActive && pageActive.data) {
+    pageActive.data.active = true;
+  }
+
   previousSelectedPage = pageActive;
 
   if (pages.length > numberPageShowed) {
@@ -136,6 +139,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
 };
 
 function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.Element {
+  const { setResetPage } = useClientPaginationContext();
   const pages = useMemo<Node<PageButton>[]>(() => {
     const paginationArray: PageButton[] = [];
 
@@ -146,18 +150,24 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
       });
     }
 
-    LinkedList.createdFromArray(paginationArray);
-    return LinkedList.Nodes as Node<PageButton>[];
+    if (paginationArray.length) {
+      LinkedList.createdFromArray(paginationArray);
+      return LinkedList.Nodes as Node<PageButton>[];
+    }
+    return [];
   }, [pageNumber]);
 
   const [page, setPage] = useState<Node<PageButton>>(pages[0]);
 
   const initPage = useMemo<Node<PageButton>>(() => {
-    return page.data.page === 1 ? pages[0] : page;
+    if (page && page.data && page.data.page) {
+      return page.data.page === 1 ? pages[0] : page;
+    }
+    return page;
   }, [pages, page]);
 
   const pageList = useMemo<(Node<PageButton> | DotPageButton)[]>
-    (() => renderPagination(initPage, pages), [initPage, pageNumber]);
+    (() => pages.length ? renderPagination(initPage, pages) : [], [initPage, pageNumber]);
 
   const { disablePrevious, disableNext } = useMemo<{ disablePrevious: boolean; disableNext: boolean }>(() => ({
     disablePrevious: previousSelectedPage!.data.page === pages[0].data.page,
@@ -172,60 +182,71 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
     }
   }, [pageList]);
 
+  const reset = useCallback((): void => {
+    if (pages && pages.length) {
+      setPage(pages[0]);
+    }
+  }, [pages]);
+
   useEffect(() => {
     if (pageList.length > 0 && (pageList[0] as Node<PageButton>)?.data) {
       (pageList[0] as Node<PageButton>).data.active = true;
       previousSelectedPage = (pageList[0] as Node<PageButton>);
     }
-
-    if (pages && pages.length) {
-      setPage(pages[0]);
-    }
   }, [pageNumber]);
 
-  return (
-    <ul className={clsx('pagination', horizontal && 'horizontal-pagination')}>
-      <li>
-        <Button className="pagination-button direction"
-          disabled={disablePrevious}
-          onClick={() => pageClick(pages[0])}>
-          &#11244;
+  useEffect(() => {
+    if (reset) {
+      setResetPage(() => reset);
+    }
+  }, [reset]);
+
+  if (pageList.length) {
+    return (
+      <ul className={clsx('pagination', horizontal && 'horizontal-pagination')}>
+        <li>
+          <Button className="pagination-button direction"
+            disabled={disablePrevious}
+            onClick={() => pageClick(pages[0])}>
+            &#11244;
+          </Button>
+        </li>
+        <li>
+          <Button className="pagination-button direction"
+            disabled={disablePrevious}
+            onClick={() => pageClick(previousSelectedPage?.previous as Node<PageButton>)}>
+            &#11164;
         </Button>
-      </li>
-      <li>
-        <Button className="pagination-button direction"
-          disabled={disablePrevious}
-          onClick={() => pageClick(previousSelectedPage?.previous as Node<PageButton>)}>
-          &#11164;
-      </Button>
-      </li>
-      {
-        pageList.map((page: any, index: number) => (
-          <li key={index} data-testid={`pagination-button-${index + 1}`}>
-            <Button
-              className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })}
-              onClick={() => pageClick(page)}>
-                { page.data?.page || '...' }
-            </Button>
-          </li>
-        ))
-      }
-      <li>
-        <Button className="pagination-button direction"
-          disabled={disableNext}
-          onClick={() => pageClick(previousSelectedPage?.next as Node<PageButton>)}>
-          &#11166;
-        </Button>
-      </li>
-      <li>
-        <Button className="pagination-button direction"
-          disabled={disableNext}
-          onClick={() => pageClick(pages[pages.length - 1])}>
-          &#11246;
-        </Button>
-      </li>
-    </ul>
-  );
+        </li>
+        {
+          pageList.map((page: any, index: number) => (
+            <li key={index} data-testid={`pagination-button-${index + 1}`}>
+              <Button
+                className={clsx('pagination-button', { 'active': page.data?.active, 'dots': page.dots })}
+                onClick={() => pageClick(page)}>
+                  { page.data?.page || '...' }
+              </Button>
+            </li>
+          ))
+        }
+        <li>
+          <Button className="pagination-button direction"
+            disabled={disableNext}
+            onClick={() => pageClick(previousSelectedPage?.next as Node<PageButton>)}>
+            &#11166;
+          </Button>
+        </li>
+        <li>
+          <Button className="pagination-button direction"
+            disabled={disableNext}
+            onClick={() => pageClick(pages[pages.length - 1])}>
+            &#11246;
+          </Button>
+        </li>
+      </ul>
+    );
+  }
+  return (<></>);
 }
 
 export default Pagination;

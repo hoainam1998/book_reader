@@ -1,7 +1,8 @@
-import { JSX, useCallback, useState, useRef, useMemo } from 'react';
+import { JSX, useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import Button from 'components/button/button';
 import Input from 'components/form/form-control/input/input';
 import RenderCondition from 'components/render-condition/render-condition';
+import { useClientPaginationContext } from 'contexts/client-pagination';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -14,10 +15,12 @@ type HeaderDashboardPropsType = {
 };
 
 function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: HeaderDashboardPropsType): JSX.Element {
+  const paginationContext = useClientPaginationContext();
+  const setClearOldKeyword = paginationContext.setClearOldKeyword;
   const headerRef = useRef<HTMLDivElement>(null);
   const [isClear, setIsClear] = useState<boolean>(false);
-  const [disableSearchButton, setDisableSearchButton] = useState<boolean>(true);
-  const [keyword, setKeyword] = useState<string>('');
+  const [keyword, setKeyword] = useState<string>(paginationContext.keyword);
+  const [disableSearchButton, setDisableSearchButton] = useState<boolean>(!keyword.trim());
   const oldKeyword = useRef<string>(keyword);
 
   const top: number | string = useMemo<number | string>(() => {
@@ -32,19 +35,47 @@ function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: Hea
     setIsClear(true);
     oldKeyword.current = keyword;
     search(keyword);
-  }, [keyword]);
+    setDisableSearchButton(!keyword.trim());
+  }, [keyword, search]);
 
   const clear = useCallback((): void => {
     setIsClear(false);
     setKeyword('');
     search('');
-  }, [keyword]);
+    setDisableSearchButton(true);
+  }, [keyword, search]);
 
   const setClearFlag = useCallback((value: string): void => {
-    if (oldKeyword.current && value !== oldKeyword.current) {
-      setIsClear(false);
+    if (value) {
+      if (oldKeyword.current && value !== oldKeyword.current) {
+        setIsClear(false);
+      }
+      setDisableSearchButton(!value.trim());
+    } else {
+      setIsClear(true);
     }
-    setDisableSearchButton(!value.trim());
+  }, []);
+
+  const reset = useCallback((): void => {
+    setIsClear(false);
+    setKeyword('');
+    setDisableSearchButton(true);
+  }, []);
+
+  const enterKeydown = useCallback((event: any): void => {
+    const query = event.target.value.trim();
+    if (event.code === 'Enter' && query) {
+      oldKeyword.current = query;
+      setIsClear(true);
+      search(query);
+      setDisableSearchButton(!query);
+    }
+  }, [search]);
+
+  useEffect(() => {
+    if (globalThis.isClient) {
+      setClearOldKeyword(() => reset);
+    }
   }, []);
 
   return (
@@ -63,7 +94,8 @@ function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: Hea
         }}
         disabled={disabled}
         onChange={(e) => setClearFlag((e.target as any).value)}
-        onBlur={(value) => setKeyword(value as string)} />
+        onBlur={(value) => setKeyword(value as string)}
+        onKeyDown={enterKeydown} />
         {
           !isClear
           ?<Button variant="outline" className="btn-search"

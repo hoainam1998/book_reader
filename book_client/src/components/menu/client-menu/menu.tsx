@@ -1,9 +1,10 @@
-import { Fragment, JSX, ReactElement, useCallback, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Fragment, JSX, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { AxiosResponse } from 'axios';
 import { HaveLoadedFnType, NavLinkPropsType } from 'interfaces';
 import path from 'router/paths';
 import Button from 'components/button/button';
-import useComponentWillMount from 'hooks/useComponentWillMount';
+import useComponentDidMount from 'hooks/useComponentDidMount';
 import { useClientPaginationContext } from 'contexts/client-pagination';
 import { stringRandom as id, clsx } from 'utils';
 import { getMenuItem } from './fetcher';
@@ -34,7 +35,7 @@ type MenuItemApi = {
 const menuItemMapping = (
   menuItems: MenuItemApi[],
   parentPath: string,
-  onChange: (id: string, path: string) => void
+  loader: (item: NavLinkPropsType) => void,
 ): NavLinkPropsType[] => {
   const idField = {
     [path.CATEGORIES]: 'categoryId',
@@ -47,7 +48,7 @@ const menuItemMapping = (
       image: menuItem.avatar,
       id: menuItem[idField[parentPath as keyof typeof idField]],
       path: `${parentPath}/${menuItem[idField[parentPath as keyof typeof idField]]}`,
-      loader: onChange,
+      loader,
     };
 
     return item;
@@ -65,7 +66,7 @@ const createItemMenu = (item: NavLinkPropsType): ReactElement => {
         }
         onClick={(event) => {
           event.preventDefault();
-          item.loader!(item.id!, item.path);
+          item.loader!(item);
         }}>
         {
           ([path.AUTHORS, path.CATEGORIES, path.ALL] as string[]).includes(item.path)
@@ -99,56 +100,80 @@ const flatItemsMenu = (
   });
 };
 
+type MenuItemsListPropsType = {
+  items: AxiosResponse[];
+  loader: () => (item: NavLinkPropsType) => void;
+};
+
+const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element => {
+  const menuItems = useMemo<NavLinkPropsType[]>(() => {
+    const allMenuItem = itemsMenu[0];
+    const categoryMenu = itemsMenu[1];
+    const authorMenu = itemsMenu[2];
+    const menu = items.map((result) => {
+      if (result.config.url?.includes('category')) {
+        categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader());
+        return categoryMenu;
+      } else {
+        authorMenu.children = menuItemMapping(result.data, path.AUTHORS, loader());
+        return authorMenu;
+      }
+    });
+    menu.unshift(allMenuItem);
+    return menu;
+  }, [items, loader]);
+
+  return (
+    <ul className="menu">
+      {flatItemsMenu(menuItems)}
+    </ul>
+  );
+};
+
 function Menu(): JSX.Element {
   const navigate = useNavigate();
-  const [menuItems, setMenuItems] = useState<NavLinkPropsType[]>(itemsMenu);
-  const { onPageChange, setConditions } = useClientPaginationContext();
+  const [menuItemsApi, setMenuItemsApi] = useState<AxiosResponse[]>([]);
+  const { onPageChange, setCondition, clearOldKeyword, resetPage, setResultFor } = useClientPaginationContext();
 
   const navigateToPersonal = useCallback((): void => {
     navigate(`${path.HOME}${path.PERSONAL}`);
   }, []);
 
-  const loader = useCallback((): (id: string, subUrl: string) => void => {
-    if (onPageChange) {
-      return (id: string, subUrl: string): void => {
-        navigate(`${path.HOME}/${subUrl}`);
-        setConditions({ id });
-        onPageChange(1, { id });
+  const setResultTitle = useCallback((item: NavLinkPropsType): void => {
+    if (item.path.includes(path.AUTHORS)) {
+      setResultFor(<Link to={`${path.HOME}/${path.AUTHOR}/${item.id}`}>{item.label}</Link>);
+    } else {
+      setResultFor(item.label);
+    }
+  }, [setResultFor]);
+
+  const loader = useCallback((): (item: NavLinkPropsType) => void => {
+    if (onPageChange && clearOldKeyword && resetPage) {
+      return (item: NavLinkPropsType): void => {
+        navigate(`${path.HOME}/${item.path}`);
+        setCondition({ id: item.id });
+        onPageChange(1, { id: item.id });
+        clearOldKeyword();
+        setResultTitle(item);
+        resetPage();
       };
     }
     return () => {};
-  }, [onPageChange]);
+  }, [onPageChange, clearOldKeyword, resetPage]);
 
-  useComponentWillMount((haveFetched: HaveLoadedFnType) => {
+  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        const allMenuItem = itemsMenu[0];
-        const categoryMenu = itemsMenu[1];
-        const authorMenu = itemsMenu[2];
-        if (onPageChange) {
-          getMenuItem().then((result) => {
-            const menu = result.map((result) => {
-              if (result.config.url?.includes('category')) {
-                categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader());
-                return categoryMenu;
-              } else {
-                authorMenu.children = menuItemMapping(result.data, path.AUTHORS, loader());
-                return authorMenu;
-              }
-            });
-            menu.unshift(allMenuItem);
-            setMenuItems(menu);
-          });
+        getMenuItem()
+          .then((result) => setMenuItemsApi(result))
+          .catch(() => setMenuItemsApi([]));
         }
-      }
     };
-  }, [loader]);
+  }, []);
 
   return (
     <section className="client-menu-wrapper">
-      <ul className="menu">
-        {flatItemsMenu(menuItems)}
-      </ul>
+      <MenuItemsList items={menuItemsApi} loader={loader} />
       <div className="user-login-box">
         <div className="user-login-quick-info">
           <img src={require('images/home.png')} height={50} width={50} />
