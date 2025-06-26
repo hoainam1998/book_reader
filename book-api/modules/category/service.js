@@ -1,4 +1,5 @@
 const Service = require('#services/prisma');
+const { calcPages } = require('#utils');
 
 class CategoryService extends Service {
 
@@ -44,7 +45,12 @@ class CategoryService extends Service {
         },
       }),
       this.PrismaInstance.category.count()
-    ]);
+    ]).then((results) => {
+      const total = results[1];
+      const pages = calcPages(pageSize, total);
+      results.push(pages);
+      return results;
+    });
   }
 
   detail(id, select) {

@@ -8,6 +8,7 @@ const { USER, BOOK, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
+const { calcPages } = require('#utils');
 const paginationUrl = `${PATH.BOOK}/pagination`;
 const bookLength = 2;
 
@@ -90,6 +91,9 @@ describe('book pagination', () => {
               expect(response.body).toEqual({
                 list: bookListExpected,
                 total: bookLength,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, bookLength),
               });
               done();
             });
@@ -154,6 +158,147 @@ describe('book pagination', () => {
               expect(response.body).toEqual({
                 list: bookListExpected,
                 total: bookLength,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, bookLength),
+              });
+              done();
+            });
+        });
+    });
+
+    test('book pagination success when filter with categoryId', (done) => {
+      const requestBodyWithKeyValue = {
+        ...requestBody,
+        by: {
+          categoryId: Date.now().toString(),
+        },
+      };
+
+      globalThis.prismaClient.$transaction.mockResolvedValue([
+        BookDummyData.createMockBookList(bookLength),
+        bookLength,
+      ]);
+
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+      const bookListExpected = BookDummyData.generateBookExpectedList(requestBodyWithKeyValue.query, bookLength);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(paginationUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .expect(HTTP_CODE.OK)
+            .expect('Content-Type', /application\/json/)
+            .send(requestBodyWithKeyValue)
+            .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
+              const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
+              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  select: selectExpected,
+                  where: {
+                    category_id: requestBodyWithKeyValue.by.categoryId,
+                  },
+                  orderBy: {
+                    book_id: 'desc'
+                  },
+                  take: requestBody.pageSize,
+                  skip: offset,
+                })
+              );
+              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.count).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  where: {
+                    category_id: requestBodyWithKeyValue.by.categoryId,
+                  }
+                })
+              );
+              expect(response.body).toEqual({
+                list: bookListExpected,
+                total: bookLength,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, bookLength),
+              });
+              done();
+            });
+        });
+    });
+
+    test('book pagination success when filter with authorId', (done) => {
+      const requestBodyWithKeyValue = {
+        ...requestBody,
+        by: {
+          authorId: Date.now().toString(),
+        },
+      };
+
+      globalThis.prismaClient.$transaction.mockResolvedValue([
+        BookDummyData.createMockBookList(bookLength),
+        bookLength,
+      ]);
+
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+      const bookListExpected = BookDummyData.generateBookExpectedList(requestBodyWithKeyValue.query, bookLength);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(paginationUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .expect(HTTP_CODE.OK)
+            .expect('Content-Type', /application\/json/)
+            .send(requestBodyWithKeyValue)
+            .then((response) => {
+              const selectExpected = parseToPrismaSelect.mock.results[0].value;
+              const offset = (requestBody.pageNumber - 1) * requestBody.pageSize;
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
+              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  select: selectExpected,
+                  where: {
+                    book_author: {
+                      some: {
+                        author_id: requestBodyWithKeyValue.by.authorId,
+                      }
+                    }
+                  },
+                  orderBy: {
+                    book_id: 'desc'
+                  },
+                  take: requestBody.pageSize,
+                  skip: offset,
+                })
+              );
+              expect(globalThis.prismaClient.book.count).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.book.count).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  where: {
+                    book_author: {
+                      some: {
+                        author_id: requestBodyWithKeyValue.by.authorId,
+                      }
+                    }
+                  }
+                })
+              );
+              expect(response.body).toEqual({
+                list: bookListExpected,
+                total: bookLength,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, bookLength),
               });
               done();
             });
@@ -197,6 +342,9 @@ describe('book pagination', () => {
               expect(response.body).toEqual({
                 list: [],
                 total: 0,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, 0),
               });
               done();
             });
