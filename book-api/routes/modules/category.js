@@ -57,7 +57,10 @@ class CategoryRouter extends Router {
           list ${
             req.body.query
           },
-          total
+          total,
+          page,
+          pageSize,
+          pages
         }
       }
     }`;

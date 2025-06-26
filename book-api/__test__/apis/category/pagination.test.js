@@ -7,6 +7,7 @@ const { USER, CATEGORY, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
+const { calcPages } = require('#utils');
 const paginationUrl = `${PATH.CATEGORY}/pagination`;
 const categoryLength = 2;
 
@@ -85,6 +86,9 @@ describe('category pagination', () => {
               expect(response.body).toEqual({
                 list: categoryListExpected,
                 total: categoryLength,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, categoryLength),
               });
               done();
             });
@@ -129,7 +133,10 @@ describe('category pagination', () => {
               expect(globalThis.prismaClient.category.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
                 list: [],
-                total: 0
+                total: 0,
+                page: requestBody.pageNumber,
+                pageSize: requestBody.pageSize,
+                pages: calcPages(requestBody.pageSize, 0),
               });
               done();
             });

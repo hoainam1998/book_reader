@@ -112,7 +112,13 @@ const query = new GraphQLObjectType({
           total: {
             type: new GraphQLNonNull(GraphQLInt)
           },
-          pageNumber: {
+          pageSize: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          page: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pages: {
             type: new GraphQLNonNull(GraphQLInt)
           },
         }
@@ -126,11 +132,13 @@ const query = new GraphQLObjectType({
         },
       },
       resolve: async (service, { pageNumber, pageSize }) => {
-        const [categories, total] = await service.pagination(pageSize, pageNumber);
+        const [categories, total, pages] = await service.pagination(pageSize, pageNumber);
         const response = convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(CategoriesDTO, categories),
           total: parseInt(total || 0),
-          pageNumber,
+          page: pageNumber,
+          pageSize,
+          pages,
         });
 
         if (!checkArrayHaveValues(categories)) {
