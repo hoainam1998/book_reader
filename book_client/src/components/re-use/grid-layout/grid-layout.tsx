@@ -16,7 +16,7 @@ type GridLayoutPropsType = {
 
 function GridLayout({ children }: GridLayoutPropsType): JSX.Element {
   const [cols, setCols] = useState<string>(COL_NAME.FOUR);
-  const { page, pages, onPageChange, condition } = useClientPaginationContext();
+  const { page, pages, onPageChange, condition, resultFor } = useClientPaginationContext();
 
   const onPageChangeWithCondition = useCallback((pageNumber: number): void => {
     if (onPageChange) {
@@ -30,7 +30,7 @@ function GridLayout({ children }: GridLayoutPropsType): JSX.Element {
         <div className="result-info">
           <span>Result for:</span>
           &nbsp;
-          <span>category</span>
+          <span>{resultFor}</span>
         </div>
         <div className="grid-layout-btn-group">
           <span className="page-nav">Page: &nbsp; {page}/{pages}</span>

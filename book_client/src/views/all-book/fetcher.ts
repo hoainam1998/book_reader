@@ -22,15 +22,19 @@ export const bookPagination = (pageNumber: number, condition?: PaginationConditi
     pageNumber,
   };
 
-  if (condition && condition.id) {
-    if (window.location.pathname.includes(path.CATEGORIES)) {
-      requestBody.by = {
-        categoryId: condition.id
-      };
-    } else if (window.location.pathname.includes(path.AUTHORS)) {
-      requestBody.by = {
-        authorId: condition.id
-      };
+  if (condition) {
+    if (condition.id) {
+      if (window.location.pathname.includes(path.CATEGORIES)) {
+        requestBody.by = {
+          categoryId: condition.id
+        };
+      } else if (window.location.pathname.includes(path.AUTHORS)) {
+        requestBody.by = {
+          authorId: condition.id
+        };
+      }
+    } else if (condition.keyword) {
+      requestBody.keyword = condition.keyword;
     }
   }
 
