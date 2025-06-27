@@ -32,6 +32,36 @@ const COMMON_BOOK_FIELD = {
   }
 };
 
+const AUTHORS = new GraphQLObjectType({
+  name: 'Authors',
+  fields: {
+    authorId: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    avatar: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  }
+});
+
+const CATEGORY = new GraphQLObjectType({
+  name: 'CategoryDetail',
+  fields: {
+    categoryId: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    name: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+    avatar: {
+      type: new GraphQLNonNull(GraphQLString)
+    },
+  }
+});
+
 const BOOK_TYPE = new GraphQLObjectType({
   name: 'Book',
   fields: {
@@ -42,7 +72,7 @@ const BOOK_TYPE = new GraphQLObjectType({
       type: GraphQLString
     },
     category: {
-      type: GraphQLString
+      type: new GraphQLNonNull(CATEGORY)
     },
     introduce: {
       type: GraphQLString
@@ -51,20 +81,7 @@ const BOOK_TYPE = new GraphQLObjectType({
       type: GraphQLString
     },
     authors: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLObjectType({
-        name: 'Authors',
-        fields: {
-          authorId: {
-            type: new GraphQLNonNull(GraphQLString),
-          },
-          name: {
-            type: new GraphQLNonNull(GraphQLString),
-          },
-          avatar: {
-            type: new GraphQLNonNull(GraphQLString),
-          }
-        }
-      })))
+      type: new GraphQLNonNull(new GraphQLList(AUTHORS))
     },
     ...COMMON_BOOK_FIELD,
   }
@@ -133,8 +150,11 @@ const BOOK_INFORMATION_TYPE = new GraphQLObjectType({
       })
     },
     authors: {
-      type: new GraphQLNonNull(new GraphQLList(GraphQLString))
-    }
+      type: new GraphQLNonNull(new GraphQLList(AUTHORS))
+    },
+    category: {
+      type: new GraphQLNonNull(CATEGORY)
+    },
   }
 });
 
@@ -378,7 +398,7 @@ const query = new GraphQLObjectType({
           throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {
-          list: plainToInstance(BookDTO, books.map(book => ({ ...book, category: book.category.name }))),
+          list: plainToInstance(BookDTO, books),
           total: parseInt(total || 0),
           page: pageNumber,
           pages,
