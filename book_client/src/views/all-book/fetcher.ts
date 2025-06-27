@@ -7,7 +7,6 @@ const query = {
   bookId: true,
   name: true,
   avatar: true,
-  category: true,
   authors: {
     authorId: true,
     name: true,

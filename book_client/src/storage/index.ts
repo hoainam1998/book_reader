@@ -1,6 +1,7 @@
 import LocalStorage from './local-storage';
 import SessionStorage from './session-storage';
 import Storage from './storage';
+import { BookPropsType } from 'interfaces';
 
 export type Image = {
   image: string;
@@ -20,7 +21,7 @@ export type BookInfoType = {
     html: string;
     json: string;
   };
-  authors: string[];
+  authors: BookPropsType['authors'];
 };
 
 export type UserLogin = {

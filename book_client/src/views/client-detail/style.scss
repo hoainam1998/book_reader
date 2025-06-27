@@ -1,8 +1,11 @@
 .client-book-detail {
   width: 70%;
+  height: calc(100vh - 60px);
   margin: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
 
   .client-book-info {
     display: flex;
@@ -72,11 +75,15 @@
     margin-top: 10px;
     padding-top: 7px;
     border-top: 1px solid $black-color;
-    height: 100vh;
+    flex-grow: 1;
 
     & > iframe {
       height: 100%;
       width: 100%;
     }
   }
+}
+
+.client-book-images-library {
+  margin-top: 7px;
 }
