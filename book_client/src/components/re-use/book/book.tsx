@@ -12,7 +12,7 @@ function Book({ bookId, name, avatar, authors }: BookPropsType): JSX.Element {
   const navigateToBookDetail = useCallback((): void => {
     const bookAuthorDetail =`${path.HOME}/${path.BOOK}/${bookId}`;
     navigate(bookAuthorDetail);
-  }, []);
+  }, [bookId]);
 
   const navigateToAuthorDetail = useCallback((event: any, authorId: string): void => {
     event.preventDefault();

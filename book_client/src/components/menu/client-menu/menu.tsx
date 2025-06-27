@@ -66,7 +66,7 @@ const createItemMenu = (item: NavLinkPropsType): ReactElement => {
         }
         onClick={(event) => {
           event.preventDefault();
-          item.loader!(item);
+          item.loader && item.loader!(item);
         }}>
         {
           ([path.AUTHORS, path.CATEGORIES, path.ALL] as string[]).includes(item.path)
@@ -110,6 +110,7 @@ const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element =
     const allMenuItem = itemsMenu[0];
     const categoryMenu = itemsMenu[1];
     const authorMenu = itemsMenu[2];
+    allMenuItem.loader = loader();
     const menu = items.map((result) => {
       if (result.config.url?.includes('category')) {
         categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader());
@@ -150,9 +151,17 @@ function Menu(): JSX.Element {
   const loader = useCallback((): (item: NavLinkPropsType) => void => {
     if (onPageChange && clearOldKeyword && resetPage) {
       return (item: NavLinkPropsType): void => {
+        const oldLocation = window.location.pathname;
         navigate(`${path.HOME}/${item.path}`);
-        setCondition({ id: item.id });
-        onPageChange(1, { id: item.id });
+        if (item.path === path.ALL) {
+          setCondition({});
+          if ([path.ALL, path.AUTHORS, path.CATEGORIES].some((p) => oldLocation.includes(p))) {
+            onPageChange(1);
+          }
+        } else {
+          setCondition({ id: item.id });
+          onPageChange(1, { id: item.id });
+        }
         clearOldKeyword();
         setResultTitle(item);
         resetPage();

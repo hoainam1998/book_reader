@@ -31,7 +31,11 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
       image: true,
       name: true
     },
-    authors: true
+    authors: {
+      authorId: true,
+      name: true,
+      avatar: true,
+    }
   };
 
   if (includeIntroduceFieldFlag) {

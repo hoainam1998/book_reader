@@ -18,7 +18,6 @@ import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentWillMount from 'hooks/useComponentWillMount';
 import { getCategoryDetail } from 'views/category/fetcher';
 import type { CategoryDetailType } from 'views/category/category';
-import { getAuthors } from 'views/book-group/fetcher';
 import { Image } from 'store/book';
 import { HaveLoadedFnType } from 'interfaces';
 import { showToast, openFile } from 'utils';
@@ -30,11 +29,6 @@ type FieldHightLightBoxPropsType = {
   label: string;
   value?: string | number;
   children?: ReactElement;
-};
-
-type AuthorsType = {
-  name: string;
-  avatar: string;
 };
 
 const FieldHightLightBox = ({
@@ -93,7 +87,6 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 
 function BookConclusion(): JSX.Element {
   const [category, setCategory] = useState<CategoryDetailType>({ name: '', avatar: ''});
-  const [authors, setAuthors] = useState<AuthorsType[]>([]);
   const { data, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
   const navigate = useNavigate();
   const publishedDay: string = useMemo(
@@ -125,12 +118,6 @@ function BookConclusion(): JSX.Element {
             .then((res) => setCategory(res.data))
             .catch(() => setCategory({ name: '', avatar: '' }));
         }
-
-        getAuthors(data.authors, {
-          name: true,
-          avatar: true
-        }).then((res) => setAuthors(res.data))
-          .catch(() => setAuthors([]));
       }
     };
   }, []);
@@ -198,7 +185,7 @@ function BookConclusion(): JSX.Element {
                 <FieldHightLightBox label="Authors" value={'author'}>
                   <Slot name="content">
                     <ul>
-                      <List<AuthorsType> items={authors} render={({ name, avatar }) => (
+                      <List<Required<typeof data.authors[0]>> items={data.authors} render={({ name, avatar }) => (
                         <li className="box-item">
                           <div className="image-field">
                             <img className="avatar" src={avatar} alt="avatar" />
