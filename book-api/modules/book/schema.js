@@ -398,7 +398,7 @@ const query = new GraphQLObjectType({
           throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
         }
         return convertDtoToZodObject(PaginationResponse, {
-          list: plainToInstance(BookDTO, books.map(book => ({ ...book, category: book.category.name }))),
+          list: plainToInstance(BookDTO, books),
           total: parseInt(total || 0),
           page: pageNumber,
           pages,
