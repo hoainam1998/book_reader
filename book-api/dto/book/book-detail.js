@@ -74,9 +74,9 @@ class BookDetailDTO extends BookDTO {
     return this.book_image;
   };
 
-  @Type(() => [String])
+  @Type(() => [Object])
   get authors() {
-    return this.book_author.map((author) => author.author_id);
+    return this.book_author.map(({author}) => ({ ...author, authorId: author.author_id }));
   }
 }
 

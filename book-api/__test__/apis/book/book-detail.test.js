@@ -21,11 +21,20 @@ const requestBody = {
     publishedDay: true,
     categoryId: true,
     avatar: true,
+    category: {
+      categoryId: true,
+      name: true,
+      avatar: true,
+    },
     images: {
       image: true,
       name: true,
     },
-    authors: true,
+    authors: {
+      authorId: true,
+      name: true,
+      avatar: true,
+    },
     introduce: {
       html: true,
       json: true,

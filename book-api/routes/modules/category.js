@@ -28,7 +28,7 @@ class CategoryRouter extends Router {
     this.post('/detail', authentication, this._getDetail);
     this.delete('/delete/:id', authentication, this._delete);
     this.post('/pagination', authentication, this._pagination);
-    this.post('/menu', authentication, this._getAll);
+    this.post('/menu', this._getAll);
   }
 
   @validation(AllCategory, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })
