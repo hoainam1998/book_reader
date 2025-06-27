@@ -17,7 +17,9 @@ class BookPrismaField extends PrismaField {
     introduce: 'introduce_file',
     category: {
       select: {
-        name: true
+        name: true,
+        category_id: true,
+        avatar: true,
       }
     },
     images: {

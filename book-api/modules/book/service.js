@@ -138,7 +138,15 @@ class BookService extends Service {
         book_id: bookId
       },
       select
-    });
+    }).then((result) => {
+      return {
+        ...result,
+        category: {
+          ...result.category,
+          categoryId: result.category.category_id
+        }
+      };
+    })
   }
 
   getAllBooks(select) {
