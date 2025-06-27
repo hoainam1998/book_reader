@@ -122,7 +122,7 @@ class BookRouter extends Router {
     super(express, graphqlExecute);
     this.post('/save-introduce', authentication, this._saveIntroduceHtmlFile);
     this.put('/update-introduce', authentication, this._updateIntroduceHtmlFile);
-    this.post('/all', this._getAllBooks);
+    this.post('/all', authentication, this._getAllBooks);
     this.post('/save-book-info', allowInternalCall, this._saveBookInfo);
     this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
     this.post('/save-pdf', allowInternalCall, this._savePdf);
@@ -131,7 +131,7 @@ class BookRouter extends Router {
     this.post('/detail', authentication, this._getBookDetail);
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
-    this.post('/pagination', this._paginationBook);
+    this.post('/pagination', authentication, this._paginationBook);
   }
 
   @validation(IntroduceHTMLFileSave, { error_message: BOOK.SAVE_INTRODUCE_FAIL })

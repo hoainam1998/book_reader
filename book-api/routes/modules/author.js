@@ -26,7 +26,7 @@ class AuthorRouter extends Router {
     this.post('/detail', authentication, this._getAuthorDetail);
     this.put('/update', authentication, this._updateAuthor);
     this.post('/filter', authentication, this._getAuthors);
-    this.post('/menu', this._loadAuthorMenu);
+    this.post('/menu', authentication, this._loadAuthorMenu);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
