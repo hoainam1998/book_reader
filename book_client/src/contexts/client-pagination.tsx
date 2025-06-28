@@ -1,5 +1,6 @@
-import { Dispatch, JSX, ReactElement, ReactNode, createContext, useContext, useState } from 'react';
+import { Dispatch, JSX, ReactElement, ReactNode, createContext, useContext, useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import path from 'router/paths';
 
 export type PaginationCondition = {
   id?: string;
@@ -26,6 +27,7 @@ type ClientPaginationContextPropsType = {
   condition: PaginationCondition;
   keyword: string;
   resultFor: ReactNode;
+  shouldCallOnPageChange: () => boolean;
 };
 
 const ClientPaginationContext = createContext<ClientPaginationContextPropsType | null>(null);
@@ -45,6 +47,11 @@ function ClientPagination({ children }: ClientPaginationPropsType): JSX.Element 
   const [pages, setPages] = useState<number>(1);
   const [condition, setCondition] = useState<PaginationCondition>({ id, keyword });
 
+  const shouldCallOnPageChange = useCallback((): boolean => {
+    const oldLocation = window.location.pathname;
+    return [path.ALL, path.AUTHORS, path.CATEGORIES].some((p) => oldLocation.includes(p));
+  }, [window.location.pathname]);
+
   return (
     <ClientPaginationContext.Provider value={{
       onPageChange,
@@ -61,7 +68,8 @@ function ClientPagination({ children }: ClientPaginationPropsType): JSX.Element 
       pages,
       condition,
       keyword,
-      resultFor
+      resultFor,
+      shouldCallOnPageChange
     }}>
       {children}
     </ClientPaginationContext.Provider>

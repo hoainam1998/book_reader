@@ -134,7 +134,14 @@ const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element =
 function Menu(): JSX.Element {
   const navigate = useNavigate();
   const [menuItemsApi, setMenuItemsApi] = useState<AxiosResponse[]>([]);
-  const { onPageChange, setCondition, clearOldKeyword, resetPage, setResultFor } = useClientPaginationContext();
+  const {
+    onPageChange,
+    setCondition,
+    clearOldKeyword,
+    resetPage,
+    setResultFor,
+    shouldCallOnPageChange
+  } = useClientPaginationContext();
 
   const navigateToPersonal = useCallback((): void => {
     navigate(`${path.HOME}${path.PERSONAL}`);
@@ -151,17 +158,13 @@ function Menu(): JSX.Element {
   const loader = useCallback((): (item: NavLinkPropsType) => void => {
     if (onPageChange && clearOldKeyword && resetPage) {
       return (item: NavLinkPropsType): void => {
-        const oldLocation = window.location.pathname;
-        navigate(`${path.HOME}/${item.path}`);
         if (item.path === path.ALL) {
-          setCondition({});
-          if ([path.ALL, path.AUTHORS, path.CATEGORIES].some((p) => oldLocation.includes(p))) {
-            onPageChange(1);
-          }
+          shouldCallOnPageChange() && onPageChange(1);
         } else {
           setCondition({ id: item.id });
           onPageChange(1, { id: item.id });
         }
+        navigate(`${path.HOME}/${item.path}`);
         clearOldKeyword();
         setResultTitle(item);
         resetPage();
