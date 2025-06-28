@@ -7,12 +7,14 @@ import './style.scss';
 
 function Header(): JSX.Element {
   const navigate = useNavigate();
-  const { onPageChange, setCondition, setResultFor } = useClientPaginationContext();
+  const { onPageChange, setCondition, setResultFor, shouldCallOnPageChange } = useClientPaginationContext();
 
   const search = useCallback((keyword: string): void => {
     if (onPageChange) {
       const allUrl: string = `${path.HOME}/${path.ALL}${keyword ? `?keyword=${keyword}` : ''}`.trim();
-      onPageChange(1, { keyword });
+      if (shouldCallOnPageChange()) {
+        onPageChange(1, { keyword });
+      }
       setCondition({ keyword });
       setResultFor(keyword || 'All');
       navigate(allUrl);

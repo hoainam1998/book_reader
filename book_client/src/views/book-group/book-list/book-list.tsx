@@ -10,9 +10,9 @@ import Button from 'components/button/button';
 import paths from 'router/paths';
 import { bookPagination, getBookDetail } from '../fetcher';
 import store from 'store/book';
+const { updateData, deleteAllStorage } = store;
 import { openFile, showToast } from 'utils';
 import './style.scss';
-const { updateData, deleteAllStorage } = store;
 
 type BookType = {
   bookId: string;
@@ -21,7 +21,10 @@ type BookType = {
   pdf: string;
   publishedDay: string;
   publishedTime: number;
-  category: string;
+  category: {
+    avatar: string;
+    name: string;
+  };
   introduce: string;
 };
 
@@ -135,6 +138,14 @@ function BookList(): JSX.Element {
             name="avatar"
             render={(slotProp) => (
               <img height="50px" width="50px" src={slotProp.avatar} alt="book-avatar" />
+            )}/>
+          <Slot<BookType>
+            name="category"
+            render={(slotProp) => (
+              <div className="category-cell">
+                <img height="30px" width="30px" src={slotProp.category.avatar} alt="category-avatar" />
+                <span>{slotProp.category.name}</span>
+              </div>
             )}/>
           <Slot<BookType>
             name="pdf"
