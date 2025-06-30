@@ -17,8 +17,20 @@ class BookDTO extends OutputValidate {
   @Type(() => String)
   avatar;
 
-  @Type(() => String)
-  category;
+  @Type(() => Object)
+  _category;
+
+  set category(value) {
+    this._category = {
+      ...value,
+      categoryId: value.category_id
+    };
+  }
+
+  @Type(() => Object)
+  get category() {
+    return this._category;
+  }
 
   @Exclude()
   introduce_file;

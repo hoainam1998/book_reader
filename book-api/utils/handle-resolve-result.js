@@ -35,7 +35,7 @@ const handleError = (err, messages, errorCodes) => {
           }
           throw new GraphQLError(message, graphqlUnauthorizedErrorOption);
         } else {
-          message = messages['RECORD_NOT_FOUND'];
+          message = messages['RECORD_NOT_FOUND'] || err.message;
           throw new GraphQLError(message, graphqlNotFoundErrorOption);
         }
       case PRISMA_ERROR_CODE.UNIQUE_DUPLICATE:
@@ -67,7 +67,7 @@ const handleError = (err, messages, errorCodes) => {
  * @return {Promise} - The result.
  * @throws {Error} - Throw error if it have.
  */
-module.exports = (resolveFunction, messages, errorCodes) => {
+module.exports = (resolveFunction, messages = {}, errorCodes) => {
   // checking whether properties and data type is valid or not.
   // if true run resolve function, else throw an error.
   if (Object.keys(messages).every((code) => Object.keys(PRISMA_ERROR_CODE).includes(code) && typeof messages[code] === 'string')) {

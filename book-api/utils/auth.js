@@ -50,6 +50,14 @@ const signLoginToken = (userId, email, power) => jwt.sign({ userId, email, power
 const signClientLoginToken = (email) => jwt.sign({ email }, process.env.CLIENT_LOGIN_SECRET_KEY);
 
 /**
+ * Verify client login token.
+ *
+ * @param {string} clientLoginToken - The client login token.
+ * @return {object} - The data decoded.
+ */
+const verifyClientLoginToken = (clientLoginToken) => jwt.verify(clientLoginToken, process.env.CLIENT_LOGIN_SECRET_KEY);
+
+/**
  * Signing client reset password token.s
  *
  * @param {string} email - An email register.
@@ -117,4 +125,5 @@ module.exports = {
   verifyClientResetPasswordToken,
   signLoginToken,
   verifyLoginToken,
+  verifyClientLoginToken,
 };

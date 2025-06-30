@@ -21,7 +21,11 @@ const requestBody = {
     pdf: true,
     publishedTime: true,
     publishedDay: true,
-    category: true,
+    category: {
+      name: true,
+      avatar: true,
+      categoryId: true,
+    },
     introduce: true,
     avatar: true,
   },

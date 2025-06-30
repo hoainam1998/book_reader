@@ -3,6 +3,7 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
+const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
@@ -11,6 +12,7 @@ const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const getBookDetailUrl = `${PATH.BOOK}/detail`;
 const mockBook = BookDummyData.MockData;
+const apiKey = ClientDummyData.apiKey;
 
 const requestBody = {
   bookId: mockBook.book_id,
@@ -66,17 +68,28 @@ describe('get book detail', () => {
   ], 'get book detail common test');
 
   describe(createDescribeTest(METHOD.POST, getBookDetailUrl), () => {
-    test('get book detail success', (done) => {
+    test.each([
+      {
+        name: 'user',
+        sessionData: sessionData.user,
+        apiKey: authenticationToken,
+      },
+      {
+        name: 'client',
+        sessionData: ClientDummyData.session.client,
+        apiKey,
+      }
+    ])('get book detail success with $name role', ({ name, sessionData, apiKey }, done) => {
       globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const expectedBook = BookDummyData.generateExpectedObject(requestBody.query);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
+      signedTestCookie(sessionData, name)
         .then((responseSign) => {
           globalThis.api
             .post(getBookDetailUrl)
-            .set('authorization', authenticationToken)
+            .set('authorization', apiKey)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)

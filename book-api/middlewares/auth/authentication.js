@@ -15,25 +15,40 @@ const logger = new Logger('Authentication');
  * @return - by next middleware if pass, otherwise return unauthorized json response.
  */
 const authentication = (req, res, next) => {
-  try {
-    const authorization = req.get('authorization');
-    if (authorization
-      && req.session.isDefined('user')
-      && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId', 'apiKey')) {
-      // verify token
-      if (req.session.user.apiKey === authorization) {
+  const authorization = req.get('authorization');
+  /**
+   * Check login token is the same with api key.
+   *
+   * @param {string} [name='user'] - Name of session.
+   */
+  const userLogged = (name = 'user') => {
+    // verify token
+    if (req.session[name].apiKey === authorization) {
+      if (name === 'user') {
         utils.verifyLoginToken(authorization);
-        // if user already passed mfa, then switch to next middleware.
-        return next();
       } else {
-        logger.warn('user not found!');
-        return res.status(HTTP_CODE.UNAUTHORIZED)
-          .json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
+        utils.verifyClientLoginToken(authorization);
+      }
+      // if user already passed mfa, then switch to next middleware.
+      next();
+    } else {
+      logger.warn('user not found!');
+      res.status(HTTP_CODE.UNAUTHORIZED)
+        .json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
+    }
+  };
+
+  try {
+    if (authorization) {
+      if (req.session.isDefined('user') && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId', 'apiKey')) {
+        return userLogged('user');
+      } else if (req.session.isDefined('client') && req.session.client.isDefined('email', 'clientId', 'apiKey')) {
+        return userLogged('client');
       }
     }
 
     // if session have not, also return unauthorized message.
-    if (!req.session.isDefined('user')) {
+    if (!req.session.isDefined('user') && !req.session.isDefined('client')) {
       logger.warn('session is out of date');
       return res.status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(USER.WORKING_SESSION_EXPIRE, ErrorCode.WORKING_SESSION_ENDED));
