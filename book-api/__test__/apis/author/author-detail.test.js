@@ -2,6 +2,7 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const ErrorCode = require('#services/error-code');
+const ClientDummyData = require('#test/resources/dummy-data/client');
 const AuthorDummyData = require('#test/resources/dummy-data/author');
 const OutputValidate = require('#services/output-validate');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
@@ -10,6 +11,7 @@ const { authenticationToken, sessionData, signedTestCookie, destroySession } = r
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const authorDetailUrl = `${PATH.AUTHOR}/detail`;
+const apiKey = ClientDummyData.apiKey;
 
 const mockAuthor = AuthorDummyData.MockData;
 const requestBody = {
@@ -51,17 +53,28 @@ describe('author detail', () => {
   ], 'get author detail common test');
 
   describe(createDescribeTest(METHOD.POST, authorDetailUrl), () => {
-    test('get author detail will be success', (done) => {
+    test.each([
+      {
+        name: 'user',
+        sessionData: sessionData.user,
+        apiKey: authenticationToken,
+      },
+      {
+        name: 'client',
+        sessionData: ClientDummyData.session.client,
+        apiKey,
+      }
+    ])('get author detail will be success with $name role', ({ name, sessionData, apiKey }, done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       globalThis.prismaClient.author.findUniqueOrThrow.mockResolvedValue(mockAuthor);
       const expectedUser = AuthorDummyData.generateExpectedObject(requestBody.query);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
+      signedTestCookie(sessionData, name)
         .then((responseSign) => {
           globalThis.api
             .post(authorDetailUrl)
-            .set('authorization', authenticationToken)
+            .set('authorization', apiKey)
             .set('Cookie', [responseSign.header['set-cookie']])
             .send(requestBody)
             .expect('Content-Type', /application\/json/)

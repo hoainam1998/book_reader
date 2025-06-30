@@ -307,6 +307,45 @@ const mutation = new GraphQLObjectType({
         await book.saveBookAuthor(authorList);
         return messageCreator(BOOK.CREATE_BOOK_AUTHOR_SUCCESS);
       }
+    },
+    addFavoriteBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId }) => {
+        return handleResolveResult(async () => {
+          await service.addFavoriteBook(readerId, bookId);
+          return messageCreator(BOOK.ADD_FAVORITE_BOOK_SUCCESS);
+        }, {
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
+    },
+    deleteFavoriteBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId }) => {
+        return handleResolveResult(async () => {
+          await service.deleteFavoriteBook(readerId, bookId);
+          return messageCreator(BOOK.DELETE_FAVORITE_BOOK_SUCCESS);
+        }, {
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
     }
   }
 });

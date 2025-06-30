@@ -16,6 +16,14 @@ const randomPassword = autoGeneratePassword();
 class ClientDummyData extends DummyDataApi {
   static default = new ClientDummyData();
 
+  /**
+   * Access password.
+   *
+   * @static
+   * @return {string} - The password.
+   */
+  static password = randomPassword;
+
   constructor() {
     super(
       {
@@ -53,13 +61,13 @@ class ClientDummyData extends DummyDataApi {
   }
 
   /**
-   * Access password.
+   * Access api key.
    *
    * @static
-   * @return {string} - The password.
+   * @return {string} - The api key.
    */
-  static get password() {
-    return randomPassword;
+  static get apiKey() {
+    return signClientLoginToken(this.MockData.email);
   }
 
   /**

@@ -78,6 +78,11 @@ module.exports = deepFreeze({
     LOAD_BOOK_DETAIL_FAIL: 'Load book information was failed!',
     LOAD_BOOKS_FAIL: 'Loading books was failed!',
     INTRODUCE_FILE_NOT_FOUND: 'Can not found introduce file!',
+    ADD_FAVORITE_BOOK_SUCCESS: 'Adding favorite book was success!',
+    ADD_FAVORITE_BOOK_FAIL: 'Adding favorite book was failed!',
+    DELETE_FAVORITE_BOOK_SUCCESS: 'Deleting favorite book was success!',
+    DELETE_FAVORITE_BOOK_FAIL: 'Deleting favorite book was failed!',
+    BOOK_DO_NOT_EXIST: 'The book do not exist!',
   },
   AUTHOR: {
     CREATE_AUTHOR_SUCCESS: 'Create author was success!',

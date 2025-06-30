@@ -36,7 +36,8 @@ const {
   PdfFileSaved,
   BookDetail,
   IntroduceHTMLFileSave,
-  BookAuthors
+  BookAuthors,
+  FavoriteBook,
 } = require('#dto/book/book-in');
 const BookCreated = require('#dto/book/book-created');
 const cpUpload = multer().fields([
@@ -132,6 +133,47 @@ class BookRouter extends Router {
     this.post('/create-book', authentication, cpUpload, this._createBookInformation);
     this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
     this.post('/pagination', authentication, this._paginationBook);
+    this.post('/add-favorite-book', authentication, this._addFavoriteBook);
+    this.delete('/delete-favorite-book/:bookId', authentication, this._deleteFavoriteBook);
+  }
+
+  @validation(FavoriteBook, {
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+    error_message: BOOK.DELETE_FAVORITE_BOOK_FAIL
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _deleteFavoriteBook(req, res, next, self) {
+    const query = `mutation DeleteFavoriteBook($readerId: ID!, $bookId: ID!) {
+      book {
+        deleteFavoriteBook(readerId: $readerId, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.params.bookId,
+    });
+  }
+
+  @validation(FavoriteBook, { error_message: BOOK.ADD_FAVORITE_BOOK_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _addFavoriteBook(req, res, next, self) {
+    const query = `mutation AddFavoriteBook($readerId: ID!, $bookId: ID!) {
+      book {
+        addFavoriteBook(readerId: $readerId, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.body.bookId,
+    });
   }
 
   @validation(IntroduceHTMLFileSave, { error_message: BOOK.SAVE_INTRODUCE_FAIL })
