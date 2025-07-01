@@ -39,7 +39,7 @@ describe('client detail', () => {
     {
       name: 'url test',
       describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
+      url: `${PATH.CLIENT}/unknown`,
       method: METHOD.POST.toLowerCase(),
     },
     {
