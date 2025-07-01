@@ -81,7 +81,9 @@
     "test.client.login": "npm run test.requirement -- __test__/apis/client/login.test.js",
     "test.client.login.silent": "npm run test.requirement -- __test__/apis/client/login.test.js --silent",
     "test.client.reset-password": "npm run test.requirement -- __test__/apis/client/reset-password.test.js",
-    "test.client.reset-password.silent": "npm run test.requirement -- __test__/apis/client/reset-password.test.js --silent"
+    "test.client.reset-password.silent": "npm run test.requirement -- __test__/apis/client/reset-password.test.js --silent",
+    "test.client.detail": "npm run test.requirement -- __test__/apis/client/client-detail.test.js",
+    "test.client.detail.silent": "npm run test.requirement -- __test__/apis/client/client-detail.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

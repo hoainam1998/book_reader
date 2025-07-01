@@ -4,7 +4,7 @@ const cors = require('cors');
  * Cors middleware only allow calling to internal api.
  *
  * @param {Object} req - express request.
- * @param {Function} corsFunction - express response.
+ * @param {Function} corsFunction - cors callback.
  * @returns {void}
  */
 const corsOptionsDelegate = (req, callback) => {

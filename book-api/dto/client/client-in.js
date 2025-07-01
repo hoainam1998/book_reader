@@ -1,6 +1,15 @@
 const { classCreator, Validation } = require('../helper.js');
 const { Validator } = require('#services/validator');
-const { IsString, IsEmail, IsPassword, IsNumeric } = require('#decorators/validators');
+const { IsString, IsEmail, IsPassword, IsNumeric, IsGraphqlSelect } = require('#decorators/validators');
+
+const ClientDetail = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsGraphqlSelect('value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
 
 const SignUp = (validators, className) => {
   return classCreator(class extends Validator {
@@ -68,4 +77,5 @@ module.exports = {
   SignUp: Validation(SignUp),
   ForgetPassword: Validation(ForgetPassword),
   ResetPassword: Validation(ResetPassword),
+  ClientDetail: Validation(ClientDetail),
 };

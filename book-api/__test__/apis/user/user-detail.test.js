@@ -198,6 +198,34 @@ describe('user detail', () => {
         });
     });
 
+     test('get user detail failed with undefine request body field', (done) => {
+      const undefineField = 'userIds';
+      const badRequestBody = {
+        [undefineField]: [Date.now().toString()],
+        ...requestBody,
+      };
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(userDetailUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send(badRequestBody)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(USER.LOAD_USER_DETAIL_FAIL),
+                errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
+              });
+              done();
+            });
+        });
+    });
+
     test('get user detail failed with output validate error', (done) => {
       globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
       jest.spyOn(GraphqlResponse, 'parse').mockImplementation(

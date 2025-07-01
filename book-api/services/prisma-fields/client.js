@@ -12,7 +12,46 @@ class ClientPrismaField extends PrismaField {
     lastName: 'last_name',
     avatar: 'avatar',
     email: 'email',
+    sex: 'sex',
     resetPasswordToken: 'reset_password_token',
+    favoriteBooks: {
+      as: 'favorite_books',
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+          }
+        }
+      }
+    },
+    readLate: {
+      as: 'read_late',
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+            create_at: true,
+          }
+        }
+      }
+    },
+    usedRead: {
+      as: 'used_read',
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+            create_at: true,
+          }
+        }
+      }
+    }
   };
 }
 

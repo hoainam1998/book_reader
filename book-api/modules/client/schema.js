@@ -17,6 +17,24 @@ const ForgetPassword = require('#dto/client/forget-password');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const { READER } = require('#messages');
 
+const CLIENT_RELATE_BOOKS = new GraphQLObjectType({
+  name: 'RelateBook',
+  fields: {
+    bookId: {
+      type: GraphQLID,
+    },
+    name: {
+      type: GraphQLString
+    },
+    avatar: {
+      type: GraphQLString
+    },
+    createAt: {
+      type: GraphQLString
+    },
+  }
+});
+
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
   fields: {
@@ -35,6 +53,9 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     email: {
       type: GraphQLString,
     },
+    sex: {
+      type: GraphQLInt,
+    },
     apiKey: {
       type: GraphQLString,
     },
@@ -44,6 +65,15 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     passwordMustChange: {
       type: GraphQLBoolean,
     },
+    favoriteBooks: {
+      type: new GraphQLList(CLIENT_RELATE_BOOKS),
+    },
+    readLate: {
+      type: new GraphQLList(CLIENT_RELATE_BOOKS),
+    },
+    usedRead: {
+      type: new GraphQLList(CLIENT_RELATE_BOOKS),
+    }
   }
 });
 
@@ -156,6 +186,21 @@ const query = new GraphQLObjectType({
           return convertDtoToZodObject(ClientDTO, await service.login(email, password, context));
         }, {
           UNAUTHORIZED: READER.USER_NOT_FOUND,
+        });
+      }
+    },
+    detail: {
+      type: new GraphQLNonNull(CLIENT_DETAIL_TYPE),
+      args: {
+        clientId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { clientId }, context) => {
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(ClientDTO, await service.detail(clientId, context));
+        }, {
+          RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
         });
       }
     }
