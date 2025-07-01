@@ -40,7 +40,7 @@ describe('reset password', () => {
       describe: 'reset password api cors',
       url: resetPasswordUrl,
       method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
+      origin: process.env.CLIENT_ORIGIN_CORS,
     }
   ], 'reset password common test');
 

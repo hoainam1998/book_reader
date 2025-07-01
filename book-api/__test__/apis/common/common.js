@@ -76,15 +76,27 @@ module.exports = (describeTitle, testParameter, serverName) => {
     }
 
     if (!isTestSkip(corsOriginRequest)) {
-      test(corsOriginRequest.describe, (done) => {
-        expect.hasAssertions();
-        globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
-          .then((response) => {
-            const originUrl = `${response.request.protocol}//${response.request.host}`;
-            expect(response.header['access-control-allow-origin']).toBe(corsOriginRequest.origin || originUrl);
-            done();
-          });
-      });
+      if (corsOriginRequest.origin) {
+        test(corsOriginRequest.describe, (done) => {
+          expect.hasAssertions();
+          globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
+            .set('Origin', corsOriginRequest.origin)
+            .then((response) => {
+              expect(response.header['access-control-allow-origin']).toBe(corsOriginRequest.origin);
+              done();
+            });
+        });
+      } else {
+        test(corsOriginRequest.describe, (done) => {
+          expect.hasAssertions();
+          globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
+            .then((response) => {
+              const originUrl = `${response.request.protocol}//${response.request.host}`;
+              expect(response.header['access-control-allow-origin']).toBe(originUrl);
+              done();
+            });
+        });
+      }
     }
   });
 };

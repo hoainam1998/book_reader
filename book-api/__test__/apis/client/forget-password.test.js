@@ -42,7 +42,7 @@ describe('forget-password', () => {
       describe: 'forget password api cors',
       url: forgetPasswordUrl,
       method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
+      origin: process.env.CLIENT_ORIGIN_CORS,
     }
   ], 'forget password common test');
 
@@ -185,7 +185,7 @@ describe('forget-password', () => {
         });
     });
 
-    test('generate reset password token failed with undefine request body filed', (done) => {
+    test('generate reset password token failed with undefine request body field', (done) => {
       const undefineField = 'resetToken';
       const badRequestBody = {
         ...requestBody,

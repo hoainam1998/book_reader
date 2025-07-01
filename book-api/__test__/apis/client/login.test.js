@@ -48,7 +48,7 @@ describe('client login', () => {
       describe: 'login api cors',
       url: loginUrl,
       method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
+      origin: process.env.CLIENT_ORIGIN_CORS,
     }
   ], 'login common test');
 

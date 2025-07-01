@@ -86,6 +86,15 @@ class ClientService extends Service {
         throw new PrismaClientKnownRequestError(READER.PASSWORD_NOT_MATCH, { code: 'P2025' });
       });
   }
+
+  detail(clientId, select) {
+    return this.PrismaInstance.reader.findUniqueOrThrow({
+      where: {
+        reader_id: clientId,
+      },
+      select,
+    });
+  }
 }
 
 module.exports = ClientService;

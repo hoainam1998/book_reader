@@ -8,6 +8,20 @@ const {
 const randomPassword = autoGeneratePassword();
 
 /**
+  * Create a book list.
+  *
+  * @param {number} amount - The book amount.
+  * @return {*[]} - The book list.
+  */
+const createBooks = (amount) => {
+  return Array.apply(null, Array(amount)).map((_, index) => ({
+    name: `book ${index}`,
+    book_id: Date.now().toString(),
+    avatar: `avatar ${index}`
+  }));
+};
+
+/**
  * The class store client data and behavior of them.
  *
  * @class
@@ -34,6 +48,9 @@ class ClientDummyData extends DummyDataApi {
         avatar: 'avatar',
         email: 'unknown_client@gmail.com',
         sex: 0,
+        favorite_books: createBooks(2),
+        read_late: createBooks(2),
+        used_read: createBooks(2),
       },
       null,
       {
@@ -46,6 +63,9 @@ class ClientDummyData extends DummyDataApi {
         sex: expect.any(Number),
         apiKey: expect.any(String),
         passwordMustChange: expect.any(Boolean),
+        favoriteBooks: expect.any(Array),
+        readLate: expect.any(Array),
+        usedRead: expect.any(Array),
       }
     );
   }

@@ -19,20 +19,21 @@ model author {
 }
 
 model book {
-  book_id        String        @id @db.VarChar(20)
-  name           String        @db.Text
-  pdf            String?       @db.Text
-  published_day  String        @db.VarChar(20)
+  book_id        String            @id @db.VarChar(20)
+  name           String            @db.Text
+  pdf            String?           @db.Text
+  published_day  String            @db.VarChar(20)
   published_time Int
-  category_id    String        @db.VarChar(20)
-  introduce_file String?       @db.VarChar(255)
-  avatar         String?       @db.Text
-  category       category      @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK")
+  category_id    String            @db.VarChar(20)
+  introduce_file String?           @db.VarChar(255)
+  avatar         String?           @db.Text
+  category       category          @relation(fields: [category_id], references: [category_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_BOOK")
   book_image     book_image[]
   book_reader    book_reader[]
   book_author    book_author[]
   favorite_books favorite_books[]
   read_late      read_late[]
+  used_read      used_read[]
 
   @@index([category_id], map: "FK_BOOK")
 }
@@ -75,6 +76,17 @@ model read_late {
 
   @@id([reader_id, book_id])
   @@index([book_id], map: "FK_READ_LATE_BOOK")
+}
+
+model used_read {
+  book_id String    @db.VarChar(20)
+  reader_id String  @db.VarChar(20)
+  added_at  String  @unique @db.VarChar(20)
+  book      book    @relation(fields: [book_id], references: [book_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_USED_READ_BOOK")
+  reader    reader  @relation(fields: [reader_id], references: [reader_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_USED_READ_READER")
+
+  @@id([reader_id, book_id])
+  @@index([book_id], map: "FK_USED_READ_BOOK")
 }
 
 model book_reader {
@@ -123,4 +135,5 @@ model reader {
   book_reader               book_reader[]
   favorite_books            favorite_books[]
   read_late                 read_late[]
+  used_read                 used_read[]
 }

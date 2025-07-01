@@ -15,6 +15,9 @@ const isValueEqual = function (valueToCompare) {
     return false;
   } else if (Array.isArray(this) && Array.isArray(valueToCompare)) {
     if (this.length === valueToCompare.length) {
+      if (this.length === 0 && valueToCompare.length === 0) {
+        return true;
+      }
       return this.every((v, index) => v.isValueEqual(valueToCompare[index]));
     }
     return false;

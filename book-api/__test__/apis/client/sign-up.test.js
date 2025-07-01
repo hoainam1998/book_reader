@@ -39,7 +39,7 @@ describe('client signup', () => {
       describe: 'client signup api cors',
       url: clientSignupUrl,
       method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
+      origin: process.env.CLIENT_ORIGIN_CORS,
     }
   ], 'client signup common test');
 

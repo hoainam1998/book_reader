@@ -4,6 +4,7 @@ const { validateResultExecute, upload, validation, serializer } = require('#deco
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const clientLoginRequire = require('#middlewares/auth/client-login-require');
+const authentication = require('#middlewares/auth/authentication');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
@@ -13,7 +14,7 @@ const {
   verifyClientResetPasswordToken,
   getGeneratorFunctionData,
 } = require('#utils');
-const { SignUp, ForgetPassword, ResetPassword } = require('#dto/client/client-in');
+const { SignUp, ForgetPassword, ResetPassword, ClientDetail } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -39,6 +40,24 @@ class ClientRouter extends Router {
     this.post('/reset-password', onlyAllowOneDevice, this._resetPassword);
     this.post('/login', onlyAllowOneDevice, this._login);
     this.post('/logout', clientLoginRequire, this._logout);
+    this.post('/detail', authentication, this._detail);
+  }
+
+  @validation(ClientDetail, { error_message: READER.LOAD_DETAIL_FAIL })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(ClientDetailResponse)
+  _detail(req, res, next, self) {
+    const query = `query ClientDetail ($clientId: ID!) {
+      client {
+        detail(clientId: $clientId) ${
+          req.body.query
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      clientId: req.session.client.clientId,
+    }, req.body.query);
   }
 
   @validation(SignUp, { error_message: READER.SIGNUP_FAIL })
