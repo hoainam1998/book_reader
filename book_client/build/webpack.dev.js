@@ -3,22 +3,25 @@ const common = require('./webpack.common');
 const { OUTPUT_DIR } = require('./config.js');
 const portfinder = require('portfinder');
 const notifier = require('node-notifier');
+const { dev } = require('../config');
 const FriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin');
 
-const devConfig = (env) => merge(common(env), {
-  mode: 'development',
-  devtool: 'inline-source-map',
-  devServer: {
-    static: OUTPUT_DIR,
-    open: true,
-    hot: true,
-    port: 3000,
-    historyApiFallback: true,
-  },
-  optimization: {
-    runtimeChunk: 'single'
+const devConfig = (env) => merge(common(env),
+  {
+    mode: 'development',
+    devtool: 'inline-source-map',
+    devServer: {
+      static: OUTPUT_DIR,
+      open: true,
+      hot: true,
+      port: env.APP_NAME === 'client' ? dev.CLIENT_PORT : dev.ADMIN_PORT,
+      historyApiFallback: true,
+    },
+    optimization: {
+      runtimeChunk: 'single'
+    }
   }
-});
+);
 
 module.exports = (env) => {
   const developmentConfig = devConfig(env);
@@ -35,7 +38,7 @@ module.exports = (env) => {
         developmentConfig.plugins.push(
           new FriendlyErrorsWebpackPlugin({
             compilationSuccessInfo: {
-              messages: ['You application is running here http://localhost:3000']
+              messages: [`You application is running here http://localhost:${port}`]
             },
             onErrors: function (severity, errors) {
               if (severity === 'error') {
