@@ -3,13 +3,13 @@ const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
+const ClientRoutePath = require('#services/route-paths/client');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const { signClientResetPasswordToken } = require('#utils');
-const clientSignupUrl = `${PATH.CLIENT}/sign-up`;
-
+const clientSignupUrl = ClientRoutePath.signUp.abs;
 const mockRequestClient = ClientDummyData.MockRequestData;
 
 const requestBody = {

@@ -2,14 +2,15 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { signLoginToken } = require('#utils');
 const { mockUser, authenticationToken, otpCode, sessionData, signedTestCookie } = require('#test/resources/auth');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
-const verifyOtpUrl = `${PATH.USER}/verify-otp`;
-const verifyOtpInternalUrl = `${PATH.USER}/verify-otp-process`;
+const verifyOtpUrl = UserRoutePath.verifyOtp.abs;
+const verifyOtpInternalUrl = UserRoutePath.verifyOtpProcess.abs;
 
 const requestBody = {
   otp: otpCode,

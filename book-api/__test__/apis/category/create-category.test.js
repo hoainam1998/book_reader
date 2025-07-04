@@ -2,13 +2,13 @@ const { ServerError } = require('#test/mocks/other-errors');
 const ErrorCode = require('#services/error-code');
 const CategoryDummyData = require('#test/resources/dummy-data/category');
 const OutputValidate = require('#services/output-validate');
+const CategoryRoutePath = require('#services/route-paths/category');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { CATEGORY, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
-const createCategoryUrl = `${PATH.CATEGORY}/create`;
-
+const createCategoryUrl = CategoryRoutePath.create.abs;
 const mockCategory = CategoryDummyData.MockData;
 const mockRequestCategory = CategoryDummyData.MockRequestData;
 

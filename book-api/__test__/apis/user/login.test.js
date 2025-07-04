@@ -4,14 +4,15 @@ const { plainToInstance } = require('class-transformer');
 const UserDTO = require('#dto/user/user');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { mockUser } = require('#test/resources/auth');
 const { passwordHashing } = require('#utils');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
-const loginUrl = `${PATH.USER}/login`;
-const internalLoginApiUrl = `${PATH.USER}/login-process`;
+const loginUrl = UserRoutePath.login.abs;
+const internalLoginApiUrl = UserRoutePath.loginProcess.abs;
 
 const requestBody = {
   email: mockUser.email,

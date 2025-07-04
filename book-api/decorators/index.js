@@ -151,6 +151,7 @@ const endpoint = (target) => {
   const originMethod = target.descriptor.value;
   target.descriptor.value = function (...args) {
     // checking if url not contain "/" at first, then "/" will be include at begin of url.
+    args[0] = `${args[0]}`;
     if (/^\/(\w|-)+/.test(args[0]) === false) {
       args[0] = `/${args[0]}`;
     }

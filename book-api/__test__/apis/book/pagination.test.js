@@ -3,13 +3,14 @@ const BookDummyData = require('#test/resources/dummy-data/book');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
+const BookRoutePath = require('#services/route-paths/book');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, BOOK, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const { calcPages } = require('#utils');
-const paginationUrl = `${PATH.BOOK}/pagination`;
+const paginationUrl = BookRoutePath.pagination.abs;
 const bookLength = 2;
 
 BookDummyData.ExpectedTypes = Object.assign(BookDummyData.ExpectedTypes, { introduce: expect.any(String) });

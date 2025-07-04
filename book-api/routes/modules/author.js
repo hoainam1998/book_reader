@@ -1,4 +1,5 @@
 const Router = require('../router');
+const AuthorRoutePath = require('#services/route-paths/author');
 const { validateResultExecute, upload, serializer, validation } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -21,12 +22,12 @@ class AuthorRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create', authentication, this._createAuthor);
-    this.post('/pagination', authentication, this._pagination);
-    this.post('/detail', authentication, this._getAuthorDetail);
-    this.put('/update', authentication, this._updateAuthor);
-    this.post('/filter', authentication, this._getAuthors);
-    this.post('/menu', authentication, this._loadAuthorMenu);
+    this.post(AuthorRoutePath.create, authentication, this._createAuthor);
+    this.post(AuthorRoutePath.pagination, authentication, this._pagination);
+    this.post(AuthorRoutePath.detail, authentication, this._getAuthorDetail);
+    this.put(AuthorRoutePath.update, authentication, this._updateAuthor);
+    this.post(AuthorRoutePath.filter, authentication, this._getAuthors);
+    this.post(AuthorRoutePath.menu, authentication, this._loadAuthorMenu);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')

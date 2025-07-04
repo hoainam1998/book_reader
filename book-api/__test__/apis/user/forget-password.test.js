@@ -1,6 +1,7 @@
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
@@ -12,8 +13,8 @@ const {
 const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const forgetPasswordUrl = `${PATH.USER}/forget-password`;
-const forgetPasswordInternalUrl = `${PATH.USER}/forget-password-process`;
+const forgetPasswordUrl = UserRoutePath.forgetPassword.abs;
+const forgetPasswordInternalUrl = UserRoutePath.forgetPasswordProcess.abs;
 
 const requestBody = {
   email: mockUser.email,

@@ -5,13 +5,13 @@ const { ServerError } = require('#test/mocks/other-errors');
 const ErrorCode = require('#services/error-code');
 const AuthorDummyData = require('#test/resources/dummy-data/author');
 const OutputValidate = require('#services/output-validate');
+const AuthorRoutePath = require('#services/route-paths/author');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { AUTHOR, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
-const updateAuthorUrl = `${PATH.AUTHOR}/update`;
-
+const updateAuthorUrl = AuthorRoutePath.update.abs;
 const mockAuthor = AuthorDummyData.MockData;
 const mockRequestAuthor = AuthorDummyData.MockRequestData;
 

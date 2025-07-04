@@ -19,6 +19,7 @@ const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const EmailService = require('#services/email');
+const ClientRoutePath = require('#services/route-paths/client');
 
 /**
  * Organize client routes.
@@ -34,13 +35,13 @@ class ClientRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/sign-up', onlyAllowOneDevice, this._signup);
-    this.post('/forget-password', onlyAllowOneDevice, this._forgetPassword);
-    this.post('/generated-reset-password-token', allowInternalCall, this._generatedResetPassword);
-    this.post('/reset-password', onlyAllowOneDevice, this._resetPassword);
-    this.post('/login', onlyAllowOneDevice, this._login);
-    this.post('/logout', clientLoginRequire, this._logout);
-    this.post('/detail', authentication, this._detail);
+    this.post(ClientRoutePath.signUp, onlyAllowOneDevice, this._signup);
+    this.post(ClientRoutePath.forgetPassword, onlyAllowOneDevice, this._forgetPassword);
+    this.post(ClientRoutePath.generatedResetPasswordToken, allowInternalCall, this._generatedResetPassword);
+    this.post(ClientRoutePath.resetPassword, onlyAllowOneDevice, this._resetPassword);
+    this.post(ClientRoutePath.login, onlyAllowOneDevice, this._login);
+    this.post(ClientRoutePath.logout, clientLoginRequire, this._logout);
+    this.post(ClientRoutePath.detail, authentication, this._detail);
   }
 
   @validation(ClientDetail, { error_message: READER.LOAD_DETAIL_FAIL })

@@ -4,13 +4,14 @@ const ClientDummyData = require('#test/resources/dummy-data/client');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
+const ClientRoutePath = require('#services/route-paths/client');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, READER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { signedTestCookie } = require('#test/resources/auth');
 const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
-const loginUrl = `${PATH.CLIENT}/login`;
+const loginUrl = ClientRoutePath.login.abs;
 
 const clientRequestMock = ClientDummyData.MockRequestData;
 const clientMock = ClientDummyData.MockData;

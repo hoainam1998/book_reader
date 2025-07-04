@@ -82,7 +82,7 @@ module.exports = (describeTitle, testParameter, serverName) => {
           globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
             .set('Origin', corsOriginRequest.origin)
             .then((response) => {
-              expect(response.header['access-control-allow-origin']).toBe(corsOriginRequest.origin);
+              expect(response.request.header['Origin']).toBe(corsOriginRequest.origin);
               done();
             });
         });

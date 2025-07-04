@@ -3,6 +3,7 @@ const { PrismaForeignConflict, PrismaNotFoundError } = require('#test/mocks/pris
 const CategoryDummyData = require('#test/resources/dummy-data/category');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
+const CategoryRoutePath = require('#services/route-paths/category');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, CATEGORY, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
@@ -10,7 +11,7 @@ const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const mockCategory = CategoryDummyData.MockData;
 const mockRequestCategory = CategoryDummyData.MockRequestData;
-const deleteCategoryUrl = `${PATH.CATEGORY}/delete/${mockRequestCategory.category_id}`;
+const deleteCategoryUrl = `${CategoryRoutePath.delete.abs}/${mockRequestCategory.category_id}`;
 
 describe('delete category', () => {
   commonTest('delete category api common test', [

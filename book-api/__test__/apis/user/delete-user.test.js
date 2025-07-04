@@ -3,13 +3,14 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const WebSocketCreator = require('#test/resources/web-socket');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const UserRoutePath = require('#services/route-paths/user');
 const { WsClient, Socket } = require('#services/socket');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest } = require('#test/helpers/index');
 const { authenticationToken, sessionData, mockUser, signedTestCookie, clearAllSession, destroySession } = require('#test/resources/auth');
 const deleteUserId = Date.now().toString();
-const deleteUserUrl = `${PATH.USER}/delete/${deleteUserId}`;
+const deleteUserUrl = `${UserRoutePath.delete.abs}/${deleteUserId}`;
 
 const wsSend = jest.fn();
 

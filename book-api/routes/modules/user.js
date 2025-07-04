@@ -18,6 +18,7 @@ const {
 } = require('#utils');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const loginRequire = require('#middlewares/auth/login-require');
 const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
@@ -81,26 +82,26 @@ class UserRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/create-user', authentication, onlyAdminAllowed, this._createUser);
-    this.post('/add', allowInternalCall, this._addUser);
-    this.post('/pagination', authentication, this._pagination);
-    this.post('/update-mfa', authentication, onlyAdminAllowed, this._updateMfaState);
-    this.post('/update-power', authentication, onlyAdminAllowed, this._updatePower);
-    this.post('/reset-password', onlyAllowOneDevice, this._resetPassword);
-    this.delete('/delete/:id', authentication, onlyAdminAllowed, this._deleteUser);
-    this.post('/user-detail', authentication, onlyAdminAllowed, this._getUserDetail);
-    this.put('/update-user', authentication, onlyAdminAllowed, this._updateUser);
-    this.put('/update-person', authentication, this._updatePerson);
-    this.post('/send-otp', loginRequire, otpAllowed, this._sendOtpCode);
-    this.post('/update-otp', allowInternalCall, this._updateOtpCode);
-    this.post('/login-process', allowInternalCall, this._login);
-    this.post('/login', onlyAllowOneDevice, this._loginWithSession);
-    this.get('/logout', loginRequire, this._logout);
-    this.post('/verify-otp', loginRequire, otpAllowed, this._verifyOtpWithSession);
-    this.post('/verify-otp-process', allowInternalCall, this._verifyOtp);
-    this.post('/forget-password-process', allowInternalCall, this._forgetPasswordProcess);
-    this.post('/forget-password', this._forgetPassword);
-    this.post('/all', authentication, this._getAllUsers);
+    this.post(UserRoutePath.createUser, authentication, onlyAdminAllowed, this._createUser);
+    this.post(UserRoutePath.add, allowInternalCall, this._addUser);
+    this.post(UserRoutePath.pagination, authentication, this._pagination);
+    this.post(UserRoutePath.updateMfa, authentication, onlyAdminAllowed, this._updateMfaState);
+    this.post(UserRoutePath.updatePower, authentication, onlyAdminAllowed, this._updatePower);
+    this.post(UserRoutePath.resetPassword, onlyAllowOneDevice, this._resetPassword);
+    this.delete(UserRoutePath.delete, authentication, onlyAdminAllowed, this._deleteUser);
+    this.post(UserRoutePath.userDetail, authentication, onlyAdminAllowed, this._getUserDetail);
+    this.put(UserRoutePath.updateUser, authentication, onlyAdminAllowed, this._updateUser);
+    this.put(UserRoutePath.updatePerson, authentication, this._updatePerson);
+    this.post(UserRoutePath.sendOtp, loginRequire, otpAllowed, this._sendOtpCode);
+    this.post(UserRoutePath.updateOtp, allowInternalCall, this._updateOtpCode);
+    this.post(UserRoutePath.loginProcess, allowInternalCall, this._login);
+    this.post(UserRoutePath.login, onlyAllowOneDevice, this._loginWithSession);
+    this.get(UserRoutePath.logout, loginRequire, this._logout);
+    this.post(UserRoutePath.verifyOtp, loginRequire, otpAllowed, this._verifyOtpWithSession);
+    this.post(UserRoutePath.verifyOtpProcess, allowInternalCall, this._verifyOtp);
+    this.post(UserRoutePath.forgetPasswordProcess, allowInternalCall, this._forgetPasswordProcess);
+    this.post(UserRoutePath.forgetPassword, this._forgetPassword);
+    this.post(UserRoutePath.all, authentication, this._getAllUsers);
   }
 
   @validation(UserUpdate, { error_message: USER.ADD_USER_FAIL, groups: ['create'] })

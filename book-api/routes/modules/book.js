@@ -1,5 +1,6 @@
 const Router = require('../router');
 const multer = require('multer');
+const BookRoutePath = require('#services/route-paths/book');
 const {
   validateResultExecute,
   uploadPdf,
@@ -121,20 +122,20 @@ class BookRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/save-introduce', authentication, this._saveIntroduceHtmlFile);
-    this.put('/update-introduce', authentication, this._updateIntroduceHtmlFile);
-    this.post('/all', authentication, this._getAllBooks);
-    this.post('/save-book-info', allowInternalCall, this._saveBookInfo);
-    this.put('/update-book-info', allowInternalCall, this._updateBookInfo);
-    this.post('/save-pdf', allowInternalCall, this._savePdf);
-    this.put('/update-pdf', allowInternalCall, this._updatePdf);
-    this.post('/save-book-authors', allowInternalCall, this._saveBookAuthors);
-    this.post('/detail', authentication, this._getBookDetail);
-    this.post('/create-book', authentication, cpUpload, this._createBookInformation);
-    this.put('/update-book', authentication, cpUpload, this._updateBookInformation);
-    this.post('/pagination', authentication, this._paginationBook);
-    this.post('/add-favorite-book', authentication, this._addFavoriteBook);
-    this.delete('/delete-favorite-book/:bookId', authentication, this._deleteFavoriteBook);
+    this.post(BookRoutePath.saveIntroduce, authentication, this._saveIntroduceHtmlFile);
+    this.put(BookRoutePath.updateIntroduce, authentication, this._updateIntroduceHtmlFile);
+    this.post(BookRoutePath.all, authentication, this._getAllBooks);
+    this.post(BookRoutePath.saveBookInfo, allowInternalCall, this._saveBookInfo);
+    this.put(BookRoutePath.updateBookInfo, allowInternalCall, this._updateBookInfo);
+    this.post(BookRoutePath.savePdf, allowInternalCall, this._savePdf);
+    this.put(BookRoutePath.updatePdf, allowInternalCall, this._updatePdf);
+    this.post(BookRoutePath.saveBookAuthors, allowInternalCall, this._saveBookAuthors);
+    this.post(BookRoutePath.detail, authentication, this._getBookDetail);
+    this.post(BookRoutePath.createBook, authentication, cpUpload, this._createBookInformation);
+    this.put(BookRoutePath.updateBook, authentication, cpUpload, this._updateBookInformation);
+    this.post(BookRoutePath.pagination, authentication, this._paginationBook);
+    this.post(BookRoutePath.addFavoriteBook, authentication, this._addFavoriteBook);
+    this.delete(BookRoutePath.deleteFavoriteBook, authentication, this._deleteFavoriteBook);
   }
 
   @validation(FavoriteBook, {

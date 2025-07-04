@@ -1,4 +1,5 @@
 const Router = require('../router');
+const CategoryRoutePath = require('#services/route-paths/category');
 const { validateResultExecute, upload, validation, serializer } = require('#decorators');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const authentication = require('#middlewares/auth/authentication');
@@ -22,13 +23,13 @@ class CategoryRouter extends Router {
   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
-    this.post('/all', authentication, this._getAll);
-    this.post('/create', authentication, this._create);
-    this.put('/update', authentication, this._update);
-    this.post('/detail', authentication, this._getDetail);
-    this.delete('/delete/:id', authentication, this._delete);
-    this.post('/pagination', authentication, this._pagination);
-    this.post('/menu', authentication, this._getAll);
+    this.post(CategoryRoutePath.all, authentication, this._getAll);
+    this.post(CategoryRoutePath.create, authentication, this._create);
+    this.put(CategoryRoutePath.update, authentication, this._update);
+    this.post(CategoryRoutePath.detail, authentication, this._getDetail);
+    this.delete(CategoryRoutePath.delete, authentication, this._delete);
+    this.post(CategoryRoutePath.pagination, authentication, this._pagination);
+    this.post(CategoryRoutePath.menu, authentication, this._getAll);
   }
 
   @validation(AllCategory, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })

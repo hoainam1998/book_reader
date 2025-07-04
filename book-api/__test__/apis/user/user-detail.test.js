@@ -4,13 +4,13 @@ const GraphqlResponse = require('#dto/common/graphql-response');
 const UserDummyData = require('#test/resources/dummy-data/user');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const userDetailUrl = `${PATH.USER}/user-detail`;
-
+const userDetailUrl = UserRoutePath.userDetail.abs;
 const mockUser = UserDummyData.MockData;
 
 const requestBody = {

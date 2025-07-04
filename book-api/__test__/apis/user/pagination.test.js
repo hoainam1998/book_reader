@@ -3,12 +3,13 @@ const UserDummyData = require('#test/resources/dummy-data/user');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const paginationUrl = `${PATH.USER}/pagination`;
+const paginationUrl = UserRoutePath.pagination.abs;
 
 const requestBody = {
   pageSize: 10,
