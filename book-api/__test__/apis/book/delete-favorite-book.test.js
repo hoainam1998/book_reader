@@ -4,6 +4,7 @@ const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
+const BookRoutePath = require('#services/route-paths/book');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { signedTestCookie, destroySession } = require('#test/resources/auth');
@@ -13,7 +14,7 @@ const mockRequestBook = BookDummyData.MockRequestData;
 const sessionData = ClientDummyData.session.client;
 const apiKey = ClientDummyData.apiKey;
 const bookId = mockRequestBook.book_id;
-const deleteFavoriteBook = `${PATH.BOOK}/delete-favorite-book/${bookId}`;
+const deleteFavoriteBook = `${BookRoutePath.deleteFavoriteBook.abs}/${bookId}`;
 
 const requestBody = {
   bookId: mockRequestBook.book_id,

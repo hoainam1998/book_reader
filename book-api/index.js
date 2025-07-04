@@ -25,7 +25,6 @@ const PrismaClient = require('#services/prisma-client');
 const Logger = require('#services/logger');
 const RedisClient = require('#services/redis');
 
-
 const PORT = process.env.NODE_ENV === 'test' ? process.env.TEST_PORT : process.env.PORT;
 const layers = [];
 

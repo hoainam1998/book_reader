@@ -2,6 +2,7 @@ const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
@@ -17,8 +18,8 @@ const {
 const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const createUserUrl = `${PATH.USER}/create-user`;
-const addUserUrl = `${PATH.USER}/add`;
+const createUserUrl = UserRoutePath.createUser.abs;
+const addUserUrl = UserRoutePath.add.abs;
 
 const createUserResponse = {
   password: randomPassword,

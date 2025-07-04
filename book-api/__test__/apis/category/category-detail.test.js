@@ -4,12 +4,13 @@ const PrismaField = require('#services/prisma-fields/prisma-field');
 const ErrorCode = require('#services/error-code');
 const CategoryDummyData = require('#test/resources/dummy-data/category');
 const OutputValidate = require('#services/output-validate');
+const CategoryRoutePath = require('#services/route-paths/category');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { CATEGORY, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const getCategoryDetailUrl = `${PATH.CATEGORY}/detail`;
+const getCategoryDetailUrl = CategoryRoutePath.detail.abs;
 const mockCategory = CategoryDummyData.MockData;
 
 const requestBody = {

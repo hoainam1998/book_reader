@@ -5,12 +5,13 @@ const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
+const BookRoutePath = require('#services/route-paths/book');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const getBookDetailUrl = `${PATH.BOOK}/detail`;
+const getBookDetailUrl = BookRoutePath.detail.abs;
 const mockBook = BookDummyData.MockData;
 const apiKey = ClientDummyData.apiKey;
 

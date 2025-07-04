@@ -3,18 +3,19 @@ const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { mockUser, otpCode, sessionData, signedTestCookie, authenticationToken } = require('#test/resources/auth');
 const { generateOtp } = require('#utils');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
-const sendOtpUrl = `${PATH.USER}/send-otp`;
-const sendOtpInternalUrl = `${PATH.USER}/update-otp`;
+const sendOtpUrl = UserRoutePath.sendOtp.abs;
+const sendOtpInternalUrl = UserRoutePath.updateOtp.abs;
 
 const requestBody = {
   query: {
-  message: true,
+    message: true,
     otp: true
   },
 };

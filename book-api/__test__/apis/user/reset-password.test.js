@@ -3,13 +3,14 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const { JsonWebTokenError, TokenExpiredError } = require('#test/mocks/json-web-token-error');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { autoGeneratePassword, passwordHashing, signingResetPasswordToken } = require('#utils');
 const { COMMON, USER } = require('#messages');
 const { resetPasswordToken, mockUser, signedTestCookie, sessionData } = require('#test/resources/auth');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
-const resetPasswordUrl = `${PATH.USER}/reset-password`;
+const resetPasswordUrl = UserRoutePath.resetPassword.abs;
 
 describe('reset password', () => {
   commonTest('reset password common test', [

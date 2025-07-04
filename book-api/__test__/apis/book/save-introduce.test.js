@@ -4,12 +4,13 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const OutputValidate = require('#services/output-validate');
+const BookRoutePath = require('#services/route-paths/book');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const saveIntroduceFileUrl = `${PATH.BOOK}/save-introduce`;
+const saveIntroduceFileUrl = BookRoutePath.saveIntroduce.abs;
 const mockBook = BookDummyData.MockData;
 
 const requestBody = {

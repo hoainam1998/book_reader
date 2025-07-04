@@ -3,12 +3,13 @@ const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const UserDummyData = require('#test/resources/dummy-data/user');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, mockUser, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const allUserUrl = `${PATH.USER}/all`;
+const allUserUrl = UserRoutePath.all.abs;
 
 const requestBody = {
   query: {

@@ -5,12 +5,13 @@ const { TokenExpiredError, JsonWebTokenError } = require('#test/mocks/json-web-t
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
+const ClientRoutePath = require('#services/route-paths/client');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { autoGeneratePassword } = require('#utils');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const resetPasswordUrl = `${PATH.CLIENT}/reset-password`;
+const resetPasswordUrl = ClientRoutePath.resetPassword.abs;
 const mockRequestClient = ClientDummyData.MockRequestData;
 const clientMock = ClientDummyData.MockData;
 

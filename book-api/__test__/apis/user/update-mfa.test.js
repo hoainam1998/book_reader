@@ -2,12 +2,13 @@ const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, PATH, METHOD, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { mockUser, authenticationToken, sessionData, destroySession, signedTestCookie } = require('#test/resources/auth');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
-const updateMfaUrl = `${PATH.USER}/update-mfa`;
+const updateMfaUrl = UserRoutePath.updateMfa.abs;
 
 const requestBody = {
   userId: mockUser.user_id,

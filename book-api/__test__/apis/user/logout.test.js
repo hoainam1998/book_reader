@@ -1,9 +1,10 @@
 const commonTest = require('#test/apis/common/common');
+const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie } = require('#test/resources/auth');
 const { createDescribeTest } = require('#test/helpers/index');
-const logoutUrl = `${PATH.USER}/logout`;
+const logoutUrl = UserRoutePath.logout.abs;
 
 describe('logout api', () => {
   commonTest('logout api common test', [

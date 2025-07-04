@@ -4,13 +4,14 @@ const { ServerError } = require('#test/mocks/other-errors');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
+const ClientRoutePath = require('#services/route-paths/client');
 const { HTTP_CODE, METHOD, PATH, RESET_PASSWORD_URL, REGEX } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const { signClientResetPasswordToken } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const forgetPasswordUrl = `${PATH.CLIENT}/forget-password`;
-const generatedResetPasswordUrl = `${PATH.CLIENT}/generated-reset-password-token`;
+const generatedResetPasswordUrl = ClientRoutePath.generatedResetPasswordToken.abs;
 const clientMock = ClientDummyData.MockData;
 
 const forgetPasswordResponse = {
