@@ -6,7 +6,7 @@ import path from 'router/paths';
 import constants from 'read-only-variables';
 import { HaveLoadedFnType } from 'interfaces';
 import { getAuthorDetail } from './fetcher';
-import { format } from 'date-fns';
+import { formatDate } from 'utils';
 import './style.scss';
 
 type AuthorDetailType = {
@@ -58,12 +58,12 @@ function ClientAuthorDetail(): JSX.Element {
                 <span>{constants.SEX[author.sex]}</span>
               </li>
               <li className="book-info-property">
-                <span className="property-label">Birth</span>
-                <span>{format(author.yearOfBirth, 'dd-MM-yyyy')}</span>
+                <span className="property-label">Birth:</span>
+                <span>{formatDate(author.yearOfBirth)}</span>
               </li>
               <li className="book-info-property">
-                <span className="property-label">Dead</span>
-                <span>{format(author.yearOfDead, 'dd-MM-yyyy')}</span>
+                <span className="property-label">Dead:</span>
+                <span>{formatDate(author.yearOfDead)}</span>
               </li>
               <li className="book-info-property">
                 <span className="author-book-link" onClick={navigateToAuthors}>All book</span>

@@ -7,7 +7,8 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
     password,
     query: {
       userId: true,
-      name: true,
+      firstName: true,
+      lastName: true,
       avatar: true,
       email: true,
       mfaEnable: true,

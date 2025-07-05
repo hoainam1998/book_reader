@@ -1,4 +1,4 @@
-import { JSX, useCallback, useSyncExternalStore, useEffect, useState } from 'react';
+import { JSX, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import BlockerProvider from 'contexts/blocker';
@@ -9,22 +9,16 @@ import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-
 import Button from 'components/button/button';
 import Radio from 'components/form/form-control/radio/radio';
 import { OptionPrototype } from 'components/form/form-control/form-control';
+import { logout } from 'views/login-group/login/admin-login/fetcher';
 import { required, email as emailValidate, matchPattern, ErrorFieldInfo } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
-import store, { UserLogin } from 'store/auth';
+import store from 'store/auth';
 import path from 'router/paths';
-import { logout } from 'views/login-group/login/admin-login/fetcher';
-import useComponentDidMount from 'hooks/useComponentDidMount';
 import { clsx, convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
-import { HaveLoadedFnType, UserType } from 'interfaces';
+import { PersonalType } from 'interfaces';
 import './style.scss';
-const { subscribe, getSnapshot } = store;
-
-type PersonalType = Omit<UserType, 'mfa' | 'power'> & {
-  avatar: string;
-};
 
 const state: PersonalType = {
   firstName: '',
@@ -39,15 +33,15 @@ const formId: string = 'personal-form';
 const sexOptions: OptionPrototype<number>[] = constants.SEX.map((label, index) => ({ label, value: index }));
 
 type PersonalPropsType = {
+  personal: PersonalType | null;
   update: (formData: FormData) => Promise<AxiosResponse>;
   getAllUsers: (userId: string) => Promise<AxiosResponse>;
 };
 
-function Personal({ update, getAllUsers }: PersonalPropsType): JSX.Element {
+function Personal({ personal, update, getAllUsers }: PersonalPropsType): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
   const [phones, setPhones] = useState<string[]>([]);
   const [reLogin, setReLogin] = useState<boolean>(false);
-  const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
   const navigate = useNavigate();
 
   const emailDuplicateValidate = useCallback(
@@ -132,41 +126,34 @@ function Personal({ update, getAllUsers }: PersonalPropsType): JSX.Element {
   }, []);
 
   useEffect(() => {
-    if (userLogin) {
-      const nameSeparate: string[] = userLogin.name.split(' ');
-      firstName.watch(nameSeparate[1]);
-      lastName.watch(nameSeparate[0]);
-      email.watch(userLogin.email);
-      phone.watch(userLogin.phone);
-      sex.watch(userLogin.sex);
-      convertBase64ToSingleFile(userLogin.avatar, userLogin.name)
+    if (personal) {
+      const personalName = `${personal.firstName} ${personal.lastName}`;
+      firstName.watch(personal.firstName);
+      lastName.watch(personal.lastName);
+      email.watch(personal.email);
+      phone.watch(personal.phone);
+      sex.watch(personal.sex);
+      convertBase64ToSingleFile(personal.avatar, personalName)
         .then(res => {
           if (res.type.includes('image')) {
             avatar.watch(res);
           }
         });
-    }
-  }, []);
-
-  useComponentDidMount((haveFetched: HaveLoadedFnType) => {
-    return () => {
-      if (!haveFetched() && userLogin) {
-        getAllUsers(userLogin.userId)
-          .then((res: AxiosResponse<PersonalType[]>) => {
-            const { emailsList, phonesList } =
-              res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
-                flat.phonesList.push(current.phone);
-                flat.emailsList.push(current.email);
-                return flat;
-              }, { phonesList: [], emailsList: [] });
+      getAllUsers(personal.userId!)
+        .then((res: AxiosResponse<PersonalType[]>) => {
+          const { emailsList, phonesList } =
+            res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
+              flat.phonesList.push(current.phone);
+              flat.emailsList.push(current.email);
+              return flat;
+            }, { phonesList: [], emailsList: [] });
 
             setEmails(emailsList);
             setPhones(phonesList);
           })
           .catch(() => setEmails([]));
-      }
-    };
-  }, []);
+    }
+  }, [personal]);
 
   return (
     <BlockerProvider isNavigate={validate.dirty && !reLogin}>
