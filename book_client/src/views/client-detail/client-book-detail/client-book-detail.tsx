@@ -102,7 +102,7 @@ function ClientBookDetail(): JSX.Element {
               </li>
               <li className="book-info-property">
                 <span className="property-label">Published day:</span>
-                <span>{formatDate(+book.publishedDay)}</span>
+                <span>{formatDate(book.publishedDay)}</span>
               </li>
               <li className="book-info-property book-operator">
                 <Button variant="dangerous" className="operator-button" onClick={() => openFile(book.pdf)}>

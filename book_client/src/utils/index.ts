@@ -51,7 +51,7 @@ const stringRandom = () => {
   const RANDOM_STRING_LENGTH = 12;
   let result = '';
 
-  for (let i = 0; i < RANDOM_STRING_LENGTH ; i++) {
+  for (let i = 0; i < RANDOM_STRING_LENGTH; i++) {
     const randomId = Math.floor(Math.random() * CHARACTERS.length);
     result += CHARACTERS.charAt(randomId);
   }
@@ -63,7 +63,7 @@ const stringRandom = () => {
  * Format date to string with format dd-MM-yyyy.
  *
  * @param {number | string} - The timestamp.
- * @returns {string} - The id string.
+ * @returns {string} - The date formatted string.
  */
 const formatDate = (timestamp: number | string) => format(+timestamp, 'dd-MM-yyyy');
 
