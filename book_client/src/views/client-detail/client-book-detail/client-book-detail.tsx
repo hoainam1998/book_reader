@@ -8,7 +8,7 @@ import { useClientPaginationContext } from 'contexts/client-pagination';
 import { getBookDetail } from './fetcher';
 import { openFile } from 'utils';
 import { HaveLoadedFnType, BookPropsType } from 'interfaces';
-import { format } from 'date-fns';
+import { formatDate } from 'utils';
 import './style.scss';
 
 const authorLink = `${path.HOME}/${path.AUTHOR}`;
@@ -102,7 +102,7 @@ function ClientBookDetail(): JSX.Element {
               </li>
               <li className="book-info-property">
                 <span className="property-label">Published day:</span>
-                <span>{format(+book.publishedDay, 'dd-MM-yyyy')}</span>
+                <span>{formatDate(book.publishedDay)}</span>
               </li>
               <li className="book-info-property book-operator">
                 <Button variant="dangerous" className="operator-button" onClick={() => openFile(book.pdf)}>

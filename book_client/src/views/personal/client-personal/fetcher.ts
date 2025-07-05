@@ -10,3 +10,25 @@ export const getAllReaders = (userId?: string): Promise<AxiosResponse> => {
     },
   });
 };
+
+export const getReaderDetail = (): Promise<AxiosResponse> => {
+  return ClientService.post('detail', {
+    query: {
+      clientId: true,
+      firstName: true,
+      lastName: true,
+      avatar: true,
+      email: true,
+      sex: true,
+      favoriteBooks: {
+        name: true
+      },
+      readLate: {
+        name: true
+      },
+      usedRead: {
+        name: true
+      }
+    }
+  });
+};

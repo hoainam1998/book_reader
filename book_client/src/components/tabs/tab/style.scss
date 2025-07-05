@@ -1,12 +1,12 @@
 .tab {
   .tab-header {
-    width: 100px;
     height: 30px;
+    font-size: 14px;
     border: 1px solid $placeholder;
     border-left: none;
     border-bottom: none;
     border-radius: 5px 5px 0 0;
-    padding-top: 3px;
+    padding: 3px 7px 0px 7px;
     cursor: pointer;
     text-align: center;
 

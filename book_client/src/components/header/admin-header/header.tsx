@@ -1,4 +1,4 @@
-import { JSX, useSyncExternalStore, useCallback, useRef, CSSProperties } from 'react';
+import { JSX, useSyncExternalStore, useCallback, useRef, CSSProperties, useMemo } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
 import { createRoot, Root } from 'react-dom/client';
 import { createElementWrapper, showToast } from 'utils';
@@ -66,8 +66,9 @@ function Header(): JSX.Element {
   }
 
   const navigate = useNavigate();
-  const { avatar, name, email } = userLogin;
+  const { avatar, firstName, lastName, email } = userLogin;
   const personalBoxRef = useRef<HTMLDivElement>(null);
+  const userName = useMemo<string>(() => `${firstName} ${lastName}`, [firstName, lastName]);
 
   const calculateMenuPosition = useCallback(() => {
     if (personalBoxRef.current) {
@@ -107,7 +108,7 @@ function Header(): JSX.Element {
             <img src={avatar} alt="logo" width="30" height="30" />
           </Button>
           <div>
-            <span data-testid="name">{name}</span>
+            <span data-testid="name">{userName}</span>
             <Tooltip>
               <p className="email" data-tooltip={email} data-testid="email">{email}</p>
             </Tooltip>
