@@ -155,12 +155,12 @@ const UserUpdate = (validators, className) => {
     userId;
 
     @validators(
-      IsString('userId must be string!'),
+      IsString('firstName must be string!'),
     )
     firstName;
 
     @validators(
-      IsString('userId must be string!'),
+      IsString('lastName must be string!'),
     )
     lastName;
 
@@ -196,12 +196,12 @@ const UserUpdate = (validators, className) => {
 const PersonUpdate = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
-      IsString('userId must be string!'),
+      IsString('firstName must be string!'),
     )
     firstName;
 
     @validators(
-      IsString('userId must be string!'),
+      IsString('lastName must be string!'),
     )
     lastName;
 

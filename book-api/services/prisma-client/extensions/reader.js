@@ -22,10 +22,16 @@ module.exports = (prisma) => {
     },
 
     update: async ({ args, query }) => {
+      let condition;
+
+      if (args.where.reader_id) {
+        condition = { reader_id: args.where.reader_id };
+      } else if (args.where.email) {
+        condition = { email: args.where.email };
+      }
+
       const oldUser = await prisma.reader.findUnique({
-        where: {
-          email: args.where.email
-        }
+        where: condition,
       });
 
       if (args.data.password) {

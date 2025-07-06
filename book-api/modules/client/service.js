@@ -19,6 +19,23 @@ class ClientService extends Service {
     });
   }
 
+  update(client) {
+    const { clientId, firstName, lastName, avatar, email, sex, phone } = client;
+    return this.PrismaInstance.reader.update({
+      where: {
+        reader_id: clientId,
+      },
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        avatar,
+        email,
+        sex,
+        phone,
+      }
+    });
+  }
+
   forgetPassword(email) {
     const resetToken = signClientResetPasswordToken(email);
     const randomPassword = autoGeneratePassword();

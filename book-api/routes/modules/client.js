@@ -5,7 +5,7 @@ const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const clientLoginRequire = require('#middlewares/auth/client-login-require');
 const authentication = require('#middlewares/auth/authentication');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, RESET_PASSWORD_URL } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, METHOD, RESET_PASSWORD_URL } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -14,7 +14,7 @@ const {
   verifyClientResetPasswordToken,
   getGeneratorFunctionData,
 } = require('#utils');
-const { SignUp, ForgetPassword, ResetPassword, ClientDetail } = require('#dto/client/client-in');
+const { SignUp, ForgetPassword, ResetPassword, ClientDetail, ClientUpdate } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -42,6 +42,31 @@ class ClientRouter extends Router {
     this.post(ClientRoutePath.login, onlyAllowOneDevice, this._login);
     this.post(ClientRoutePath.logout, clientLoginRequire, this._logout);
     this.post(ClientRoutePath.detail, authentication, this._detail);
+    this.put(ClientRoutePath.updatePerson, authentication, this._updateClient);
+  }
+
+  @upload(UPLOAD_MODE.SINGLE, 'avatar')
+  @validation(ClientUpdate, { error_message: READER.ADD_PERSONAL_INFORMATION_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _updateClient(req, res, next, self) {
+    const variables = {
+      clientId: req.session.client.clientId,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      sex: +req.body.sex,
+      phone: req.body.phone,
+      avatar: req.body.avatar,
+    };
+    const query = `mutation UpdateClient($client: ClientInputType!) {
+      client {
+        updateClient(client: $client) {
+          message
+        }
+      }
+    }`;
+    return self.execute(query, { client: variables });
   }
 
   @validation(ClientDetail, { error_message: READER.LOAD_DETAIL_FAIL })

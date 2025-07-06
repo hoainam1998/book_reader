@@ -41,7 +41,7 @@ class CategoryRoutePath {
   /**
   * Relative: /menu *Absolute: category/menu
   */
-  static menu = createRoutePath({ url: 'menu' }, [process.env.ORIGIN_CORS]);
+  static menu = createRoutePath({ url: 'menu' }, [process.env.CLIENT_ORIGIN_CORS]);
 }
 
 module.exports = CategoryRoutePath;

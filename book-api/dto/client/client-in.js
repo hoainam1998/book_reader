@@ -1,6 +1,56 @@
 const { classCreator, Validation } = require('../helper.js');
 const { Validator } = require('#services/validator');
-const { IsString, IsEmail, IsPassword, IsNumeric, IsGraphqlSelect } = require('#decorators/validators');
+const {
+  IsId,
+  IsString,
+  IsEmail,
+  IsPassword,
+  IsNumeric,
+  IsGraphqlSelect,
+  IsBase64Image,
+  Length
+} = require('#decorators/validators');
+
+const ClientUpdate = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsId('clientId must be numeric string and contain 13 character', { groups: ['update'] })
+    )
+    userId;
+
+    @validators(
+      IsString('firstName must be string!'),
+    )
+    firstName;
+
+    @validators(
+      IsString('lastName must be string!'),
+    )
+    lastName;
+
+    @validators(
+      IsEmail('Invalid email!'),
+    )
+    email;
+
+    @validators(
+      IsNumeric('sex must be a numeric!')
+    )
+    sex;
+
+    @validators(
+      IsBase64Image('avatar must be image!')
+    )
+    avatar;
+
+    @validators(
+      Length(10, 'phone number must contain 10 character!'),
+      IsString('phone number must be a string!'),
+      IsNumeric('phone number must be numeric!'),
+    )
+    phone;
+  }, className);
+};
 
 const ClientDetail = (validators, className) => {
   return classCreator(class extends Validator {
@@ -78,4 +128,5 @@ module.exports = {
   ForgetPassword: Validation(ForgetPassword),
   ResetPassword: Validation(ResetPassword),
   ClientDetail: Validation(ClientDetail),
+  ClientUpdate: Validation(ClientUpdate),
 };
