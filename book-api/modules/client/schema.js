@@ -11,17 +11,41 @@ const {
   GraphQLFloat
 } = require('graphql');
 const ClientDTO = require('#dto/client/client');
-const { ResponseType, graphqlUnauthorizedErrorOption } = require('../common-schema');
+const { ResponseType } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
 const ForgetPassword = require('#dto/client/forget-password');
 const handleResolveResult = require('#utils/handle-resolve-result');
-const { READER } = require('#messages');
+const { READER, USER } = require('#messages');
+
+const CLIENT = {
+  clientId: {
+    type: GraphQLID,
+  },
+  firstName: {
+    type: GraphQLString,
+  },
+  lastName: {
+    type: GraphQLString,
+  },
+  avatar: {
+    type: GraphQLString,
+  },
+  email: {
+    type: GraphQLString,
+  },
+  sex: {
+    type: GraphQLInt,
+  },
+  phone: {
+    type: GraphQLString,
+  },
+};
 
 const CLIENT_RELATE_BOOKS = new GraphQLObjectType({
   name: 'RelateBook',
   fields: {
     bookId: {
-      type: GraphQLID,
+      type: GraphQLID
     },
     name: {
       type: GraphQLString
@@ -38,24 +62,7 @@ const CLIENT_RELATE_BOOKS = new GraphQLObjectType({
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
   name: 'ClientDetail',
   fields: {
-    clientId: {
-      type: GraphQLID,
-    },
-    firstName: {
-      type: GraphQLString,
-    },
-    lastName: {
-      type: GraphQLString,
-    },
-    avatar: {
-      type: GraphQLString,
-    },
-    email: {
-      type: GraphQLString,
-    },
-    sex: {
-      type: GraphQLInt,
-    },
+    ...CLIENT,
     apiKey: {
       type: GraphQLString,
     },
@@ -74,6 +81,13 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     usedRead: {
       type: new GraphQLList(CLIENT_RELATE_BOOKS),
     }
+  }
+});
+
+const CLIENT_INPUT_TYPE = new GraphQLInputObjectType({
+  name: 'ClientInputType',
+  fields: {
+    ...CLIENT,
   }
 });
 
@@ -162,6 +176,23 @@ const mutation = new GraphQLObjectType({
           return messageCreator(READER.RESET_PASSWORD_SUCCESS);
         }, {
           UNAUTHORIZED: READER.USER_NOT_FOUND,
+        });
+      }
+    },
+    updateClient: {
+      type: ResponseType,
+      args: {
+        client: {
+          type: new GraphQLNonNull(CLIENT_INPUT_TYPE),
+        }
+      },
+      resolve: async (service, { client }) => {
+        return handleResolveResult(async () => {
+          await service.update(client);
+          return messageCreator(READER.ADD_PERSONAL_INFORMATION_SUCCESS);
+        }, {
+          RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
+          UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
         });
       }
     }

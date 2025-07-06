@@ -120,5 +120,7 @@ module.exports = deepFreeze({
     OLD_PASSWORD_NOT_MATCH: 'Old password not match!',
     RESET_PASSWORD_SUCCESS: 'Reset password was success!',
     LOAD_DETAIL_FAIL: 'Load client information detail was failed!',
+    ADD_PERSONAL_INFORMATION_SUCCESS: 'Update your personal information was success!',
+    ADD_PERSONAL_INFORMATION_FAIL: 'Update your personal information was failed!',
   }
 });

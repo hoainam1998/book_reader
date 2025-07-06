@@ -242,7 +242,7 @@ class UserRouter extends Router {
         updateUser(user: $user) {
           message
         }
-       }
+      }
     }`;
     return self.execute(query, { user: variables });
   }

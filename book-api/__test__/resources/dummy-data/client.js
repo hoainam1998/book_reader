@@ -48,6 +48,7 @@ class ClientDummyData extends DummyDataApi {
         avatar: 'avatar',
         email: 'unknown_client@gmail.com',
         sex: 0,
+        phone: '0987654321',
         favorite_books: createBooks(2),
         read_late: createBooks(2),
         used_read: createBooks(2),

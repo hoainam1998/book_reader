@@ -9,6 +9,14 @@ const corsOptions = {
 };
 
 /**
+ * Return origin result.
+ *
+ * @param {boolean} on - The origin flag.
+ * @returns {{origin: boolean}} - The origin result.
+ */
+const toggleOrigin = (on) => ({ origin: on });
+
+/**
  * Return origin list for specific url.
  *
  * @param {string} originUrl - The origin url.
@@ -16,20 +24,21 @@ const corsOptions = {
  */
 const findOrigins = (originUrl) => {
   const iterator = RoutePath.WhiteList.keys();
-  let done;
   let origins = [];
 
   do {
     const step = iterator.next();
-    done = step.done;
-    if (step.value.test(originUrl)) {
-      origins = RoutePath.WhiteList.get(step.value);
-    }
+    const value = step.value;
 
-    if (done === false) {
+    if (value) {
+      if (value.test(originUrl)) {
+        origins = RoutePath.WhiteList.get(value);
+      }
+    } else {
       break;
     }
-  } while (done !== false || origins.length === 0)
+
+  } while (origins.length === 0)
   return origins;
 };
 
@@ -42,14 +51,21 @@ const findOrigins = (originUrl) => {
  */
 module.exports = (req, callback) => {
   const originUrl = req.header('Origin');
-  let corsOptionOrigin = { origin: false };
-  if (whitelist.indexOf(originUrl) !== -1) {
-    const origins = findOrigins(req.originalUrl);
-    if (origins.includes(originUrl)) {
-      corsOptionOrigin = { origin: true };
+  let corsOptionOrigin = toggleOrigin(false);
+
+  if (req.method === METHOD.OPTIONS) {
+    corsOptionOrigin = toggleOrigin(true);
+  } else {
+    if (whitelist.indexOf(originUrl) !== -1) {
+      const origins = findOrigins(req.originalUrl);
+
+      if (origins.includes(originUrl)) {
+        corsOptionOrigin = toggleOrigin(true);
+      } else {
+        corsOptionOrigin = toggleOrigin(false);
+      }
     }
   }
 
-  corsOptionOrigin = Object.assign(corsOptionOrigin, corsOptions);
-  callback(null, corsOptionOrigin);
+  callback(null, Object.assign(corsOptionOrigin, corsOptions));
 };

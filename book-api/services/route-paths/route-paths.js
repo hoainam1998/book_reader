@@ -25,7 +25,7 @@ class RoutePath {
     this._url = url;
     this._subUrl = subUrl || '';
     this._origin = origin;
-    RoutePath.WhiteList.set(new RegExp(`${this.abs}(\/.+)?`, 'g'), origin);
+    RoutePath.WhiteList.set(new RegExp(`${this.abs}(\/.+)?`), origin);
   }
 
   /**

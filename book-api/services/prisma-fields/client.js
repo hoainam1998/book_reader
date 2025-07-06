@@ -13,6 +13,7 @@ class ClientPrismaField extends PrismaField {
     avatar: 'avatar',
     email: 'email',
     sex: 'sex',
+    phone: 'phone',
     resetPasswordToken: 'reset_password_token',
     favoriteBooks: {
       as: 'favorite_books',
@@ -34,9 +35,9 @@ class ClientPrismaField extends PrismaField {
             book_id: true,
             name: true,
             avatar: true,
-            create_at: true,
           }
-        }
+        },
+        added_at: true,
       }
     },
     usedRead: {
@@ -47,9 +48,9 @@ class ClientPrismaField extends PrismaField {
             book_id: true,
             name: true,
             avatar: true,
-            create_at: true,
           }
-        }
+        },
+        added_at: true,
       }
     }
   };

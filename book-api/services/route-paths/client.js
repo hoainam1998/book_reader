@@ -42,6 +42,11 @@ class ClientRoutePath {
   * Relative: /sign-up *Absolute: client/sign-up
   */
   static signUp = createRoutePath({ url: 'sign-up' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
+  * Relative: /update-person *Absolute: client/update-person
+  */
+  static updatePerson = createRoutePath({ url: 'update-person' }, [process.env.CLIENT_ORIGIN_CORS]);
 }
 
 module.exports = ClientRoutePath;
