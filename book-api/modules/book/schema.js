@@ -325,6 +325,7 @@ const mutation = new GraphQLObjectType({
         }, {
           RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
           FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+          UNIQUE_DUPLICATE: BOOK.ADD_FAVORITE_BOOK_DUPLICATE,
         });
       }
     },
@@ -367,6 +368,7 @@ const mutation = new GraphQLObjectType({
         }, {
           RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
           FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+          UNIQUE_DUPLICATE: BOOK.ADD_READ_LATE_BOOK_DUPLICATE,
         });
       }
     },
@@ -409,6 +411,7 @@ const mutation = new GraphQLObjectType({
         }, {
           RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
           FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+          UNIQUE_DUPLICATE: BOOK.ADD_USED_READ_DUPLICATE,
         });
       }
     },

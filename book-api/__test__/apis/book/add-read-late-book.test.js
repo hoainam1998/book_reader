@@ -1,5 +1,5 @@
 const { ServerError } = require('#test/mocks/other-errors');
-const { PrismaNotFoundError, PrismaForeignConflict } = require('#test/mocks/prisma-error');
+const { PrismaNotFoundError, PrismaForeignConflict, PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
@@ -176,6 +176,14 @@ describe('add read late book', () => {
         cause: new PrismaForeignConflict('book_id'),
         expected: {
           message: BOOK.BOOK_DO_NOT_EXIST,
+        },
+        status: HTTP_CODE.BAD_REQUEST,
+      },
+      {
+        describe: 'read late book already exist',
+        cause: PrismaDuplicateError,
+        expected: {
+          message: BOOK.ADD_READ_LATE_BOOK_DUPLICATE,
         },
         status: HTTP_CODE.BAD_REQUEST,
       },
