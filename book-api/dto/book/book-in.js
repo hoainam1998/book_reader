@@ -16,7 +16,7 @@ const {
   IsObject,
 } = require('#decorators/validators');
 
-const FavoriteBook = (validators, className) => {
+const RelateBook = (validators, className) => {
   return classCreator(class extends Validator {
     @validators(
       IsId('readerId must be numeric string and contain 13 character')
@@ -245,5 +245,5 @@ module.exports = {
   IntroduceHTMLFileSave: Validation(IntroduceHTMLFileSave),
   BookAuthors: Validation(BookAuthors),
   AllBooks: Validation(AllBooks),
-  FavoriteBook: Validation(FavoriteBook),
+  RelateBook: Validation(RelateBook),
 };

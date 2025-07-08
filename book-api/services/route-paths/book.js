@@ -74,9 +74,29 @@ class BookRoutePath {
   static addFavoriteBook = createRoutePath({ url: 'add-favorite-book' }, [process.env.CLIENT_ORIGIN_CORS]);
 
   /**
+  * Relative: /add-read-late-book *Absolute: book/add-read-late-book
+  */
+  static addReadLateBook = createRoutePath({ url: 'add-read-late-book' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
+  * Relative: /add-used-read-book *Absolute: book/add-used-read-book
+  */
+  static addUsedReadBook = createRoutePath({ url: 'add-used-read-book' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
   * Relative: /delete-favorite-book/:bookId *Absolute: book/delete-favorite-book/:bookId
   */
   static deleteFavoriteBook = createRoutePath({ url: 'delete-favorite-book', subUrl: ':bookId' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
+  * Relative: /delete-read-late-book/:bookId *Absolute: book/delete-read-late-book/:bookId
+  */
+  static deleteReadLateBook = createRoutePath({ url: 'delete-read-late-book', subUrl: ':bookId' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
+  * Relative: /delete-used-read-book/:bookId *Absolute: book/delete-used-read-book/:bookId
+  */
+  static deleteUsedReadBook = createRoutePath({ url: 'delete-used-read-book', subUrl: ':bookId' }, [process.env.CLIENT_ORIGIN_CORS]);
 }
 
 module.exports = BookRoutePath;

@@ -38,7 +38,7 @@ const {
   BookDetail,
   IntroduceHTMLFileSave,
   BookAuthors,
-  FavoriteBook,
+  RelateBook,
 } = require('#dto/book/book-in');
 const BookCreated = require('#dto/book/book-created');
 const cpUpload = multer().fields([
@@ -136,9 +136,13 @@ class BookRouter extends Router {
     this.post(BookRoutePath.pagination, authentication, this._paginationBook);
     this.post(BookRoutePath.addFavoriteBook, authentication, this._addFavoriteBook);
     this.delete(BookRoutePath.deleteFavoriteBook, authentication, this._deleteFavoriteBook);
+    this.post(BookRoutePath.addReadLateBook, authentication, this._addReadLateBook);
+    this.delete(BookRoutePath.deleteReadLateBook, authentication, this._deleteReadLateBook);
+    this.post(BookRoutePath.addUsedReadBook, authentication, this._addUsedReadBook);
+    this.delete(BookRoutePath.deleteUsedReadBook, authentication, this._deleteUsedReadBook);
   }
 
-  @validation(FavoriteBook, {
+  @validation(RelateBook, {
     request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
     error_message: BOOK.DELETE_FAVORITE_BOOK_FAIL
   })
@@ -159,7 +163,7 @@ class BookRouter extends Router {
     });
   }
 
-  @validation(FavoriteBook, { error_message: BOOK.ADD_FAVORITE_BOOK_FAIL })
+  @validation(RelateBook, { error_message: BOOK.ADD_FAVORITE_BOOK_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _addFavoriteBook(req, res, next, self) {
@@ -174,6 +178,86 @@ class BookRouter extends Router {
     return self.execute(query, {
       readerId: req.session.client.clientId,
       bookId: req.body.bookId,
+    });
+  }
+
+  @validation(RelateBook, {
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+    error_message: BOOK.DELETE_READ_LATE_BOOK_FAIL
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _deleteReadLateBook(req, res, next, self) {
+    const query = `mutation DeleteReadLateBook($readerId: ID!, $bookId: ID!) {
+      book {
+        deleteReadLateBook(readerId: $readerId, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.params.bookId,
+    });
+  }
+
+  @validation(RelateBook, { error_message: BOOK.ADD_READ_LATE_BOOK_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _addReadLateBook(req, res, next, self) {
+    const query = `mutation AddReadLateBook($readerId: ID!, $bookId: ID!, $createAt: ID!) {
+      book {
+        addReadLateBook(readerId: $readerId, bookId: $bookId, createAt: $createAt) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.body.bookId,
+      createAt: Date.now(),
+    });
+  }
+
+  @validation(RelateBook, {
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+    error_message: BOOK.DELETE_USED_READ_BOOK_FAIL,
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _deleteUsedReadBook(req, res, next, self) {
+    const query = `mutation DeleteUsedReadBook($readerId: ID!, $bookId: ID!) {
+      book {
+        deleteUsedReadBook(readerId: $readerId, bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.params.bookId,
+    });
+  }
+
+  @validation(RelateBook, { error_message: BOOK.ADD_USED_READ_BOOK_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _addUsedReadBook(req, res, next, self) {
+    const query = `mutation AddUsedReadBook($readerId: ID!, $bookId: ID!, $createAt: ID!) {
+      book {
+        addUsedReadBook(readerId: $readerId, bookId: $bookId, createAt: $createAt) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      readerId: req.session.client.clientId,
+      bookId: req.body.bookId,
+      createAt: Date.now(),
     });
   }
 

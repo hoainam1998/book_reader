@@ -268,6 +268,66 @@ class BookService extends Service {
       return result;
     });
   }
+
+  addReadLateBook(readerId, bookId, createAt) {
+    return this.PrismaInstance.read_late.create({
+      data: {
+        book_id: bookId,
+        reader_id: readerId,
+        added_at: createAt,
+      }
+    });
+  }
+
+  deleteReadLateBook(readerId, bookId) {
+    return this.PrismaInstance.read_late.deleteMany({
+      where: {
+        AND: [
+          {
+            book_id: bookId
+          },
+          {
+            reader_id: readerId
+          }
+        ]
+      },
+    }).then((result) => {
+      if (result.count === 0) {
+        throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: 'P2025' });
+      }
+      return result;
+    });
+  }
+
+  addUsedReadBook(readerId, bookId, createAt) {
+    return this.PrismaInstance.used_read.create({
+      data: {
+        book_id: bookId,
+        reader_id: readerId,
+        added_at: createAt,
+      }
+    });
+  }
+
+  deleteUsedReadBook(readerId, bookId) {
+    return this.PrismaInstance.used_read.deleteMany({
+      where: {
+        AND: [
+          {
+            book_id: bookId
+          },
+          {
+            reader_id: readerId
+          }
+        ]
+      },
+    }).then((result) => {
+      if (result.count === 0) {
+        throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: 'P2025' });
+      }
+      return result;
+    });
+  }
 }
 
 module.exports = BookService;

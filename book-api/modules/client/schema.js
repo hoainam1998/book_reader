@@ -50,6 +50,19 @@ const CLIENT_RELATE_BOOKS = new GraphQLObjectType({
     name: {
       type: GraphQLString
     },
+    authors: {
+      type: new GraphQLList(new GraphQLObjectType({
+        name: 'AuthorRelative',
+        fields: {
+          name: {
+            type: GraphQLString
+          },
+          authorId: {
+            type: GraphQLString
+          }
+        }
+      }))
+    },
     avatar: {
       type: GraphQLString
     },
