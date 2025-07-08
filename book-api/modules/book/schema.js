@@ -346,7 +346,91 @@ const mutation = new GraphQLObjectType({
           FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
         });
       }
-    }
+    },
+    addReadLateBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        createAt: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId, createAt }) => {
+        return handleResolveResult(async () => {
+          await service.addReadLateBook(readerId, bookId, createAt);
+          return messageCreator(BOOK.ADD_READ_LATE_BOOK_SUCCESS);
+        }, {
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
+    },
+    deleteReadLateBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId }) => {
+        return handleResolveResult(async () => {
+          await service.deleteReadLateBook(readerId, bookId);
+          return messageCreator(BOOK.DELETE_READ_LATE_BOOK_SUCCESS);
+        }, {
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
+    },
+    addUsedReadBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        createAt: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId, createAt }) => {
+        return handleResolveResult(async () => {
+          await service.addUsedReadBook(readerId, bookId, createAt);
+          return messageCreator(BOOK.ADD_USED_BOOK_SUCCESS);
+        }, {
+          RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
+    },
+    deleteUsedReadBook: {
+      type: ResponseType,
+      args: {
+        readerId: {
+          type: new GraphQLNonNull(GraphQLID)
+        },
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID)
+        }
+      },
+      resolve: async (service, { readerId, bookId }) => {
+        return handleResolveResult(async () => {
+          await service.deleteUsedReadBook(readerId, bookId);
+          return messageCreator(BOOK.DELETE_USED_READ_BOOK_SUCCESS);
+        }, {
+          FOREIGN_KEY_CONFLICT: BOOK.BOOK_DO_NOT_EXIST,
+        });
+      }
+    },
   }
 });
 

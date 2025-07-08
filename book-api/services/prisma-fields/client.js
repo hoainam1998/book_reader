@@ -23,6 +23,16 @@ class ClientPrismaField extends PrismaField {
             book_id: true,
             name: true,
             avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -35,6 +45,16 @@ class ClientPrismaField extends PrismaField {
             book_id: true,
             name: true,
             avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  }
+                }
+              }
+            }
           }
         },
         added_at: true,
@@ -48,6 +68,16 @@ class ClientPrismaField extends PrismaField {
             book_id: true,
             name: true,
             avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  }
+                }
+              }
+            }
           }
         },
         added_at: true,

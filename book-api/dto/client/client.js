@@ -2,6 +2,21 @@ const { Type, Exclude } = require('class-transformer');
 const OutputValidate = require('#services/output-validate');
 const { signClientLoginToken } = require('#utils');
 
+/**
+* Convert the books to books dto.
+* @param {*[]} items - The books.
+* @returns {*[]} - The books after converted.
+*/
+const convertToRelateBook = (items) => {
+  return items.map(({ book, added_at }) => ({
+    bookId: book.book_id,
+    avatar: book.avatar,
+    name: book.name,
+    createAt: added_at,
+    authors: book.book_author.map(({ author }) => ({ name: author.name, authorId: author.author_id })),
+  }));
+};
+
 class ClientDTO extends OutputValidate {
   @Exclude()
   @Type(() => String)
@@ -69,17 +84,17 @@ class ClientDTO extends OutputValidate {
 
   @Type(() => [Object])
   get favoriteBooks() {
-    return this.favorite_books;
+    return convertToRelateBook(this.favorite_books);
   }
 
   @Type(() => [Object])
   get readLate() {
-    return this.read_late;
+    return convertToRelateBook(this.read_late);
   }
 
   @Type(() => [Object])
   get usedRead() {
-    return this.used_read;
+    return convertToRelateBook(this.used_read);
   }
 }
 
