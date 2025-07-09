@@ -164,8 +164,8 @@ const query = new GraphQLObjectType({
           type: GraphQLString,
         },
       },
-      resolve: async (user, { pageSize, pageNumber, keyword }, context) => {
-        const [users, total] = await user.pagination(pageSize, pageNumber, keyword, context);
+      resolve: async (service, { pageSize, pageNumber, keyword }, context) => {
+        const [users, total] = await service.pagination(pageSize, pageNumber, keyword, context);
 
         if (!checkArrayHaveValues(users)) {
           graphqlNotFoundErrorOption.response = {
@@ -188,12 +188,8 @@ const query = new GraphQLObjectType({
           type: GraphQLID,
         },
       },
-      resolve: async (user, { exceptedUserId }, context) => {
-        const users = await user.getAllUsers(exceptedUserId, context);
-        if (!checkArrayHaveValues(users)) {
-          graphqlNotFoundErrorOption.response = [];
-          throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
-        }
+      resolve: async (service, { exceptedUserId }, context) => {
+        const users = await service.getAllUsers(exceptedUserId, context);
         return convertDtoToZodObject(UserDTO, users);
       }
     },
@@ -204,9 +200,9 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
         },
       },
-      resolve: async (user, { userId }, context) => {
+      resolve: async (service, { userId }, context) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(UserDTO, await user.getUserDetail(userId, context));
+          return convertDtoToZodObject(UserDTO, await service.getUserDetail(userId, context));
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND
         });
@@ -245,9 +241,9 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (user, { email, password }, context) => {
+      resolve: async (service, { email, password }, context) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(UserDTO, await user.login(email, password, context));
+          return convertDtoToZodObject(UserDTO, await service.login(email, password, context));
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND,
         });
@@ -270,9 +266,9 @@ const query = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (user, { email, otp }) => {
+      resolve: async (service, { email, otp }) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(OtpVerify, await user.verifyOtpCode(email, otp));
+          return convertDtoToZodObject(OtpVerify, await service.verifyOtpCode(email, otp));
         }, {
           UNAUTHORIZED: USER.VERIFY_OTP_FAIL_DUE_MISSING_OTP_OR_EMAIL
         });
@@ -301,9 +297,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(USER_INFORMATION_CREATE_INPUT),
         },
       },
-      resolve: async (user, args) => {
+      resolve: async (service, args) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(UserCreated, await user.addUser(args.user));
+          return convertDtoToZodObject(UserCreated, await service.addUser(args.user));
         }, {
           UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
         });
@@ -326,9 +322,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString)
         }
       },
-      resolve: async (user, { email }) => {
+      resolve: async (service, { email }) => {
         return handleResolveResult(async () => {
-          return convertDtoToZodObject(ForgetPassword, await user.forgetPassword(email));
+          return convertDtoToZodObject(ForgetPassword, await service.forgetPassword(email));
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND,
         });
@@ -350,9 +346,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (user, { resetPasswordToken, email, oldPassword, password }) => {
+      resolve: async (service, { resetPasswordToken, email, oldPassword, password }) => {
         return handleResolveResult(async () => {
-          await user.resetPassword(resetPasswordToken, email, oldPassword, password);
+          await service.resetPassword(resetPasswordToken, email, oldPassword, password);
           return messageCreator(USER.RESET_PASSWORD_SUCCESS);
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND
@@ -369,9 +365,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLBoolean),
         },
       },
-      resolve: async (user, { userId, mfaEnable }) => {
+      resolve: async (service, { userId, mfaEnable }) => {
         return handleResolveResult(async () => {
-          const { email } = await user.updateMfaState(mfaEnable, userId);
+          const { email } = await service.updateMfaState(mfaEnable, userId);
           return messageCreator(USER.UPDATE_MFA_STATE_SUCCESS.format(email));
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND
@@ -388,9 +384,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLBoolean),
         },
       },
-      resolve: async (user, { userId, power }) => {
+      resolve: async (service, { userId, power }) => {
         return handleResolveResult(async () => {
-          const { email } = await user.updatePower(power, userId);
+          const { email } = await service.updatePower(power, userId);
           return messageCreator(USER.UPDATE_POWER_SUCCESS.format(email));
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND
@@ -414,9 +410,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (user, { email }) => {
+      resolve: async (service, { email }) => {
         return handleResolveResult(async () => {
-          const otp = await user.updateOtpCode(email);
+          const otp = await service.updateOtpCode(email);
           return convertDtoToZodObject(OtpUpdate, { ...messageCreator(USER.OTP_HAS_BEEN_SENT), otp });
         }, {
           UNAUTHORIZED: USER.USER_NOT_FOUND
@@ -433,9 +429,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(USER_INFORMATION_INPUT),
         },
       },
-      resolve: async (user, args) => {
+      resolve: async (service, args) => {
         return handleResolveResult(async () => {
-          await user.updateUser(args.user);
+          await service.updateUser(args.user);
           return messageCreator(USER.UPDATE_USER_SUCCESS);
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
@@ -450,9 +446,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(USER_INFORMATION_UPDATE_PERSON_INPUT)
         },
       },
-      resolve: async (user, args) => {
+      resolve: async (service, args) => {
         return handleResolveResult(async () => {
-          await user.updateUser(args.person);
+          await service.updateUser(args.person);
           return messageCreator(USER.UPDATE_SELF_INFORMATION_SUCCESS);
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
@@ -467,9 +463,9 @@ const mutation = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLID),
         },
       },
-      resolve: async (user, { userId }) => {
+      resolve: async (service, { userId }) => {
         return handleResolveResult(async () => {
-          const { email } = await user.deleteUser(userId);
+          const { email } = await service.deleteUser(userId);
           return messageCreator(USER.DELETE_USER_SUCCESS.format(email));
         }, {
           RECORD_NOT_FOUND: USER.USER_NOT_FOUND

@@ -15,9 +15,13 @@ const randomPassword = autoGeneratePassword();
   */
 const createBooks = (amount) => {
   return Array.apply(null, Array(amount)).map((_, index) => ({
-    name: `book ${index}`,
-    book_id: Date.now().toString(),
-    avatar: `avatar ${index}`
+    book: {
+      name: `book ${index}`,
+      book_id: Date.now().toString(),
+      avatar: `avatar ${index}`,
+      createAt: Date.now().toString(),
+      authors: [],
+    }
   }));
 };
 
@@ -62,6 +66,8 @@ class ClientDummyData extends DummyDataApi {
         avatar: expect.any(String),
         email: expect.any(String),
         sex: expect.any(Number),
+        phone: expect.any(String),
+        name: expect.any(String),
         apiKey: expect.any(String),
         passwordMustChange: expect.any(Boolean),
         favoriteBooks: expect.any(Array),
@@ -90,6 +96,32 @@ class ClientDummyData extends DummyDataApi {
   static get apiKey() {
     return signClientLoginToken(this.MockData.email);
   }
+
+  /**
+   * Create the expected user list.
+   *
+   * @static
+   * @param {object} requestBodyQuery - The request body query.
+   * @param {number} length - The number user create.
+   * @param {string[]} [excludeFields=[]] - The fields should remove.
+   * @return {object[]} - The expected user list.
+   */
+  static generateClientExpectedList(requestBodyQuery, length, excludeFields = []) {
+    return Array.apply(null, Array(length)).map(() => {
+      return ClientDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
+    });
+  };
+
+  /**
+   * Create the client list for test.
+   *
+   * @static
+   * @param {number} length - The number of clients who want to create.
+   * @return {object[]} - The client list.
+   */
+  static createMockClientList (length) {
+    return Array.apply(null, Array(length)).map(() => ClientDummyData.MockData);
+  };
 
   /**
    * Access session data.

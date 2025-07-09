@@ -255,6 +255,34 @@ describe('get all user', () => {
         });
     });
 
+    test('get all user failed with undefine request body field', (done) => {
+      const undefineField = 'userIds';
+      const badRequestBody = {
+        [undefineField]: [mockUser.user_id],
+        query: requestBody.query,
+      };
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user)
+        .then((responseSign) => {
+          globalThis.api
+            .post(allUserUrl)
+            .set('authorization', authenticationToken)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .expect('Content-Type', /application\/json/)
+            .send(badRequestBody)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.findMany).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(USER.LOAD_ALL_USER_FAIL),
+                errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
+              });
+              done();
+            });
+        });
+    });
+
     test('get all user failed with output validate error', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));

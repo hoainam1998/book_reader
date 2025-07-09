@@ -3,8 +3,12 @@ const Service = require('#services/prisma');
 const {
   generateOtp,
   autoGeneratePassword,
-  signingResetPasswordToken
+  signingResetPasswordToken,
+  checkArrayHaveValues
 } = require('#utils');
+const { USER } = require('#messages');
+const { graphqlNotFoundErrorOption } = require('../common-schema');
+const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 class UserService extends Service {
@@ -249,6 +253,12 @@ class UserService extends Service {
     return this.PrismaInstance.user.findMany({
       ...conditions,
       select: { ...select, power: true },
+    }).then((result) => {
+     if (!checkArrayHaveValues(result)) {
+        graphqlNotFoundErrorOption.response = [];
+        throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
+      }
+      return result;
     });
   }
 }
