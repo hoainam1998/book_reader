@@ -133,5 +133,6 @@ module.exports = deepFreeze({
     LOAD_DETAIL_FAIL: 'Load client information detail was failed!',
     ADD_PERSONAL_INFORMATION_SUCCESS: 'Update your personal information was success!',
     ADD_PERSONAL_INFORMATION_FAIL: 'Update your personal information was failed!',
+    LOAD_ALL_CLIENT_FAIL: 'Load all client was failed!',
   }
 });

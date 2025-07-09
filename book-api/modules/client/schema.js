@@ -4,11 +4,9 @@ const {
   GraphQLInputObjectType,
   GraphQLList,
   GraphQLID,
-  GraphQLError,
   GraphQLInt,
   GraphQLBoolean,
   GraphQLNonNull,
-  GraphQLFloat
 } = require('graphql');
 const ClientDTO = require('#dto/client/client');
 const { ResponseType } = require('../common-schema');
@@ -25,6 +23,9 @@ const CLIENT = {
     type: GraphQLString,
   },
   lastName: {
+    type: GraphQLString,
+  },
+  name: {
     type: GraphQLString,
   },
   avatar: {
@@ -99,9 +100,12 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
 
 const CLIENT_INPUT_TYPE = new GraphQLInputObjectType({
   name: 'ClientInputType',
-  fields: {
-    ...CLIENT,
-  }
+  fields: CLIENT,
+});
+
+const CLIENT_TYPE = new GraphQLObjectType({
+  name: 'ClientType',
+  fields: CLIENT,
 });
 
 const mutation = new GraphQLObjectType({
@@ -243,6 +247,21 @@ const query = new GraphQLObjectType({
       resolve: async (service, { clientId }, context) => {
         return handleResolveResult(async () => {
           return convertDtoToZodObject(ClientDTO, await service.detail(clientId, context));
+        }, {
+          RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
+        });
+      }
+    },
+    all: {
+      type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE)),
+      args: {
+        exclude: {
+          type: GraphQLID
+        }
+      },
+      resolve: async (service, { exclude }, context) => {
+        return handleResolveResult(async () => {
+          return convertDtoToZodObject(ClientDTO, await service.all(exclude, context));
         }, {
           RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
         });

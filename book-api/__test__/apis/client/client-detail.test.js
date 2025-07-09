@@ -24,13 +24,31 @@ const requestBody = {
     email: true,
     sex: true,
     favoriteBooks: {
-      name: true
+      name: true,
+      avatar: true,
+      bookId: true,
+      authors: {
+        name: true,
+        authorId: true,
+      },
     },
     readLate: {
-      name: true
+      avatar: true,
+      bookId: true,
+      authors: {
+        name: true,
+        authorId: true,
+      },
+      createAt: true
     },
     usedRead: {
-      name: true
+      avatar: true,
+      bookId: true,
+      authors: {
+        name: true,
+        authorId: true,
+      },
+      createAt: true
     }
   }
 };

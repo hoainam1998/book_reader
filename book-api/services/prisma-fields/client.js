@@ -14,6 +14,7 @@ class ClientPrismaField extends PrismaField {
     email: 'email',
     sex: 'sex',
     phone: 'phone',
+    name: ['first_name', 'last_name'],
     resetPasswordToken: 'reset_password_token',
     favoriteBooks: {
       as: 'favorite_books',

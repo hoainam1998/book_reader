@@ -1,7 +1,9 @@
 const Service = require('#services/prisma');
+const { GraphQLError } = require('graphql');
 const { compare } = require('bcrypt');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils');
+const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues } = require('#utils');
+const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { READER } = require('#messages');
 
 class ClientService extends Service {
@@ -110,6 +112,26 @@ class ClientService extends Service {
         reader_id: clientId,
       },
       select,
+    });
+  }
+
+  all(exclude, select) {
+    const excludeWhere = exclude ? {
+      where: {
+        reader_id: {
+          not: exclude
+        }
+      }
+    } : {};
+    return this.PrismaInstance.reader.findMany({
+      ...excludeWhere,
+      select
+    }).then((result) => {
+      if (!checkArrayHaveValues(result)) {
+        graphqlNotFoundErrorOption.response = [];
+        throw new GraphQLError(READER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
+      }
+      return result;
     });
   }
 }

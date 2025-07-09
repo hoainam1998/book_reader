@@ -21,7 +21,16 @@ class ForgetPasswordResponse extends GraphqlResponse {
   }
 }
 
+class AllClientsResponse extends GraphqlResponse {
+  @Expose({ toClassOnly: true })
+  @Type(() => [ClientDTO])
+  get response() {
+    return getGraphqlFinalData(this.data);
+  }
+}
+
 module.exports = {
   ClientDetailResponse: zodValidateClassWrapper(ClientDetailResponse, ClientDTO),
   ForgetPasswordResponse: zodValidateClassWrapper(ForgetPasswordResponse, ForgetPassword),
+  AllClientsResponse: zodValidateClassWrapper(AllClientsResponse, ClientDTO),
 };

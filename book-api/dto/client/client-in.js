@@ -8,8 +8,24 @@ const {
   IsNumeric,
   IsGraphqlSelect,
   IsBase64Image,
+  IsOptional,
   Length
 } = require('#decorators/validators');
+
+const AllClient = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsOptional(),
+      IsId('clientId must be numeric string and contain 13 character')
+    )
+    exclude;
+
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
 
 const ClientUpdate = (validators, className) => {
   return classCreator(class extends Validator {
@@ -129,4 +145,5 @@ module.exports = {
   ResetPassword: Validation(ResetPassword),
   ClientDetail: Validation(ClientDetail),
   ClientUpdate: Validation(ClientUpdate),
+  AllClient: Validation(AllClient),
 };

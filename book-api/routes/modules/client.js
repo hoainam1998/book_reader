@@ -14,9 +14,9 @@ const {
   verifyClientResetPasswordToken,
   getGeneratorFunctionData,
 } = require('#utils');
-const { SignUp, ForgetPassword, ResetPassword, ClientDetail, ClientUpdate } = require('#dto/client/client-in');
+const { SignUp, ForgetPassword, ResetPassword, ClientDetail, ClientUpdate, AllClient } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
-const { ClientDetailResponse } = require('#dto/client/client-out');
+const { ClientDetailResponse, AllClientsResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const EmailService = require('#services/email');
 const ClientRoutePath = require('#services/route-paths/client');
@@ -43,6 +43,21 @@ class ClientRouter extends Router {
     this.post(ClientRoutePath.logout, clientLoginRequire, this._logout);
     this.post(ClientRoutePath.detail, authentication, this._detail);
     this.put(ClientRoutePath.updatePerson, authentication, this._updateClient);
+    this.post(ClientRoutePath.all, authentication, this._getAllClient);
+  }
+
+  @validation(AllClient, { error_message: READER.LOAD_ALL_CLIENT_FAIL })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(AllClientsResponse)
+  _getAllClient(req, res, next, self) {
+    const query = `query GetAllClient($exclude: ID) {
+      client {
+        all(exclude: $exclude) ${
+          req.body.query
+        }
+      }
+    }`;
+    return self.execute(query, { exclude: req.body.exclude }, req.body.query);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')

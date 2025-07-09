@@ -9,11 +9,13 @@ const { signClientLoginToken } = require('#utils');
 */
 const convertToRelateBook = (items) => {
   return items.map(({ book, added_at }) => ({
-    bookId: book.book_id,
-    avatar: book.avatar,
-    name: book.name,
-    createAt: added_at,
-    authors: book.book_author.map(({ author }) => ({ name: author.name, authorId: author.author_id })),
+    bookId: book.book_id || null,
+    avatar: book.avatar || null,
+    name: book.name || null,
+    createAt: added_at || null,
+    authors: book.book_author
+      ? book.book_author.map(({ author }) => ({ name: author.name, authorId: author.author_id }))
+      : [],
   }));
 };
 
@@ -62,6 +64,11 @@ class ClientDTO extends OutputValidate {
   @Type(() => String)
   get lastName() {
     return this.last_name;
+  }
+
+  @Type(() => String)
+  get name() {
+    return `${this.first_name} ${this.last_name}`;
   }
 
   @Type(() => String)
