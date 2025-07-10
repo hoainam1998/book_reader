@@ -109,7 +109,7 @@ class SharedService {
       reader_id: clientId,
     };
 
-    return this.PrismaClient.reader.findFirstOrThrow({
+    return this.PrismaClient.reader.findUniqueOrThrow({
       where,
       select: {
         session_id: true,
