@@ -47,7 +47,7 @@ const AllUser = (validators, className) => {
       IsOptional(),
       IsId('userId must be numeric string and contain 13 character')
     )
-    exceptedUserId;
+    exclude;
 
     @validators(
       IsGraphqlSelect('Value of field must be boolean!')

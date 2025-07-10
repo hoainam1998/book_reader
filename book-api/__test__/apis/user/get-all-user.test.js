@@ -86,7 +86,7 @@ describe('get all user', () => {
     test('get all user success with exclude id', (done) => {
       const requestBodyWithExcludeId = {
         ...requestBody,
-        exceptedUserId: mockUser.user_id
+        exclude: mockUser.user_id
       };
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
@@ -114,7 +114,7 @@ describe('get all user', () => {
                   },
                   where: {
                     user_id: {
-                      not: requestBodyWithExcludeId.exceptedUserId
+                      not: requestBodyWithExcludeId.exclude
                     }
                   }
                 })

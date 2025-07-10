@@ -1,11 +1,14 @@
 const commonTest = require('#test/apis/common/common');
-const UserRoutePath = require('#services/route-paths/user');
+const ClientRoutePath = require('#services/route-paths/client');
+const ClientDummyData = require('#test/resources/dummy-data/client');
 const ErrorCode = require('#services/error-code');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER } = require('#messages');
-const { authenticationToken, sessionData, signedTestCookie } = require('#test/resources/auth');
+const { signedTestCookie } = require('#test/resources/auth');
 const { createDescribeTest } = require('#test/helpers/index');
-const logoutUrl = UserRoutePath.logout.abs;
+const logoutUrl = ClientRoutePath.logout.abs;
+const sessionData = ClientDummyData.session.client;
+const apiKey = ClientDummyData.apiKey;
 
 describe('logout api', () => {
   commonTest('logout api common test', [
@@ -13,7 +16,7 @@ describe('logout api', () => {
       name: 'url test',
       describe: 'url is invalid',
       url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
+      method: METHOD.GET.toLowerCase(),
     },
     {
       name: 'method test',
@@ -34,44 +37,44 @@ describe('logout api', () => {
     test('logout failed due without login', (done) => {
       expect.hasAssertions();
       globalThis.api.get(logoutUrl)
-        .set('authorization', authenticationToken)
+        .set('authorization', apiKey)
         .expect(HTTP_CODE.UNAUTHORIZED)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
-          expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
-          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: USER.USER_UNAUTHORIZED,
-            errorCode: ErrorCode.HAVE_NOT_LOGIN
+            errorCode: ErrorCode.HAVE_NOT_LOGIN,
           });
-          done();
-        });
+        done();
+      });
     });
 
     test('logout will be success', (done) => {
       expect.hasAssertions();
 
-      signedTestCookie(sessionData.user)
+      signedTestCookie(sessionData, 'client')
         .then((responseSign) => {
           globalThis.api.get(logoutUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .set('authorization', authenticationToken)
+            .set('authorization', apiKey)
             .expect(HTTP_CODE.OK)
             .expect('Content-Type', /application\/json/)
             .then((response) => {
-              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith({
+              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
                 where: {
-                  user_id: sessionData.user.userId
+                  reader_id: sessionData.clientId,
                 },
                 select: {
                   session_id: true,
                 }
               });
-              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+              expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
                 where: {
-                  user_id: sessionData.user.userId
+                  reader_id: sessionData.clientId,
                 },
                 data: {
                   session_id: null

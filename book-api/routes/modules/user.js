@@ -347,14 +347,14 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {
-    const query = `query GetAllUsers($exceptedUserId: ID) {
+    const query = `query GetAllUsers($exclude: ID) {
       user {
-        all(exceptedUserId: $exceptedUserId) ${
+        all(exclude: $exclude) ${
           req.body.query
         }
       }
     }`;
-    return self.execute(query, { exceptedUserId: req.body.exceptedUserId }, req.body.query);
+    return self.execute(query, { exclude: req.body.exclude }, req.body.query);
   }
 
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })

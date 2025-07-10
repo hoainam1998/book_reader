@@ -88,6 +88,8 @@
     "test.client.sign-up.silent": "npm run test.requirement -- __test__/apis/client/sign-up.test.js --silent",
     "test.client.login": "npm run test.requirement -- __test__/apis/client/login.test.js",
     "test.client.login.silent": "npm run test.requirement -- __test__/apis/client/login.test.js --silent",
+    "test.client.logout": "npm run test.requirement -- __test__/apis/client/logout.test.js",
+    "test.client.logout.silent": "npm run test.requirement -- __test__/apis/client/logout.test.js --silent",
     "test.client.reset-password": "npm run test.requirement -- __test__/apis/client/reset-password.test.js",
     "test.client.reset-password.silent": "npm run test.requirement -- __test__/apis/client/reset-password.test.js --silent",
     "test.client.detail": "npm run test.requirement -- __test__/apis/client/client-detail.test.js",

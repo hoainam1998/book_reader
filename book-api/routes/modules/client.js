@@ -14,7 +14,14 @@ const {
   verifyClientResetPasswordToken,
   getGeneratorFunctionData,
 } = require('#utils');
-const { SignUp, ForgetPassword, ResetPassword, ClientDetail, ClientUpdate, AllClient } = require('#dto/client/client-in');
+const {
+  SignUp,
+  ForgetPassword,
+  ResetPassword,
+  ClientDetail,
+  ClientUpdate,
+  AllClient
+} = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse, AllClientsResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -40,7 +47,7 @@ class ClientRouter extends Router {
     this.post(ClientRoutePath.generatedResetPasswordToken, allowInternalCall, this._generatedResetPassword);
     this.post(ClientRoutePath.resetPassword, onlyAllowOneDevice, this._resetPassword);
     this.post(ClientRoutePath.login, onlyAllowOneDevice, this._login);
-    this.post(ClientRoutePath.logout, clientLoginRequire, this._logout);
+    this.get(ClientRoutePath.logout, clientLoginRequire, this._logout);
     this.post(ClientRoutePath.detail, authentication, this._detail);
     this.put(ClientRoutePath.updatePerson, authentication, this._updateClient);
     this.post(ClientRoutePath.all, authentication, this._getAllClient);
