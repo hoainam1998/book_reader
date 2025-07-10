@@ -240,16 +240,16 @@ class UserService extends Service {
     });
   }
 
-  getAllUsers(exceptedUserId, select) {
-    const conditions = exceptedUserId
+  getAllUsers(exclude, select) {
+    const conditions = exclude
     ? {
       where: {
         user_id: {
-          not: exceptedUserId
+          not: exclude
         }
       },
-    }
-    : {};
+    } : {};
+
     return this.PrismaInstance.user.findMany({
       ...conditions,
       select: { ...select, power: true },

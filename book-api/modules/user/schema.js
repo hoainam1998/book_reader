@@ -184,12 +184,12 @@ const query = new GraphQLObjectType({
     all: {
       type: new GraphQLList(new GraphQLNonNull(USER_INFORMATION)),
       args: {
-        exceptedUserId: {
+        exclude: {
           type: GraphQLID,
         },
       },
-      resolve: async (service, { exceptedUserId }, context) => {
-        const users = await service.getAllUsers(exceptedUserId, context);
+      resolve: async (service, { exclude }, context) => {
+        const users = await service.getAllUsers(exclude, context);
         return convertDtoToZodObject(UserDTO, users);
       }
     },
