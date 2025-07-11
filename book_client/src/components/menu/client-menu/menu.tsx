@@ -1,13 +1,17 @@
-import { Fragment, JSX, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Fragment, JSX, ReactElement, useCallback, useMemo, useState, useSyncExternalStore } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import { HaveLoadedFnType, NavLinkPropsType } from 'interfaces';
 import path from 'router/paths';
 import Button from 'components/button/button';
 import useComponentDidMount from 'hooks/useComponentDidMount';
+import store, { UserLogin } from 'store/auth';
+import paths from 'router/paths';
 import { useClientPaginationContext } from 'contexts/client-pagination';
-import { stringRandom as id, clsx } from 'utils';
+import { stringRandom as id, clsx, showToast } from 'utils';
+import { logout as logoutService } from 'views/login-group/login/client-login/fetcher';
 import { getMenuItem } from './fetcher';
+const { getSnapshot, subscribe } = store;
 import './style.scss';
 
 const itemsMenu: NavLinkPropsType[] = [
@@ -133,6 +137,7 @@ const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element =
 
 function Menu(): JSX.Element {
   const navigate = useNavigate();
+  const userLogin: UserLogin | null = useSyncExternalStore(subscribe, getSnapshot);
   const [menuItemsApi, setMenuItemsApi] = useState<AxiosResponse[]>([]);
   const {
     onPageChange,
@@ -143,8 +148,30 @@ function Menu(): JSX.Element {
     shouldCallOnPageChange
   } = useClientPaginationContext();
 
+  const userName = useMemo<string>(() => {
+    return userLogin ? `${userLogin.firstName} ${userLogin.lastName}` : '';
+  }, [userLogin]);
+
+  const userAvatar = useMemo<string | ReturnType<typeof require>>(() => {
+    return userLogin ? userLogin.avatar : require('images/writer.png');
+  }, [userLogin]);
+
   const navigateToPersonal = useCallback((): void => {
     navigate(`${path.HOME}${path.PERSONAL}`);
+  }, []);
+
+  const navigateToMenuItemPage = useCallback((menuItemPath: string): void => {
+    navigate(`${path.HOME}/${menuItemPath}`);
+  }, []);
+
+  const logout = useCallback((): void => {
+    logoutService()
+      .then((response) => {
+        showToast('Logout!', response.data.message);
+        store.logout();
+        navigate(paths.LOGIN);
+      })
+      .catch((error) => showToast('Logout!', error.response.data.message));
   }, []);
 
   const setResultTitle = useCallback((item: NavLinkPropsType): void => {
@@ -156,21 +183,19 @@ function Menu(): JSX.Element {
   }, [setResultFor]);
 
   const loader = useCallback((): (item: NavLinkPropsType) => void => {
-    if (onPageChange && clearOldKeyword && resetPage) {
-      return (item: NavLinkPropsType): void => {
-        if (item.path === path.ALL) {
-          shouldCallOnPageChange() && onPageChange(1);
-        } else {
-          setCondition({ id: item.id });
-          onPageChange(1, { id: item.id });
-        }
-        navigate(`${path.HOME}/${item.path}`);
-        clearOldKeyword();
-        setResultTitle(item);
-        resetPage();
-      };
-    }
-    return () => {};
+    return (item: NavLinkPropsType): void => {
+      if (item.path === path.ALL) {
+        (shouldCallOnPageChange() && onPageChange) && onPageChange(1, {});
+        navigateToMenuItemPage(item.path);
+      } else {
+        navigateToMenuItemPage(item.path);
+        setCondition({ id: item.id });
+        onPageChange && onPageChange(1, { id: item.id });
+      }
+      clearOldKeyword && clearOldKeyword();
+      setResultTitle(item);
+      resetPage && resetPage();
+    };
   }, [onPageChange, clearOldKeyword, resetPage]);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
@@ -188,13 +213,13 @@ function Menu(): JSX.Element {
       <MenuItemsList items={menuItemsApi} loader={loader} />
       <div className="user-login-box">
         <div className="user-login-quick-info">
-          <img src={require('images/home.png')} height={50} width={50} />
-          <h5 className="line-clamp">hfhhfhfffffffffffffffffffffffffffffafhafh@gmail.com</h5>
+          <img src={userAvatar} height={50} width={50} alt='user avatar' />
+          <h5 className="line-clamp">{userName}</h5>
         </div>
         <hr className="separate-line" />
         <div className="personal-operator-btn">
           <Button variant="outline" className="flex-basic-50" onClick={navigateToPersonal}>Personal</Button>
-          <Button variant="outline" className="flex-basic-50" onClick={() => {}}>Logout</Button>
+          <Button variant="outline" className="flex-basic-50" onClick={logout}>Logout</Button>
         </div>
       </div>
     </section>

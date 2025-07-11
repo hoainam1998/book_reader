@@ -1,4 +1,4 @@
-import { JSX, ReactElement, Children, cloneElement, useState, useCallback, useMemo } from 'react';
+import { JSX, ReactElement, Children, cloneElement, useState, useMemo, useEffect } from 'react';
 import Tab, { TabHeader } from './tab/tab';
 import './style.scss';
 
@@ -9,14 +9,14 @@ type TabsPropsType = {
 
 const renderTab = (element: ReactElement<any, any>): ReactElement => {
   if (element.type.name === 'Tab') {
-    return element.props.children;
+    return element.props.children[1];
   }
   return (<></>);
 };
 
 function Tabs({ children, value }: TabsPropsType): JSX.Element {
   let order: number = 1;
-  const tabs: ReactElement[] = Children.toArray(children) as ReactElement[];
+  const tabs: ReactElement[] = useMemo(() => Children.toArray(children) as ReactElement[], [children]);
   const defaultTabBody = useMemo<ReactElement>(() => {
     if (Children.count(children)) {
       if (value) {
@@ -26,16 +26,24 @@ function Tabs({ children, value }: TabsPropsType): JSX.Element {
       }
     }
     return (<></>);
-  }, [value, children]);
+  }, [value, children, tabs]);
 
   const [tabBody, setTabBody] = useState<ReactElement>(defaultTabBody);
   const [selectedTabValue, setSelectedTabValue] = useState<number>(1);
 
-  const onSelected = useCallback((selectedValue: number): void => {
-    const selectedTabBody = tabs[selectedValue - 1].props.children;
-    setSelectedTabValue(selectedValue);
-    setTabBody(selectedTabBody);
-  }, []);
+  const onSelected = (selectedValue: number, child: ReactElement): () => void => {
+    return (): void => {
+      setSelectedTabValue(selectedValue);
+      setTabBody(child);
+    };
+  };
+
+  useEffect(() => {
+    if (Children.count(children)) {
+      const tab = tabs[selectedTabValue - 1].props.children[1];
+      setTabBody(tab);
+    }
+  }, [children]);
 
   return (
     <section>
@@ -46,7 +54,7 @@ function Tabs({ children, value }: TabsPropsType): JSX.Element {
               const tab = cloneElement(child, {
                 order,
                 checked: order === selectedTabValue,
-                onSelectedValue: onSelected,
+                onSelectedValue: onSelected(order, child.props.children[1]),
               });
               ++order;
               return tab;

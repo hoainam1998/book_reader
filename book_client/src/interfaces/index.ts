@@ -64,13 +64,19 @@ export type PaginationCondition = {
   keyword?: string;
 };
 
-export type PersonalType = Omit<UserType, 'mfa' | 'power'> & {
+export type PersonalType = Omit<UserType, 'mfa' | 'power' | 'userId'> & {
   avatar: string;
+  id: string;
 };
 
 export type HorizontalBookType = {
-  name: true;
-  avatar: true;
-  bookId: true;
-  createAt?: true;
+  name: string;
+  avatar: string;
+  bookId: string;
+  createAt?: number;
+  authors: {
+    name: string;
+    authorId: string;
+  }[];
+  deleteBook: () => void;
 };

@@ -22,6 +22,7 @@ type ClientPaginationContextPropsType = {
   setResultFor: Dispatch<ClientPaginationContextPropsType['resultFor']>;
   resetPage: (() => void) | null;
   clearOldKeyword: (() => void) | null;
+  getConditions: () => { id?: string, keyword: string };
   page: number;
   pages: number;
   condition: PaginationCondition;
@@ -52,6 +53,13 @@ function ClientPagination({ children }: ClientPaginationPropsType): JSX.Element 
     return [path.ALL, path.AUTHORS, path.CATEGORIES].some((p) => oldLocation.includes(p));
   }, [window.location.pathname]);
 
+  const getConditions = () => {
+    return {
+      id,
+      keyword,
+    };
+  };
+
   return (
     <ClientPaginationContext.Provider value={{
       onPageChange,
@@ -64,6 +72,7 @@ function ClientPagination({ children }: ClientPaginationPropsType): JSX.Element 
       setResetPage,
       resetPage,
       setResultFor,
+      getConditions,
       page,
       pages,
       condition,

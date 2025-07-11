@@ -28,3 +28,15 @@ export const getBookDetail = (bookId: string): Promise<AxiosResponse> => {
     bookId,
   });
 };
+
+export const addFavoriteBook = (bookId: string): Promise<AxiosResponse> => {
+  return BookService.post('add-favorite-book', { bookId });
+};
+
+export const addReadLateBook = (bookId: string): Promise<AxiosResponse> => {
+  return BookService.post('add-read-late-book', { bookId });
+};
+
+export const addUsedReadBook = (bookId: string): Promise<AxiosResponse> => {
+  return BookService.post('add-used-read-book', { bookId });
+};

@@ -33,7 +33,7 @@ export const updateUser = (user: UserType): Promise<AxiosResponse> => {
 
 export const getAllUsers = (userId?: string): Promise<AxiosResponse> => {
   return UserService.post('all', {
-    exceptedUserId: userId,
+    exclude: userId,
     query: {
       email: true,
       phone: true,

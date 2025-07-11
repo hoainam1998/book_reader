@@ -9,6 +9,8 @@ import { getResetPasswordToken, resetPassword } from './fetcher';
 import constants from 'read-only-variables';
 import { ResetPasswordFieldType } from 'interfaces';
 import { showToast } from 'utils';
+import { logout } from 'views/login-group/login/client-login/fetcher';
+import auth from 'store/auth';
 import paths from 'router/paths';
 
 const state: ResetPasswordFieldType = {
@@ -48,7 +50,7 @@ function ClientResetPassword(): JSX.Element {
   const onSubmit = useCallback((): void => {
     handleSubmit();
     if (!validate.error) {
-     const { email, password, oldPassword } = validate.values;
+      const { email, password, oldPassword } = validate.values;
       const body = {
         email,
         password,
@@ -56,13 +58,27 @@ function ClientResetPassword(): JSX.Element {
         resetPasswordToken: token,
       };
 
-      resetPassword(body)
-        .then((response) => {
-          showToast('Reset password!', response.data.message);
-          navigate(paths.LOGIN);
-        })
-        .catch((error) => showToast('Reset password!', error.response.data.message))
-        .finally(reset);
+      const handleResetPassword = () => {
+        resetPassword(body)
+          .then((response) => {
+            navigate(paths.LOGIN);
+            showToast('Reset password!', response.data.message);
+          })
+          .catch((error) => showToast('Reset password!', error.response.data.message))
+          .finally(reset);
+      };
+
+      if (auth.PasswordMustChange) {
+        logout()
+          .then(() => {
+            auth.logout();
+            handleResetPassword();
+          })
+          .catch(() => showToast('Reset password!', 'Reset password was failed!. Something wrong are happening!'))
+          .finally(reset);
+        } else {
+          handleResetPassword();
+        }
     }
   }, []);
 

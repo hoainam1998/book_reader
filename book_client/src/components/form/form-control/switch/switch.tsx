@@ -27,7 +27,7 @@ function Switch({
   watch,
 }: SwitchPropsType): JSX.Element {
 
-  const valueConverter = useCallback((checked: boolean | string) => {
+  const valueConverter = useCallback((checked: boolean | string): string => {
     if (checkValue && notCheckValue) {
       return (checked === true ? checkValue : notCheckValue).toString();
     }

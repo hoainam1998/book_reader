@@ -9,7 +9,6 @@ import FileDragDropUpload from 'components/file-drag-drop-upload/file-drag-drop-
 import Button from 'components/button/button';
 import Radio from 'components/form/form-control/radio/radio';
 import { OptionPrototype } from 'components/form/form-control/form-control';
-import { logout } from 'views/login-group/login/admin-login/fetcher';
 import { required, email as emailValidate, matchPattern, ErrorFieldInfo } from 'hooks/useValidate';
 import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
@@ -20,7 +19,9 @@ import constants from 'read-only-variables';
 import { PersonalType } from 'interfaces';
 import './style.scss';
 
-const state: PersonalType = {
+type PersonalStateType = Omit<PersonalType, 'id'>;
+
+const state: PersonalStateType = {
   firstName: '',
   lastName: '',
   email: '',
@@ -36,9 +37,10 @@ type PersonalPropsType = {
   personal: PersonalType | null;
   update: (formData: FormData) => Promise<AxiosResponse>;
   getAllUsers: (userId: string) => Promise<AxiosResponse>;
+  logout: () => Promise<AxiosResponse>;
 };
 
-function Personal({ personal, update, getAllUsers }: PersonalPropsType): JSX.Element {
+function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
   const [phones, setPhones] = useState<string[]>([]);
   const [reLogin, setReLogin] = useState<boolean>(false);
@@ -66,7 +68,7 @@ function Personal({ personal, update, getAllUsers }: PersonalPropsType): JSX.Ele
     [phones]
   );
 
-  const rules: RuleType<Omit<PersonalType, 'userId'>> = {
+  const rules: RuleType<Omit<PersonalStateType, 'userId'>> = {
     email: {
       required,
       emailValidate: emailValidate('Email invalid!'),
@@ -94,8 +96,8 @@ function Personal({ personal, update, getAllUsers }: PersonalPropsType): JSX.Ele
     validate,
     reset
   } = useForm<
-    PersonalType,
-    RuleType<PersonalType>
+    PersonalStateType,
+    RuleType<PersonalStateType>
   >(state, rules, formId, [emails, phones]);
 
   const backToPrevious = useCallback((event: any): void => {
@@ -139,7 +141,7 @@ function Personal({ personal, update, getAllUsers }: PersonalPropsType): JSX.Ele
             avatar.watch(res);
           }
         });
-      getAllUsers(personal.userId!)
+      getAllUsers(personal.id)
         .then((res: AxiosResponse<PersonalType[]>) => {
           const { emailsList, phonesList } =
             res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
