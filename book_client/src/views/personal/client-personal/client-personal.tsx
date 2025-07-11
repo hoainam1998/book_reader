@@ -1,10 +1,23 @@
-import { Fragment, JSX, useState } from 'react';
+import { Fragment, JSX, useCallback, useState } from 'react';
+import { AxiosResponse } from 'axios';
 import Tabs, { Tab, TabHeader } from 'components/tabs/tabs';
 import HorizontalBookGrid from 'components/re-use/horizontal-book-grid/horizontal-book-grid';
 import useComponentDidMount from 'hooks/useComponentDidMount';
 import Personal from '../personal';
-import { updatePerson } from '../fetcher';
-import { getAllReaders, getReaderDetail } from './fetcher';
+import { showToast } from 'utils';
+import { updatePerson as _updatePerson } from '../fetcher';
+import {
+  getAllReaders,
+  getReaderDetail,
+  getReaderInformation,
+  logout,
+  deleteFavoriteBook,
+  deleteReadLateBook,
+  deleteUsedReadBook,
+  getFavoriteBooks,
+  getReadLateBooks,
+  getUsedReadBooks,
+} from './fetcher';
 import { HaveLoadedFnType, PersonalType, HorizontalBookType } from 'interfaces';
 
 type ReaderType = PersonalType & {
@@ -13,35 +26,94 @@ type ReaderType = PersonalType & {
   usedRead: HorizontalBookType[];
 };
 
+type DeleteBookFn = (bookId: string) => void;
+
+/**
+* Incorporate delete function with data list.
+*
+* @param {Omit<HorizontalBookType, 'deleteBook'>[]} items - The data list.
+* @param {DeleteBookFn} - The delete function.
+* @returns {HorizontalBookType[]} - The new data list.
+*/
+const combineDeleteBook =
+  (items: Omit<HorizontalBookType, 'deleteBook'>[], deleteBookFn: DeleteBookFn): HorizontalBookType[] => {
+    const deleteBook = (bookId: string) => () => deleteBookFn(bookId);
+    return items.map((item) => ({ ...item, deleteBook: deleteBook(item.bookId) }));
+  };
+
 function ClientPersonal(): JSX.Element {
   const [reader, setReader] = useState<PersonalType | null>(null);
   const [favoriteBooks, setFavoriteBooks] = useState<ReaderType['favoriteBooks']>([]);
-  const [readLate, setReadLate] = useState<ReaderType['readLate']>([]);
-  const [usedRead, setUsedRead] = useState<ReaderType['usedRead']>([]);
+  const [readLateBooks, setReadLateBooks] = useState<ReaderType['readLate']>([]);
+  const [usedReadBooks, setUsedReadBooks] = useState<ReaderType['usedRead']>([]);
+
+  const deleteFavoriteBookService = useCallback((bookId: string): void => {
+    deleteFavoriteBook(bookId)
+      .then((response) => {
+        showToast('Delete favorite book!', response.data.message);
+        getFavoriteBooks()
+          .then((response) => setFavoriteBooks(combineDeleteBook(response.data, deleteFavoriteBookService)))
+          .catch(() => setFavoriteBooks([]));
+      })
+      .catch((error) => showToast('Delete favorite book!', error.response.data.message));
+  }, []);
+
+  const deleteReadLateBookService = useCallback((bookId: string): void => {
+    deleteReadLateBook(bookId)
+      .then((response) => {
+        showToast('Delete read late book!', response.data.message);
+        getReadLateBooks()
+          .then((response) => setReadLateBooks(combineDeleteBook(response.data, deleteReadLateBookService)))
+          .catch(() => setReadLateBooks([]));
+      })
+      .catch((error) => showToast('Delete read late book!', error.response.data.message));
+  }, []);
+
+  const deleteUsedBookService = useCallback((bookId: string): void => {
+    deleteUsedReadBook(bookId)
+      .then((response) => {
+        showToast('Delete used read book!', response.data.message);
+        getUsedReadBooks()
+          .then((response) => setUsedReadBooks(combineDeleteBook(response.data, deleteUsedBookService)))
+          .catch(() => setUsedReadBooks([]));
+      })
+      .catch((error) => showToast('Delete used read book!', error.response.data.message));
+  }, []);
 
   useComponentDidMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
         getReaderDetail()
           .then((reader) => {
-            setReader(reader.data);
-            setFavoriteBooks(reader.data.favoriteBooks);
-            setReadLate(reader.data.readLate);
-            setUsedRead(reader.data.usedRead);
+            setReader({ ...reader.data, id: reader.data.clientId });
+            setFavoriteBooks(combineDeleteBook(reader.data.favoriteBooks, deleteFavoriteBookService));
+            setReadLateBooks(combineDeleteBook(reader.data.readLate, deleteReadLateBookService));
+            setUsedReadBooks(combineDeleteBook(reader.data.usedRead, deleteUsedBookService));
           })
           .catch(() => {
             setReader(null);
             setFavoriteBooks([]);
-            setReadLate([]);
-            setUsedRead([]);
+            setReadLateBooks([]);
+            setUsedReadBooks([]);
           });
       }
     };
   });
 
+  const updatePerson = useCallback((formData: FormData): Promise<AxiosResponse> => {
+    return _updatePerson(formData)
+      .then((response) => {
+        getReaderInformation()
+          .then((reader) => setReader(reader.data))
+          .catch(() => setReader(null));
+        return response;
+      });
+  }, []);
+
+
   return (
     <Fragment>
-      <Personal personal={reader} update={updatePerson} getAllUsers={getAllReaders} />
+      <Personal personal={reader} update={updatePerson} getAllUsers={getAllReaders} logout={logout} />
       <Tabs>
         <Tab title="Favorite books">
           <TabHeader render={(title) => (
@@ -59,7 +131,7 @@ function ClientPersonal(): JSX.Element {
                 {title}
               </div>
             )} />
-            <HorizontalBookGrid items={usedRead} />
+            <HorizontalBookGrid items={usedReadBooks} />
           </Tab>
           <Tab title="Read late">
             <TabHeader render={(title) => (
@@ -68,7 +140,7 @@ function ClientPersonal(): JSX.Element {
                 {title}
               </div>
             )} />
-            <HorizontalBookGrid items={readLate} />
+            <HorizontalBookGrid items={readLateBooks} />
           </Tab>
         </Tabs>
     </Fragment>

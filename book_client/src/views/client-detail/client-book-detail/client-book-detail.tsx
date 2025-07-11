@@ -5,10 +5,9 @@ import path from 'router/paths';
 import Button from 'components/button/button';
 import List from 'components/list/list';
 import { useClientPaginationContext } from 'contexts/client-pagination';
-import { getBookDetail } from './fetcher';
-import { openFile } from 'utils';
+import { openFile, showToast, formatDate } from 'utils';
 import { HaveLoadedFnType, BookPropsType } from 'interfaces';
-import { formatDate } from 'utils';
+import { getBookDetail, addFavoriteBook, addReadLateBook, addUsedReadBook } from './fetcher';
 import './style.scss';
 
 const authorLink = `${path.HOME}/${path.AUTHOR}`;
@@ -64,6 +63,27 @@ function ClientBookDetail(): JSX.Element {
     }
   }, [book, onPageChange]);
 
+  const addFavoriteBookService = useCallback((): void => {
+    addFavoriteBook(id!)
+      .then((response) => showToast('Add favorite book!', response.data.message))
+      .catch((error) => showToast('Add favorite book!', error.response.data.message));
+  }, [id]);
+
+  const addReadLateBookService = useCallback((): void => {
+    addReadLateBook(id!)
+      .then((response) => showToast('Add read late book!', response.data.message))
+      .catch((error) => showToast('Add read late book!', error.response.data.message));
+  }, [id]);
+
+  const addUsedReadBookService = useCallback((): void => {
+    addUsedReadBook(id!)
+      .then((response) => {
+        showToast('Add used read book!', response.data.message);
+        book && openFile(book.pdf);
+      })
+      .catch((error) => showToast('Add used read book!', error.response.data.message));
+  }, [id, book]);
+
   if (book) {
     return (
       <section className="client-book-detail">
@@ -105,15 +125,15 @@ function ClientBookDetail(): JSX.Element {
                 <span>{formatDate(book.publishedDay)}</span>
               </li>
               <li className="book-info-property book-operator">
-                <Button variant="dangerous" className="operator-button" onClick={() => openFile(book.pdf)}>
+                <Button variant="dangerous" className="operator-button" onClick={addUsedReadBookService}>
                   <img src={require('images/book.png')} className="icon-btn" />
                   Read
                 </Button>
-                <Button variant="dangerous" className="operator-button" onClick={console.log}>
+                <Button variant="dangerous" className="operator-button" onClick={addFavoriteBookService}>
                   <img src={require('images/heart.png')} className="icon-btn" />
                   Favorite
                 </Button>
-                <Button variant="success" className="operator-button" onClick={console.log}>
+                <Button variant="success" className="operator-button" onClick={addReadLateBookService}>
                   <img src={require('images/watch-later.png')} className="icon-btn" />
                   Read later
                 </Button>

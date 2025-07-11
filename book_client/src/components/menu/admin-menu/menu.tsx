@@ -8,14 +8,17 @@ import { NavLinkPropsType } from 'interfaces';
 import './style.scss';
 
 function Menu(): JSX.Element {
-
   const navLinks = useMemo<NavLinkPropsType[]>(() => {
    return (routes.find(route => route.path === path.HOME)?.children || [])
     .reduce<NavLinkPropsType[]>((links, menuItem) => {
-        if (menuItem.path) {
-          links.push({ path: menuItem.path || '', label: menuItem.name || '', image: menuItem.icon || '' });
-        }
-        return links;
+      if (menuItem.path) {
+        links.push({
+          path: menuItem.path || '',
+          label: menuItem.name || '',
+          image: menuItem.icon || '',
+        });
+      }
+      return links;
     }, []);
   }, [routes]);
 

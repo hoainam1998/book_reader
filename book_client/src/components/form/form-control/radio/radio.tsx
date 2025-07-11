@@ -1,4 +1,4 @@
-import { JSX, useMemo, useEffect, useState, useCallback } from 'react';
+import { JSX, useMemo, useEffect, useCallback } from 'react';
 import FormControl, { FormControlProps, OptionPrototype } from '../form-control';
 import List from 'components/list/list';
 import { FieldValidateProps } from 'hooks/useForm';
@@ -23,18 +23,15 @@ function Radio<T extends string | number>({
   onFocus,
   watch,
 }: RadioPropsType<T>): JSX.Element {
-  const [originalValue, setOriginalValue] = useState<RadioPropsType<T>['value']>(value);
-
   const valueTransformed = useMemo<T>(() => {
-    if ((typeof originalValue === 'string')) {
-      return (originalValue === '' ? options![0].value: parseInt(originalValue)) as T;
+    if ((typeof value === 'string')) {
+      return (value === '' ? options![0].value: parseInt(value)) as T;
     }
-    return originalValue!;
-  }, [originalValue]);
+    return value!;
+  }, [value]);
 
   const radioOnChange = useCallback((event: any): void => {
-    setOriginalValue(event.target.value);
-    onChange && onChange(event.target.checked);
+    onChange && onChange(event.target.value);
   }, []);
 
   useEffect(() => {

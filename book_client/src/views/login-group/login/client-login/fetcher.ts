@@ -18,3 +18,7 @@ export const login = (email: string, password: string): Promise<AxiosResponse> =
   };
   return ClientService.post('login', body);
 };
+
+export const logout = (): Promise<AxiosResponse> => {
+  return ClientService.get('logout');
+};

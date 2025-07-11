@@ -5,6 +5,7 @@ import { useClientPaginationContext } from 'contexts/client-pagination';
 import useComponentDidMount from 'hooks/useComponentWillMount';
 import { bookPagination } from './fetcher';
 import { HaveLoadedFnType, BookPropsType, PaginationCondition } from 'interfaces';
+import { useBlocker } from 'react-router-dom';
 
 type PaginationType = {
   page: number;
@@ -13,11 +14,18 @@ type PaginationType = {
 };
 
 function AllBooks(): JSX.Element {
-  const { setOnPageChange, setPage, setPages, resetPage, condition } = useClientPaginationContext();
+  const {
+    setOnPageChange,
+    setPage,
+    setPages,
+    resetPage,
+    clearOldKeyword,
+    getConditions
+  } = useClientPaginationContext();
   const [books, setBooks] = useState<BookPropsType[]>([]);
 
   const pagination = (): (pageNumber?: number) => Promise<void> => {
-    return (pageNumber: number = 1, currentCondition: PaginationCondition = condition) =>
+    return (pageNumber: number = 1, currentCondition: PaginationCondition = getConditions()) =>
        bookPagination(pageNumber, currentCondition)
         .then((result: AxiosResponse<PaginationType>) => {
           resetPage && resetPage();
@@ -35,6 +43,13 @@ function AllBooks(): JSX.Element {
       }
     };
   }, []);
+
+  useBlocker(({ currentLocation, nextLocation }): boolean => {
+    if (currentLocation.pathname !== nextLocation.pathname) {
+      clearOldKeyword && clearOldKeyword();
+    }
+    return false;
+  });
 
   return (<Books items={books} />);
 }

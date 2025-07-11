@@ -17,12 +17,12 @@ function AdminLogin(): JSX.Element {
         const userLogin = { ...res.data };
         delete userLogin.apiKey;
         auth.saveUserLogin(userLogin);
-        auth.saveApiKey(res.data.apiKey);
 
         if (res.data.passwordMustChange) {
           navigate(generateResetPasswordLink(res.data.resetPasswordToken));
         } else {
           auth.IsLogged = true;
+          auth.saveApiKey(res.data.apiKey);
           navigate(path.HOME);
         }
       })

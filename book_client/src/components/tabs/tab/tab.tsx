@@ -7,7 +7,7 @@ type TabPropsType = {
   children: ReactElement | ReactElement[];
   order?: number;
   checked?: boolean;
-  onSelectedValue?: (value: number) => void;
+  onSelectedValue?: () => void;
 };
 
 type TabHeaderPropsType = {
@@ -21,12 +21,11 @@ function TabHeader({ children }: TabHeaderPropsType): ReactElement {
 }
 
 function Tab({ title, order, children, checked, onSelectedValue }: TabPropsType): JSX.Element {
-  const onSelected = useCallback((event: any): void => {
-    const value = +event.target.value;
+  const onSelected = useCallback((): void => {
     if (onSelectedValue) {
-      onSelectedValue(value);
+      onSelectedValue();
     }
-  }, []);
+  }, [onSelectedValue]);
 
   const tabHeader = useMemo<ReactElement>(() => {
     const tabHeaderElement = (slot: ReactElement | null = null) => (

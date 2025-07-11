@@ -1,6 +1,7 @@
 .horizontal-book {
   display: flex;
   align-items: center;
+  justify-content: space-around;
   gap: 5px;
   border-radius: 5px;
   padding: 5px;
@@ -13,6 +14,7 @@
   &-info {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 
     &-name {
       display: -webkit-box;
@@ -22,12 +24,25 @@
       text-wrap: wrap;
     }
 
-    &-author-name {
-      font-size: 13px;
-    }
-
     .create-at {
       font-size: 11px;
+    }
+  }
+
+  &-authors {
+    display: flex;
+
+    &-item {
+      margin-right: 4px;
+
+      &-author-name {
+        font-size: 13px;
+        color: $black-color;
+      }
+
+      &:last-child {
+        margin-right: unset;
+      }
     }
   }
 
