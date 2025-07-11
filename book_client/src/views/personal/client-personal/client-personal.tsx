@@ -131,7 +131,7 @@ function ClientPersonal(): JSX.Element {
                 {title}
               </div>
             )} />
-            <HorizontalBookGrid items={usedReadBooks}/>
+            <HorizontalBookGrid items={usedReadBooks} />
           </Tab>
           <Tab title="Read late">
             <TabHeader render={(title) => (

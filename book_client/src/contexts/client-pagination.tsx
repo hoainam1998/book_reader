@@ -53,12 +53,12 @@ function ClientPagination({ children }: ClientPaginationPropsType): JSX.Element 
     return [path.ALL, path.AUTHORS, path.CATEGORIES].some((p) => oldLocation.includes(p));
   }, [window.location.pathname]);
 
-  const getConditions = () => {
-    return {
-      id,
-      keyword,
-    };
-  };
+  /**
+  * Return a newest book pagination object.
+  *
+  * @return {PaginationCondition} The book pagination condition.
+  */
+  const getConditions = () => ({ id, keyword });
 
   return (
     <ClientPaginationContext.Provider value={{

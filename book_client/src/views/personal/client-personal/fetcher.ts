@@ -40,6 +40,12 @@ const READER_DETAIL_QUERY = {
   }
 };
 
+/**
+ * Omit key from origin query object.
+ *
+ * @param {string[]} keys - The exclude keys.
+ * @return {[key: string]: any} -  The query object.
+ */
 const excludeQuery = (...keys: string[]): { [key: string]: any } => {
   return Object.keys(READER_DETAIL_QUERY)
     .reduce<{ [key: string]: any }>((newQuery, key) => {
