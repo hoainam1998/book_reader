@@ -274,10 +274,10 @@ const query = new GraphQLObjectType({
         name: 'ClientPagination',
         fields: {
           list: {
-            type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE)),
+            type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE))
           },
           total: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: new GraphQLNonNull(GraphQLInt)
           },
           page: {
             type: new GraphQLNonNull(GraphQLInt)
@@ -292,10 +292,10 @@ const query = new GraphQLObjectType({
       }),
       args: {
         pageSize: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         pageNumber: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         keyword: {
           type: GraphQLString,

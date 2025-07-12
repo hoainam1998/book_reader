@@ -34,7 +34,7 @@ class UserService extends Service {
     const offset = (pageNumber - 1) * pageSize;
     let paginationResultPromise;
     if (keyword) {
-       paginationResultPromise = this.PrismaInstance.$transaction([
+      paginationResultPromise = this.PrismaInstance.$transaction([
         this.PrismaInstance.user.findMany({
           select,
           where: {

@@ -143,10 +143,10 @@ const query = new GraphQLObjectType({
         name: 'UserPagination',
         fields: {
           list: {
-            type: new GraphQLNonNull(new GraphQLList(USER_INFORMATION)),
+            type: new GraphQLNonNull(new GraphQLList(USER_INFORMATION))
           },
           total: {
-            type: new GraphQLNonNull(GraphQLInt),
+            type: new GraphQLNonNull(GraphQLInt)
           },
           page: {
             type: new GraphQLNonNull(GraphQLInt)
@@ -161,13 +161,13 @@ const query = new GraphQLObjectType({
       }),
       args: {
         pageSize: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         pageNumber: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         keyword: {
-          type: GraphQLString,
+          type: GraphQLString
         },
       },
       resolve: async (service, { pageSize, pageNumber, keyword }, context) => {
