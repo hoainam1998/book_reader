@@ -5,12 +5,13 @@ const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
 const ClientRoutePath = require('#services/route-paths/client');
-const { HTTP_CODE, METHOD, PATH, RESET_PASSWORD_URL, REGEX } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, REGEX } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const { signClientResetPasswordToken } = require('#utils');
 const commonTest = require('#test/apis/common/common');
+const { getClientResetPasswordLink } = require('#test/resources/auth');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
-const forgetPasswordUrl = `${PATH.CLIENT}/forget-password`;
+const forgetPasswordUrl = ClientRoutePath.forgetPassword.abs;
 const generatedResetPasswordUrl = ClientRoutePath.generatedResetPasswordToken.abs;
 const clientMock = ClientDummyData.MockData;
 
@@ -73,7 +74,7 @@ describe('forget-password', () => {
           expect(sendEmail).toHaveBeenCalledTimes(1);
           expect(sendEmail).toHaveBeenCalledWith(
             requestBody.email,
-            RESET_PASSWORD_URL.format(forgetPasswordResponse.resetPasswordToken),
+            getClientResetPasswordLink(forgetPasswordResponse.resetPasswordToken),
             forgetPasswordResponse.password,
           );
           expect(response.body).toEqual({

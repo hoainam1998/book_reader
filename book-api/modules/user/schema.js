@@ -10,7 +10,7 @@ const {
   GraphQLNonNull,
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
-const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const { messageCreator, convertDtoToZodObject } = require('#utils');
 const { USER } = require('#messages');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const ErrorCode = require('#services/error-code');
@@ -20,10 +20,7 @@ const OtpUpdate = require('#dto/user/otp-update');
 const UserCreated = require('#dto/user/user-created');
 const ForgetPassword = require('#dto/user/forget-password');
 const PaginationResponse = require('#dto/common/pagination-response');
-const {
-  ResponseType,
-  graphqlNotFoundErrorOption,
-} = require('../common-schema');
+const { ResponseType } = require('../common-schema');
 
 const USER_INFORMATION_FIELDS = {
   email: {
@@ -146,38 +143,41 @@ const query = new GraphQLObjectType({
         name: 'UserPagination',
         fields: {
           list: {
-            type: new GraphQLList(USER_INFORMATION),
+            type: new GraphQLNonNull(new GraphQLList(USER_INFORMATION))
           },
           total: {
-            type: GraphQLInt,
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          page: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pages: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pageSize: {
+            type: new GraphQLNonNull(GraphQLInt)
           },
         },
       }),
       args: {
         pageSize: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         pageNumber: {
-          type: new GraphQLNonNull(GraphQLInt),
+          type: new GraphQLNonNull(GraphQLInt)
         },
         keyword: {
-          type: GraphQLString,
+          type: GraphQLString
         },
       },
       resolve: async (service, { pageSize, pageNumber, keyword }, context) => {
-        const [users, total] = await service.pagination(pageSize, pageNumber, keyword, context);
-
-        if (!checkArrayHaveValues(users)) {
-          graphqlNotFoundErrorOption.response = {
-            list: [],
-            total: 0,
-          };
-          throw new GraphQLError(USER.USERS_EMPTY, graphqlNotFoundErrorOption);
-        }
-
+        const [users, total, pages] = await service.pagination(pageSize, pageNumber, keyword, context);
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(UserDTO, users),
           total: parseInt(total || 0),
+          pages,
+          page: pageNumber,
+          pageSize,
         });
       },
     },

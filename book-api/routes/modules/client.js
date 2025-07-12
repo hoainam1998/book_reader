@@ -5,7 +5,7 @@ const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const clientLoginRequire = require('#middlewares/auth/client-login-require');
 const authentication = require('#middlewares/auth/authentication');
-const { UPLOAD_MODE, HTTP_CODE, METHOD, RESET_PASSWORD_URL } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, METHOD } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -13,6 +13,7 @@ const {
   getOriginInternalServerUrl,
   verifyClientResetPasswordToken,
   getGeneratorFunctionData,
+  getClientResetPasswordLink,
 } = require('#utils');
 const {
   SignUp,
@@ -20,10 +21,11 @@ const {
   ResetPassword,
   ClientDetail,
   ClientUpdate,
-  AllClient
+  AllClient,
+  ClientPagination,
 } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
-const { ClientDetailResponse, AllClientsResponse } = require('#dto/client/client-out');
+const { ClientDetailResponse, AllClientsResponse, ClientPaginationResponse } = require('#dto/client/client-out');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const EmailService = require('#services/email');
 const ClientRoutePath = require('#services/route-paths/client');
@@ -51,6 +53,36 @@ class ClientRouter extends Router {
     this.post(ClientRoutePath.detail, authentication, this._detail);
     this.put(ClientRoutePath.updatePerson, authentication, this._updateClient);
     this.post(ClientRoutePath.all, authentication, this._getAllClient);
+    this.post(ClientRoutePath.pagination, authentication, this._pagination);
+  }
+
+  @validation(ClientPagination, {
+    error_message: READER.PAGINATION_LOAD_CLIENT_FAIL
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(ClientPaginationResponse)
+  _pagination(req, res, next, self) {
+    const query = `query ClientPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
+      client {
+        pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
+          list ${
+            req.body.query
+          },
+          total,
+          page,
+          pages,
+          pageSize
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+        pageSize: req.body.pageSize,
+        pageNumber: req.body.pageNumber,
+        keyword: req.body.keyword,
+      },
+      req.body.query
+    );
   }
 
   @validation(AllClient, { error_message: READER.LOAD_ALL_CLIENT_FAIL })
@@ -166,7 +198,7 @@ class ClientRouter extends Router {
     })
     .then((json) => {
       const { resetPasswordToken, message, password } = json;
-      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
+      const link = getClientResetPasswordLink(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
         .then(() => messageCreator(message));
     });

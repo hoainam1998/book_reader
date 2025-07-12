@@ -12,7 +12,6 @@ const { signedTestCookie } = require('#test/resources/auth');
 const { signClientResetPasswordToken, autoGeneratePassword } = require('#utils');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const loginUrl = ClientRoutePath.login.abs;
-
 const clientRequestMock = ClientDummyData.MockRequestData;
 const clientMock = ClientDummyData.MockData;
 

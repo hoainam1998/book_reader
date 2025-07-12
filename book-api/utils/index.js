@@ -13,6 +13,8 @@ const {
   signClientResetPasswordToken,
   signClientLoginToken,
   verifyClientLoginToken,
+  getResetPasswordLink,
+  getClientResetPasswordLink,
 } = require('./auth');
 const MessageResponse = require('#dto/common/message-response');
 
@@ -230,4 +232,6 @@ module.exports = freezing({
   signClientResetPasswordToken,
   signClientLoginToken,
   verifyClientLoginToken,
+  getResetPasswordLink,
+  getClientResetPasswordLink,
 });

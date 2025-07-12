@@ -9,8 +9,36 @@ const {
   IsGraphqlSelect,
   IsBase64Image,
   IsOptional,
-  Length
+  Length,
+  IsRangeContain,
+  IsPositive,
 } = require('#decorators/validators');
+
+const ClientPagination = (validators, className) => {
+  return classCreator(class extends Validator {
+    @validators(
+      IsRangeContain([10, 30, 50], 'Page size must in [10, 30, 50]!'),
+      IsPositive('Page size must be positive number!'),
+    )
+    pageSize;
+
+    @validators(
+      IsOptional(),
+      IsString('keyword must be string!')
+    )
+    keyword;
+
+    @validators(
+      IsPositive('Page number must be positive number!')
+    )
+    pageNumber;
+
+    @validators(
+      IsGraphqlSelect('Value of field must be boolean!')
+    )
+    query;
+  }, className);
+};
 
 const AllClient = (validators, className) => {
   return classCreator(class extends Validator {
@@ -146,4 +174,5 @@ module.exports = {
   ClientDetail: Validation(ClientDetail),
   ClientUpdate: Validation(ClientUpdate),
   AllClient: Validation(AllClient),
+  ClientPagination: Validation(ClientPagination),
 };

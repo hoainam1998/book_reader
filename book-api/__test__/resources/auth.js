@@ -1,5 +1,12 @@
-const { signingResetPasswordToken, generateOtp, signLoginToken, autoGeneratePassword } = require('#utils');
-const { POWER, RESET_PASSWORD_URL } = require('#constants');
+const {
+  signingResetPasswordToken,
+  generateOtp,
+  signLoginToken,
+  autoGeneratePassword,
+  getClientResetPasswordLink,
+  getResetPasswordLink,
+} = require('#utils');
+const { POWER } = require('#constants');
 
 const mockUser = {
   user_id: Date.now().toString(),
@@ -52,17 +59,7 @@ const clearAllSession = () => {
  *
  * @return {Promise} - The supertest promise.
  */
-const destroySession = () => {
-  return globalThis.api.get('/destroy-session');
-};
-
-/**
- * Return reset password link.
- *
- * @param {string} resetPasswordToken - The reset password token.
- * @return {string} - The reset password link.
- */
-const getResetPasswordLink = (resetPasswordToken) => RESET_PASSWORD_URL.format(resetPasswordToken);
+const destroySession = () => globalThis.api.get('/destroy-session');
 
 const sessionData = {
   user: {
@@ -85,4 +82,5 @@ module.exports = {
   destroySession,
   clearAllSession,
   getResetPasswordLink,
+  getClientResetPasswordLink,
 };

@@ -2,7 +2,7 @@ const Service = require('#services/prisma');
 const { GraphQLError } = require('graphql');
 const { compare } = require('bcrypt');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues } = require('#utils');
+const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues, calcPages } = require('#utils');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { READER } = require('#messages');
 
@@ -132,6 +132,84 @@ class ClientService extends Service {
         throw new GraphQLError(READER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
       }
       return result;
+    });
+  }
+
+  pagination(pageSize, pageNumber, keyword, select) {
+    const offset = (pageNumber - 1) * pageSize;
+    let paginationResultPromise;
+    if (keyword) {
+      paginationResultPromise = this.PrismaInstance.$transaction([
+        this.PrismaInstance.reader.findMany({
+          select,
+          where: {
+            OR: [
+              {
+                last_name: {
+                  contains: keyword
+                }
+              },
+              {
+                first_name: {
+                  contains: keyword
+                }
+              }
+            ],
+          },
+          orderBy: {
+            reader_id: 'desc'
+          },
+          take: pageSize,
+          skip: offset
+        }),
+        this.PrismaInstance.reader.count({
+          where: {
+            OR: [
+              {
+                last_name: {
+                  contains: keyword
+                }
+              },
+              {
+                first_name: {
+                  contains: keyword
+                }
+              }
+            ]
+          }
+        })
+      ]);
+    } else {
+      paginationResultPromise = this.PrismaInstance.$transaction([
+        this.PrismaInstance.reader.findMany({
+          select,
+          orderBy: {
+            reader_id: 'desc'
+          },
+          take: pageSize,
+          skip: offset
+        }),
+        this.PrismaInstance.reader.count(),
+      ]);
+    }
+
+    return paginationResultPromise.then((clients) => {
+      const total = clients[1];
+      const pages = calcPages(pageSize, total);
+
+      if (!checkArrayHaveValues(clients[0])) {
+        graphqlNotFoundErrorOption.response = {
+          list: [],
+          total: 0,
+          page: pageNumber,
+          pages,
+          pageSize,
+        };
+        throw new GraphQLError(READER.READERS_EMPTY, graphqlNotFoundErrorOption);
+      }
+
+      clients.push(pages);
+      return clients;
     });
   }
 }

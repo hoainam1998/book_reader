@@ -114,7 +114,10 @@ class AuthorRouter extends Router {
           list ${
             req.body.query
           },
-          total
+          total,
+          page,
+          pages,
+          pageSize
         }
       }
     }`;
