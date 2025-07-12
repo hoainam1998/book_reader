@@ -134,5 +134,7 @@ module.exports = deepFreeze({
     ADD_PERSONAL_INFORMATION_SUCCESS: 'Update your personal information was success!',
     ADD_PERSONAL_INFORMATION_FAIL: 'Update your personal information was failed!',
     LOAD_ALL_CLIENT_FAIL: 'Load all client was failed!',
+    READERS_EMPTY: 'Readers is empty!',
+    PAGINATION_LOAD_CLIENT_FAIL: 'Pagination load client was failed!',
   }
 });

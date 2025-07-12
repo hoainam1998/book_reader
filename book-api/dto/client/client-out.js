@@ -1,6 +1,7 @@
 const { Expose, Type } = require('class-transformer');
 const { getGraphqlFinalData } = require('#utils');
 const GraphqlResponse = require('#dto/common/graphql-response');
+const PaginationResponse = require('#dto/common/pagination-response');
 const { zodValidateClassWrapper } = require('#decorators');
 const ClientDTO = require('./client');
 const ForgetPassword = require('#dto/client/forget-password');
@@ -29,8 +30,17 @@ class AllClientsResponse extends GraphqlResponse {
   }
 }
 
+class ClientPaginationResponse extends GraphqlResponse {
+  @Expose({ toClassOnly: true })
+  @Type(() => PaginationResponse)
+  get response() {
+    return getGraphqlFinalData(this.data);
+  }
+}
+
 module.exports = {
   ClientDetailResponse: zodValidateClassWrapper(ClientDetailResponse, ClientDTO),
   ForgetPasswordResponse: zodValidateClassWrapper(ForgetPasswordResponse, ForgetPassword),
   AllClientsResponse: zodValidateClassWrapper(AllClientsResponse, ClientDTO),
+  ClientPaginationResponse: zodValidateClassWrapper(ClientPaginationResponse, PaginationResponse),
 };

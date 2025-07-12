@@ -5,7 +5,6 @@ const {
   HTTP_CODE,
   REQUEST_DATA_PASSED_TYPE,
   METHOD,
-  RESET_PASSWORD_URL,
   POWER,
 } = require('#constants');
 const { USER, COMMON } = require('#messages');
@@ -15,6 +14,7 @@ const {
   getOriginInternalServerUrl,
   verifyResetPasswordToken,
   getGeneratorFunctionData,
+  getResetPasswordLink,
 } = require('#utils');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
@@ -141,7 +141,10 @@ class UserRouter extends Router {
           list ${
             req.body.query
           },
-          total
+          total,
+          pages,
+          page,
+          pageSize
         }
       }
     }`;
@@ -470,7 +473,7 @@ class UserRouter extends Router {
       return Promise.reject({ ...await json, status: response.status });
     })
     .then(({ resetPasswordToken, password }) => {
-      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
+      const link = getResetPasswordLink(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
         .then(() => messageCreator(USER.USER_ADDED));
     });
@@ -569,7 +572,7 @@ class UserRouter extends Router {
       return Promise.reject({ ...await json, status: response.status });
     })
     .then(({ resetPasswordToken, password }) => {
-      const link = RESET_PASSWORD_URL.format(resetPasswordToken);
+      const link = getResetPasswordLink(resetPasswordToken);
       return EmailService.sendPassword(req.body.email, link, password)
         .then(() => messageCreator(USER.UPDATE_PASSWORD));
     });

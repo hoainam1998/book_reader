@@ -512,17 +512,6 @@ const query = new GraphQLObjectType({
       },
       resolve: async (book, { pageNumber, pageSize, keyword, by }, context) => {
         const [books, total, pages] = await book.pagination(pageSize, pageNumber, keyword, by, context);
-        if (!checkArrayHaveValues(books)) {
-          const response = {
-            list: [],
-            total: 0,
-            page: pageNumber,
-            pages,
-            pageSize,
-          };
-          graphqlNotFoundErrorOption.response = response;
-          throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
-        }
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(BookDTO, books),
           total: parseInt(total || 0),

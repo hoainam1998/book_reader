@@ -8,10 +8,12 @@ const {
   GraphQLBoolean,
   GraphQLNonNull,
 } = require('graphql');
+const { plainToInstance } = require('class-transformer');
 const ClientDTO = require('#dto/client/client');
 const { ResponseType } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
 const ForgetPassword = require('#dto/client/forget-password');
+const PaginationResponse = require('#dto/common/pagination-response');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const { READER, USER } = require('#messages');
 
@@ -266,7 +268,50 @@ const query = new GraphQLObjectType({
           RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
         });
       }
-    }
+    },
+    pagination: {
+      type: new GraphQLObjectType({
+        name: 'ClientPagination',
+        fields: {
+          list: {
+            type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE)),
+          },
+          total: {
+            type: new GraphQLNonNull(GraphQLInt),
+          },
+          page: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pages: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pageSize: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+        },
+      }),
+      args: {
+        pageSize: {
+          type: new GraphQLNonNull(GraphQLInt),
+        },
+        pageNumber: {
+          type: new GraphQLNonNull(GraphQLInt),
+        },
+        keyword: {
+          type: GraphQLString,
+        },
+      },
+      resolve: async (service, { pageSize, pageNumber, keyword }, context) => {
+        const [clients, total, pages] = await service.pagination(pageSize, pageNumber, keyword, context);
+        return convertDtoToZodObject(PaginationResponse, {
+          list: plainToInstance(ClientDTO, clients),
+          total: parseInt(total || 0),
+          page: pageNumber,
+          pages,
+          pageSize,
+        });
+      },
+    },
   }
 });
 

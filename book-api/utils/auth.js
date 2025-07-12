@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { genSalt, hash } = require('bcrypt');
+const RESET_PASSWORD_URL = '{0}/reset-password?token={1}';
 
 /**
  * Generate the new password.
@@ -114,6 +115,27 @@ const generateOtp = () => {
   return otp;
 };
 
+/**
+ * Return reset password link.
+ *
+ * @param {string} resetPasswordToken - The reset password token.
+ * @return {string} - The reset password link.
+ */
+const getResetPasswordLink = (resetPasswordToken) => {
+  return RESET_PASSWORD_URL.format(process.env.ORIGIN_CORS, resetPasswordToken);
+};
+
+
+/**
+ * Return client reset password link.
+ *
+ * @param {string} resetPasswordToken - The reset password token.
+ * @return {string} - The reset password link.
+ */
+const getClientResetPasswordLink = (resetPasswordToken) => {
+  return RESET_PASSWORD_URL.format(process.env.CLIENT_ORIGIN_CORS, resetPasswordToken);
+};
+
 module.exports = {
   signingResetPasswordToken,
   signClientResetPasswordToken,
@@ -126,4 +148,6 @@ module.exports = {
   signLoginToken,
   verifyLoginToken,
   verifyClientLoginToken,
+  getResetPasswordLink,
+  getClientResetPasswordLink,
 };

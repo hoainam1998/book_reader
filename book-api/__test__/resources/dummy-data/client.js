@@ -98,13 +98,13 @@ class ClientDummyData extends DummyDataApi {
   }
 
   /**
-   * Create the expected user list.
+   * Create the expected client list.
    *
    * @static
    * @param {object} requestBodyQuery - The request body query.
-   * @param {number} length - The number user create.
+   * @param {number} length - The number client create.
    * @param {string[]} [excludeFields=[]] - The fields should remove.
-   * @return {object[]} - The expected user list.
+   * @return {object[]} - The expected client list.
    */
   static generateClientExpectedList(requestBodyQuery, length, excludeFields = []) {
     return Array.apply(null, Array(length)).map(() => {

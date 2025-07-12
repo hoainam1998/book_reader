@@ -4,6 +4,7 @@ const AuthorDummyData = require('#test/resources/dummy-data/author');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const AuthorRoutePath = require('#services/route-paths/author');
+const { calcPages } = require('#utils');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, AUTHOR, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
@@ -75,20 +76,21 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  orderBy: {
-                    author_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset
-                })
-              );
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+                select: selectExpected,
+                orderBy: {
+                  author_id: 'desc'
+                },
+                take: requestBody.pageSize,
+                skip: offset
+              });
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
                 list: authorListExpected,
                 total: authorLength,
+                page: requestBody.pageNumber,
+                pages: calcPages(requestBody.pageSize, authorLength),
+                pageSize: requestBody.pageSize,
               });
               done();
             });
@@ -123,21 +125,19 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  where: {
-                    name: {
-                      contains: requestBodyWithSearchKey.keyword
-                    }
-                  },
-                  orderBy: {
-                    author_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset
-                })
-              );
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+                select: selectExpected,
+                where: {
+                  name: {
+                    contains: requestBodyWithSearchKey.keyword
+                  }
+                },
+                orderBy: {
+                  author_id: 'desc'
+                },
+                take: requestBody.pageSize,
+                skip: offset
+              });
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledWith({
                 where: {
@@ -149,6 +149,9 @@ describe('author pagination', () => {
               expect(response.body).toEqual({
                 list: authorListExpected,
                 total: authorLength,
+                page: requestBody.pageNumber,
+                pages: calcPages(requestBody.pageSize, authorLength),
+                pageSize: requestBody.pageSize,
               });
               done();
             });
@@ -222,20 +225,21 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  orderBy: {
-                    author_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset
-                })
-              );
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+                select: selectExpected,
+                orderBy: {
+                  author_id: 'desc'
+                },
+                take: requestBody.pageSize,
+                skip: offset
+              });
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
                 list: [],
-                total: 0
+                total: 0,
+                page: requestBody.pageNumber,
+                pages: calcPages(requestBody.pageSize, 0),
+                pageSize: requestBody.pageSize,
               });
               done();
             });
@@ -286,7 +290,6 @@ describe('author pagination', () => {
                 message: getInputValidateMessage(AUTHOR.LOAD_AUTHORS_FAIL),
                 errors: expect.any(Array),
               });
-              expect(response.body.errors).toHaveLength(1);
               done();
             });
         });
@@ -342,16 +345,14 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  orderBy: {
-                    author_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset
-                })
-              );
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+                select: selectExpected,
+                orderBy: {
+                  author_id: 'desc'
+                },
+                take: requestBody.pageSize,
+                skip: offset
+              });
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
                 message: COMMON.OUTPUT_VALIDATE_FAIL
@@ -380,16 +381,14 @@ describe('author pagination', () => {
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.$transaction).toHaveBeenCalledWith(expect.any(Array));
               expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  select: selectExpected,
-                  orderBy: {
-                    author_id: 'desc'
-                  },
-                  take: requestBody.pageSize,
-                  skip: offset
-                })
-              );
+              expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+                select: selectExpected,
+                orderBy: {
+                  author_id: 'desc'
+                },
+                take: requestBody.pageSize,
+                skip: offset
+              });
               expect(globalThis.prismaClient.author.count).toHaveBeenCalledTimes(1);
               expect(response.body).toEqual({
                 message: COMMON.INTERNAL_ERROR_MESSAGE

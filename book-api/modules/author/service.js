@@ -1,16 +1,20 @@
 const { saveFile } = require('#utils');
-const { createFolder, deleteFile } = require('#utils');
+const { GraphQLError } = require('graphql');
+const { createFolder, deleteFile, checkArrayHaveValues, calcPages } = require('#utils');
 const { join } = require('path');
 const Service = require('#services/prisma');
+const { graphqlNotFoundErrorOption } = require('../common-schema');
+const { AUTHOR } = require('#messages');
 const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
 class AuthorService extends Service {
 
   pagination(pageSize, pageNumber, keyword, select) {
     const offset = (pageNumber - 1) * pageSize;
+    let paginationPromiseResult;
 
     if (keyword) {
-      return this.PrismaInstance.$transaction([
+      paginationPromiseResult = this.PrismaInstance.$transaction([
         this.PrismaInstance.author.findMany({
           take: pageSize,
           skip: offset,
@@ -32,18 +36,37 @@ class AuthorService extends Service {
           }
         }),
       ]);
+    } else {
+      paginationPromiseResult = this.PrismaInstance.$transaction([
+        this.PrismaInstance.author.findMany({
+          take: pageSize,
+            skip: offset,
+            orderBy: {
+              author_id: 'desc',
+            },
+            select
+        }),
+        this.PrismaInstance.author.count(),
+      ]);
     }
-    return this.PrismaInstance.$transaction([
-      this.PrismaInstance.author.findMany({
-        take: pageSize,
-          skip: offset,
-          orderBy: {
-            author_id: 'desc',
-          },
-          select
-      }),
-      this.PrismaInstance.author.count(),
-    ]);
+
+    return paginationPromiseResult.then((authors) => {
+      const total = authors[1];
+      const pages = calcPages(pageSize, total);
+      if (!checkArrayHaveValues(authors[0])) {
+        const response = {
+          list: [],
+          total: 0,
+          page: pageNumber,
+          pages,
+          pageSize,
+        };
+        graphqlNotFoundErrorOption.response = response;
+        throw new GraphQLError(AUTHOR.AUTHORS_EMPTY, graphqlNotFoundErrorOption);
+      }
+      authors.push(pages);
+      return authors;
+    });
   }
 
   getAuthors(authorIds, select) {

@@ -4,6 +4,7 @@ const {
   generateOtp,
   autoGeneratePassword,
   signingResetPasswordToken,
+  calcPages,
   checkArrayHaveValues
 } = require('#utils');
 const { USER } = require('#messages');
@@ -31,8 +32,9 @@ class UserService extends Service {
   pagination(pageSize, pageNumber, keyword, select) {
     select = { ...select, power: true };
     const offset = (pageNumber - 1) * pageSize;
+    let paginationResultPromise;
     if (keyword) {
-      return this.PrismaInstance.$transaction([
+       paginationResultPromise = this.PrismaInstance.$transaction([
         this.PrismaInstance.user.findMany({
           select,
           where: {
@@ -72,18 +74,37 @@ class UserService extends Service {
           }
         })
       ]);
+    } else {
+      paginationResultPromise = this.PrismaInstance.$transaction([
+        this.PrismaInstance.user.findMany({
+          select,
+          orderBy: {
+            user_id: 'desc'
+          },
+          take: pageSize,
+          skip: offset
+        }),
+        this.PrismaInstance.user.count(),
+      ]);
     }
-    return this.PrismaInstance.$transaction([
-      this.PrismaInstance.user.findMany({
-        select,
-        orderBy: {
-          user_id: 'desc'
-        },
-        take: pageSize,
-        skip: offset
-      }),
-      this.PrismaInstance.user.count(),
-    ]);
+
+    return paginationResultPromise.then((users) => {
+      const total = users[1];
+      const pages = calcPages(pageSize, total);
+
+      if (!checkArrayHaveValues(users[0])) {
+        graphqlNotFoundErrorOption.response = {
+          list: [],
+          total: 0,
+          pageSize,
+          page: pageNumber,
+          pages,
+        };
+        throw new GraphQLError(USER.USERS_EMPTY, graphqlNotFoundErrorOption);
+      }
+      users.push(pages);
+      return users;
+    });
   }
 
   updateMfaState(mfaEnable, userId) {

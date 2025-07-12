@@ -1,8 +1,10 @@
 const { join } = require('path');
-const { saveFile, deleteFile, calcPages } = require('#utils');
+const { GraphQLError } = require('graphql');
+const { saveFile, deleteFile, checkArrayHaveValues, calcPages } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const Service = require('#services/prisma');
 const { BOOK } = require('#messages');
+const { graphqlNotFoundErrorOption } = require('../common-schema');
 
 class BookService extends Service {
 
@@ -206,11 +208,11 @@ class BookService extends Service {
         this.PrismaInstance.book.findMany({
           where: searchByForeignId,
           take: pageSize,
-            skip: offset,
-            orderBy: {
-              book_id: 'desc',
-            },
-            select,
+          skip: offset,
+          orderBy: {
+            book_id: 'desc',
+          },
+          select,
         }),
         this.PrismaInstance.book.count({
           where: searchByForeignId,
@@ -218,11 +220,22 @@ class BookService extends Service {
       ]);
     }
 
-    return promiseResult.then((results) => {
-      const total = results[1];
+    return promiseResult.then((books) => {
+      const total = books[1];
       const pages = calcPages(pageSize, total);
-      results.push(pages);
-      return results;
+      if (!checkArrayHaveValues(books[0])) {
+        const response = {
+          list: [],
+          total: 0,
+          page: pageNumber,
+          pages,
+          pageSize,
+        };
+        graphqlNotFoundErrorOption.response = response;
+        throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
+      }
+      books.push(pages);
+      return books;
     });
   }
 

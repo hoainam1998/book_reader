@@ -126,11 +126,20 @@ const query = new GraphQLObjectType({
         name: 'AuthorPagination',
         fields: {
           list: {
-            type: AUTHOR_LIST
+            type: new GraphQLNonNull(AUTHOR_LIST),
           },
           total: {
-            type: GraphQLInt
-          }
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          page: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pages: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
+          pageSize: {
+            type: new GraphQLNonNull(GraphQLInt)
+          },
         }
       }),
       args: {
@@ -145,18 +154,13 @@ const query = new GraphQLObjectType({
         }
       },
       resolve: async (author, { pageSize, pageNumber, keyword }, context) => {
-        const [authors, total] = await author.pagination(pageSize, pageNumber, keyword, context);
-        if (!checkArrayHaveValues(authors)) {
-          const response = {
-            list: [],
-            total: 0
-          };
-          graphqlNotFoundErrorOption.response = response;
-          throw new GraphQLError(AUTHOR.AUTHORS_EMPTY, graphqlNotFoundErrorOption);
-        }
+        const [authors, total, pages] = await author.pagination(pageSize, pageNumber, keyword, context);
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(AuthorDTO, authors),
-          total: parseInt(total || 0)
+          total: parseInt(total || 0),
+          pages,
+          page: pageNumber,
+          pageSize,
         });
       }
     },
