@@ -9,8 +9,8 @@ const Logger = require('#services/logger');
  * @param {Object} res - express response.
  * @param {Object} next - next function.
  */
+// eslint-disable-next-line no-unused-vars
 module.exports = (err, req, res, next) => {
-  console.log(err);
   Logger.error('Express error', err.message);
   res.status(HTTP_CODE.SERVER_ERROR).send(messageCreator('Something broke!'));
 };
