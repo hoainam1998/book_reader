@@ -28,10 +28,10 @@ const getInputValidateMessage = (message) => `${message}\n${COMMON.INPUT_VALIDAT
  */
 const createDescribeTest = (method, url) => {
   return `${method} - ${url}`;
-}
+};
 
 module.exports = {
   getStaticFile,
   getInputValidateMessage,
-  createDescribeTest
+  createDescribeTest,
 };

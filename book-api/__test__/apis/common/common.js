@@ -25,12 +25,10 @@ const isTestSkip = (testInfo) => {
  * url: string,
  * [origin]: string,
  * }[]} testParameter - An array of test information.
- * @param {string} serverName - Name of test server are running.
  * @return {Function} The test describe.
  */
-module.exports = (describeTitle, testParameter, serverName) => {
+module.exports = (describeTitle, testParameter) => {
   return describe(describeTitle, () => {
-
     let urlInvalidRequest;
     let methodAllowedRequest;
     let corsOriginRequest;
@@ -45,7 +43,8 @@ module.exports = (describeTitle, testParameter, serverName) => {
         case 'cors test':
           corsOriginRequest = info;
           break;
-        default: break;
+        default:
+          break;
       }
     });
 
@@ -69,7 +68,9 @@ module.exports = (describeTitle, testParameter, serverName) => {
           .expect(HTTP_CODE.METHOD_NOT_ALLOWED)
           .expect('Content-Type', /application\/json/)
           .then((response) => {
-            expect(response.body.message).toBe(COMMON.METHOD_NOT_ALLOWED.format(response.req.method, response.req.path));
+            expect(response.body.message).toBe(
+              COMMON.METHOD_NOT_ALLOWED.format(response.req.method, response.req.path)
+            );
             done();
           });
       });
@@ -89,12 +90,11 @@ module.exports = (describeTitle, testParameter, serverName) => {
       } else {
         test(corsOriginRequest.describe, (done) => {
           expect.hasAssertions();
-          globalThis.api[corsOriginRequest.method](corsOriginRequest.url)
-            .then((response) => {
-              const originUrl = `${response.request.protocol}//${response.request.host}`;
-              expect(response.header['access-control-allow-origin']).toBe(originUrl);
-              done();
-            });
+          globalThis.api[corsOriginRequest.method](corsOriginRequest.url).then((response) => {
+            const originUrl = `${response.request.protocol}//${response.request.host}`;
+            expect(response.header['access-control-allow-origin']).toBe(originUrl);
+            done();
+          });
         });
       }
     }

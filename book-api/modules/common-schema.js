@@ -1,7 +1,4 @@
-const {
-  GraphQLString,
-  GraphQLObjectType
-} = require('graphql');
+const { GraphQLString, GraphQLObjectType } = require('graphql');
 const { HTTP_CODE } = require('#constants');
 
 /**
@@ -17,25 +14,28 @@ const { HTTP_CODE } = require('#constants');
  * }}} The extension name.
  */
 const createGraphqlError = (code) => {
-  return Object.defineProperties({
-    extensions: {
-      code,
-      http: {
-        status: HTTP_CODE[code],
+  return Object.defineProperties(
+    {
+      extensions: {
+        code,
+        http: {
+          status: HTTP_CODE[code],
+        },
+      },
+    },
+    {
+      error_code: {
+        set(value) {
+          this.extensions.http.error_code = value;
+        },
+      },
+      response: {
+        set(value) {
+          this.extensions.response = value;
+        },
       },
     }
-  },{
-    error_code: {
-      set(value) {
-        this.extensions.http.error_code = value;
-      }
-    },
-    response: {
-      set(value) {
-        this.extensions.response = value;
-      }
-    }
-  });
+  );
 };
 
 const graphqlErrorOption = createGraphqlError('BAD_REQUEST');
@@ -48,7 +48,7 @@ const ResponseType = new GraphQLObjectType({
   name: 'Response',
   fields: {
     message: {
-      type: GraphQLString
+      type: GraphQLString,
     },
   },
 });

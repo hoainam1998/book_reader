@@ -19,8 +19,8 @@ class EmailService {
   static self = new EmailService();
 
   /**
-  * Create email service instance if it not exist.
-  */
+   * Create email service instance if it not exist.
+   */
   constructor() {
     if (EmailService.self) {
       throw new Error(`${this.constructor.name} already created!`);
@@ -28,19 +28,19 @@ class EmailService {
   }
 
   /**
-  * Send email util.
-  *
-  * @param {string} to - The receiver.
-  * @param {string} subject - The email subject.
-  * @param {string} html - The email content.
-  * @return {Promise} - The email sent result.
-  */
+   * Send email util.
+   *
+   * @param {string} to - The receiver.
+   * @param {string} subject - The email subject.
+   * @param {string} html - The email content.
+   * @return {Promise} - The email sent result.
+   */
   _sendEmail(to, subject, html) {
     const mailOptions = {
       from: process.env.SMPT_MAIL,
       to: to,
       subject,
-      html
+      html,
     };
 
     return new Promise((resolve, reject) => {
@@ -55,12 +55,12 @@ class EmailService {
   }
 
   /**
-  * Sending email attach otp code.
-  * @static
-  * @param {string} email - The receiver.
-  * @param {string} otp - The otp code.
-  * @return {Promise} - The email sent result.
-  */
+   * Sending email attach otp code.
+   * @static
+   * @param {string} email - The receiver.
+   * @param {string} otp - The otp code.
+   * @return {Promise} - The email sent result.
+   */
   static sendOtpEmail(email, otp) {
     const subject = 'Your OTP';
     const html = `
@@ -70,13 +70,13 @@ class EmailService {
   }
 
   /**
-  * Sending email contain new password and reset password link.
-  * @static
-  * @param {string} email - The receiver.
-  * @param {string} link - The reset password link.
-  * @param {string} password - The new password.
-  * @return {Promise} - The email sent result.
-  */
+   * Sending email contain new password and reset password link.
+   * @static
+   * @param {string} email - The receiver.
+   * @param {string} link - The reset password link.
+   * @param {string} password - The new password.
+   * @return {Promise} - The email sent result.
+   */
   static sendPassword(email, link, password) {
     const subject = 'Reset password';
     const html = `

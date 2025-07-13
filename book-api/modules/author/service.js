@@ -4,10 +4,10 @@ const { join } = require('path');
 const Service = require('#services/prisma');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { AUTHOR } = require('#messages');
+// eslint-disable-next-line no-useless-escape
 const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
 class AuthorService extends Service {
-
   pagination(pageSize, pageNumber, keyword, select) {
     const offset = (pageNumber - 1) * pageSize;
     let paginationPromiseResult;
@@ -19,31 +19,31 @@ class AuthorService extends Service {
           skip: offset,
           where: {
             name: {
-              contains: keyword
-            }
+              contains: keyword,
+            },
           },
           orderBy: {
             author_id: 'desc',
           },
-          select
+          select,
         }),
         this.PrismaInstance.author.count({
           where: {
             name: {
-              contains: keyword
-            }
-          }
+              contains: keyword,
+            },
+          },
         }),
       ]);
     } else {
       paginationPromiseResult = this.PrismaInstance.$transaction([
         this.PrismaInstance.author.findMany({
           take: pageSize,
-            skip: offset,
-            orderBy: {
-              author_id: 'desc',
-            },
-            select
+          skip: offset,
+          orderBy: {
+            author_id: 'desc',
+          },
+          select,
         }),
         this.PrismaInstance.author.count(),
       ]);
@@ -69,17 +69,19 @@ class AuthorService extends Service {
   }
 
   getAuthors(authorIds, select) {
-    const conditions = authorIds ? {
-      where: {
-        author_id: {
-          in: [authorIds].flat()
+    const conditions = authorIds
+      ? {
+          where: {
+            author_id: {
+              in: [authorIds].flat(),
+            },
+          },
         }
-      }
-    }: {};
+      : {};
 
     return this.PrismaInstance.author.findMany({
       select,
-      ...conditions
+      ...conditions,
     });
   }
 
@@ -88,25 +90,25 @@ class AuthorService extends Service {
       select,
       where: {
         book_author: {
-          some: {}
-        }
-      }
+          some: {},
+        },
+      },
     });
   }
 
   getAuthorDetail(authorId, select) {
     return this.PrismaInstance.author.findUniqueOrThrow({
       where: {
-        author_id: authorId
+        author_id: authorId,
       },
-      select
+      select,
     });
   }
 
   deleteStoryFile(authorId) {
     return this.getAuthorDetail(authorId, {
-      story: true
-    }).then(author => {
+      story: true,
+    }).then((author) => {
       const storyFile = author.story.split(',');
       const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
       const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
@@ -115,22 +117,25 @@ class AuthorService extends Service {
   }
 
   updateAuthor(author) {
-    const filePath = (extName) => `${join(__dirname, `../../public/${extName}/author/${author.authorId}`)}/${author.name}.${extName}`;
+    const filePath = (extName) =>
+      `${join(__dirname, `../../public/${extName}/author/${author.authorId}`)}/${author.name}.${extName}`;
     const htmlSave = saveFile(filePath('html'), author.story.html);
     const jsonSave = saveFile(filePath('json'), author.story.json);
 
     return Promise.all([htmlSave, jsonSave]).then((paths) => {
-      const story = paths.reduce((listPath, currentPath) => {
-        const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
-        if (relativePath) {
-          listPath.push(relativePath.replace(/\\/gm, '/'));
-        }
-        return listPath;
-      }, []).join(', ');
+      const story = paths
+        .reduce((listPath, currentPath) => {
+          const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
+          if (relativePath) {
+            listPath.push(relativePath.replace(/\\/gm, '/'));
+          }
+          return listPath;
+        }, [])
+        .join(', ');
 
       return this.PrismaInstance.author.update({
         where: {
-          author_id: author.authorId
+          author_id: author.authorId,
         },
         data: {
           name: author.name,
@@ -138,7 +143,7 @@ class AuthorService extends Service {
           avatar: author.avatar,
           year_of_birth: author.yearOfBirth,
           year_of_dead: author.yearOfDead,
-          story
+          story,
         },
       });
     });
@@ -150,7 +155,7 @@ class AuthorService extends Service {
 
     return Promise.all([
       createFolder(join(__dirname, `../../public/html/author/${authorId}`)),
-      createFolder(join(__dirname, `../../public/json/author/${authorId}`))
+      createFolder(join(__dirname, `../../public/json/author/${authorId}`)),
     ]).then((urls) => {
       const extNames = ['html', 'json'];
 
@@ -160,13 +165,15 @@ class AuthorService extends Service {
       });
 
       return Promise.all(promise).then((paths) => {
-        const story = paths.reduce((listPath, currentPath) => {
-          const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
-          if (relativePath) {
-            listPath.push(relativePath.replace(/\\/gm, '/'));
-          }
-          return listPath;
-        }, []).join(', ');
+        const story = paths
+          .reduce((listPath, currentPath) => {
+            const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
+            if (relativePath) {
+              listPath.push(relativePath.replace(/\\/gm, '/'));
+            }
+            return listPath;
+          }, [])
+          .join(', ');
 
         return this.PrismaInstance.author.create({
           data: {
@@ -176,7 +183,7 @@ class AuthorService extends Service {
             avatar: author.avatar,
             year_of_birth: author.yearOfBirth,
             year_of_dead: author.yearOfDead,
-            story
+            story,
           },
         });
       });

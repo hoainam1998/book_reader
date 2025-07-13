@@ -38,5 +38,5 @@ class CategoryDTO extends OutputValidate {
 
 module.exports = {
   CategoriesDTO,
-  CategoryDTO
+  CategoryDTO,
 };

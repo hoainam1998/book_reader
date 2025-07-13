@@ -3,7 +3,7 @@ const { validate, validating } = require('#helpers');
 const isGraphqlSelect = validate((value) => {
   const graphqlSelectChecker = (value) => {
     if (typeof value === 'object') {
-      return Object.values(value).every(v => graphqlSelectChecker(v));
+      return Object.values(value).every((v) => graphqlSelectChecker(v));
     } else {
       return typeof value === 'boolean';
     }

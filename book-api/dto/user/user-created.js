@@ -17,6 +17,6 @@ class UserCreated extends OutputValidate {
   get resetPasswordToken() {
     return this.reset_password_token;
   }
-};
+}
 
 module.exports = UserCreated;

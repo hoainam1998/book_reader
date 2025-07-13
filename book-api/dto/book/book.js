@@ -23,7 +23,7 @@ class BookDTO extends OutputValidate {
   set category(value) {
     this._category = {
       ...value,
-      categoryId: value.category_id
+      categoryId: value.category_id,
     };
   }
 
@@ -38,7 +38,7 @@ class BookDTO extends OutputValidate {
   @Type(() => String)
   get introduce() {
     return this.introduce_file?.split(',')[0] || '';
-  };
+  }
 
   @Type(() => String)
   get bookId() {
@@ -62,9 +62,8 @@ class BookDTO extends OutputValidate {
 
   @Type(() => Array)
   get authors() {
-    return this.book_author
-      .map(({ author }) => ({ ...author, authorId: author.author_id }));
+    return this.book_author.map(({ author }) => ({ ...author, authorId: author.author_id }));
   }
-};
+}
 
 module.exports = BookDTO;

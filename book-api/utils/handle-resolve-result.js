@@ -43,7 +43,7 @@ const handleError = (err, messages, errorCodes) => {
         throw new GraphQLError(message, graphqlErrorOption);
       case PRISMA_ERROR_CODE.FOREIGN_KEY_CONFLICT:
         message = messages['FOREIGN_KEY_CONFLICT'] || 'Can not delete this record!';
-        throw new  GraphQLError(message, graphqlErrorOption);
+        throw new GraphQLError(message, graphqlErrorOption);
       default:
         throw new GraphQLError(err.meta.cause, graphqlErrorOption);
     }
@@ -70,7 +70,11 @@ const handleError = (err, messages, errorCodes) => {
 module.exports = (resolveFunction, messages = {}, errorCodes) => {
   // checking whether properties and data type is valid or not.
   // if true run resolve function, else throw an error.
-  if (Object.keys(messages).every((code) => Object.keys(PRISMA_ERROR_CODE).includes(code) && typeof messages[code] === 'string')) {
+  if (
+    Object.keys(messages).every(
+      (code) => Object.keys(PRISMA_ERROR_CODE).includes(code) && typeof messages[code] === 'string'
+    )
+  ) {
     return resolveFunction().catch((err) => handleError(err, messages, errorCodes));
   } else {
     throw new Error('Messages is not valid!');

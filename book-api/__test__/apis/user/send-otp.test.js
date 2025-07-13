@@ -16,32 +16,36 @@ const sendOtpInternalUrl = UserRoutePath.updateOtp.abs;
 const requestBody = {
   query: {
     message: true,
-    otp: true
+    otp: true,
   },
 };
 
 describe('send otp', () => {
-  commonTest('send otp api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: sendOtpUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'send otp api cors',
-      url: sendOtpUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'send otp common test');
+  commonTest(
+    'send otp api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: sendOtpUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'send otp api cors',
+        url: sendOtpUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'send otp common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, sendOtpUrl), () => {
     afterEach((done) => {
@@ -52,10 +56,14 @@ describe('send otp', () => {
     test('send otp will be success', (done) => {
       const sendOtpEmail = jest.spyOn(EmailService, 'sendOtpEmail').mockResolvedValue();
 
-      fetch.mockResolvedValue(new Response(JSON.stringify({
-        otp: otpCode,
-        message: USER.OTP_HAS_BEEN_SENT
-      })));
+      fetch.mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            otp: otpCode,
+            message: USER.OTP_HAS_BEEN_SENT,
+          })
+        )
+      );
 
       expect.hasAssertions();
       signedTestCookie({
@@ -63,7 +71,8 @@ describe('send otp', () => {
         apiKey: null,
       }).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
-        globalThis.api.post(sendOtpUrl)
+        globalThis.api
+          .post(sendOtpUrl)
           .set('Cookie', cookie)
           .send(requestBody)
           .expect(HTTP_CODE.OK)
@@ -73,21 +82,25 @@ describe('send otp', () => {
             expect(fetch).toHaveBeenCalledWith(
               expect.stringContaining(sendOtpInternalUrl),
               expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json',
-                'Cookie': cookie,
-              }),
-              body: JSON.stringify(requestBody)
-            }));
+                method: METHOD.POST,
+                headers: expect.objectContaining({
+                  'Content-Type': 'application/json',
+                  Cookie: cookie,
+                }),
+                body: JSON.stringify(requestBody),
+              })
+            );
             expect(sendOtpEmail).toHaveBeenCalledTimes(1);
-            expect(sendOtpEmail).toHaveBeenCalledWith(expect.stringMatching(sessionData.user.email), expect.stringMatching(otpCode));
+            expect(sendOtpEmail).toHaveBeenCalledWith(
+              expect.stringMatching(sessionData.user.email),
+              expect.stringMatching(otpCode)
+            );
             expect(response.body).toEqual({
-              message: USER.OTP_HAS_BEEN_SENT
+              message: USER.OTP_HAS_BEEN_SENT,
             });
             done();
           });
-        });
+      });
     });
 
     test('send otp failed with user has not login yet', (done) => {
@@ -95,7 +108,8 @@ describe('send otp', () => {
       fetch.mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpUrl)
+      globalThis.api
+        .post(sendOtpUrl)
         .send(requestBody)
         .expect(HTTP_CODE.UNAUTHORIZED)
         .expect('Content-Type', /application\/json/)
@@ -131,30 +145,30 @@ describe('send otp', () => {
         },
         credential: {
           ...sessionData.user,
-          apiKey: authenticationToken
+          apiKey: authenticationToken,
         },
-        status: HTTP_CODE.UNAUTHORIZED
-      }
+        status: HTTP_CODE.UNAUTHORIZED,
+      },
     ])('send otp failed with $describe', ({ credential, expected, status }, done) => {
       const sendOtpEmail = jest.spyOn(EmailService, 'sendOtpEmail').mockResolvedValue();
       fetch.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie(credential)
-        .then((responseSign) => {
-          const cookie = responseSign.header['set-cookie'];
-          globalThis.api.post(sendOtpUrl)
-            .set('Cookie', cookie)
-            .send(requestBody)
-            .expect(status)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(sendOtpEmail).not.toHaveBeenCalled();
-              expect(response.body).toEqual(expected);
-              done();
-            });
-        });
+      signedTestCookie(credential).then((responseSign) => {
+        const cookie = responseSign.header['set-cookie'];
+        globalThis.api
+          .post(sendOtpUrl)
+          .set('Cookie', cookie)
+          .send(requestBody)
+          .expect(status)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(sendOtpEmail).not.toHaveBeenCalled();
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
 
     test.each([
@@ -162,67 +176,70 @@ describe('send otp', () => {
         describe: 'user not found',
         expected: {
           message: USER.USER_NOT_FOUND,
-          errorCode: ErrorCode.CREDENTIAL_NOT_MATCH
+          errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
         },
-        status: HTTP_CODE.UNAUTHORIZED
+        status: HTTP_CODE.UNAUTHORIZED,
       },
       {
         describe: 'bad request',
         expected: {
           message: getInputValidateMessage(USER.UPDATE_OTP_CODE_FAIL),
         },
-        status: HTTP_CODE.BAD_REQUEST
+        status: HTTP_CODE.BAD_REQUEST,
       },
       {
         describe: 'server error',
         expected: {
-          message: COMMON.INTERNAL_ERROR_MESSAGE
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
-        status: HTTP_CODE.SERVER_ERROR
-      }
+        status: HTTP_CODE.SERVER_ERROR,
+      },
     ])('send otp failed with $describe', ({ expected, status }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
       const sendOtpEmail = jest.spyOn(EmailService, 'sendOtpEmail').mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie({ ...sessionData.user, apiKey: null })
-        .then((responseSign) => {
-          const cookie = responseSign.header['set-cookie'];
-          globalThis.api
-            .post(sendOtpUrl)
-            .set('Cookie', cookie)
-            .send(requestBody)
-            .expect(status)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(1);
-              expect(fetch).toHaveBeenCalledWith(
-                expect.stringContaining(sendOtpInternalUrl),
-                expect.objectContaining({
-                  method: METHOD.POST,
-                  headers: expect.objectContaining({
-                    'Content-Type': 'application/json',
-                    'Cookie': cookie,
-                  }),
-                  body: JSON.stringify(requestBody)
-                }
-              ));
-              expect(sendOtpEmail).not.toHaveBeenCalled();
-              expect(response.body).toEqual(expected);
-              done();
-            });
-        });
+      signedTestCookie({ ...sessionData.user, apiKey: null }).then((responseSign) => {
+        const cookie = responseSign.header['set-cookie'];
+        globalThis.api
+          .post(sendOtpUrl)
+          .set('Cookie', cookie)
+          .send(requestBody)
+          .expect(status)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch).toHaveBeenCalledWith(
+              expect.stringContaining(sendOtpInternalUrl),
+              expect.objectContaining({
+                method: METHOD.POST,
+                headers: expect.objectContaining({
+                  'Content-Type': 'application/json',
+                  Cookie: cookie,
+                }),
+                body: JSON.stringify(requestBody),
+              })
+            );
+            expect(sendOtpEmail).not.toHaveBeenCalled();
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
   });
 
-  commonTest('send otp internal api common test', [
-    {
-      name: 'cors test',
-      describe: 'send otp internal api cors',
-      url: sendOtpInternalUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'send otp internal');
+  commonTest(
+    'send otp internal api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'send otp internal api cors',
+        url: sendOtpInternalUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'send otp internal'
+  );
 
   describe(createDescribeTest(METHOD.POST, sendOtpInternalUrl), () => {
     afterAll((done) => globalThis.TestServer.removeTestMiddleware(done));
@@ -238,7 +255,8 @@ describe('send otp', () => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpInternalUrl)
+      globalThis.api
+        .post(sendOtpInternalUrl)
         .send(requestBody)
         .expect(HTTP_CODE.OK)
         .expect('Content-Type', /application\/json/)
@@ -251,14 +269,14 @@ describe('send otp', () => {
                 mfa_enable: true,
               },
               data: {
-                otp_code: expect.stringMatching(/(\d+){6}/)
-              }
-            }
-          ));
+                otp_code: expect.stringMatching(/(\d+){6}/),
+              },
+            })
+          );
           expect(response.body.otp).toHaveLength(6);
           expect(response.body).toEqual({
             message: USER.OTP_HAS_BEEN_SENT,
-            otp: mockUser.otp_code
+            otp: mockUser.otp_code,
           });
           done();
         });
@@ -268,21 +286,24 @@ describe('send otp', () => {
       globalThis.prismaClient.user.update.mockRejectedValue(PrismaNotFoundError);
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpInternalUrl)
+      globalThis.api
+        .post(sendOtpInternalUrl)
         .send(requestBody)
         .expect(HTTP_CODE.UNAUTHORIZED)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(expect.objectContaining({
-            where: {
-              email: sessionData.user.email,
-              mfa_enable: true,
-            },
-            data: {
-              otp_code: expect.stringMatching(/(\d+){6}/)
-            }
-          }));
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: {
+                email: sessionData.user.email,
+                mfa_enable: true,
+              },
+              data: {
+                otp_code: expect.stringMatching(/(\d+){6}/),
+              },
+            })
+          );
           expect(response.body).toEqual({
             message: USER.USER_NOT_FOUND,
             errorCode: ErrorCode.CREDENTIAL_NOT_MATCH,
@@ -295,7 +316,8 @@ describe('send otp', () => {
       const badRequestBody = {};
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpInternalUrl)
+      globalThis.api
+        .post(sendOtpInternalUrl)
         .send(badRequestBody)
         .expect(HTTP_CODE.BAD_REQUEST)
         .expect('Content-Type', /application\/json/)
@@ -313,12 +335,13 @@ describe('send otp', () => {
     test('send otp internal api failed with output validate error', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
-        () => GraphqlResponse.dto.parse({ data: { otp: generateOtp() } })
-      );
+      jest
+        .spyOn(GraphqlResponse, 'parse')
+        .mockImplementation(() => GraphqlResponse.dto.parse({ data: { otp: generateOtp() } }));
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpInternalUrl)
+      globalThis.api
+        .post(sendOtpInternalUrl)
         .send(requestBody)
         .expect(HTTP_CODE.BAD_REQUEST)
         .expect('Content-Type', /application\/json/)
@@ -331,8 +354,8 @@ describe('send otp', () => {
                 mfa_enable: true,
               },
               data: {
-                otp_code: expect.stringMatching(/(\d+){6}/)
-              }
+                otp_code: expect.stringMatching(/(\d+){6}/),
+              },
             })
           );
           expect(response.body).toEqual({
@@ -346,23 +369,26 @@ describe('send otp', () => {
       globalThis.prismaClient.user.update.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
-      globalThis.api.post(sendOtpInternalUrl)
+      globalThis.api
+        .post(sendOtpInternalUrl)
         .send(requestBody)
         .expect(HTTP_CODE.SERVER_ERROR)
         .expect('Content-Type', /application\/json/)
         .then((response) => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(expect.objectContaining({
-            where: {
-              email: sessionData.user.email,
-              mfa_enable: true,
-            },
-            data: {
-              otp_code: expect.stringMatching(/(\d+){6}/)
-            }
-          }));
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: {
+                email: sessionData.user.email,
+                mfa_enable: true,
+              },
+              data: {
+                otp_code: expect.stringMatching(/(\d+){6}/),
+              },
+            })
+          );
           expect(response.body).toEqual({
-            message: COMMON.INTERNAL_ERROR_MESSAGE
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
         });

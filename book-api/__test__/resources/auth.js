@@ -67,7 +67,7 @@ const sessionData = {
     email: mockUser.email,
     apiKey: authenticationToken,
     role: POWER.ADMIN,
-    mfaEnable: mockUser.mfa_enable
+    mfaEnable: mockUser.mfa_enable,
   },
 };
 

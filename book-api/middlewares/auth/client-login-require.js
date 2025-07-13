@@ -21,13 +21,11 @@ const clientLoginRequire = (req, res, next) => {
     } else {
       // else return unauthorized message
       logger.warn('unauthorized error');
-      return res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
+      return res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
     }
   } catch (error) {
     logger.error(error.message);
-    return res.status(HTTP_CODE.SERVER_ERROR)
-      .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+    return res.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
   }
 };
 

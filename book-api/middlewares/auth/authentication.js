@@ -33,14 +33,16 @@ const authentication = (req, res, next) => {
       next();
     } else {
       logger.warn('user not found!');
-      res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
+      res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH));
     }
   };
 
   try {
     if (authorization) {
-      if (req.session.isDefined('user') && req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId', 'apiKey')) {
+      if (
+        req.session.isDefined('user') &&
+        req.session.user.isDefined('email', 'role', 'mfaEnable', 'userId', 'apiKey')
+      ) {
         return userLogged('user');
       } else if (req.session.isDefined('client') && req.session.client.isDefined('email', 'clientId', 'apiKey')) {
         return userLogged('client');
@@ -50,26 +52,27 @@ const authentication = (req, res, next) => {
     // if session have not, also return unauthorized message.
     if (!req.session.isDefined('user') && !req.session.isDefined('client')) {
       logger.warn('session is out of date');
-      return res.status(HTTP_CODE.UNAUTHORIZED)
+      return res
+        .status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(USER.WORKING_SESSION_EXPIRE, ErrorCode.WORKING_SESSION_ENDED));
     }
 
     // if token have not, also return unauthorized message.
     logger.warn('unauthorized error');
-    return res.status(HTTP_CODE.UNAUTHORIZED)
-      .json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
+    return res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.USER_UNAUTHORIZED, ErrorCode.HAVE_NOT_LOGIN));
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return res.status(HTTP_CODE.UNAUTHORIZED)
+      return res
+        .status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED));
     } else if (error.name === 'JsonWebTokenError') {
-      return res.status(HTTP_CODE.UNAUTHORIZED)
+      return res
+        .status(HTTP_CODE.UNAUTHORIZED)
         .json(messageCreator(COMMON.AUTHENTICATION_TOKEN_INVALID, ErrorCode.TOKEN_INVALID));
     }
 
     logger.error(error.message);
-    return res.status(HTTP_CODE.SERVER_ERROR)
-      .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+    return res.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
   }
 };
 

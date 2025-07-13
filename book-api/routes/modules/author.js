@@ -15,11 +15,11 @@ const { AUTHOR } = require('#messages');
  */
 class AuthorRouter extends Router {
   /**
-  * Create authorRouter instance.
-  *
-  * @param {object} express - The express object.
-  * @param {object} graphqlExecute - The graphql execute instance.
-  */
+   * Create authorRouter instance.
+   *
+   * @param {object} express - The express object.
+   * @param {object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post(AuthorRoutePath.create, authentication, this._createAuthor);
@@ -52,9 +52,9 @@ class AuthorRouter extends Router {
         yearOfDead: +req.body.yearOfDead,
         story: {
           html: req.body.storyHtml,
-          json: req.body.storyJson
-        }
-      }
+          json: req.body.storyJson,
+        },
+      },
     });
   }
 
@@ -81,9 +81,9 @@ class AuthorRouter extends Router {
         yearOfDead: +req.body.yearOfDead,
         story: {
           html: req.body.storyHtml,
-          json: req.body.storyJson
-        }
-      }
+          json: req.body.storyJson,
+        },
+      },
     });
   }
 
@@ -93,15 +93,11 @@ class AuthorRouter extends Router {
   _getAuthorDetail(req, res, next, self) {
     const query = `query AuthorDetail($authorId: ID!) {
       author {
-        detail(authorId: $authorId) ${
-          req.body.query
-        }
+        detail(authorId: $authorId) ${req.body.query}
       }
     }`;
 
-    return self.execute(query,
-    { authorId: req.body.authorId },
-    req.body.query);
+    return self.execute(query, { authorId: req.body.authorId }, req.body.query);
   }
 
   @validation(AuthorPagination, { error_message: AUTHOR.LOAD_AUTHORS_FAIL })
@@ -111,9 +107,7 @@ class AuthorRouter extends Router {
     const query = `query AuthorPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
       author {
         pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
-          list ${
-            req.body.query
-          },
+          list ${req.body.query},
           total,
           page,
           pages,
@@ -122,13 +116,15 @@ class AuthorRouter extends Router {
       }
     }`;
 
-    return self.execute(query,
-    {
-      pageSize: req.body.pageSize,
-      pageNumber: req.body.pageNumber,
-      keyword: req.body.keyword
-    },
-    req.body.query);
+    return self.execute(
+      query,
+      {
+        pageSize: req.body.pageSize,
+        pageNumber: req.body.pageNumber,
+        keyword: req.body.keyword,
+      },
+      req.body.query
+    );
   }
 
   @validation(AuthorFilter, { error_message: 'Loading authors failed!' })
@@ -137,17 +133,11 @@ class AuthorRouter extends Router {
   _getAuthors(req, res, next, self) {
     const query = `query AllAuthor($authorIds: [String]) {
       author {
-        filter(authorIds: $authorIds) ${
-          req.body.query
-        }
+        filter(authorIds: $authorIds) ${req.body.query}
       }
     }`;
 
-    return self.execute(
-      query,
-      { authorIds: req.body.authorIds },
-      req.body.query
-    );
+    return self.execute(query, { authorIds: req.body.authorIds }, req.body.query);
   }
 
   @validation(AuthorMenu, { error_message: AUTHOR.MENU })
@@ -156,9 +146,7 @@ class AuthorRouter extends Router {
   _loadAuthorMenu(req, res, next, self) {
     const query = `query AuthorMenu {
       author {
-        menu ${
-          req.body.query
-        }
+        menu ${req.body.query}
       }
     }`;
 

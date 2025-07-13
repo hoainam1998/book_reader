@@ -23,27 +23,31 @@ const requestBody = {
 };
 
 describe('reset password', () => {
-  commonTest('reset password api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.CLIENT}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: resetPasswordUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'reset password api cors',
-      url: resetPasswordUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.CLIENT_ORIGIN_CORS,
-    }
-  ], 'reset password common test');
+  commonTest(
+    'reset password api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.CLIENT}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: resetPasswordUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'reset password api cors',
+        url: resetPasswordUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.CLIENT_ORIGIN_CORS,
+      },
+    ],
+    'reset password common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, resetPasswordUrl), () => {
     test('reset password will be success', async () => {
@@ -108,7 +112,7 @@ describe('reset password', () => {
     test('reset password failed with email not match', async () => {
       const badRequestBody = {
         ...requestBody,
-        email: 'not_match@gmail.com'
+        email: 'not_match@gmail.com',
       };
 
       expect.hasAssertions();
@@ -176,9 +180,9 @@ describe('reset password', () => {
           expect(response.body).toEqual({
             message: getInputValidateMessage(USER.RESET_PASSWORD_FAIL),
             errors: [COMMON.REQUEST_DATA_EMPTY],
+          });
+          done();
         });
-        done();
-      });
     });
 
     test('reset password failed request body is missing field', (done) => {
@@ -201,7 +205,7 @@ describe('reset password', () => {
           });
           expect(response.body.errors).toHaveLength(1);
           done();
-      });
+        });
     });
 
     test('reset password failed with undefine request body field', (done) => {
@@ -211,7 +215,7 @@ describe('reset password', () => {
         ...requestBody,
         [undefineField]: {
           message: true,
-        }
+        },
       };
 
       expect.hasAssertions();
@@ -227,8 +231,8 @@ describe('reset password', () => {
             message: getInputValidateMessage(USER.RESET_PASSWORD_FAIL),
             errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
           });
-        done();
-      });
+          done();
+        });
     });
 
     test('reset password failed with output validate error', async () => {
@@ -399,5 +403,5 @@ describe('reset password', () => {
         message: READER.USER_NOT_FOUND,
       });
     });
-  })
+  });
 });

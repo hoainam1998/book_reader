@@ -17,6 +17,6 @@ class ForgetPassword extends MessageResponse {
   get resetPasswordToken() {
     return this.reset_password_token;
   }
-};
+}
 
 module.exports = ForgetPassword;

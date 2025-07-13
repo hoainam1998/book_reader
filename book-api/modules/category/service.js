@@ -2,26 +2,26 @@ const Service = require('#services/prisma');
 const { calcPages } = require('#utils');
 
 class CategoryService extends Service {
-
   create(category) {
     return this.PrismaInstance.category.create({
       data: {
         category_id: Date.now().toString(),
         name: category.name,
-        avatar: category.avatar
+        avatar: category.avatar,
       },
     });
   }
 
   all(hasRelation, select) {
     const condition = hasRelation
-    ? {
-      where: {
-        book: {
-          some: {}
+      ? {
+          where: {
+            book: {
+              some: {},
+            },
+          },
         }
-      },
-    } : {};
+      : {};
 
     return this.PrismaInstance.category.findMany({
       ...condition,
@@ -44,7 +44,7 @@ class CategoryService extends Service {
           },
         },
       }),
-      this.PrismaInstance.category.count()
+      this.PrismaInstance.category.count(),
     ]).then((results) => {
       const total = results[1];
       const pages = calcPages(pageSize, total);
@@ -56,9 +56,9 @@ class CategoryService extends Service {
   detail(id, select) {
     return this.PrismaInstance.category.findUniqueOrThrow({
       where: {
-        category_id: id
+        category_id: id,
       },
-      select
+      select,
     });
   }
 
@@ -69,7 +69,7 @@ class CategoryService extends Service {
         name: category.name,
       },
       where: {
-        category_id: category.categoryId
+        category_id: category.categoryId,
       },
     });
   }
@@ -77,7 +77,7 @@ class CategoryService extends Service {
   delete(id) {
     return this.PrismaInstance.category.delete({
       where: {
-        category_id: id
+        category_id: id,
       },
     });
   }

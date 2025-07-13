@@ -10,7 +10,7 @@ module.exports = describe('login require', () => {
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
       authorization: authenticationToken,
-      session: sessionData
+      session: sessionData,
     };
 
     loginRequire(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
@@ -31,10 +31,12 @@ module.exports = describe('login require', () => {
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.USER_UNAUTHORIZED,
-      errorCode: ErrorCode.HAVE_NOT_LOGIN,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: USER.USER_UNAUTHORIZED,
+        errorCode: ErrorCode.HAVE_NOT_LOGIN,
+      })
+    );
     done();
   });
 });

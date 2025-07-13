@@ -1,10 +1,10 @@
 const PrismaField = require('./prisma-field');
 
 /**
-* Class contain the fields valid to select.
-* @class
-* @extends PrismaField
-*/
+ * Class contain the fields valid to select.
+ * @class
+ * @extends PrismaField
+ */
 class UserPrismaField extends PrismaField {
   _fields = {
     firstName: 'first_name',
@@ -18,9 +18,8 @@ class UserPrismaField extends PrismaField {
     sex: 'sex',
     phone: 'phone',
     resetPasswordToken: 'reset_password_token',
-    name: ['first_name', 'last_name']
+    name: ['first_name', 'last_name'],
   };
 }
 
 module.exports = UserPrismaField;
-

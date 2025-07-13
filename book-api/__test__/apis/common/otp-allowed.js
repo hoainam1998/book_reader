@@ -39,10 +39,12 @@ module.exports = describe('otp allowed', () => {
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.MFA_UNENABLE,
-      errorCode: ErrorCode.MFA_TURN_OFF,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: USER.MFA_UNENABLE,
+        errorCode: ErrorCode.MFA_TURN_OFF,
+      })
+    );
     done();
   });
 
@@ -50,17 +52,19 @@ module.exports = describe('otp allowed', () => {
     expect.hasAssertions();
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
-      session: sessionData
+      session: sessionData,
     };
 
     otpAllowed(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.USER_FINISH_LOGIN,
-      errorCode: ErrorCode.ALREADY_LOGGED,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: USER.USER_FINISH_LOGIN,
+        errorCode: ErrorCode.ALREADY_LOGGED,
+      })
+    );
     done();
   });
 });

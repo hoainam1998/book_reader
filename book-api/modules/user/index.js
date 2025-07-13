@@ -7,11 +7,11 @@ module.exports = (sql) => {
   return {
     query: {
       resolve: () => service,
-      type: query
+      type: query,
     },
     mutation: {
       resolve: () => service,
-      type: mutation
-    }
+      type: mutation,
+    },
   };
 };

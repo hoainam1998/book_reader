@@ -10,10 +10,14 @@ module.exports = describe('login require', () => {
     expect.hasAssertions();
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
-      session: sessionData
+      session: sessionData,
     };
 
-    clientLoginRequire(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    clientLoginRequire(
+      globalThis.expressMiddleware.req,
+      globalThis.expressMiddleware.res,
+      globalThis.expressMiddleware.next
+    );
     expect(globalThis.expressMiddleware.next).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.next).toHaveBeenCalled();
     done();
@@ -26,14 +30,20 @@ module.exports = describe('login require', () => {
       session: {},
     };
 
-    clientLoginRequire(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    clientLoginRequire(
+      globalThis.expressMiddleware.req,
+      globalThis.expressMiddleware.res,
+      globalThis.expressMiddleware.next
+    );
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.UNAUTHORIZED);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.USER_UNAUTHORIZED,
-      errorCode: ErrorCode.HAVE_NOT_LOGIN,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: USER.USER_UNAUTHORIZED,
+        errorCode: ErrorCode.HAVE_NOT_LOGIN,
+      })
+    );
     done();
   });
 });

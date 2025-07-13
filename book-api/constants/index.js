@@ -4,7 +4,7 @@ module.exports = deepFreeze({
   UPLOAD_MODE: {
     SINGLE: 'single',
     ARRAY: 'array',
-    FIELDS: 'fields'
+    FIELDS: 'fields',
   },
   HTTP_CODE: {
     OK: 200,
@@ -14,7 +14,7 @@ module.exports = deepFreeze({
     UNAUTHORIZED: 401,
     NOT_PERMISSION: 403,
     METHOD_NOT_ALLOWED: 405,
-    SERVER_ERROR: 500
+    SERVER_ERROR: 500,
   },
   METHOD: {
     POST: 'POST',

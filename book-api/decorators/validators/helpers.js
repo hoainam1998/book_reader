@@ -57,7 +57,7 @@ const validating = (validateFn) => {
     if (options) {
       return {
         groups: options.groups,
-        validator: (value) => validateFn(value, message)
+        validator: (value) => validateFn(value, message),
       };
     } else {
       return (value) => validateFn(value, message);

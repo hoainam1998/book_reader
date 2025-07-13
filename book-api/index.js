@@ -29,16 +29,18 @@ const PORT = process.env.NODE_ENV === 'test' ? process.env.TEST_PORT : process.e
 const layers = [];
 
 const app = express();
-app.use(session({
-  store: new RedisStore({
-    client: RedisClient,
-    prefix: REDIS_PREFIX,
-  }),
-  resave: false,
-  saveUninitialized: false,
-  secret: process.env.SESSION_ID_TOKEN,
-  cookie: { maxAge: +process.env.SESSION_EXPIRES }
-}));
+app.use(
+  session({
+    store: new RedisStore({
+      client: RedisClient,
+      prefix: REDIS_PREFIX,
+    }),
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.SESSION_ID_TOKEN,
+    cookie: { maxAge: +process.env.SESSION_EXPIRES },
+  })
+);
 app.use(cors(corsOptionsDelegate));
 app.use(express.static('public'));
 app.use(bodyParser.json({ limit: '5mb' }));
@@ -65,7 +67,7 @@ try {
       user: user.query,
       author: author.query,
       client: client.query,
-    }
+    },
   });
 
   const mutation = new GraphQLObjectType({
@@ -76,18 +78,20 @@ try {
       user: user.mutation,
       author: author.mutation,
       client: client.mutation,
-    }
+    },
   });
 
   FactoryRouter.RedisClient = RedisClient;
   FactoryRouter.PrismaClient = PrismaClient;
-  FactoryRouter.getRoutes(express, new GraphQLSchema({ query, mutation })).forEach(({ route, path }) => app.use(path, route.Router));
+  FactoryRouter.getRoutes(express, new GraphQLSchema({ query, mutation })).forEach(({ route, path }) =>
+    app.use(path, route.Router)
+  );
 } catch (err) {
   Logger.error('Book api building schema', err.message);
   FactoryRouter.getRoutes(express).forEach(({ route, path }) => app.use(path, route.Router));
 } finally {
-  app._router.stack.forEach(parentLayer => {
-    (parentLayer.handle.stack || []).forEach(childLayer => {
+  app._router.stack.forEach((parentLayer) => {
+    (parentLayer.handle.stack || []).forEach((childLayer) => {
       if (parentLayer.name === 'router' && childLayer.route && !childLayer.route.methods._all) {
         layers.push({ route: parentLayer.regexp, endpoint: childLayer.regexp, methods: childLayer.route.methods });
       }

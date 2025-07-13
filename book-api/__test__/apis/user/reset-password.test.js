@@ -13,46 +13,49 @@ const commonTest = require('#test/apis/common/common');
 const resetPasswordUrl = UserRoutePath.resetPassword.abs;
 
 describe('reset password', () => {
-  commonTest('reset password common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: resetPasswordUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'reset password api cors',
-      url: resetPasswordUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS
-    }
-  ], 'reset password');
+  commonTest(
+    'reset password common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: resetPasswordUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'reset password api cors',
+        url: resetPasswordUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'reset password'
+  );
 
   describe(createDescribeTest(METHOD.POST, resetPasswordUrl), () => {
     test('reset password success', async () => {
       const oldPassword = autoGeneratePassword();
       const user = {
         password: await passwordHashing(oldPassword),
-      }
+      };
 
       globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue(user);
 
       globalThis.prismaClient.user.update.mockResolvedValue({ reset_password_token: null, password: user.password });
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.OK);
@@ -61,8 +64,8 @@ describe('reset password', () => {
         expect.objectContaining({
           where: {
             reset_password_token: resetPasswordToken,
-            email: mockUser.email
-          }
+            email: mockUser.email,
+          },
         })
       );
       expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
@@ -76,11 +79,11 @@ describe('reset password', () => {
           data: {
             reset_password_token: null,
             password: mockUser.password,
-          }
+          },
         })
       );
       expect(response.body).toEqual({
-        message: USER.RESET_PASSWORD_SUCCESS
+        message: USER.RESET_PASSWORD_SUCCESS,
       });
     });
 
@@ -88,43 +91,41 @@ describe('reset password', () => {
       const oldPassword = autoGeneratePassword();
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then(() => {
-          signedTestCookie(sessionData.user)
-            .then((responseSign) => {
-              globalThis.api.post(resetPasswordUrl)
-                .set('Cookie', [responseSign.header['set-cookie']])
-                .send({
-                  resetPasswordToken,
-                  email: mockUser.email,
-                  oldPassword,
-                  password: mockUser.password,
-                })
-                .expect(HTTP_CODE.UNAUTHORIZED)
-                .expect('Content-Type', /application\/json/)
-                .then((response) => {
-                  expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
-                  expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-                  expect(response.body).toEqual({
-                    message: USER.ONLY_ONE_DEVICE,
-                    errorCode: ErrorCode.ONLY_ALLOW_ONE_DEVICE,
-                  });
-                  done();
-                })
+      signedTestCookie(sessionData.user).then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.api
+            .post(resetPasswordUrl)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .send({
+              resetPasswordToken,
+              email: mockUser.email,
+              oldPassword,
+              password: mockUser.password,
+            })
+            .expect(HTTP_CODE.UNAUTHORIZED)
+            .expect('Content-Type', /application\/json/)
+            .then((response) => {
+              expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: USER.ONLY_ONE_DEVICE,
+                errorCode: ErrorCode.ONLY_ALLOW_ONE_DEVICE,
+              });
+              done();
             });
-        })
+        });
+      });
     });
 
     test('old password is same with new password', async () => {
       const oldPassword = autoGeneratePassword();
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: oldPassword,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: oldPassword,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -139,12 +140,11 @@ describe('reset password', () => {
     test('reset password failed with bad request', async () => {
       const oldPassword = autoGeneratePassword();
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          email: mockUser.email,
-          oldPassword,
-          password: oldPassword,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        email: mockUser.email,
+        oldPassword,
+        password: oldPassword,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.BAD_REQUEST);
@@ -160,13 +160,12 @@ describe('reset password', () => {
     test('reset password failed with email not register', async () => {
       const oldPassword = autoGeneratePassword();
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken: signingResetPasswordToken('namdang201998@gmail.com'),
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken: signingResetPasswordToken('namdang201998@gmail.com'),
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -182,13 +181,12 @@ describe('reset password', () => {
       globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(PrismaNotFoundError);
       const oldPassword = autoGeneratePassword();
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -203,13 +201,12 @@ describe('reset password', () => {
       const oldPassword = autoGeneratePassword();
       const verifyMock = jest.spyOn(jwt, 'verify').mockReturnValue(undefined);
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -228,13 +225,12 @@ describe('reset password', () => {
         throw new TokenExpiredError('jwt expired');
       });
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -249,17 +245,16 @@ describe('reset password', () => {
 
     test('reset password failed with invalid token', async () => {
       const oldPassword = autoGeneratePassword();
-      const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() =>  {
+      const verifyMock = jest.spyOn(jwt, 'verify').mockImplementationOnce(() => {
         throw new JsonWebTokenError('jwt malformed');
       });
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.UNAUTHORIZED);
@@ -276,20 +271,19 @@ describe('reset password', () => {
       globalThis.prismaClient.user.findFirstOrThrow.mockRejectedValue(ServerError);
       const oldPassword = autoGeneratePassword();
 
-      const response = await globalThis.api.post(resetPasswordUrl)
-        .send({
-          resetPasswordToken,
-          email: mockUser.email,
-          oldPassword,
-          password: mockUser.password,
-        });
+      const response = await globalThis.api.post(resetPasswordUrl).send({
+        resetPasswordToken,
+        email: mockUser.email,
+        oldPassword,
+        password: mockUser.password,
+      });
       expect.hasAssertions();
       expect(response.header['content-type']).toContain('application/json;');
       expect(response.status).toBe(HTTP_CODE.SERVER_ERROR);
       expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalled();
       expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
       expect(response.body).toEqual({
-        message: COMMON.INTERNAL_ERROR_MESSAGE
+        message: COMMON.INTERNAL_ERROR_MESSAGE,
       });
     });
   });

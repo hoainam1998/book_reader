@@ -26,27 +26,31 @@ const requestBody = {
 };
 
 describe('forget-password', () => {
-  commonTest('forget password api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: forgetPasswordUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'forget password api cors',
-      url: forgetPasswordUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.CLIENT_ORIGIN_CORS,
-    }
-  ], 'forget password common test');
+  commonTest(
+    'forget password api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: forgetPasswordUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'forget password api cors',
+        url: forgetPasswordUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.CLIENT_ORIGIN_CORS,
+      },
+    ],
+    'forget password common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, forgetPasswordUrl), () => {
     test('forget password success', (done) => {
@@ -66,16 +70,16 @@ describe('forget-password', () => {
             expect.objectContaining({
               method: METHOD.POST,
               headers: expect.objectContaining({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               }),
-              body: JSON.stringify(requestBody)
+              body: JSON.stringify(requestBody),
             })
           );
           expect(sendEmail).toHaveBeenCalledTimes(1);
           expect(sendEmail).toHaveBeenCalledWith(
             requestBody.email,
             getClientResetPasswordLink(forgetPasswordResponse.resetPasswordToken),
-            forgetPasswordResponse.password,
+            forgetPasswordResponse.password
           );
           expect(response.body).toEqual({
             message: forgetPasswordResponse.message,
@@ -98,8 +102,8 @@ describe('forget-password', () => {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         status: HTTP_CODE.SERVER_ERROR,
-      }
-    ])('forget password failed with $describe', ({ cause, expected, status }, done) => {
+      },
+    ])('forget password failed with $describe', ({ expected, status }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
       const sendEmail = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
@@ -116,26 +120,30 @@ describe('forget-password', () => {
             expect.objectContaining({
               method: METHOD.POST,
               headers: expect.objectContaining({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               }),
-              body: JSON.stringify(requestBody)
+              body: JSON.stringify(requestBody),
             })
           );
           expect(sendEmail).not.toHaveBeenCalled();
           expect(response.body).toEqual(expected);
           done();
-      });
-    })
+        });
+    });
   });
 
-  commonTest('generate reset password token api common test', [
-    {
-      name: 'cors test',
-      describe: 'generate reset password token api cors',
-      url: generatedResetPasswordUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'generate reset password token');
+  commonTest(
+    'generate reset password token api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'generate reset password token api cors',
+        url: generatedResetPasswordUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'generate reset password token'
+  );
 
   describe(createDescribeTest(METHOD.POST, generatedResetPasswordUrl), () => {
     test('generate reset password token success', (done) => {
@@ -160,7 +168,7 @@ describe('forget-password', () => {
             data: {
               reset_password_token: resetPasswordToken,
               password: expect.stringMatching(REGEX.PASSWORD),
-            }
+            },
           });
           expect(response.body).toEqual({
             message: READER.SEND_RESET_PASSWORD_SUCCESS,
@@ -168,7 +176,7 @@ describe('forget-password', () => {
             resetPasswordToken: resetPasswordToken,
           });
           done();
-      });
+        });
     });
 
     test('generate reset password token failed with request body is empty', (done) => {
@@ -191,7 +199,7 @@ describe('forget-password', () => {
       const undefineField = 'resetToken';
       const badRequestBody = {
         ...requestBody,
-        [undefineField]: ''
+        [undefineField]: '',
       };
 
       expect.hasAssertions();
@@ -215,7 +223,7 @@ describe('forget-password', () => {
         describe: 'client not found',
         cause: PrismaNotFoundError,
         expected: {
-          message: READER.EMAIL_NOT_FOUND
+          message: READER.EMAIL_NOT_FOUND,
         },
         status: HTTP_CODE.NOT_FOUND,
       },
@@ -223,10 +231,10 @@ describe('forget-password', () => {
         describe: 'server error',
         cause: ServerError,
         expected: {
-          message: COMMON.INTERNAL_ERROR_MESSAGE
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         status: HTTP_CODE.SERVER_ERROR,
-      }
+      },
     ])('generate reset password token failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.reader.update.mockRejectedValue(cause);
 
@@ -245,11 +253,11 @@ describe('forget-password', () => {
             data: {
               reset_password_token: expect.any(String),
               password: expect.stringMatching(REGEX.PASSWORD),
-            }
+            },
           });
           expect(response.body).toEqual(expected);
           done();
-      });
+        });
     });
 
     test('generate reset password token failed with output validate error', (done) => {
@@ -277,13 +285,13 @@ describe('forget-password', () => {
             data: {
               reset_password_token: resetPasswordToken,
               password: expect.stringMatching(REGEX.PASSWORD),
-            }
+            },
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
           done();
-      });
+        });
     });
   });
 });

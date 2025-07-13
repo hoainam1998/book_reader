@@ -4,7 +4,11 @@ const { validateResultExecute, upload, validation, serializer } = require('#deco
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const authentication = require('#middlewares/auth/authentication');
 const { CategoryPagination, CategoryValidator, CategoryDeleteParamsValidator } = require('#dto/category/category-in');
-const { CategoryPaginationResponse, CategoryDetailResponse, AllCategoryResponse } = require('#dto/category/category-out');
+const {
+  CategoryPaginationResponse,
+  CategoryDetailResponse,
+  AllCategoryResponse,
+} = require('#dto/category/category-out');
 const { CategoryDetailValidator, AllCategory } = require('#dto/category/category-in');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const { CATEGORY } = require('#messages');
@@ -16,11 +20,11 @@ const { CATEGORY } = require('#messages');
  */
 class CategoryRouter extends Router {
   /**
-  * Create categoryRouter instance.
-  *
-  * @param {Object} express - The express object.
-  * @param {Object} graphqlExecute - The graphql execute instance.
-  */
+   * Create categoryRouter instance.
+   *
+   * @param {Object} express - The express object.
+   * @param {Object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post(CategoryRoutePath.all, authentication, this._getAll);
@@ -38,14 +42,16 @@ class CategoryRouter extends Router {
   _getAll(req, res, next, self) {
     const query = `query AllCategory($haveValue: Boolean!) {
       category {
-        all (haveValue: $haveValue) ${
-          req.body.query
-        }
+        all (haveValue: $haveValue) ${req.body.query}
       }
     }`;
-    return self.execute(query, {
-      haveValue: req.path === '/menu',
-    }, req.body.query);
+    return self.execute(
+      query,
+      {
+        haveValue: req.path === '/menu',
+      },
+      req.body.query
+    );
   }
 
   @validation(CategoryPagination, { error_message: CATEGORY.LOAD_CATEGORIES_FAIL })
@@ -55,9 +61,7 @@ class CategoryRouter extends Router {
     const query = `query CategoryPagination($pageSize: Int!, $pageNumber: Int!) {
       category {
         pagination (pageSize: $pageSize, pageNumber: $pageNumber) {
-          list ${
-            req.body.query
-          },
+          list ${req.body.query},
           total,
           page,
           pageSize,
@@ -66,17 +70,18 @@ class CategoryRouter extends Router {
       }
     }`;
 
-    return self.execute(query,
+    return self.execute(
+      query,
       {
         pageNumber: req.body.pageNumber,
-        pageSize: req.body.pageSize
+        pageSize: req.body.pageSize,
       },
       req.body.query
     );
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(CategoryValidator, { error_message: CATEGORY.CREATE_CATEGORY_FAIL , groups: ['create'] })
+  @validation(CategoryValidator, { error_message: CATEGORY.CREATE_CATEGORY_FAIL, groups: ['create'] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _create(req, res, next, self) {
@@ -89,7 +94,7 @@ class CategoryRouter extends Router {
     }`;
     const variables = {
       name: req.body.name,
-      avatar: req.body.avatar
+      avatar: req.body.avatar,
     };
     return self.execute(query, { category: variables });
   }
@@ -109,7 +114,7 @@ class CategoryRouter extends Router {
     const variables = {
       categoryId: req.body.categoryId,
       name: req.body.name,
-      avatar: req.body.avatar
+      avatar: req.body.avatar,
     };
     return self.execute(query, { category: variables });
   }
@@ -120,9 +125,7 @@ class CategoryRouter extends Router {
   _getDetail(req, res, next, self) {
     const query = `query CategoryDetail($categoryId: ID!) {
       category {
-        detail (categoryId: $categoryId) ${
-          req.body.query
-        }
+        detail (categoryId: $categoryId) ${req.body.query}
       }
     }`;
     return self.execute(query, { categoryId: req.body.categoryId }, req.body.query);
@@ -130,7 +133,7 @@ class CategoryRouter extends Router {
 
   @validation(CategoryDeleteParamsValidator, {
     error_message: CATEGORY.DELETE_CATEGORY_FAIL,
-    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)

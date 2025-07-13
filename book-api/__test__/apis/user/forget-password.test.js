@@ -4,12 +4,7 @@ const EmailService = require('#services/email');
 const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const {
-  mockUser,
-  resetPasswordToken,
-  getResetPasswordLink,
-  randomPassword
-} = require('#test/resources/auth');
+const { mockUser, resetPasswordToken, getResetPasswordLink, randomPassword } = require('#test/resources/auth');
 const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
@@ -22,31 +17,35 @@ const requestBody = {
 
 const forgetPasswordResponse = {
   password: randomPassword,
-  resetPasswordToken: resetPasswordToken
+  resetPasswordToken: resetPasswordToken,
 };
 
 describe('forget password', () => {
-  commonTest('forget password api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: forgetPasswordUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'forget password api cors',
-      url: forgetPasswordUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'forget password common test');
+  commonTest(
+    'forget password api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: forgetPasswordUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'forget password api cors',
+        url: forgetPasswordUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'forget password common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, forgetPasswordUrl), () => {
     afterEach(() => fetch.mockReset());
@@ -69,9 +68,9 @@ describe('forget password', () => {
             expect.objectContaining({
               method: METHOD.POST,
               headers: expect.objectContaining({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               }),
-              body: JSON.stringify(requestBody)
+              body: JSON.stringify(requestBody),
             })
           );
           expect(sendPassword).toHaveBeenCalledTimes(1);
@@ -89,27 +88,25 @@ describe('forget password', () => {
         expected: {
           message: USER.USER_NOT_FOUND,
         },
-        status: HTTP_CODE.UNAUTHORIZED
+        status: HTTP_CODE.UNAUTHORIZED,
       },
       {
         describe: 'bad request',
         expected: {
           message: getInputValidateMessage(USER.RESET_PASSWORD_FAIL),
-          errors: []
+          errors: [],
         },
-        status: HTTP_CODE.BAD_REQUEST
+        status: HTTP_CODE.BAD_REQUEST,
       },
       {
         describe: 'server error',
         expected: {
-          message: COMMON.INTERNAL_ERROR_MESSAGE
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
-        status: HTTP_CODE.SERVER_ERROR
-      }
+        status: HTTP_CODE.SERVER_ERROR,
+      },
     ])('forget password failed with $describe', ({ expected, status }, done) => {
-      fetch.mockResolvedValue(
-        new Response(JSON.stringify(expected), { status })
-      );
+      fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
@@ -126,9 +123,9 @@ describe('forget password', () => {
             expect.objectContaining({
               method: METHOD.POST,
               headers: expect.objectContaining({
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
               }),
-              body: JSON.stringify(requestBody)
+              body: JSON.stringify(requestBody),
             })
           );
           expect(sendPassword).not.toHaveBeenCalled();
@@ -138,14 +135,18 @@ describe('forget password', () => {
     });
   });
 
-  commonTest('forget password internal api common test', [
-    {
-      name: 'cors test',
-      describe: 'forget password internal api cors',
-      url: forgetPasswordInternalUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'forget password internal');
+  commonTest(
+    'forget password internal api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'forget password internal api cors',
+        url: forgetPasswordInternalUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'forget password internal'
+  );
 
   describe(createDescribeTest(METHOD.POST, forgetPasswordInternalUrl), () => {
     test('forget password internal will be success', (done) => {
@@ -162,17 +163,17 @@ describe('forget password', () => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
-                email: mockUser.email
+                email: mockUser.email,
               }),
               data: expect.objectContaining({
                 reset_password_token: expect.any(String),
                 password: expect.any(String),
-              })
+              }),
             })
           );
           expect(response.body).toEqual({
             resetPasswordToken: mockUser.reset_password_token,
-            password: expect.stringMatching(/(.+){8}/g)
+            password: expect.stringMatching(/(.+){8}/g),
           });
           done();
         });
@@ -180,7 +181,7 @@ describe('forget password', () => {
 
     test('forget password internal failed with bad request', (done) => {
       const badRequestBody = {
-        email: 'unknownEmail'
+        email: 'unknownEmail',
       };
 
       globalThis.prismaClient.user.update.mockResolvedValue();
@@ -205,12 +206,12 @@ describe('forget password', () => {
     test('forget password internal failed with output validate error', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue({ ...mockUser, password: randomPassword });
 
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
-        () => GraphqlResponse.dto.parse({
+      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
+        GraphqlResponse.dto.parse({
           data: {
             password: autoGeneratePassword(),
-            resetPasswordToken: mockUser.reset_password_token
-          }
+            resetPasswordToken: mockUser.reset_password_token,
+          },
         })
       );
 
@@ -225,12 +226,12 @@ describe('forget password', () => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
-                email: mockUser.email
+                email: mockUser.email,
               }),
               data: expect.objectContaining({
                 reset_password_token: expect.any(String),
                 password: expect.any(String),
-              })
+              }),
             })
           );
           expect(response.body).toEqual({
@@ -247,7 +248,7 @@ describe('forget password', () => {
         expected: {
           message: USER.USER_NOT_FOUND,
         },
-        status: HTTP_CODE.UNAUTHORIZED
+        status: HTTP_CODE.UNAUTHORIZED,
       },
       {
         describe: 'server error',
@@ -255,8 +256,8 @@ describe('forget password', () => {
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
-        status: HTTP_CODE.SERVER_ERROR
-      }
+        status: HTTP_CODE.SERVER_ERROR,
+      },
     ])('forget password internal failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.user.update.mockRejectedValue(cause);
 
@@ -271,12 +272,12 @@ describe('forget password', () => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: expect.objectContaining({
-                email: mockUser.email
+                email: mockUser.email,
               }),
               data: expect.objectContaining({
                 reset_password_token: expect.any(String),
                 password: expect.any(String),
-              })
+              }),
             })
           );
           expect(response.body).toEqual(expected);

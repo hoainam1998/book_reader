@@ -25,15 +25,15 @@ const requestBody = [
   {
     authorId: Date.now().toString(),
     bookId: mockRequestBook.book_id,
-  }
+  },
 ];
 
-  /**
-  * Format authors with new properties.
-  *
-  * @param {array} authors - The authors.
-  * @return {array} - The new authors.
-  */
+/**
+ * Format authors with new properties.
+ *
+ * @param {array} authors - The authors.
+ * @return {array} - The new authors.
+ */
 const createDataInsert = (authors) => {
   const objectMapping = {
     authorId: 'author_id',
@@ -49,127 +49,128 @@ const createDataInsert = (authors) => {
 };
 
 describe('create book', () => {
-  commonTest('create book api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.BOOK}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: createBookUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'create book api cors',
-      url: createBookUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'create book common test');
+  commonTest(
+    'create book api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.BOOK}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: createBookUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'create book api cors',
+        url: createBookUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'create book common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, createBookUrl), () => {
     test('create book will be success', (done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify({}), { status: HTTP_CODE.CREATED }));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.CREATED)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(3);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/save-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    body: expect.any(FormData)
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.CREATED)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(3);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/save-book-info'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-pdf'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-book-authors'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
                   }),
-                ],
-                [
-                  expect.stringContaining('/save-pdf'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    body: expect.any(FormData)
-                  }),
-                ],
-                [
-                  expect.stringContaining('/save-book-authors'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    headers: expect.objectContaining({
-                      'Content-Type': 'application/json',
-                    }),
-                    body: expect.any(String)
-                  }),
-                ]
-              ]);
-              expect(response.body).toEqual({
-                message: BOOK.CREATE_BOOK_SUCCESS,
-                bookId: expect.any(String),
-              });
-              done();
+                  body: expect.any(String),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual({
+              message: BOOK.CREATE_BOOK_SUCCESS,
+              bookId: expect.any(String),
             });
-        });
+            done();
+          });
+      });
     });
 
     test('create book failed with authentication token not set', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN,
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('create book failed with session expired', (done) => {
       expect.hasAssertions();
-      destroySession()
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
+      });
     });
 
     test.each([
@@ -178,132 +179,128 @@ describe('create book', () => {
         status: HTTP_CODE.BAD_REQUEST,
         expected: {
           message: BOOK.CREATE_BOOK_FAIL,
-        }
+        },
       },
       {
         describe: 'server error',
         status: HTTP_CODE.SERVER_ERROR,
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
-        }
-      }
+        },
+      },
     ])('create book failed with $describe', ({ status, expected }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(status)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(1);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/save-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    body: expect.any(FormData)
-                  }),
-                ],
-              ]);
-              expect(response.body).toEqual(expected);
-              done();
-            });
-        });
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(status)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/save-book-info'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  body: expect.any(FormData),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
 
     test('create book failed with request body empty', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
-                errors: [COMMON.REQUEST_DATA_EMPTY]
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+              errors: [COMMON.REQUEST_DATA_EMPTY],
             });
+            done();
           });
+      });
     });
 
     test('create book failed with request body are missing field', (done) => {
       // missing authors
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
-                errors: expect.any(Array),
-              });
-              expect(response.body.errors).toHaveLength(1)
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+              errors: expect.any(Array),
             });
+            expect(response.body.errors).toHaveLength(1);
+            done();
           });
+      });
     });
 
     test('create book failed with request files are missing field', (done) => {
       // missing images
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
-                errors: expect.any(Array),
-              });
-              expect(response.body.errors.length).toBeGreaterThanOrEqual(1)
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
+              errors: expect.any(Array),
             });
+            expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+            done();
           });
+      });
     });
 
     test('create book failed output validate error', (done) => {
@@ -311,68 +308,71 @@ describe('create book', () => {
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .post(createBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(3);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/save-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    body: expect.any(FormData)
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(3);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/save-book-info'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-pdf'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-book-authors'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
                   }),
-                ],
-                [
-                  expect.stringContaining('/save-pdf'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    body: expect.any(FormData)
-                  }),
-                ],
-                [
-                  expect.stringContaining('/save-book-authors'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    headers: expect.objectContaining({
-                      'Content-Type': 'application/json',
-                    }),
-                    body: expect.any(String)
-                  }),
-                ]
-              ]);
-              expect(response.body).toEqual({
-                message: COMMON.OUTPUT_VALIDATE_FAIL,
-              });
-              done();
+                  body: expect.any(String),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual({
+              message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
-        });
+            done();
+          });
+      });
     });
   });
 
-  commonTest('create book api common test', [
-    {
-      name: 'cors test',
-      describe: 'create book  api cors',
-      url: saveBookInfoUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'create book');
+  commonTest(
+    'create book api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'create book  api cors',
+        url: saveBookInfoUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'create book'
+  );
 
   describe(createDescribeTest(METHOD.POST, saveBookInfoUrl), () => {
     test('save book info success', (done) => {
@@ -386,8 +386,8 @@ describe('create book', () => {
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
         .field('categoryId', mockRequestBook.category_id)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -404,7 +404,7 @@ describe('create book', () => {
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
               book_image: {
-                create:  [
+                create: [
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}1.png`,
@@ -412,16 +412,16 @@ describe('create book', () => {
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}2.png`,
-                  }
+                  },
                 ],
-              }
-          }
+              },
+            },
+          });
+          expect(response.body).toEqual({
+            message: BOOK.BOOK_CREATED,
+          });
+          done();
         });
-        expect(response.body).toEqual({
-          message: BOOK.BOOK_CREATED,
-        });
-        done();
-      });
     });
 
     test('save book info failed with request body are empty', (done) => {
@@ -470,8 +470,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -497,8 +497,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -525,8 +525,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/pdf/empty-pdf.pdf'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
@@ -534,7 +534,7 @@ describe('create book', () => {
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FILE_NOT_IMAGE
+            message: COMMON.FILE_NOT_IMAGE,
           });
           done();
         });
@@ -551,8 +551,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
@@ -579,8 +579,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('pdf/empty-pdf.pdf'))
@@ -606,8 +606,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
@@ -632,8 +632,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -662,8 +662,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .field(undefineField, [Date.now().toString()])
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -677,10 +677,10 @@ describe('create book', () => {
             message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
             errors: expect.any(Array),
           });
-          expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
-          expect(response.body.errors).toEqual(
-            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
-          );
+          (expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
+            expect(response.body.errors).toEqual(
+              expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+            ));
           done();
         });
     });
@@ -696,8 +696,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -715,7 +715,7 @@ describe('create book', () => {
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
               book_image: {
-                create:  [
+                create: [
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}1.png`,
@@ -723,16 +723,16 @@ describe('create book', () => {
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}2.png`,
-                  }
+                  },
                 ],
-              }
-          }
+              },
+            },
+          });
+          expect(response.body).toEqual({
+            message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
         });
-        expect(response.body).toEqual({
-          message: COMMON.OUTPUT_VALIDATE_FAIL,
-        });
-        done();
-      });
     });
 
     test('save book info failed with server error', (done) => {
@@ -745,8 +745,8 @@ describe('create book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -764,7 +764,7 @@ describe('create book', () => {
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
               book_image: {
-                create:  [
+                create: [
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}1.png`,
@@ -772,27 +772,31 @@ describe('create book', () => {
                   {
                     image: expect.any(String),
                     name: `${mockRequestBook.name}2.png`,
-                  }
+                  },
                 ],
-              }
-            }
+              },
+            },
           });
           expect(response.body).toEqual({
-            message:COMMON.INTERNAL_ERROR_MESSAGE,
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
-      });
+        });
     });
   });
 
-  commonTest('save pdf file api common test', [
-    {
-      name: 'cors test',
-      describe: 'save pdf file api cors',
-      url: savePdfFileUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'save pdf file');
+  commonTest(
+    'save pdf file api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'save pdf file api cors',
+        url: savePdfFileUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'save pdf file'
+  );
 
   describe(createDescribeTest(METHOD.POST, savePdfFileUrl), () => {
     test('save pfd file success', (done) => {
@@ -810,14 +814,14 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            data: {
+              pdf: expect.any(String),
+            },
           });
           expect(response.body).toEqual({
-            message: BOOK.PDF_SAVED
+            message: BOOK.PDF_SAVED,
           });
           done();
         });
@@ -830,7 +834,7 @@ describe('create book', () => {
         expected: {
           message: BOOK.BOOK_NOT_FOUND,
         },
-        status: HTTP_CODE.NOT_FOUND
+        status: HTTP_CODE.NOT_FOUND,
       },
       {
         describe: 'server error',
@@ -839,7 +843,7 @@ describe('create book', () => {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         status: HTTP_CODE.SERVER_ERROR,
-      }
+      },
     ])('save pdf file failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.book.update.mockRejectedValue(cause);
 
@@ -855,11 +859,11 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            data: {
+              pdf: expect.any(String),
+            },
           });
           expect(response.body).toEqual(expected);
           done();
@@ -937,7 +941,7 @@ describe('create book', () => {
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FIELD_NOT_PROVIDE.format('pdf')
+            message: COMMON.FIELD_NOT_PROVIDE.format('pdf'),
           });
           done();
         });
@@ -955,7 +959,7 @@ describe('create book', () => {
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FILE_IS_EMPTY
+            message: COMMON.FILE_IS_EMPTY,
           });
           done();
         });
@@ -981,8 +985,7 @@ describe('create book', () => {
     });
 
     test('save pfd file failed with output validate error', (done) => {
-      jest.spyOn(OutputValidate, 'prepare')
-        .mockImplementation(() => OutputValidate.parse({}));
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
 
       expect.hasAssertions();
@@ -997,11 +1000,11 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
-            data:{
-              pdf: expect.any(String)
-            }
+            data: {
+              pdf: expect.any(String),
+            },
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
@@ -1011,14 +1014,18 @@ describe('create book', () => {
     });
   });
 
-  commonTest('save book author api common test', [
-    {
-      name: 'cors test',
-      describe: 'save book author api cors',
-      url: savePdfFileUrl,
-      method: METHOD.POST.toLowerCase(),
-    }
-  ], 'save book author');
+  commonTest(
+    'save book author api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'save book author api cors',
+        url: savePdfFileUrl,
+        method: METHOD.POST.toLowerCase(),
+      },
+    ],
+    'save book author'
+  );
 
   describe(createDescribeTest(METHOD.POST, saveBookAuthorUrl), () => {
     test('save book author success', (done) => {
@@ -1030,7 +1037,7 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.CREATED)
         .send({
-          authors: requestBody
+          authors: requestBody,
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
@@ -1040,11 +1047,11 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
             where: {
-              book_id: requestBody[0].bookId
-            }
+              book_id: requestBody[0].bookId,
+            },
           });
           expect(response.body).toEqual({
-            message: BOOK.CREATE_BOOK_AUTHOR_SUCCESS
+            message: BOOK.CREATE_BOOK_AUTHOR_SUCCESS,
           });
           done();
         });
@@ -1062,7 +1069,7 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
-            errors: [COMMON.REQUEST_DATA_EMPTY]
+            errors: [COMMON.REQUEST_DATA_EMPTY],
           });
           done();
         });
@@ -1077,7 +1084,7 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .send({
-          [undefineField]: []
+          [undefineField]: [],
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
@@ -1099,15 +1106,15 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.SERVER_ERROR)
         .send({
-          authors: requestBody
+          authors: requestBody,
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
             where: {
-              book_id: requestBody[0].bookId
-            }
+              book_id: requestBody[0].bookId,
+            },
           });
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
@@ -1128,7 +1135,7 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.SERVER_ERROR)
         .send({
-          authors: requestBody
+          authors: requestBody,
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
@@ -1138,8 +1145,8 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
             where: {
-              book_id: requestBody[0].bookId
-            }
+              book_id: requestBody[0].bookId,
+            },
           });
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
@@ -1152,8 +1159,7 @@ describe('create book', () => {
       globalThis.prismaClient.book_author.createMany.mockReset();
       globalThis.prismaClient.book_author.deleteMany.mockReset();
 
-      jest.spyOn(OutputValidate, 'prepare')
-        .mockImplementation(() => OutputValidate.parse({}));
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       const dataInsert = createDataInsert(requestBody);
 
       expect.hasAssertions();
@@ -1162,7 +1168,7 @@ describe('create book', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .send({
-          authors: requestBody
+          authors: requestBody,
         })
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).toHaveBeenCalledTimes(1);
@@ -1172,8 +1178,8 @@ describe('create book', () => {
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
             where: {
-              book_id: requestBody[0].bookId
-            }
+              book_id: requestBody[0].bookId,
+            },
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,

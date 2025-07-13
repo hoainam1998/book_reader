@@ -18,14 +18,12 @@ module.exports = async (req, res, next) => {
   try {
     const user = await req.sessionStore.client.get(`${REDIS_PREFIX}${req.session.id}`);
     if (user) {
-      res.status(HTTP_CODE.UNAUTHORIZED)
-        .json(messageCreator(USER.ONLY_ONE_DEVICE, ErrorCode.ONLY_ALLOW_ONE_DEVICE));
+      res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.ONLY_ONE_DEVICE, ErrorCode.ONLY_ALLOW_ONE_DEVICE));
     } else {
       return next();
     }
   } catch (error) {
     logger.error(error.message);
-    return res.status(HTTP_CODE.SERVER_ERROR)
-      .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+    return res.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
   }
 };

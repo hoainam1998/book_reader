@@ -9,38 +9,38 @@ const createRoutePath = RoutePath.Base({ baseUrl: PATH.CATEGORY });
  */
 class CategoryRoutePath {
   /**
-  * Relative: /detail *Absolute: category/detail
-  */
+   * Relative: /detail *Absolute: category/detail
+   */
   static detail = createRoutePath({ url: 'detail' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /update *Absolute: category/update
-  */
+   * Relative: /update *Absolute: category/update
+   */
   static update = createRoutePath({ url: 'update' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /create *Absolute: category/create
-  */
+   * Relative: /create *Absolute: category/create
+   */
   static create = createRoutePath({ url: 'create' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /create/:id *Absolute: category/create/:id
-  */
+   * Relative: /create/:id *Absolute: category/create/:id
+   */
   static delete = createRoutePath({ url: 'delete', subUrl: ':id' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /pagination *Absolute: category/pagination
-  */
+   * Relative: /pagination *Absolute: category/pagination
+   */
   static pagination = createRoutePath({ url: 'pagination' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /all *Absolute: category/all
-  */
+   * Relative: /all *Absolute: category/all
+   */
   static all = createRoutePath({ url: 'all' }, [process.env.ORIGIN_CORS]);
 
   /**
-  * Relative: /menu *Absolute: category/menu
-  */
+   * Relative: /menu *Absolute: category/menu
+   */
   static menu = createRoutePath({ url: 'menu' }, [process.env.CLIENT_ORIGIN_CORS]);
 }
 

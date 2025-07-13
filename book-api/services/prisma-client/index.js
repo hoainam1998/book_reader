@@ -7,7 +7,7 @@ const extensions = Prisma.defineExtension((prisma) => {
     query: {
       reader: reader(prisma),
       user: user(prisma),
-    }
+    },
   });
 });
 

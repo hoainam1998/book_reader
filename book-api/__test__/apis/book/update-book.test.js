@@ -18,127 +18,128 @@ const mockBook = BookDummyData.MockData;
 const mockRequestBook = BookDummyData.MockRequestData;
 
 describe('update book', () => {
-  commonTest('update book api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.BOOK}/unknown`,
-      method: METHOD.PUT.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: updateBookUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'update book api cors',
-      url: updateBookUrl,
-      method: METHOD.PUT.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'update book common test');
+  commonTest(
+    'update book api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.BOOK}/unknown`,
+        method: METHOD.PUT.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: updateBookUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'update book api cors',
+        url: updateBookUrl,
+        method: METHOD.PUT.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'update book common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, updateBookUrl), () => {
     test('update book will be success', (done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify({}), { status: HTTP_CODE.CREATED }));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('bookId', mockRequestBook.book_id)
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.CREATED)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(3);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/update-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.PUT,
-                    body: expect.any(FormData)
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('bookId', mockRequestBook.book_id)
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.CREATED)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(3);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/update-book-info'),
+                expect.objectContaining({
+                  method: METHOD.PUT,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/update-pdf'),
+                expect.objectContaining({
+                  method: METHOD.PUT,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-book-authors'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
                   }),
-                ],
-                [
-                  expect.stringContaining('/update-pdf'),
-                  expect.objectContaining({
-                    method: METHOD.PUT,
-                    body: expect.any(FormData)
-                  }),
-                ],
-                [
-                  expect.stringContaining('/save-book-authors'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    headers: expect.objectContaining({
-                      'Content-Type': 'application/json',
-                    }),
-                    body: expect.any(String)
-                  }),
-                ]
-              ]);
-              expect(response.body).toEqual({
-                message: BOOK.UPDATE_BOOK_SUCCESS,
-              });
-              done();
+                  body: expect.any(String),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual({
+              message: BOOK.UPDATE_BOOK_SUCCESS,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('update book failed with authentication token not set', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN,
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('update book failed with session expired', (done) => {
       expect.hasAssertions();
-      destroySession()
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
+      });
     });
 
     test.each([
@@ -147,135 +148,131 @@ describe('update book', () => {
         status: HTTP_CODE.BAD_REQUEST,
         expected: {
           message: BOOK.UPDATE_BOOK_FAIL,
-        }
+        },
       },
       {
         describe: 'server error',
         status: HTTP_CODE.SERVER_ERROR,
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
-        }
-      }
+        },
+      },
     ])('update book failed with $describe', ({ status, expected }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('bookId', mockRequestBook.book_id)
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(status)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(1);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/update-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.PUT,
-                    body: expect.any(FormData)
-                  }),
-                ],
-              ]);
-              expect(response.body).toEqual(expected);
-              done();
-            });
-        });
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('bookId', mockRequestBook.book_id)
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(status)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/update-book-info'),
+                expect.objectContaining({
+                  method: METHOD.PUT,
+                  body: expect.any(FormData),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
 
     test('update book failed with request body empty', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
-                errors: [COMMON.REQUEST_DATA_EMPTY]
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
+              errors: [COMMON.REQUEST_DATA_EMPTY],
             });
+            done();
           });
+      });
     });
 
     test('update book failed with request body are missing field', (done) => {
       // missing authors
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .field('bookId', mockRequestBook.book_id)
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
-                errors: expect.any(Array),
-              });
-              expect(response.body.errors).toHaveLength(1)
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .field('bookId', mockRequestBook.book_id)
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
+              errors: expect.any(Array),
             });
+            expect(response.body.errors).toHaveLength(1);
+            done();
           });
+      });
     });
 
     test('update book failed with request files are missing field', (done) => {
       // missing images
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .field('bookId', mockRequestBook.book_id)
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
-                errors: expect.any(Array),
-              });
-              expect(response.body.errors.length).toBeGreaterThanOrEqual(1)
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .field('bookId', mockRequestBook.book_id)
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
+              errors: expect.any(Array),
             });
+            expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
+            done();
           });
+      });
     });
 
     test('update book failed output validate error', (done) => {
@@ -283,69 +280,72 @@ describe('update book', () => {
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          globalThis.api
-            .put(updateBookUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('Connection', 'keep-alive')
-            .field('bookId', mockRequestBook.book_id)
-            .field('name', mockRequestBook.name)
-            .field('publishedTime', mockRequestBook.published_time)
-            .field('publishedDay', mockRequestBook.published_day)
-            .field('categoryId', mockRequestBook.category_id)
-            .field('authors', Date.now().toString())
-            .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-            .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(fetch).toHaveBeenCalledTimes(3);
-              expect(fetch.mock.calls).toEqual([
-                [
-                  expect.stringContaining('/update-book-info'),
-                  expect.objectContaining({
-                    method: METHOD.PUT,
-                    body: expect.any(FormData)
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateBookUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('bookId', mockRequestBook.book_id)
+          .field('name', mockRequestBook.name)
+          .field('publishedTime', mockRequestBook.published_time)
+          .field('publishedDay', mockRequestBook.published_day)
+          .field('categoryId', mockRequestBook.category_id)
+          .field('authors', Date.now().toString())
+          .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(3);
+            expect(fetch.mock.calls).toEqual([
+              [
+                expect.stringContaining('/update-book-info'),
+                expect.objectContaining({
+                  method: METHOD.PUT,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/update-pdf'),
+                expect.objectContaining({
+                  method: METHOD.PUT,
+                  body: expect.any(FormData),
+                }),
+              ],
+              [
+                expect.stringContaining('/save-book-authors'),
+                expect.objectContaining({
+                  method: METHOD.POST,
+                  headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
                   }),
-                ],
-                [
-                  expect.stringContaining('/update-pdf'),
-                  expect.objectContaining({
-                    method: METHOD.PUT,
-                    body: expect.any(FormData)
-                  }),
-                ],
-                [
-                  expect.stringContaining('/save-book-authors'),
-                  expect.objectContaining({
-                    method: METHOD.POST,
-                    headers: expect.objectContaining({
-                      'Content-Type': 'application/json',
-                    }),
-                    body: expect.any(String)
-                  }),
-                ]
-              ]);
-              expect(response.body).toEqual({
-                message: COMMON.OUTPUT_VALIDATE_FAIL,
-              });
-              done();
+                  body: expect.any(String),
+                }),
+              ],
+            ]);
+            expect(response.body).toEqual({
+              message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
-        });
+            done();
+          });
+      });
     });
   });
 
-  commonTest('update book api common test', [
-    {
-      name: 'cors test',
-      describe: 'update book  api cors',
-      url: updateBookInfoUrl,
-      method: METHOD.PUT.toLowerCase(),
-    }
-  ], 'update book');
+  commonTest(
+    'update book api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'update book  api cors',
+        url: updateBookInfoUrl,
+        method: METHOD.PUT.toLowerCase(),
+      },
+    ],
+    'update book'
+  );
 
   describe(createDescribeTest(METHOD.POST, updateBookInfoUrl), () => {
     test('update book info success', (done) => {
@@ -362,8 +362,8 @@ describe('update book', () => {
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
         .field('categoryId', mockRequestBook.category_id)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -381,7 +381,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -392,7 +392,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
             data: [
-                {
+              {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}1.png`,
                 book_id: mockRequestBook.book_id,
@@ -401,14 +401,14 @@ describe('update book', () => {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}2.png`,
                 book_id: mockRequestBook.book_id,
-              }
-            ]
+              },
+            ],
           });
           expect(response.body).toEqual({
             message: BOOK.BOOK_UPDATED,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with request body are empty', (done) => {
@@ -459,8 +459,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -486,8 +486,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -514,8 +514,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/pdf/empty-pdf.pdf'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
@@ -525,7 +525,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.deleteMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FILE_NOT_IMAGE
+            message: COMMON.FILE_NOT_IMAGE,
           });
           done();
         });
@@ -540,8 +540,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
@@ -568,8 +568,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('pdf/empty-pdf.pdf'))
@@ -595,8 +595,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
@@ -622,8 +622,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -653,8 +653,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .field(undefineField, [Date.now().toString()])
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -668,7 +668,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.UPDATE_BOOK_FAIL),
-            errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+            errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
           });
           done();
         });
@@ -687,8 +687,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -707,7 +707,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -718,7 +718,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
             data: [
-                {
+              {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}1.png`,
                 book_id: mockRequestBook.book_id,
@@ -727,14 +727,14 @@ describe('update book', () => {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}2.png`,
                 book_id: mockRequestBook.book_id,
-              }
-            ]
+              },
+            ],
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with update method get server error', (done) => {
@@ -747,8 +747,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -767,15 +767,15 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message:COMMON.INTERNAL_ERROR_MESSAGE,
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with deleteMany method get server error', (done) => {
@@ -789,14 +789,14 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .expect('Content-Type', /application\/json/)
-       // .expect(HTTP_CODE.SERVER_ERROR)
+        // .expect(HTTP_CODE.SERVER_ERROR)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
@@ -809,7 +809,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -819,10 +819,10 @@ describe('update book', () => {
           });
           expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message:COMMON.INTERNAL_ERROR_MESSAGE,
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with createMany method get server error', (done) => {
@@ -837,8 +837,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -857,7 +857,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -868,7 +868,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
             data: [
-                {
+              {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}1.png`,
                 book_id: mockRequestBook.book_id,
@@ -877,14 +877,14 @@ describe('update book', () => {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}2.png`,
                 book_id: mockRequestBook.book_id,
-              }
-            ]
+              },
+            ],
           });
           expect(response.body).toEqual({
-            message:COMMON.INTERNAL_ERROR_MESSAGE,
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with update method get not found error', (done) => {
@@ -899,8 +899,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -919,7 +919,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_image.createMany).not.toHaveBeenCalled();
@@ -927,7 +927,7 @@ describe('update book', () => {
             message: BOOK.BOOK_NOT_FOUND,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with deleteMany method get not found error', (done) => {
@@ -942,8 +942,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -962,7 +962,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -975,7 +975,7 @@ describe('update book', () => {
             message: BOOK.BOOK_NOT_FOUND,
           });
           done();
-      });
+        });
     });
 
     test('update book info failed with createMany method get not found error', (done) => {
@@ -990,8 +990,8 @@ describe('update book', () => {
         .field('name', mockRequestBook.name)
         .field('publishedTime', mockRequestBook.published_time)
         .field('publishedDay', mockRequestBook.published_day)
-        .field('imageNames',`${mockRequestBook.name}1.png`)
-        .field('imageNames',`${mockRequestBook.name}2.png`)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
         .field('categoryId', mockRequestBook.category_id)
         .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
         .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
@@ -1010,7 +1010,7 @@ describe('update book', () => {
               published_time: mockRequestBook.published_time,
               published_day: mockRequestBook.published_day,
               category_id: mockRequestBook.category_id,
-            }
+            },
           });
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.deleteMany).toHaveBeenCalledWith({
@@ -1021,7 +1021,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_image.createMany).toHaveBeenCalledWith({
             data: [
-                {
+              {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}1.png`,
                 book_id: mockRequestBook.book_id,
@@ -1030,25 +1030,29 @@ describe('update book', () => {
                 image: expect.any(String),
                 name: `${mockRequestBook.name}2.png`,
                 book_id: mockRequestBook.book_id,
-              }
-            ]
+              },
+            ],
           });
           expect(response.body).toEqual({
             message: BOOK.BOOK_NOT_FOUND,
           });
           done();
-      });
+        });
     });
   });
 
-  commonTest('update pdf file api common test', [
-    {
-      name: 'cors test',
-      describe: 'update pdf file api cors',
-      url: updatePdfFileUrl,
-      method: METHOD.PUT.toLowerCase(),
-    }
-  ], 'save pdf file');
+  commonTest(
+    'update pdf file api common test',
+    [
+      {
+        name: 'cors test',
+        describe: 'update pdf file api cors',
+        url: updatePdfFileUrl,
+        method: METHOD.PUT.toLowerCase(),
+      },
+    ],
+    'save pdf file'
+  );
 
   describe(createDescribeTest(METHOD.POST, updatePdfFileUrl), () => {
     test('update pdf file success', (done) => {
@@ -1067,10 +1071,10 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
             select: {
-              pdf: true
+              pdf: true,
             },
           });
           expect(unLink).toHaveBeenCalledTimes(1);
@@ -1101,10 +1105,10 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
             select: {
-              pdf: true
+              pdf: true,
             },
           });
           expect(unLink).not.toHaveBeenCalled();
@@ -1122,7 +1126,7 @@ describe('update book', () => {
         expected: {
           message: BOOK.BOOK_NOT_FOUND,
         },
-        status: HTTP_CODE.NOT_FOUND
+        status: HTTP_CODE.NOT_FOUND,
       },
       {
         describe: 'server error',
@@ -1131,7 +1135,7 @@ describe('update book', () => {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         status: HTTP_CODE.SERVER_ERROR,
-      }
+      },
     ])('update pdf file failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.book.findUniqueOrThrow.mockRejectedValue(cause);
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
@@ -1148,10 +1152,10 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
             select: {
-              pdf: true
+              pdf: true,
             },
           });
           expect(unLink).not.toHaveBeenCalled();
@@ -1242,7 +1246,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
           expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FIELD_NOT_PROVIDE.format('pdf')
+            message: COMMON.FIELD_NOT_PROVIDE.format('pdf'),
           });
           done();
         });
@@ -1263,7 +1267,7 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
           expect(unLink).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: COMMON.FILE_IS_EMPTY
+            message: COMMON.FILE_IS_EMPTY,
           });
           done();
         });
@@ -1292,8 +1296,7 @@ describe('update book', () => {
     });
 
     test('update pdf file failed with output validate error', (done) => {
-      jest.spyOn(OutputValidate, 'prepare')
-        .mockImplementation(() => OutputValidate.parse({}));
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
 
@@ -1309,10 +1312,10 @@ describe('update book', () => {
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
             where: {
-              book_id: mockRequestBook.book_id
+              book_id: mockRequestBook.book_id,
             },
             select: {
-              pdf: true
+              pdf: true,
             },
           });
           expect(unLink).toHaveBeenCalledTimes(1);

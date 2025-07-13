@@ -48,31 +48,33 @@ const CLIENT_RELATE_BOOKS = new GraphQLObjectType({
   name: 'RelateBook',
   fields: {
     bookId: {
-      type: GraphQLID
+      type: GraphQLID,
     },
     name: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     authors: {
-      type: new GraphQLList(new GraphQLObjectType({
-        name: 'AuthorRelative',
-        fields: {
-          name: {
-            type: GraphQLString
+      type: new GraphQLList(
+        new GraphQLObjectType({
+          name: 'AuthorRelative',
+          fields: {
+            name: {
+              type: GraphQLString,
+            },
+            authorId: {
+              type: GraphQLString,
+            },
           },
-          authorId: {
-            type: GraphQLString
-          }
-        }
-      }))
+        })
+      ),
     },
     avatar: {
-      type: GraphQLString
+      type: GraphQLString,
     },
     createAt: {
-      type: GraphQLString
+      type: GraphQLString,
     },
-  }
+  },
 });
 
 const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
@@ -96,8 +98,8 @@ const CLIENT_DETAIL_TYPE = new GraphQLObjectType({
     },
     usedRead: {
       type: new GraphQLList(CLIENT_RELATE_BOOKS),
-    }
-  }
+    },
+  },
 });
 
 const CLIENT_INPUT_TYPE = new GraphQLInputObjectType({
@@ -117,29 +119,32 @@ const mutation = new GraphQLObjectType({
       type: ResponseType,
       args: {
         firstName: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         lastName: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         email: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         password: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         sex: {
-          type: new GraphQLNonNull(GraphQLInt)
-        }
+          type: new GraphQLNonNull(GraphQLInt),
+        },
       },
       resolve: async (service, { firstName, lastName, email, password, sex }) => {
-        return handleResolveResult(async () => {
-          await service.signUp(firstName, lastName, email, password, sex);
-          return messageCreator(READER.SIGNUP_SUCCESS);
-        }, {
-          UNIQUE_DUPLICATE: READER.EMAIL_EXIST,
-        });
-      }
+        return handleResolveResult(
+          async () => {
+            await service.signUp(firstName, lastName, email, password, sex);
+            return messageCreator(READER.SIGNUP_SUCCESS);
+          },
+          {
+            UNIQUE_DUPLICATE: READER.EMAIL_EXIST,
+          }
+        );
+      },
     },
     forgetPassword: {
       type: new GraphQLObjectType({
@@ -158,64 +163,73 @@ const mutation = new GraphQLObjectType({
       }),
       args: {
         email: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: async (service, { email}) => {
-        return handleResolveResult(async () => {
-          const reader = await service.forgetPassword(email);
-          return convertDtoToZodObject(
-            ForgetPassword,
-            Object.assign(reader, messageCreator(READER.SEND_RESET_PASSWORD_SUCCESS))
+      resolve: async (service, { email }) => {
+        return handleResolveResult(
+          async () => {
+            const reader = await service.forgetPassword(email);
+            return convertDtoToZodObject(
+              ForgetPassword,
+              Object.assign(reader, messageCreator(READER.SEND_RESET_PASSWORD_SUCCESS))
             );
-        }, {
-          RECORD_NOT_FOUND: READER.EMAIL_NOT_FOUND,
-        });
-      }
+          },
+          {
+            RECORD_NOT_FOUND: READER.EMAIL_NOT_FOUND,
+          }
+        );
+      },
     },
     resetPassword: {
       type: ResponseType,
       args: {
         token: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         email: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         oldPassword: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         password: {
-          type: new GraphQLNonNull(GraphQLString)
-        }
+          type: new GraphQLNonNull(GraphQLString),
+        },
       },
       resolve: async (service, { token, email, oldPassword, password }) => {
-        return handleResolveResult(async () => {
-          await service.resetPassword(token, email, oldPassword, password);
-          return messageCreator(READER.RESET_PASSWORD_SUCCESS);
-        }, {
-          UNAUTHORIZED: READER.USER_NOT_FOUND,
-        });
-      }
+        return handleResolveResult(
+          async () => {
+            await service.resetPassword(token, email, oldPassword, password);
+            return messageCreator(READER.RESET_PASSWORD_SUCCESS);
+          },
+          {
+            UNAUTHORIZED: READER.USER_NOT_FOUND,
+          }
+        );
+      },
     },
     updateClient: {
       type: ResponseType,
       args: {
         client: {
           type: new GraphQLNonNull(CLIENT_INPUT_TYPE),
-        }
+        },
       },
       resolve: async (service, { client }) => {
-        return handleResolveResult(async () => {
-          await service.update(client);
-          return messageCreator(READER.ADD_PERSONAL_INFORMATION_SUCCESS);
-        }, {
-          RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
-          UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
-        });
-      }
-    }
-  }
+        return handleResolveResult(
+          async () => {
+            await service.update(client);
+            return messageCreator(READER.ADD_PERSONAL_INFORMATION_SUCCESS);
+          },
+          {
+            RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
+            UNIQUE_DUPLICATE: USER.DUPLICATE_EMAIL_OR_PHONE_NUMBER,
+          }
+        );
+      },
+    },
+  },
 });
 
 const query = new GraphQLObjectType({
@@ -225,77 +239,86 @@ const query = new GraphQLObjectType({
       type: new GraphQLNonNull(CLIENT_DETAIL_TYPE),
       args: {
         email: {
-          type: new GraphQLNonNull(GraphQLString)
+          type: new GraphQLNonNull(GraphQLString),
         },
         password: {
-          type: new GraphQLNonNull(GraphQLString)
-        }
+          type: new GraphQLNonNull(GraphQLString),
+        },
       },
       resolve: async (service, { email, password }, context) => {
-        return handleResolveResult(async () => {
-          return convertDtoToZodObject(ClientDTO, await service.login(email, password, context));
-        }, {
-          UNAUTHORIZED: READER.USER_NOT_FOUND,
-        });
-      }
+        return handleResolveResult(
+          async () => {
+            return convertDtoToZodObject(ClientDTO, await service.login(email, password, context));
+          },
+          {
+            UNAUTHORIZED: READER.USER_NOT_FOUND,
+          }
+        );
+      },
     },
     detail: {
       type: new GraphQLNonNull(CLIENT_DETAIL_TYPE),
       args: {
         clientId: {
-          type: new GraphQLNonNull(GraphQLID)
-        }
+          type: new GraphQLNonNull(GraphQLID),
+        },
       },
       resolve: async (service, { clientId }, context) => {
-        return handleResolveResult(async () => {
-          return convertDtoToZodObject(ClientDTO, await service.detail(clientId, context));
-        }, {
-          RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
-        });
-      }
+        return handleResolveResult(
+          async () => {
+            return convertDtoToZodObject(ClientDTO, await service.detail(clientId, context));
+          },
+          {
+            RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
+          }
+        );
+      },
     },
     all: {
       type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE)),
       args: {
         exclude: {
-          type: GraphQLID
-        }
+          type: GraphQLID,
+        },
       },
       resolve: async (service, { exclude }, context) => {
-        return handleResolveResult(async () => {
-          return convertDtoToZodObject(ClientDTO, await service.all(exclude, context));
-        }, {
-          RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
-        });
-      }
+        return handleResolveResult(
+          async () => {
+            return convertDtoToZodObject(ClientDTO, await service.all(exclude, context));
+          },
+          {
+            RECORD_NOT_FOUND: READER.USER_NOT_FOUND,
+          }
+        );
+      },
     },
     pagination: {
       type: new GraphQLObjectType({
         name: 'ClientPagination',
         fields: {
           list: {
-            type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE))
+            type: new GraphQLNonNull(new GraphQLList(CLIENT_TYPE)),
           },
           total: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLInt),
           },
           page: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLInt),
           },
           pages: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLInt),
           },
           pageSize: {
-            type: new GraphQLNonNull(GraphQLInt)
+            type: new GraphQLNonNull(GraphQLInt),
           },
         },
       }),
       args: {
         pageSize: {
-          type: new GraphQLNonNull(GraphQLInt)
+          type: new GraphQLNonNull(GraphQLInt),
         },
         pageNumber: {
-          type: new GraphQLNonNull(GraphQLInt)
+          type: new GraphQLNonNull(GraphQLInt),
         },
         keyword: {
           type: GraphQLString,
@@ -312,7 +335,7 @@ const query = new GraphQLObjectType({
         });
       },
     },
-  }
+  },
 });
 
 module.exports = {

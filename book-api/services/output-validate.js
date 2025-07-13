@@ -6,7 +6,6 @@ const Singleton = require('#services/singleton');
  * @extends Singleton
  */
 class Validate extends Singleton {
-
   /**
    * Function will validate the out put.
    * @static
@@ -21,18 +20,18 @@ class Validate extends Singleton {
   static parse;
 
   /**
-  * Convert object value to z schema object.
-  *
-  * @static
-  * @param {Object} value - The value to convert.
-  */
+   * Convert object value to z schema object.
+   *
+   * @static
+   * @param {Object} value - The value to convert.
+   */
   static prepare(value) {
     /**
-    * Determinate output value is the equal with original value.
-    *
-    * @param {Object} graphQlResult - The object will be compare with value.
-    * @return {boolean} - The compare result.
-    */
+     * Determinate output value is the equal with original value.
+     *
+     * @param {Object} graphQlResult - The object will be compare with value.
+     * @return {boolean} - The compare result.
+     */
     const recursiveCheck = (graphQlResult) => {
       if (!graphQlResult) {
         return false;
@@ -56,13 +55,13 @@ class Validate extends Singleton {
       if (recursiveCheck(data ?? response ?? dtoValue)) {
         return {
           success: true,
-          data: response
+          data: response,
         };
       } else {
         return {
           success: false,
           message: 'Output did not expect!',
-          data: response
+          data: response,
         };
       }
     };
@@ -70,4 +69,3 @@ class Validate extends Singleton {
 }
 
 module.exports = Validate;
-

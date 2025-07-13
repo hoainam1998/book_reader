@@ -21,27 +21,31 @@ const requestBody = {
 };
 
 describe('client signup', () => {
-  commonTest('client signup api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.CLIENT}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: clientSignupUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'client signup api cors',
-      url: clientSignupUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.CLIENT_ORIGIN_CORS,
-    }
-  ], 'client signup common test');
+  commonTest(
+    'client signup api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.CLIENT}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: clientSignupUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'client signup api cors',
+        url: clientSignupUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.CLIENT_ORIGIN_CORS,
+      },
+    ],
+    'client signup common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, clientSignupUrl), () => {
     test('client signup will be success', (done) => {
@@ -86,9 +90,9 @@ describe('client signup', () => {
           expect(response.body).toEqual({
             message: getInputValidateMessage(READER.SIGNUP_FAIL),
             errors: [COMMON.REQUEST_DATA_EMPTY],
+          });
+          done();
         });
-        done();
-      });
     });
 
     test('client signup failed request body is missing field', (done) => {
@@ -110,7 +114,7 @@ describe('client signup', () => {
           });
           expect(response.body.errors).toHaveLength(1);
           done();
-      });
+        });
     });
 
     test('client signup failed with undefine request body field', (done) => {
@@ -120,7 +124,7 @@ describe('client signup', () => {
         ...requestBody,
         [undefineField]: {
           message: true,
-        }
+        },
       };
 
       expect.hasAssertions();
@@ -135,8 +139,8 @@ describe('client signup', () => {
             message: getInputValidateMessage(READER.SIGNUP_FAIL),
             errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
           });
-        done();
-      });
+          done();
+        });
     });
 
     test('client signup failed with email already exist', (done) => {
@@ -165,8 +169,8 @@ describe('client signup', () => {
           expect(response.body).toEqual({
             message: READER.EMAIL_EXIST,
           });
-        done();
-      });
+          done();
+        });
     });
 
     test('client signup failed with output validate error', (done) => {
@@ -196,8 +200,8 @@ describe('client signup', () => {
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
-        done();
-      });
+          done();
+        });
     });
 
     test('client signup failed with server error', (done) => {
@@ -226,8 +230,8 @@ describe('client signup', () => {
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
-        done();
-      });
+          done();
+        });
     });
-  })
+  });
 });

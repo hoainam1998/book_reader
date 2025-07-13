@@ -85,7 +85,9 @@ const calcPages = (pageSize, total) => {
  */
 const graphqlQueryParser = (select) => {
   const queryParser = (selected, tab = 0) => {
-    const tabs = Array(tab ? tab + 1 : tab).fill(' ').join('');
+    const tabs = Array(tab ? tab + 1 : tab)
+      .fill(' ')
+      .join('');
     const queryStr = Object.keys(selected).reduce((query, key) => {
       if (selected[key]) {
         if (tab) {
@@ -190,7 +192,7 @@ async function promiseAll(promisesFn) {
     arr.push(await fn());
   }
   return arr;
-};
+}
 
 /**
  * Prevent modify util functions when development phase.

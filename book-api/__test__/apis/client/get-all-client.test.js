@@ -27,27 +27,31 @@ const requestBody = {
 const clientLength = 2;
 
 describe('get all client', () => {
-  commonTest('get all client api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: allClientUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'get all client api cors',
-      url: allClientUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'get all client common test');
+  commonTest(
+    'get all client api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: allClientUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'get all client api cors',
+        url: allClientUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'get all client common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, allClientUrl), () => {
     test('get all client success', (done) => {
@@ -56,24 +60,23 @@ describe('get all client', () => {
       globalThis.prismaClient.reader.findMany.mockResolvedValue(ClientDummyData.createMockClientList(clientLength));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.OK)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
-              expect(response.body).toEqual(clientExpectedList);
-              expect(response.body).toHaveLength(clientLength);
-              done();
-            });
-        });
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.OK)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
+            expect(response.body).toEqual(clientExpectedList);
+            expect(response.body).toHaveLength(clientLength);
+            done();
+          });
+      });
     });
 
     test('get all client success with exclude id', (done) => {
@@ -87,74 +90,70 @@ describe('get all client', () => {
       globalThis.prismaClient.reader.findMany.mockResolvedValue(ClientDummyData.createMockClientList(clientLength));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.OK)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBodyWithExcludeId)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({
-                  select: selectExpected,
-                  where: {
-                    reader_id: {
-                      not: requestBodyWithExcludeId.exclude
-                    }
-                  }
-                }
-              );
-              expect(response.body).toEqual(clientExpectedList);
-              expect(response.body).toHaveLength(clientLength);
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.OK)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBodyWithExcludeId)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({
+              select: selectExpected,
+              where: {
+                reader_id: {
+                  not: requestBodyWithExcludeId.exclude,
+                },
+              },
             });
-        });
+            expect(response.body).toEqual(clientExpectedList);
+            expect(response.body).toHaveLength(clientLength);
+            done();
+          });
+      });
     });
 
     test('get all client failed with authentication token unset', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get all client failed with session expired', (done) => {
       expect.hasAssertions();
-      destroySession()
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get all client failed with clients not found', (done) => {
@@ -162,45 +161,43 @@ describe('get all client', () => {
       globalThis.prismaClient.reader.findMany.mockResolvedValue([]);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.NOT_FOUND)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
-              expect(response.body).toEqual([]);
-              done();
-            });
-        });
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.NOT_FOUND)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
+            expect(response.body).toEqual([]);
+            done();
+          });
+      });
     });
 
     test('get all client failed with request body are empty', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .send({})
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(READER.LOAD_ALL_CLIENT_FAIL),
-                errors: [COMMON.REQUEST_DATA_EMPTY]
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .send({})
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(READER.LOAD_ALL_CLIENT_FAIL),
+              errors: [COMMON.REQUEST_DATA_EMPTY],
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get all client failed with undefined request body field', (done) => {
@@ -211,24 +208,23 @@ describe('get all client', () => {
       };
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .send(badRequestBody)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(READER.LOAD_ALL_CLIENT_FAIL),
-                errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)]
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .send(badRequestBody)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findMany).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(READER.LOAD_ALL_CLIENT_FAIL),
+              errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get all client failed with output validate error', (done) => {
@@ -237,25 +233,24 @@ describe('get all client', () => {
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
-              expect(response.body).toEqual({
-                message: COMMON.OUTPUT_VALIDATE_FAIL,
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
+            expect(response.body).toEqual({
+              message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get all client failed with server error', (done) => {
@@ -263,25 +258,24 @@ describe('get all client', () => {
       globalThis.prismaClient.reader.findMany.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(allClientUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect(HTTP_CODE.SERVER_ERROR)
-            .expect('Content-Type', /application\/json/)
-            .send(requestBody)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
-              expect(response.body).toEqual({
-                message: COMMON.INTERNAL_ERROR_MESSAGE,
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(allClientUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findMany).toHaveBeenCalledWith({ select: selectExpected });
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
-        });
+            done();
+          });
+      });
     });
   });
 });

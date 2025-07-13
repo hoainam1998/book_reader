@@ -5,7 +5,7 @@ const {
   autoGeneratePassword,
   signingResetPasswordToken,
   calcPages,
-  checkArrayHaveValues
+  checkArrayHaveValues,
 } = require('#utils');
 const { USER } = require('#messages');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
@@ -41,48 +41,48 @@ class UserService extends Service {
             OR: [
               {
                 last_name: {
-                  contains: keyword
-                }
+                  contains: keyword,
+                },
               },
               {
                 first_name: {
-                  contains: keyword
-                }
-              }
+                  contains: keyword,
+                },
+              },
             ],
           },
           orderBy: {
-            user_id: 'desc'
+            user_id: 'desc',
           },
           take: pageSize,
-          skip: offset
+          skip: offset,
         }),
         this.PrismaInstance.user.count({
           where: {
             OR: [
               {
                 last_name: {
-                  contains: keyword
-                }
+                  contains: keyword,
+                },
               },
               {
                 first_name: {
-                  contains: keyword
-                }
-              }
-            ]
-          }
-        })
+                  contains: keyword,
+                },
+              },
+            ],
+          },
+        }),
       ]);
     } else {
       paginationResultPromise = this.PrismaInstance.$transaction([
         this.PrismaInstance.user.findMany({
           select,
           orderBy: {
-            user_id: 'desc'
+            user_id: 'desc',
           },
           take: pageSize,
-          skip: offset
+          skip: offset,
         }),
         this.PrismaInstance.user.count(),
       ]);
@@ -110,10 +110,10 @@ class UserService extends Service {
   updateMfaState(mfaEnable, userId) {
     return this.PrismaInstance.user.update({
       where: {
-        user_id: userId
+        user_id: userId,
       },
       data: {
-        mfa_enable: mfaEnable
+        mfa_enable: mfaEnable,
       },
     });
   }
@@ -121,86 +121,93 @@ class UserService extends Service {
   updatePower(power, userId) {
     return this.PrismaInstance.user.update({
       where: {
-        user_id: userId
+        user_id: userId,
       },
       data: {
-        power
-      }
+        power,
+      },
     });
   }
 
   login(email, password, select) {
-    return this.PrismaInstance.user.findFirstOrThrow({
-      where: {
-        email
-      },
-      select: {
-        ...select,
-        email: true,
-        power: true,
-        password: true,
-        reset_password_token: true,
-      }
-    }).then((user) => {
-      return compare(password, user.password)
-        .then((compareResult) => {
+    return this.PrismaInstance.user
+      .findFirstOrThrow({
+        where: {
+          email,
+        },
+        select: {
+          ...select,
+          email: true,
+          power: true,
+          password: true,
+          reset_password_token: true,
+        },
+      })
+      .then((user) => {
+        return compare(password, user.password).then((compareResult) => {
           if (!compareResult) {
             throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
           }
           return user;
         });
-    });
+      });
   }
 
   async forgetPassword(email) {
     const password = autoGeneratePassword();
-    return this.PrismaInstance.user.update({
-      where: {
-        email
-      },
-      data: {
-        reset_password_token: signingResetPasswordToken(email),
-        password,
-      }
-    }).then((user) => ({ ...user, password }));
+    return this.PrismaInstance.user
+      .update({
+        where: {
+          email,
+        },
+        data: {
+          reset_password_token: signingResetPasswordToken(email),
+          password,
+        },
+      })
+      .then((user) => ({ ...user, password }));
   }
 
   resetPassword(resetPasswordToken, email, oldPassword, password) {
-    return this.PrismaInstance.user.findFirstOrThrow({
-      where: {
-        reset_password_token: resetPasswordToken,
-        email,
-      },
-    }).then(async (user) => {
-      const passwordCompareResult = await compare(oldPassword, user.password);
-      if (passwordCompareResult) {
-        return this.PrismaInstance.user.update({
-          where: {
-            reset_password_token: resetPasswordToken,
-            password: user.password,
-            email,
-          },
-          data: {
-            reset_password_token: null,
-            password
-          },
-        });
-      }
-      throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
-    });
+    return this.PrismaInstance.user
+      .findFirstOrThrow({
+        where: {
+          reset_password_token: resetPasswordToken,
+          email,
+        },
+      })
+      .then(async (user) => {
+        const passwordCompareResult = await compare(oldPassword, user.password);
+        if (passwordCompareResult) {
+          return this.PrismaInstance.user.update({
+            where: {
+              reset_password_token: resetPasswordToken,
+              password: user.password,
+              email,
+            },
+            data: {
+              reset_password_token: null,
+              password,
+            },
+          });
+        }
+        throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+      });
   }
 
   updateOtpCode(email) {
     const otpCode = generateOtp();
-    return this.PrismaInstance.user.update({
-      where: {
-        email,
-        mfa_enable: true,
-      },
-      data: {
-        otp_code: otpCode
-      },
-    }).then((user) => user.otp_code);
+    return this.PrismaInstance.user
+      .update({
+        where: {
+          email,
+          mfa_enable: true,
+        },
+        data: {
+          otp_code: otpCode,
+        },
+      })
+      .then((user) => user.otp_code);
   }
 
   verifyOtpCode(email, otp) {
@@ -211,8 +218,8 @@ class UserService extends Service {
         mfa_enable: true,
       },
       data: {
-        otp_code: null
-      }
+        otp_code: null,
+      },
     });
   }
 
@@ -247,7 +254,7 @@ class UserService extends Service {
   deleteUser(userId) {
     return this.PrismaInstance.user.delete({
       where: {
-        user_id: userId
+        user_id: userId,
       },
     });
   }
@@ -255,32 +262,35 @@ class UserService extends Service {
   getUserDetail(userId, select) {
     return this.PrismaInstance.user.findUniqueOrThrow({
       where: {
-        user_id: userId
+        user_id: userId,
       },
-      select
+      select,
     });
   }
 
   getAllUsers(exclude, select) {
     const conditions = exclude
-    ? {
-      where: {
-        user_id: {
-          not: exclude
+      ? {
+          where: {
+            user_id: {
+              not: exclude,
+            },
+          },
         }
-      },
-    } : {};
+      : {};
 
-    return this.PrismaInstance.user.findMany({
-      ...conditions,
-      select: { ...select, power: true },
-    }).then((result) => {
-     if (!checkArrayHaveValues(result)) {
-        graphqlNotFoundErrorOption.response = [];
-        throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
-      }
-      return result;
-    });
+    return this.PrismaInstance.user
+      .findMany({
+        ...conditions,
+        select: { ...select, power: true },
+      })
+      .then((result) => {
+        if (!checkArrayHaveValues(result)) {
+          graphqlNotFoundErrorOption.response = [];
+          throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
+        }
+        return result;
+      });
   }
 }
 

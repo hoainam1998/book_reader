@@ -1,10 +1,10 @@
 const PrismaField = require('./prisma-field');
 
 /**
-* Class contain the fields valid to select.
-* @class
-* @extends PrismaField
-*/
+ * Class contain the fields valid to select.
+ * @class
+ * @extends PrismaField
+ */
 class BookPrismaField extends PrismaField {
   _fields = {
     bookId: 'book_id',
@@ -20,11 +20,11 @@ class BookPrismaField extends PrismaField {
         name: true,
         category_id: true,
         avatar: true,
-      }
+      },
     },
     images: {
       as: 'book_image',
-      child: ['image', 'name']
+      child: ['image', 'name'],
     },
     authors: {
       as: 'book_author',
@@ -34,9 +34,9 @@ class BookPrismaField extends PrismaField {
             author_id: true,
             avatar: true,
             name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     },
   };
 }

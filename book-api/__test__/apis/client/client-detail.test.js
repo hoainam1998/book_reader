@@ -39,7 +39,7 @@ const requestBody = {
         name: true,
         authorId: true,
       },
-      createAt: true
+      createAt: true,
     },
     usedRead: {
       avatar: true,
@@ -48,33 +48,37 @@ const requestBody = {
         name: true,
         authorId: true,
       },
-      createAt: true
-    }
-  }
+      createAt: true,
+    },
+  },
 };
 
 describe('client detail', () => {
-  commonTest('client detail api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.CLIENT}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: clientDetailUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'client detail api cors',
-      url: clientDetailUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.CLIENT_ORIGIN_CORS,
-    }
-  ], 'client detail common test');
+  commonTest(
+    'client detail api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.CLIENT}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: clientDetailUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'client detail api cors',
+        url: clientDetailUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.CLIENT_ORIGIN_CORS,
+      },
+    ],
+    'client detail common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, clientDetailUrl), () => {
     test('get client detail will be success', (done) => {
@@ -84,95 +88,91 @@ describe('client detail', () => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
-            .expect(HTTP_CODE.OK)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  where: {
-                    reader_id: sessionData.clientId,
-                  },
-                  select: selectExpected,
-                })
-              );
-              expect(response.body).toEqual(clientDetailExpected);
-              done();
-            });
-        });
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.OK)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
+              expect.objectContaining({
+                where: {
+                  reader_id: sessionData.clientId,
+                },
+                select: selectExpected,
+              })
+            );
+            expect(response.body).toEqual(clientDetailExpected);
+            done();
+          });
+      });
     });
 
     test('get client detail failed with authentication token unset', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN,
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get client detail failed with session expired', (done) => {
       expect.hasAssertions();
-      destroySession()
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get client detail failed with request body empty', (done) => {
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send({})
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(READER.LOAD_DETAIL_FAIL),
-                errors: [COMMON.REQUEST_DATA_EMPTY]
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send({})
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(READER.LOAD_DETAIL_FAIL),
+              errors: [COMMON.REQUEST_DATA_EMPTY],
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get client detail failed with undefine request body field', (done) => {
@@ -183,24 +183,23 @@ describe('client detail', () => {
       };
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(badRequestBody)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(READER.LOAD_DETAIL_FAIL),
-                errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(badRequestBody)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(READER.LOAD_DETAIL_FAIL),
+              errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
             });
-        });
+            done();
+          });
+      });
     });
 
     test('get client detail failed with output validate error', (done) => {
@@ -209,39 +208,38 @@ describe('client detail', () => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  where: {
-                    reader_id: sessionData.clientId
-                  },
-                  select: selectExpected,
-                })
-              );
-              expect(response.body).toEqual({
-                message: COMMON.OUTPUT_VALIDATE_FAIL,
-              });
-              done();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
+              expect.objectContaining({
+                where: {
+                  reader_id: sessionData.clientId,
+                },
+                select: selectExpected,
+              })
+            );
+            expect(response.body).toEqual({
+              message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
-        });
+            done();
+          });
+      });
     });
 
     test.each([
       {
         describe: 'not found error',
         expected: {
-          message: READER.USER_NOT_FOUND
+          message: READER.USER_NOT_FOUND,
         },
         status: HTTP_CODE.NOT_FOUND,
         cause: PrismaNotFoundError,
@@ -253,36 +251,35 @@ describe('client detail', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
         cause: ServerError,
-      }
+      },
     ])('get client detail failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.reader.findUniqueOrThrow.mockRejectedValue(cause);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
-      signedTestCookie(sessionData, 'client')
-        .then((responseSign) => {
-          globalThis.api
-            .post(clientDetailUrl)
-            .set('authorization', apiKey)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
-            .expect(status)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              const selectExpected = parseToPrismaSelect.mock.results[0].value;
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  where: {
-                    reader_id: sessionData.clientId,
-                  },
-                  select: selectExpected,
-                })
-              );
-              expect(response.body).toEqual(expected);
-              done();
-            });
-        });
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(clientDetailUrl)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(status)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith(
+              expect.objectContaining({
+                where: {
+                  reader_id: sessionData.clientId,
+                },
+                select: selectExpected,
+              })
+            );
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
   });
 });

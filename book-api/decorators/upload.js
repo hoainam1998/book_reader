@@ -11,7 +11,7 @@ const upload = multer({
   storage: storage,
   limits: {
     fileSize: 1000000,
-    files: 10
+    files: 10,
   },
   fileFilter: (_, file, cb) => {
     const extensionFileIsValid = /.jpg|.jpeg|.png/.test(path.extname(file.originalname));
@@ -20,7 +20,7 @@ const upload = multer({
     } else {
       cb(new Error(COMMON.FILE_NOT_IMAGE));
     }
-  }
+  },
 });
 
 /**
@@ -28,7 +28,7 @@ const upload = multer({
  * @readonly
  * @enum {String}
  */
-UPLOAD_MODE
+UPLOAD_MODE;
 
 /**
  * Return upload file helper decorator.
@@ -55,8 +55,7 @@ module.exports = (mode, fields, maxCount) => {
             case UPLOAD_MODE.SINGLE:
               if (request.file) {
                 if (isEmptyFile(request.file)) {
-                  return response.status(HTTP_CODE.BAD_REQUEST)
-                    .json(messageCreator(COMMON.FILE_IS_EMPTY));
+                  return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(COMMON.FILE_IS_EMPTY));
                 } else {
                   args[0].body[fields] = convertFileToBase64(request.file);
                 }
@@ -65,57 +64,64 @@ module.exports = (mode, fields, maxCount) => {
               }
               break;
             case UPLOAD_MODE.ARRAY:
-              let haveEmptyFile = false;
-              args[0].body[fields] = request.files.map(file => {
-                if (isEmptyFile(file)) {
-                  haveEmptyFile = true;
-                } else {
-                  return convertFileToBase64(file);
+              {
+                let haveEmptyFile = false;
+                args[0].body[fields] = request.files.map((file) => {
+                  if (isEmptyFile(file)) {
+                    haveEmptyFile = true;
+                  } else {
+                    return convertFileToBase64(file);
+                  }
+                });
+                if (haveEmptyFile) {
+                  return response
+                    .status(HTTP_CODE.BAD_REQUEST)
+                    .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(fields)));
                 }
-              });
-              if (haveEmptyFile) {
-                return response.status(HTTP_CODE.BAD_REQUEST)
-                  .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(fields)));
               }
               break;
             case UPLOAD_MODE.FIELDS:
-              let nameOfFieldHaveEmptyFile = '';
-              if (request.files) {
-                const fieldName = fields.find(({ name }) => {
-                  if (request.files[name]) {
-                    request.body[name] = request.files[name].map(file => {
-                      if (isEmptyFile(file)) {
-                        nameOfFieldHaveEmptyFile = name;
-                      } else {
-                        return convertFileToBase64(file);
-                      }
-                    });
-                    return false;
-                  } else {
-                    return true;
+              {
+                let nameOfFieldHaveEmptyFile = '';
+                if (request.files) {
+                  const fieldName = fields.find(({ name }) => {
+                    if (request.files[name]) {
+                      request.body[name] = request.files[name].map((file) => {
+                        if (isEmptyFile(file)) {
+                          nameOfFieldHaveEmptyFile = name;
+                        } else {
+                          return convertFileToBase64(file);
+                        }
+                      });
+                      return false;
+                    } else {
+                      return true;
+                    }
+                  });
+
+                  if (nameOfFieldHaveEmptyFile) {
+                    return response
+                      .status(HTTP_CODE.BAD_REQUEST)
+                      .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(nameOfFieldHaveEmptyFile)));
                   }
-                });
 
-                if (nameOfFieldHaveEmptyFile) {
-                  return response.status(HTTP_CODE.BAD_REQUEST)
-                    .json(messageCreator(COMMON.FILE_FIELD_EMPTY.format(nameOfFieldHaveEmptyFile)));
+                  if (fieldName) {
+                    return response
+                      .status(HTTP_CODE.BAD_REQUEST)
+                      .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(fieldName.name)));
+                  }
+                } else {
+                  return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(COMMON.FILE_IS_EMPTY));
                 }
-
-                if (fieldName) {
-                  return response.status(HTTP_CODE.BAD_REQUEST)
-                    .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(fieldName.name)));
-                }
-              } else {
-                return response.status(HTTP_CODE.BAD_REQUEST)
-                  .json(messageCreator(COMMON.FILE_IS_EMPTY));
               }
               break;
-            default: break;
+            default:
+              break;
           }
           originalMethod.apply(null, args);
         }
       });
     };
     return target;
-  }
+  };
 };
