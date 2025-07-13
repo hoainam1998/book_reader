@@ -1,23 +1,25 @@
 const DummyDataApi = require('./api');
 
-const mockData = Object.defineProperty({
-  author_id: Date.now().toString(),
-  name: 'author name',
-  sex: 0,
-  avatar: 'avatar',
-  year_of_birth: 1900,
-  year_of_dead: 2000,
-}, 'story',
+const mockData = Object.defineProperty(
+  {
+    author_id: Date.now().toString(),
+    name: 'author name',
+    sex: 0,
+    avatar: 'avatar',
+    year_of_birth: 1900,
+    year_of_dead: 2000,
+  },
+  'story',
   {
     get() {
       return `/html/author/${this.author_id}//${this.name}.html, /json/author/${this.author_id}/${this.name}.json`;
-    }
+    },
   }
 );
 
 const requestData = {
   ...mockData,
-   story: {
+  story: {
     html: '<div>content</div>',
     json: '{ "json": content }',
   },
@@ -33,13 +35,10 @@ class AuthorDummyData extends DummyDataApi {
   static default = new AuthorDummyData();
 
   /**
-  * Create author dummy data instance.
-  */
+   * Create author dummy data instance.
+   */
   constructor() {
-    super(
-      mockData,
-      requestData,
-      {
+    super(mockData, requestData, {
       authorId: expect.any(String),
       name: expect.any(String),
       sex: expect.any(Number),
@@ -67,7 +66,7 @@ class AuthorDummyData extends DummyDataApi {
     return Array.apply(null, Array(length)).map(() => {
       return AuthorDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
     });
-  };
+  }
 
   /**
    * Create the author list for test.
@@ -76,9 +75,9 @@ class AuthorDummyData extends DummyDataApi {
    * @param {number} length - The number of authors who want to create.
    * @return {object[]} - The author list.
    */
-  static createMockAuthorList (length) {
+  static createMockAuthorList(length) {
     return Array.apply(null, Array(length)).map(() => AuthorDummyData.MockData);
-  };
+  }
 }
 
 module.exports = AuthorDummyData;

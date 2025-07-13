@@ -6,11 +6,11 @@ const SharedService = require('#services/shared');
 const { Socket } = require('#services/socket');
 
 /**
-* Base router class.
-* This class organize the base methods will using another router extended class.
-* @class
-* @extends Singleton
-*/
+ * Base router class.
+ * This class organize the base methods will using another router extended class.
+ * @class
+ * @extends Singleton
+ */
 class Router extends Singleton {
   _express = null;
   _router = null;
@@ -19,25 +19,25 @@ class Router extends Singleton {
   _redisClient = null;
 
   /**
-  * Prisma client instance.
-  *
-  * @static
-  */
+   * Prisma client instance.
+   *
+   * @static
+   */
   static PrismaClient;
 
   /**
-  * Redis client instance.
-  *
-  * @static
-  */
+   * Redis client instance.
+   *
+   * @static
+   */
   static RedisClient;
 
   /**
-  * Create router instance.
-  *
-  * @param {object} express - The express object.
-  * @param {object} graphqlExecute - The graphql execute instance.
-  */
+   * Create router instance.
+   *
+   * @param {object} express - The express object.
+   * @param {object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(Router);
     this._express = express;
@@ -50,83 +50,82 @@ class Router extends Singleton {
       if (graphqlExecute) {
         next();
       } else {
-        res.status(HTTP_CODE.SERVER_ERROR)
-          .json(messageCreator('Server error. Please contact my admin!'));
+        res.status(HTTP_CODE.SERVER_ERROR).json(messageCreator('Server error. Please contact my admin!'));
       }
     });
   }
 
   /**
-  * Return router object.
-  *
-  * @return {object} - The router object.
-  */
+   * Return router object.
+   *
+   * @return {object} - The router object.
+   */
   get Router() {
     return this._router;
   }
 
   /**
-  * Return shared service object.
-  *
-  * @return {object} - The shared service object.
-  */
+   * Return shared service object.
+   *
+   * @return {object} - The shared service object.
+   */
   get Service() {
     return this._service;
   }
 
   /**
-  * Return socket startup object.
-  *
-  * @return {object} - The socket startup object.
-  */
+   * Return socket startup object.
+   *
+   * @return {object} - The socket startup object.
+   */
   get Socket() {
     return this._socket;
   }
 
   /**
-  * Return redis store object.
-  *
-  * @return {object} - The redis store object.
-  */
+   * Return redis store object.
+   *
+   * @return {object} - The redis store object.
+   */
   get RedisStore() {
     return this._redisClient;
   }
 
   /**
-  * Register post request method.
-  *
-  * @param {...*} - The post arguments method.
-  */
+   * Register post request method.
+   *
+   * @param {...*} - The post arguments method.
+   */
   @endpoint
   post(...args) {
     this._router.post.apply(this._router, args);
   }
 
   /**
-  * Register put request method.
-  *
-  * @param {...*} - The put arguments method.
-  */
+   * Register put request method.
+   *
+   * @param {...*} - The put arguments method.
+   */
   @endpoint
   put(...args) {
     this._router.put.apply(this._router, args);
   }
 
   /**
-  * Register get request method.
-  *
-  * @param {...*} - The get arguments method.
-  */
+   * Register get request method.
+   *
+   * @param {...*} - The get arguments method.
+   */
   @endpoint
   get(...args) {
     this._router.get.apply(this._router, args);
   }
 
   /**
-  * Register delete request method.
-  *
-  * @param {...*} - The delete arguments method.
-  */
+   * Register delete request method.
+   *
+   * @param {...*} - The delete arguments method.
+   */
   @endpoint
   delete(...args) {
     this._router.delete.apply(this._router, args);

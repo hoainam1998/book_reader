@@ -1,21 +1,21 @@
 const { validation } = require('#services/validator');
 
 /**
-* Adding class name and sealing validate object.
-*
-* @param {class} cls - The validate class.
-* @param {string} className - class name.
-* @return {class} The sealed object.
-*/
+ * Adding class name and sealing validate object.
+ *
+ * @param {class} cls - The validate class.
+ * @param {string} className - class name.
+ * @return {class} The sealed object.
+ */
 const classCreator = (cls, className) => {
   // add class name for validate instance
   cls.prototype.className = className;
 
   return class extends cls {
     /**
-    * Create validate instance.
-    * @constructor
-    */
+     * Create validate instance.
+     * @constructor
+     */
     constructor() {
       super();
       // to ensure, can not add more fields to this object.
@@ -28,19 +28,19 @@ const classCreator = (cls, className) => {
 };
 
 /**
-* Create a validate class.
-*
-* @param {...*} args - The parameters.
-* @return {class} The validate class.
-*/
+ * Create a validate class.
+ *
+ * @param {...*} args - The parameters.
+ * @return {class} The validate class.
+ */
 const Validation = (...args) => {
   /**
-  * Create validate class.
-  *
-  * @param {string} className - The class name.
-  * @param {Function} constructorFn - The class creator.
-  * @return {class} The validate class.
-  */
+   * Create validate class.
+   *
+   * @param {string} className - The class name.
+   * @param {Function} constructorFn - The class creator.
+   * @return {class} The validate class.
+   */
   const initClass = (className, constructorFn) => {
     const validators = validation(className);
     return constructorFn(validators, className);
@@ -61,5 +61,5 @@ const Validation = (...args) => {
 
 module.exports = {
   classCreator,
-  Validation
+  Validation,
 };

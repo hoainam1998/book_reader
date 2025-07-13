@@ -1,10 +1,5 @@
 const { compare } = require('bcrypt');
-const {
-  passwordHashing,
-  signingResetPasswordToken,
-  autoGeneratePassword,
-  signLoginToken
-} = require('#utils');
+const { passwordHashing, signingResetPasswordToken, autoGeneratePassword } = require('#utils');
 
 module.exports = (prisma) => {
   return {
@@ -22,7 +17,7 @@ module.exports = (prisma) => {
       };
 
       return {
-        ...await query(args),
+        ...(await query(args)),
         plain_password: firstLoginPassword,
       };
     },
@@ -50,7 +45,7 @@ module.exports = (prisma) => {
 
       if (oldUser) {
         if (args.data.password) {
-          if (!await compare(args.data.password, oldUser.password)) {
+          if (!(await compare(args.data.password, oldUser.password))) {
             args.data.password = await passwordHashing(args.data.password);
           }
         }

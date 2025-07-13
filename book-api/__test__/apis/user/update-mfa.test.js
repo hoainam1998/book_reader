@@ -5,7 +5,13 @@ const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, PATH, METHOD, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, destroySession, signedTestCookie } = require('#test/resources/auth');
+const {
+  mockUser,
+  authenticationToken,
+  sessionData,
+  destroySession,
+  signedTestCookie,
+} = require('#test/resources/auth');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const updateMfaUrl = UserRoutePath.updateMfa.abs;
@@ -16,103 +22,107 @@ const requestBody = {
 };
 
 describe('update mfa', () => {
-  commonTest('update mfa api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: updateMfaUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'update mfa api cors',
-      url: updateMfaUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'update mfa common test');
+  commonTest(
+    'update mfa api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: updateMfaUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'update mfa api cors',
+        url: updateMfaUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'update mfa common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, updateMfaUrl), () => {
     test('update mfa will be success', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          const cookie = responseSign.header['set-cookie'];
-          globalThis.api.post(updateMfaUrl)
-            .set('authorization', authenticationToken)
-            .set('Cookie', cookie)
-            .send(requestBody)
-            .expect(HTTP_CODE.CREATED)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-                expect.objectContaining({
-                  where: {
-                    user_id: requestBody.userId
-                  },
-                  data: {
-                    mfa_enable: requestBody.mfaEnable
-                  }
-                })
-              );
-              expect(response.body).toEqual({
-                message: USER.UPDATE_MFA_STATE_SUCCESS.format(mockUser.email)
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        const cookie = responseSign.header['set-cookie'];
+        globalThis.api
+          .post(updateMfaUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', cookie)
+          .send(requestBody)
+          .expect(HTTP_CODE.CREATED)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+              expect.objectContaining({
+                where: {
+                  user_id: requestBody.userId,
+                },
+                data: {
+                  mfa_enable: requestBody.mfaEnable,
+                },
+              })
+            );
+            expect(response.body).toEqual({
+              message: USER.UPDATE_MFA_STATE_SUCCESS.format(mockUser.email),
             });
-        });
+            done();
+          });
+      });
     });
 
     test('update mfa failed with authentication token unset', (done) => {
       expect.hasAssertions();
 
-      signedTestCookie(sessionData.user)
-        .then((responseSign) => {
-          const cookie = responseSign.header['set-cookie'];
-          globalThis.api.post(updateMfaUrl)
-            .send(requestBody)
-            .set('Cookie', cookie)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN,
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        const cookie = responseSign.header['set-cookie'];
+        globalThis.api
+          .post(updateMfaUrl)
+          .send(requestBody)
+          .set('Cookie', cookie)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
+            done();
+          });
       });
     });
 
     test('update mfa failed with session expired', (done) => {
       expect.hasAssertions();
 
-      destroySession()
-        .then(() => {
-          globalThis.api.post(updateMfaUrl)
-            .send(requestBody)
-            .set('authorization', authenticationToken)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .expect('Content-Type', /application\/json/)
-            .then((response) => {
-              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then(() => {
+        globalThis.api
+          .post(updateMfaUrl)
+          .send(requestBody)
+          .set('authorization', authenticationToken)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
+      });
     });
 
     test('update mfa failed with not permission error', (done) => {
@@ -124,7 +134,8 @@ describe('update mfa', () => {
       });
 
       expect.hasAssertions();
-      globalThis.api.post(updateMfaUrl)
+      globalThis.api
+        .post(updateMfaUrl)
         .set('authorization', authenticationToken)
         .send(requestBody)
         .expect(HTTP_CODE.NOT_PERMISSION)
@@ -132,7 +143,7 @@ describe('update mfa', () => {
         .then((response) => {
           expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
-            message: USER.NOT_PERMISSION
+            message: USER.NOT_PERMISSION,
           });
           done();
         });
@@ -146,7 +157,8 @@ describe('update mfa', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api.post(updateMfaUrl)
+      globalThis.api
+        .post(updateMfaUrl)
         .set('authorization', authenticationToken)
         .send({})
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -164,7 +176,7 @@ describe('update mfa', () => {
     test('update mfa failed with request body was missed field', (done) => {
       // missing userId field.
       const badRequestBody = {
-        mfaEnable: requestBody.mfaEnable
+        mfaEnable: requestBody.mfaEnable,
       };
 
       globalThis.TestServer.addMiddleware((request) => {
@@ -174,7 +186,8 @@ describe('update mfa', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api.post(updateMfaUrl)
+      globalThis.api
+        .post(updateMfaUrl)
         .set('authorization', authenticationToken)
         .send(badRequestBody)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -191,18 +204,19 @@ describe('update mfa', () => {
     });
 
     test('update mfa failed with output validated error', (done) => {
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
-        () => GraphqlResponse.dto.parse({
+      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
+        GraphqlResponse.dto.parse({
           data: {
-            message: 'unknown'
-          }
+            message: 'unknown',
+          },
         })
       );
 
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
-      globalThis.api.post(updateMfaUrl)
+      globalThis.api
+        .post(updateMfaUrl)
         .set('authorization', authenticationToken)
         .send(requestBody)
         .expect(HTTP_CODE.BAD_REQUEST)
@@ -212,11 +226,11 @@ describe('update mfa', () => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
-                user_id: requestBody.userId
+                user_id: requestBody.userId,
               },
               data: {
-                mfa_enable: requestBody.mfaEnable
-              }
+                mfa_enable: requestBody.mfaEnable,
+              },
             })
           );
           expect(response.body).toEqual({
@@ -231,23 +245,24 @@ describe('update mfa', () => {
         describe: 'user not found',
         cause: PrismaNotFoundError,
         expected: {
-          message: USER.USER_NOT_FOUND
+          message: USER.USER_NOT_FOUND,
         },
-        status: HTTP_CODE.NOT_FOUND
+        status: HTTP_CODE.NOT_FOUND,
       },
       {
         describe: 'server error',
         cause: ServerError,
         expected: {
-          message: COMMON.INTERNAL_ERROR_MESSAGE
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
-        status: HTTP_CODE.SERVER_ERROR
-      }
+        status: HTTP_CODE.SERVER_ERROR,
+      },
     ])('update mfa failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.user.update.mockRejectedValue(cause);
 
       expect.hasAssertions();
-      globalThis.api.post(updateMfaUrl)
+      globalThis.api
+        .post(updateMfaUrl)
         .set('authorization', authenticationToken)
         .send(requestBody)
         .expect(status)
@@ -257,11 +272,11 @@ describe('update mfa', () => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
             expect.objectContaining({
               where: {
-                user_id: requestBody.userId
+                user_id: requestBody.userId,
               },
               data: {
-                mfa_enable: requestBody.mfaEnable
-              }
+                mfa_enable: requestBody.mfaEnable,
+              },
             })
           );
           expect(response.body).toEqual(expected);

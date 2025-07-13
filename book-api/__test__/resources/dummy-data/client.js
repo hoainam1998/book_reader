@@ -1,18 +1,13 @@
 const DummyDataApi = require('./api');
-const {
-  autoGeneratePassword,
-  passwordHashing,
-  signClientResetPasswordToken,
-  signClientLoginToken
-} = require('#utils');
+const { autoGeneratePassword, passwordHashing, signClientResetPasswordToken, signClientLoginToken } = require('#utils');
 const randomPassword = autoGeneratePassword();
 
 /**
-  * Create a book list.
-  *
-  * @param {number} amount - The book amount.
-  * @return {*[]} - The book list.
-  */
+ * Create a book list.
+ *
+ * @param {number} amount - The book amount.
+ * @return {*[]} - The book list.
+ */
 const createBooks = (amount) => {
   return Array.apply(null, Array(amount)).map((_, index) => ({
     book: {
@@ -21,7 +16,7 @@ const createBooks = (amount) => {
       avatar: `avatar ${index}`,
       createAt: Date.now().toString(),
       authors: [],
-    }
+    },
   }));
 };
 
@@ -110,7 +105,7 @@ class ClientDummyData extends DummyDataApi {
     return Array.apply(null, Array(length)).map(() => {
       return ClientDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
     });
-  };
+  }
 
   /**
    * Create the client list for test.
@@ -119,9 +114,9 @@ class ClientDummyData extends DummyDataApi {
    * @param {number} length - The number of clients who want to create.
    * @return {object[]} - The client list.
    */
-  static createMockClientList (length) {
+  static createMockClientList(length) {
     return Array.apply(null, Array(length)).map(() => ClientDummyData.MockData);
-  };
+  }
 
   /**
    * Access session data.
@@ -140,7 +135,7 @@ class ClientDummyData extends DummyDataApi {
         clientId: this.MockData.reader_id,
         email: this.MockData.email,
         apiKey: signClientLoginToken(this.MockData.email),
-      }
+      },
     };
   }
 }

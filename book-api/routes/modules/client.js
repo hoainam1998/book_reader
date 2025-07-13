@@ -37,11 +37,11 @@ const ClientRoutePath = require('#services/route-paths/client');
  */
 class ClientRouter extends Router {
   /**
-  * Create client routes instance.
-  *
-  * @param {Object} express - The express object.
-  * @param {Object} graphqlExecute - The graphql execute instance.
-  */
+   * Create client routes instance.
+   *
+   * @param {Object} express - The express object.
+   * @param {Object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post(ClientRoutePath.signUp, onlyAllowOneDevice, this._signup);
@@ -57,7 +57,7 @@ class ClientRouter extends Router {
   }
 
   @validation(ClientPagination, {
-    error_message: READER.PAGINATION_LOAD_CLIENT_FAIL
+    error_message: READER.PAGINATION_LOAD_CLIENT_FAIL,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(ClientPaginationResponse)
@@ -65,9 +65,7 @@ class ClientRouter extends Router {
     const query = `query ClientPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
       client {
         pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
-          list ${
-            req.body.query
-          },
+          list ${req.body.query},
           total,
           page,
           pages,
@@ -76,7 +74,9 @@ class ClientRouter extends Router {
       }
     }`;
 
-    return self.execute(query, {
+    return self.execute(
+      query,
+      {
         pageSize: req.body.pageSize,
         pageNumber: req.body.pageNumber,
         keyword: req.body.keyword,
@@ -91,9 +91,7 @@ class ClientRouter extends Router {
   _getAllClient(req, res, next, self) {
     const query = `query GetAllClient($exclude: ID) {
       client {
-        all(exclude: $exclude) ${
-          req.body.query
-        }
+        all(exclude: $exclude) ${req.body.query}
       }
     }`;
     return self.execute(query, { exclude: req.body.exclude }, req.body.query);
@@ -129,15 +127,17 @@ class ClientRouter extends Router {
   _detail(req, res, next, self) {
     const query = `query ClientDetail ($clientId: ID!) {
       client {
-        detail(clientId: $clientId) ${
-          req.body.query
-        }
+        detail(clientId: $clientId) ${req.body.query}
       }
     }`;
 
-    return self.execute(query, {
-      clientId: req.session.client.clientId,
-    }, req.body.query);
+    return self.execute(
+      query,
+      {
+        clientId: req.session.client.clientId,
+      },
+      req.body.query
+    );
   }
 
   @validation(SignUp, { error_message: READER.SIGNUP_FAIL })
@@ -179,29 +179,29 @@ class ClientRouter extends Router {
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
-  _forgetPassword(req, res, next, self) {
+  _forgetPassword(req) {
     const url = getOriginInternalServerUrl(req);
 
-    return fetchHelper(`${url}/generated-reset-password-token`,
+    return fetchHelper(
+      `${url}/generated-reset-password-token`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       JSON.stringify(req.body)
     )
-    .then(async (response) => {
-      if (HTTP_CODE.OK !== response.status) {
-        const json = await response.json();
-        return Promise.reject({ ...json, status: response.status });
-      }
-      return response.json();
-    })
-    .then((json) => {
-      const { resetPasswordToken, message, password } = json;
-      const link = getClientResetPasswordLink(resetPasswordToken);
-      return EmailService.sendPassword(req.body.email, link, password)
-        .then(() => messageCreator(message));
-    });
+      .then(async (response) => {
+        if (HTTP_CODE.OK !== response.status) {
+          const json = await response.json();
+          return Promise.reject({ ...json, status: response.status });
+        }
+        return response.json();
+      })
+      .then((json) => {
+        const { resetPasswordToken, message, password } = json;
+        const link = getClientResetPasswordLink(resetPasswordToken);
+        return EmailService.sendPassword(req.body.email, link, password).then(() => messageCreator(message));
+      });
   }
 
   @validation(ResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
@@ -219,7 +219,7 @@ class ClientRouter extends Router {
     if (req.body.password === req.body.oldPassword) {
       return {
         status: HTTP_CODE.UNAUTHORIZED,
-        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE)
+        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE),
       };
     }
 
@@ -228,19 +228,19 @@ class ClientRouter extends Router {
       if (decodedClient.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH)
+          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH),
         };
       }
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED)
+          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED),
         };
       } else {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID)
+          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID),
         };
       }
     }
@@ -275,29 +275,30 @@ class ClientRouter extends Router {
 
     const query = `query Login($email: String!, $password: String!) {
       client {
-        login(email: $email, password: $password) ${
-          req.body.query
-        }
+        login(email: $email, password: $password) ${req.body.query}
       }
     }`;
 
-    const promise = self.execute(query, {
-      email: req.body.email,
-      password: req.body.password,
-    }, req.body.query);
+    const promise = self.execute(
+      query,
+      {
+        email: req.body.email,
+        password: req.body.password,
+      },
+      req.body.query
+    );
 
     return getGeneratorFunctionData(promise).then((result) => {
       const client = result?.data?.client?.login;
       if (client) {
-        return self.Service.updateClientSessionId(req.session.id, client.clientId)
-          .then(() => {
-            req.session.client = {
-              clientId: client.clientId,
-              email: client.email || req.body.email,
-              apiKey: client.apiKey,
-            };
-            return client;
-          });
+        return self.Service.updateClientSessionId(req.session.id, client.clientId).then(() => {
+          req.session.client = {
+            clientId: client.clientId,
+            email: client.email || req.body.email,
+            apiKey: client.apiKey,
+          };
+          return client;
+        });
       }
       return result;
     });
@@ -305,12 +306,11 @@ class ClientRouter extends Router {
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
-   _logout(req, res, next, self) {
-    return self.Service.deleteClientSessionId(req.session.client.clientId)
-      .then(async () => {
-        await req.session.destroy();
-        return messageCreator(USER.LOGOUT_SUCCESS);
-      });
+  _logout(req, res, next, self) {
+    return self.Service.deleteClientSessionId(req.session.client.clientId).then(async () => {
+      await req.session.destroy();
+      return messageCreator(USER.LOGOUT_SUCCESS);
+    });
   }
 }
 

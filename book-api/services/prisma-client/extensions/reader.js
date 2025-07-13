@@ -35,7 +35,7 @@ module.exports = (prisma) => {
       });
 
       if (args.data.password) {
-        if (!await compare(args.data.password, oldUser.password)) {
+        if (!(await compare(args.data.password, oldUser.password))) {
           args.data.password = await passwordHashing(args.data.password);
         } else {
           args.data.password = oldUser.password;
@@ -43,6 +43,6 @@ module.exports = (prisma) => {
       }
 
       return query(args);
-    }
+    },
   };
 };

@@ -14,58 +14,58 @@ const ClientRouter = graphqlExecuteWrapper(loggerWrapper(require('./modules/clie
 const { PATH } = require('#constants');
 
 /**
-* Organize all router instance.
-* @class
-*/
+ * Organize all router instance.
+ * @class
+ */
 class RouterFactory {
   /**
-  * Return all router instance.
-  *
-  * @static
-  * @param {object} express - The express object.
-  * @param {GraphQLSchema} schema - The graphql schema instance.
-  */
+   * Return all router instance.
+   *
+   * @static
+   * @param {object} express - The express object.
+   * @param {GraphQLSchema} schema - The graphql schema instance.
+   */
   static getRoutes(express, schema) {
     return [
       {
         path: PATH.CATEGORY,
-        route: new CategoryRouter(express, new GraphqlExecute(schema, CategoryPrismaField))
+        route: new CategoryRouter(express, new GraphqlExecute(schema, CategoryPrismaField)),
       },
       {
         path: PATH.BOOK,
-        route: new BookRouter(express, new GraphqlExecute(schema, BookPrismaField))
+        route: new BookRouter(express, new GraphqlExecute(schema, BookPrismaField)),
       },
       {
         path: PATH.USER,
-        route: new UserRouter(express, new GraphqlExecute(schema, UserPrismaField))
+        route: new UserRouter(express, new GraphqlExecute(schema, UserPrismaField)),
       },
       {
         path: PATH.AUTHOR,
-        route: new AuthorRouter(express, new GraphqlExecute(schema, AuthorPrismaField))
+        route: new AuthorRouter(express, new GraphqlExecute(schema, AuthorPrismaField)),
       },
       {
         path: PATH.CLIENT,
-        route: new ClientRouter(express, new GraphqlExecute(schema, ClientPrismaField))
-      }
+        route: new ClientRouter(express, new GraphqlExecute(schema, ClientPrismaField)),
+      },
     ];
   }
 
   /**
-  * Assign prisma client for rooter.
-  *
-  * @static
-  * @param {object} value - The prisma client object.
-  */
+   * Assign prisma client for rooter.
+   *
+   * @static
+   * @param {object} value - The prisma client object.
+   */
   static set PrismaClient(value) {
     Router.PrismaClient = value;
   }
 
   /**
-  * Assign redis client for rooter.
-  *
-  * @static
-  * @param {object} value - The redis client object.
-  */
+   * Assign redis client for rooter.
+   *
+   * @static
+   * @param {object} value - The redis client object.
+   */
   static set RedisClient(value) {
     Router.RedisClient = value;
   }

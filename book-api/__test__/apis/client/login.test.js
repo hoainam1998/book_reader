@@ -30,27 +30,31 @@ const requestBody = {
 };
 
 describe('client login', () => {
-  commonTest('login api common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.CLIENT}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: loginUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'login api cors',
-      url: loginUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.CLIENT_ORIGIN_CORS,
-    }
-  ], 'login common test');
+  commonTest(
+    'login api common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.CLIENT}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: loginUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'login api cors',
+        url: loginUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.CLIENT_ORIGIN_CORS,
+      },
+    ],
+    'login common test'
+  );
 
   describe(createDescribeTest(METHOD.POST, loginUrl), () => {
     test('login will be success', async () => {
@@ -74,7 +78,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },
@@ -106,7 +110,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },
@@ -145,7 +149,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },
@@ -188,7 +192,7 @@ describe('client login', () => {
       });
       const requestBodyWithNewPassword = {
         ...requestBody,
-        password:  autoGeneratePassword()
+        password: autoGeneratePassword(),
       };
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
@@ -205,7 +209,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },
@@ -266,18 +270,18 @@ describe('client login', () => {
         describe: 'user not found',
         cause: PrismaNotFoundError,
         expected: {
-          message: READER.USER_NOT_FOUND
+          message: READER.USER_NOT_FOUND,
         },
-        status: HTTP_CODE.UNAUTHORIZED
+        status: HTTP_CODE.UNAUTHORIZED,
       },
       {
         describe: 'server error',
         cause: ServerError,
         expected: {
-          message: COMMON.INTERNAL_ERROR_MESSAGE
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
         status: HTTP_CODE.SERVER_ERROR,
-      }
+      },
     ])('login failed with $describe', async ({ cause, expected, status }) => {
       globalThis.prismaClient.reader.findFirstOrThrow.mockRejectedValue(cause);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
@@ -295,7 +299,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },
@@ -326,7 +330,7 @@ describe('client login', () => {
               email: requestBody.email,
             },
             {
-               reader_id: requestBody.email,
+              reader_id: requestBody.email,
             },
           ],
         },

@@ -24,14 +24,12 @@ const isValueEqual = function (valueToCompare) {
   } else if (this instanceof Object && valueToCompare instanceof Object) {
     // if they are plain object, compare value property of them.
     if (Object.keys(this).length && Object.keys(valueToCompare).length) {
-      return Array.from(Object.entries(this)).every(
-        ([key, val]) => {
-          if (typeof val === 'object' && typeof valueToCompare[key] === 'object' && !!val) {
-            return val.isValueEqual(valueToCompare[key]);
-          }
-          return val === valueToCompare[key];
+      return Array.from(Object.entries(this)).every(([key, val]) => {
+        if (typeof val === 'object' && typeof valueToCompare[key] === 'object' && !!val) {
+          return val.isValueEqual(valueToCompare[key]);
         }
-      );
+        return val === valueToCompare[key];
+      });
     } else {
       return false;
     }
@@ -50,7 +48,7 @@ const isEmpty = function () {
   if (Object.keys(this).length === 0) {
     return true;
   } else {
-    return Object.values(this).every(v => v === null || v === undefined);
+    return Object.values(this).every((v) => v === null || v === undefined);
   }
 };
 
@@ -90,5 +88,5 @@ Object.defineProperties(Object.prototype, {
     configurable: false,
     enumerable: false,
     value: isDefined,
-  }
+  },
 });

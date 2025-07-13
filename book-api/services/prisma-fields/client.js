@@ -1,10 +1,10 @@
 const PrismaField = require('./prisma-field');
 
 /**
-* Class contain the fields valid to select.
-* @class
-* @extends PrismaField
-*/
+ * Class contain the fields valid to select.
+ * @class
+ * @extends PrismaField
+ */
 class ClientPrismaField extends PrismaField {
   _fields = {
     clientId: 'reader_id',
@@ -30,13 +30,13 @@ class ClientPrismaField extends PrismaField {
                   select: {
                     name: true,
                     author_id: true,
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     readLate: {
       as: 'read_late',
@@ -52,14 +52,14 @@ class ClientPrismaField extends PrismaField {
                   select: {
                     name: true,
                     author_id: true,
-                  }
-                }
-              }
-            }
-          }
+                  },
+                },
+              },
+            },
+          },
         },
         added_at: true,
-      }
+      },
     },
     usedRead: {
       as: 'used_read',
@@ -75,15 +75,15 @@ class ClientPrismaField extends PrismaField {
                   select: {
                     name: true,
                     author_id: true,
-                  }
-                }
-              }
-            }
-          }
+                  },
+                },
+              },
+            },
+          },
         },
         added_at: true,
-      }
-    }
+      },
+    },
   };
 }
 

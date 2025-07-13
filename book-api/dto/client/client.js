@@ -3,10 +3,10 @@ const OutputValidate = require('#services/output-validate');
 const { signClientLoginToken } = require('#utils');
 
 /**
-* Convert the books to books dto.
-* @param {*[]} items - The books.
-* @returns {*[]} - The books after converted.
-*/
+ * Convert the books to books dto.
+ * @param {*[]} items - The books.
+ * @returns {*[]} - The books after converted.
+ */
 const convertToRelateBook = (items) => {
   return items.map(({ book, added_at }) => ({
     bookId: book.book_id || null,

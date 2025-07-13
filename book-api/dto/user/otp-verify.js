@@ -16,6 +16,6 @@ class OtpVerify extends OutputValidate {
   get apiKey() {
     return signLoginToken(this.user_id, this.email, this.power);
   }
-};
+}
 
 module.exports = OtpVerify;

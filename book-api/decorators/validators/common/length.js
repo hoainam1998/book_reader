@@ -12,7 +12,7 @@ const Length = (limit, message, options) => {
   if (options) {
     return {
       groups: options.groups,
-      validator: (value) => checkLength(value, limit, message)
+      validator: (value) => checkLength(value, limit, message),
     };
   } else {
     return (value) => checkLength(value, limit, message);

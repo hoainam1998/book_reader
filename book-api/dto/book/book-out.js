@@ -50,5 +50,5 @@ module.exports = {
   AllBooksResponse: zodValidateClassWrapper(AllBooksResponse, BookDTO),
   BookCreatedResponse: zodValidateClassWrapper(BookCreatedResponse, BookCreated),
   BookDetailResponse: zodValidateClassWrapper(BookDetailResponse, BookDetailDTO),
-  BookPaginationResponse: zodValidateClassWrapper(BookPaginationResponse, PaginationResponse)
+  BookPaginationResponse: zodValidateClassWrapper(BookPaginationResponse, PaginationResponse),
 };

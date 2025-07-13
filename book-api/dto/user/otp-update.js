@@ -7,6 +7,6 @@ class OtpUpdate extends OutputValidate {
 
   @Type(() => String)
   otp;
-};
+}
 
 module.exports = OtpUpdate;

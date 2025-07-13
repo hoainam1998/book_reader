@@ -17,7 +17,7 @@ module.exports = (req, res, next, layers) => {
   const matches = /(?!^(\/\w+))(\/(\w|-)+){1,2}/.exec(req.originalUrl);
   if (matches && matches.length) {
     const realUrl = matches[0];
-    const layerFound = layers.find(layer => layer.route.test(req.originalUrl) && layer.endpoint.test(realUrl));
+    const layerFound = layers.find((layer) => layer.route.test(req.originalUrl) && layer.endpoint.test(realUrl));
 
     if (layerFound) {
       if (layerFound.methods[req.method.toLowerCase()]) {
@@ -25,8 +25,7 @@ module.exports = (req, res, next, layers) => {
       } else {
         const methodNotAllowed = COMMON.METHOD_NOT_ALLOWED.format(req.method, req.originalUrl);
         logger.error(methodNotAllowed);
-        return res.status(HTTP_CODE.METHOD_NOT_ALLOWED)
-          .json(messageCreator(methodNotAllowed));
+        return res.status(HTTP_CODE.METHOD_NOT_ALLOWED).json(messageCreator(methodNotAllowed));
       }
     }
   }

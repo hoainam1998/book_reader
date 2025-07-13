@@ -9,11 +9,11 @@ const { getGraphqlFinalData } = require('#utils');
 class GraphqlResponse {
   static dto;
 
-    /**
-  * Create graphql response instance.
-  *
-  * @param {class} express - The express object.
-  */
+  /**
+   * Create graphql response instance.
+   *
+   * @param {class} express - The express object.
+   */
   constructor(dto) {
     GraphqlResponse.dto = dto;
   }
@@ -27,11 +27,11 @@ class GraphqlResponse {
   }
 
   /**
-  * Validate output value.
-  *
-  * @static
-  * @param {Object} value - The value to convert.
-  */
+   * Validate output value.
+   *
+   * @static
+   * @param {Object} value - The value to convert.
+   */
   static parse(value) {
     return GraphqlResponse.dto.parse(value);
   }

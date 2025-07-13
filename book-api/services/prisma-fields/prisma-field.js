@@ -7,19 +7,18 @@ const Singleton = require('#services/singleton');
  * @extends Singleton
  */
 class PrismaField extends Singleton {
-
   /**
-  * Create prisma-field service class.
-  */
+   * Create prisma-field service class.
+   */
   constructor() {
     super(PrismaField);
   }
 
   /**
-  * Create prisma field service class.
-  * @param {string} query - The graphql query select field.
-  * @return {object} - The prisma select query.
-  */
+   * Create prisma field service class.
+   * @param {string} query - The graphql query select field.
+   * @return {object} - The prisma select query.
+   */
   parseToPrismaSelect(query) {
     // filtering fields ex(from: { userId, email } to [userId, email]).
     const fields = query.match(/\w+/gm);
@@ -54,23 +53,25 @@ class PrismaField extends Singleton {
       // if the field is valid, pushing to select query field object. Otherwise logging a warn.
       findChild(current, select);
       if (!Object.hasOwn(select, current)) {
-        if (typeof this._fields[current] === 'object'
-          && !Array.isArray(this._fields[current])
-          && this._fields[current] !== null) {
-            if (!Object.hasOwn(this._fields[current], 'child')) {
-              if (Object.hasOwn(this._fields[current], 'as')) {
-                const alias = this._fields[current].as;
-                if (!Object.hasOwn(select, alias)) {
-                  const currentFieldObj = {...this._fields[current]};
-                  delete currentFieldObj.as;
-                  select[alias] = currentFieldObj;
-                }
-              } else {
-                select[current] = this._fields[current];
+        if (
+          typeof this._fields[current] === 'object' &&
+          !Array.isArray(this._fields[current]) &&
+          this._fields[current] !== null
+        ) {
+          if (!Object.hasOwn(this._fields[current], 'child')) {
+            if (Object.hasOwn(this._fields[current], 'as')) {
+              const alias = this._fields[current].as;
+              if (!Object.hasOwn(select, alias)) {
+                const currentFieldObj = { ...this._fields[current] };
+                delete currentFieldObj.as;
+                select[alias] = currentFieldObj;
               }
+            } else {
+              select[current] = this._fields[current];
             }
+          }
         } else if (Array.isArray(this._fields[current])) {
-          this._fields[current].forEach(field => select[field] = true);
+          this._fields[current].forEach((field) => (select[field] = true));
         } else if (this._fields[current]) {
           select[this._fields[current]] = true;
         } else {

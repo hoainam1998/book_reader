@@ -16,7 +16,7 @@ class AuthorDetailDTO extends AuthorDTO {
 
     return {
       html,
-      json
+      json,
     };
   }
 }

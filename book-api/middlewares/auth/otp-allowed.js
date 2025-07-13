@@ -16,12 +16,10 @@ const logger = new Logger('Otp allowed!');
 const otpAllowed = (req, res, next) => {
   if (!req.session.user.mfaEnable) {
     logger.warn('Mfa turned off for this user!');
-    return res.status(HTTP_CODE.UNAUTHORIZED)
-      .json(messageCreator(USER.MFA_UNENABLE, ErrorCode.MFA_TURN_OFF));
+    return res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.MFA_UNENABLE, ErrorCode.MFA_TURN_OFF));
   } else if (req.session.user.apiKey) {
     logger.warn('User already has logged!');
-    return res.status(HTTP_CODE.UNAUTHORIZED)
-      .json(messageCreator(USER.USER_FINISH_LOGIN, ErrorCode.ALREADY_LOGGED));
+    return res.status(HTTP_CODE.UNAUTHORIZED).json(messageCreator(USER.USER_FINISH_LOGIN, ErrorCode.ALREADY_LOGGED));
   }
   return next();
 };

@@ -5,130 +5,137 @@ const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, PATH, METHOD } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
+const {
+  mockUser,
+  authenticationToken,
+  sessionData,
+  signedTestCookie,
+  destroySession,
+} = require('#test/resources/auth');
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const updatePersonUrl = UserRoutePath.updatePerson.abs;
 let sessionToken;
 
 describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
-  commonTest('update person common test', [
-    {
-      name: 'url test',
-      describe: 'url is invalid',
-      url: `${PATH.USER}/unknown`,
-      method: METHOD.POST.toLowerCase(),
-    },
-    {
-      name: 'method test',
-      describe: 'method not allowed',
-      url: updatePersonUrl,
-      method: METHOD.GET.toLowerCase(),
-    },
-    {
-      name: 'cors test',
-      describe: 'update person api cors',
-      url: updatePersonUrl,
-      method: METHOD.POST.toLowerCase(),
-      origin: process.env.ORIGIN_CORS,
-    }
-  ], 'update person common test');
+  commonTest(
+    'update person common test',
+    [
+      {
+        name: 'url test',
+        describe: 'url is invalid',
+        url: `${PATH.USER}/unknown`,
+        method: METHOD.POST.toLowerCase(),
+      },
+      {
+        name: 'method test',
+        describe: 'method not allowed',
+        url: updatePersonUrl,
+        method: METHOD.GET.toLowerCase(),
+      },
+      {
+        name: 'cors test',
+        describe: 'update person api cors',
+        url: updatePersonUrl,
+        method: METHOD.POST.toLowerCase(),
+        origin: process.env.ORIGIN_CORS,
+      },
+    ],
+    'update person common test'
+  );
 
   test('update person will be success', (done) => {
     expect.hasAssertions();
-    signedTestCookie(sessionData.user)
-      .then((responseApiSignin) => {
-        sessionToken = responseApiSignin.header['set-cookie'];
-        globalThis.prismaClient.user.update.mockResolvedValue();
-        globalThis.api
-          .put(updatePersonUrl)
-          .set('authorization', authenticationToken)
-          .set('Cookie', [sessionToken])
-          .field('firstName', mockUser.first_name)
-          .field('lastName', mockUser.last_name)
-          .field('email', mockUser.email)
-          .field('sex', mockUser.sex)
-          .field('phone', mockUser.phone)
-          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-          .expect('Content-Type', /application\/json/)
-          .expect(HTTP_CODE.CREATED)
-          .then((response) => {
-            expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-            expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-              expect.objectContaining({
-                where: expect.objectContaining({
-                  user_id: mockUser.user_id
-                }),
-                data: expect.objectContaining({
-                  first_name: mockUser.first_name,
-                  last_name: mockUser.last_name,
-                  email: mockUser.email,
-                  sex: mockUser.sex,
-                  phone: mockUser.phone,
-                  avatar: expect.any(String),
-                })
-              })
-            );
-            expect(response.body).toEqual({
-              message: USER.UPDATE_SELF_INFORMATION_SUCCESS
-            });
-            done();
+    signedTestCookie(sessionData.user).then((responseApiSignin) => {
+      sessionToken = responseApiSignin.header['set-cookie'];
+      globalThis.prismaClient.user.update.mockResolvedValue();
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', [sessionToken])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.CREATED)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                user_id: mockUser.user_id,
+              }),
+              data: expect.objectContaining({
+                first_name: mockUser.first_name,
+                last_name: mockUser.last_name,
+                email: mockUser.email,
+                sex: mockUser.sex,
+                phone: mockUser.phone,
+                avatar: expect.any(String),
+              }),
+            })
+          );
+          expect(response.body).toEqual({
+            message: USER.UPDATE_SELF_INFORMATION_SUCCESS,
           });
-      });
+          done();
+        });
+    });
   });
 
   test('update person failed with authentication token unset', (done) => {
     expect.hasAssertions();
-    signedTestCookie(sessionData.user)
-      .then((responseApiSignin) => {
-        globalThis.api
-          .put(updatePersonUrl)
-          .set('Cookie', [responseApiSignin.header['set-cookie']])
-          .set('Connection', 'keep-alive')
-          .field('firstName', mockUser.first_name)
-          .field('lastName', mockUser.last_name)
-          .field('email', mockUser.email)
-          .field('sex', mockUser.sex)
-          .field('phone', mockUser.phone)
-          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-          .expect('Content-Type', /application\/json/)
-          .expect(HTTP_CODE.UNAUTHORIZED)
-          .then((response) => {
-            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-            expect(response.body).toEqual({
-              message: USER.USER_UNAUTHORIZED,
-              errorCode: ErrorCode.HAVE_NOT_LOGIN,
-            });
-            done();
+    signedTestCookie(sessionData.user).then((responseApiSignin) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('Cookie', [responseApiSignin.header['set-cookie']])
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.UNAUTHORIZED)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: USER.USER_UNAUTHORIZED,
+            errorCode: ErrorCode.HAVE_NOT_LOGIN,
           });
-      });
+          done();
+        });
+    });
   });
 
   test('update person failed with session expired', (done) => {
     expect.hasAssertions();
-    destroySession()
-      .then(() => {
-        globalThis.api
-          .put(updatePersonUrl)
-          .set('authorization', authenticationToken)
-          .set('Connection', 'keep-alive')
-          .field('firstName', mockUser.first_name)
-          .field('lastName', mockUser.last_name)
-          .field('email', mockUser.email)
-          .field('sex', mockUser.sex)
-          .field('phone', mockUser.phone)
-          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-          .expect('Content-Type', /application\/json/)
-          .expect(HTTP_CODE.UNAUTHORIZED)
-          .then((response) => {
-            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-            expect(response.body).toEqual({
-              message: USER.WORKING_SESSION_EXPIRE,
-              errorCode: ErrorCode.WORKING_SESSION_ENDED,
-            });
-            done();
+    destroySession().then(() => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.UNAUTHORIZED)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: USER.WORKING_SESSION_EXPIRE,
+            errorCode: ErrorCode.WORKING_SESSION_ENDED,
           });
-      });
+          done();
+        });
+    });
   });
 
   test('update person failed with bad request', (done) => {
@@ -176,11 +183,11 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       describe: 'server error',
       cause: ServerError,
       expected: {
-        message:COMMON.INTERNAL_ERROR_MESSAGE,
+        message: COMMON.INTERNAL_ERROR_MESSAGE,
       },
       status: HTTP_CODE.SERVER_ERROR,
-    }
-  ])('update person failed with $describe', ({ cause, expected, status },done) => {
+    },
+  ])('update person failed with $describe', ({ cause, expected, status }, done) => {
     expect.hasAssertions();
     globalThis.prismaClient.user.update.mockRejectedValue(cause);
     globalThis.api
@@ -200,7 +207,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
         expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              user_id: mockUser.user_id
+              user_id: mockUser.user_id,
             }),
             data: expect.objectContaining({
               first_name: mockUser.first_name,
@@ -209,7 +216,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
               sex: mockUser.sex,
               phone: mockUser.phone,
               avatar: expect.any(String),
-            })
+            }),
           })
         );
         expect(response.body).toEqual(expected);
@@ -235,7 +242,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
         expect(response.body).toEqual({
-          message: COMMON.FILE_NOT_IMAGE
+          message: COMMON.FILE_NOT_IMAGE,
         });
         done();
       });
@@ -259,7 +266,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
       .then((response) => {
         expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
         expect(response.body).toEqual({
-          message: COMMON.FILE_IS_EMPTY
+          message: COMMON.FILE_IS_EMPTY,
         });
         done();
       });
@@ -269,11 +276,11 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     expect.hasAssertions();
     globalThis.prismaClient.user.update.mockResolvedValue();
 
-    jest.spyOn(GraphqlResponse, 'parse').mockImplementation(
-      () => GraphqlResponse.dto.parse({
+    jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
+      GraphqlResponse.dto.parse({
         data: {
-          message: 'Expected message!'
-        }
+          message: 'Expected message!',
+        },
       })
     );
 
@@ -295,7 +302,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
         expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              user_id: mockUser.user_id
+              user_id: mockUser.user_id,
             }),
             data: expect.objectContaining({
               first_name: mockUser.first_name,
@@ -304,7 +311,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
               sex: mockUser.sex,
               phone: mockUser.phone,
               avatar: expect.any(String),
-            })
+            }),
           })
         );
         expect(response.body).toEqual({

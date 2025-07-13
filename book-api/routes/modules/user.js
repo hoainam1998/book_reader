@@ -1,12 +1,6 @@
 const Router = require('../router');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const {
-  UPLOAD_MODE,
-  HTTP_CODE,
-  REQUEST_DATA_PASSED_TYPE,
-  METHOD,
-  POWER,
-} = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -53,17 +47,14 @@ const Login = require('#dto/common/login-validator');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 
 /**
-* Remove some fields that do not allow loading when the user has a user role.
-*
-* @param {Object} req - The express request.
-* @param {string[]} - The exclude fields.
-*/
+ * Remove some fields that do not allow loading when the user has a user role.
+ *
+ * @param {Object} req - The express request.
+ * @param {string[]} - The exclude fields.
+ */
 const excludePaginationQueryFields = (req) => {
-  if (
-    req.session.isDefined('user')
-    && req.session.user.isDefined('role')
-    && req.session.user.role === POWER.USER) {
-      return ['userId', 'mfaEnable', 'isAdmin'];
+  if (req.session.isDefined('user') && req.session.user.isDefined('role') && req.session.user.role === POWER.USER) {
+    return ['userId', 'mfaEnable', 'isAdmin'];
   }
   return [];
 };
@@ -75,11 +66,11 @@ const excludePaginationQueryFields = (req) => {
  */
 class UserRouter extends Router {
   /**
-  * Create userRouter instance.
-  *
-  * @param {Object} express - The express object.
-  * @param {Object} graphqlExecute - The graphql execute instance.
-  */
+   * Create userRouter instance.
+   *
+   * @param {Object} express - The express object.
+   * @param {Object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post(UserRoutePath.createUser, authentication, onlyAdminAllowed, this._createUser);
@@ -130,7 +121,7 @@ class UserRouter extends Router {
 
   @validation(UserPaginationInput, {
     error_message: USER.PAGINATION_LOAD_USER_FAIL,
-    exclude_query_fields: excludePaginationQueryFields
+    exclude_query_fields: excludePaginationQueryFields,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserPagination)
@@ -138,9 +129,7 @@ class UserRouter extends Router {
     const query = `query UserPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
       user {
         pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
-          list ${
-            req.body.query
-          },
+          list ${req.body.query},
           total,
           pages,
           page,
@@ -149,7 +138,9 @@ class UserRouter extends Router {
       }
     }`;
 
-    return self.execute(query, {
+    return self.execute(
+      query,
+      {
         pageSize: req.body.pageSize,
         pageNumber: req.body.pageNumber,
         keyword: req.body.keyword,
@@ -169,13 +160,10 @@ class UserRouter extends Router {
         }
       }
     }`;
-    return self.execute(
-      query,
-      {
-        userId: req.body.userId,
-        mfaEnable: req.body.mfaEnable,
-      },
-    );
+    return self.execute(query, {
+      userId: req.body.userId,
+      mfaEnable: req.body.mfaEnable,
+    });
   }
 
   @validation(PowerUpdate, { error_message: USER.UPDATE_POWER_FAIL })
@@ -189,18 +177,15 @@ class UserRouter extends Router {
         }
       }
     }`;
-    return self.execute(
-      query,
-      {
-        userId: req.body.userId,
-        power: req.body.power,
-      },
-    );
+    return self.execute(query, {
+      userId: req.body.userId,
+      power: req.body.power,
+    });
   }
 
   @validation(UserDelete, {
     error_message: USER.DELETE_USER_FAIL,
-    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
@@ -213,17 +198,16 @@ class UserRouter extends Router {
       }
     }`;
 
-    return self.Service.deleteUserSessionId(req.params.id)
-      .then((user) => {
-        return new Promise((resolve) => {
-          return req.sessionStore.destroy(user.session_id, function () {
-            if (self.Socket.Clients.has(req.params.id)) {
-              self.Socket.Clients.get(req.params.id).send({ delete: true });
-            }
-            resolve(getGeneratorFunctionData(self.execute(query, { userId: req.params.id })));
-          });
+    return self.Service.deleteUserSessionId(req.params.id).then((user) => {
+      return new Promise((resolve) => {
+        return req.sessionStore.destroy(user.session_id, function () {
+          if (self.Socket.Clients.has(req.params.id)) {
+            self.Socket.Clients.get(req.params.id).send({ delete: true });
+          }
+          resolve(getGeneratorFunctionData(self.execute(query, { userId: req.params.id })));
         });
       });
+    });
   }
 
   @validation(UserUpdate, { error_message: USER.UPDATE_USER_FAIL, groups: ['update'] })
@@ -282,16 +266,10 @@ class UserRouter extends Router {
   _getUserDetail(req, res, next, self) {
     const query = `query GetUserDetail($userId: ID!) {
       user {
-        detail(userId: $userId) ${
-          req.body.query
-        }
+        detail(userId: $userId) ${req.body.query}
       }
     }`;
-    return self.execute(
-      query,
-      { userId: req.body.userId, },
-      req.body.query
-    );
+    return self.execute(query, { userId: req.body.userId }, req.body.query);
   }
 
   @validation(AdminResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
@@ -309,7 +287,7 @@ class UserRouter extends Router {
     if (req.body.password === req.body.oldPassword) {
       return {
         status: HTTP_CODE.UNAUTHORIZED,
-        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE)
+        json: messageCreator(USER.OLD_AND_NEW_PASSWORD_IS_SAME, ErrorCode.DATA_IS_DUPLICATE),
       };
     }
 
@@ -318,24 +296,24 @@ class UserRouter extends Router {
       if (!decodedUser) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH)
+          json: messageCreator(USER.USER_NOT_FOUND, ErrorCode.CREDENTIAL_NOT_MATCH),
         };
       } else if (decodedUser.email !== req.body.email) {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH)
+          json: messageCreator(COMMON.REGISTER_EMAIL_NOT_MATCH, ErrorCode.CREDENTIAL_NOT_MATCH),
         };
       }
     } catch (err) {
       if (err.name === 'TokenExpiredError') {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED)
+          json: messageCreator(COMMON.RESET_PASSWORD_TOKEN_EXPIRE, ErrorCode.TOKEN_EXPIRED),
         };
       } else {
         return {
           status: HTTP_CODE.UNAUTHORIZED,
-          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID)
+          json: messageCreator(COMMON.TOKEN_INVALID, ErrorCode.TOKEN_INVALID),
         };
       }
     }
@@ -345,16 +323,14 @@ class UserRouter extends Router {
 
   @validation(AllUser, {
     error_message: USER.LOAD_ALL_USER_FAIL,
-    exclude_query_fields: excludePaginationQueryFields
+    exclude_query_fields: excludePaginationQueryFields,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {
     const query = `query GetAllUsers($exclude: ID) {
       user {
-        all(exclude: $exclude) ${
-          req.body.query
-        }
+        all(exclude: $exclude) ${req.body.query}
       }
     }`;
     return self.execute(query, { exclude: req.body.exclude }, req.body.query);
@@ -371,9 +347,7 @@ class UserRouter extends Router {
 
     const query = `query VerifyOTP($email: String!, $otp: String!) {
       user {
-        verifyOtp(email: $email, otp: $otp) ${
-          req.body.query
-        }
+        verifyOtp(email: $email, otp: $otp) ${req.body.query}
       }
     }`;
 
@@ -381,27 +355,29 @@ class UserRouter extends Router {
   }
 
   @validateResultExecute(HTTP_CODE.OK)
-  _verifyOtpWithSession(req, res, next, self) {
+  _verifyOtpWithSession(req) {
     const url = getOriginInternalServerUrl(req);
 
-    return fetchHelper(`${url}/verify-otp-process`,
+    return fetchHelper(
+      `${url}/verify-otp-process`,
       METHOD.POST,
       {
         'Content-Type': 'application/json',
-        'Cookie': [req.headers.cookie],
+        Cookie: [req.headers.cookie],
       },
       JSON.stringify(req.body)
-    ).then(async (response) => {
-      const json = response.json();
-      if (response.status === HTTP_CODE.OK) {
+    )
+      .then(async (response) => {
+        const json = response.json();
+        if (response.status === HTTP_CODE.OK) {
+          return json;
+        }
+        return Promise.reject({ ...(await json), status: response.status });
+      })
+      .then((json) => {
+        req.session.user.apiKey = json.apiKey;
         return json;
-      }
-      return Promise.reject({ ...await json, status: response.status });
-    })
-    .then((json) => {
-      req.session.user.apiKey = json.apiKey;
-      return json;
-    });
+      });
   }
 
   @validation(OtpUpdate, { error_message: USER.UPDATE_OTP_CODE_FAIL })
@@ -411,72 +387,70 @@ class UserRouter extends Router {
     const query = `
       mutation SendOtp($email: String!) {
         user {
-          updateOtpCode(email: $email) ${
-            req.body.query
-          }
+          updateOtpCode(email: $email) ${req.body.query}
         }
       }
     `;
-    return self.execute(query, { email: req.session.user.email, });
+    return self.execute(query, { email: req.session.user.email });
   }
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
-  _sendOtpCode(req, res, next, self) {
+  _sendOtpCode(req) {
     const url = getOriginInternalServerUrl(req);
 
-    return fetchHelper(`${url}/update-otp`,
+    return fetchHelper(
+      `${url}/update-otp`,
       METHOD.POST,
       {
         'Content-Type': 'application/json',
-        'Cookie': [req.headers.cookie],
+        Cookie: [req.headers.cookie],
       },
       JSON.stringify(req.body)
     )
-    .then(async (response) => {
-      const json = response.json();
-      if (response.status === HTTP_CODE.OK) {
-        return json;
-      }
-      return Promise.reject({ ...await json, status: response.status });
-    })
-    .then((json) => {
-      const { otp, message } = json;
-      return EmailService.sendOtpEmail(req.session.user.email, otp)
-        .then(() => messageCreator(message));
-    })
-    .catch((error) => {
-      if (error.errorCode === ErrorCode.CREDENTIAL_NOT_MATCH) {
-        req.session.destroy();
-      }
-      throw error;
-    });
+      .then(async (response) => {
+        const json = response.json();
+        if (response.status === HTTP_CODE.OK) {
+          return json;
+        }
+        return Promise.reject({ ...(await json), status: response.status });
+      })
+      .then((json) => {
+        const { otp, message } = json;
+        return EmailService.sendOtpEmail(req.session.user.email, otp).then(() => messageCreator(message));
+      })
+      .catch((error) => {
+        if (error.errorCode === ErrorCode.CREDENTIAL_NOT_MATCH) {
+          req.session.destroy();
+        }
+        throw error;
+      });
   }
 
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  _createUser(req, res, next, self) {
+  _createUser(req) {
     const url = getOriginInternalServerUrl(req);
 
-    return fetchHelper(`${url}/add`,
+    return fetchHelper(
+      `${url}/add`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       JSON.stringify(req.body)
     )
-    .then(async (response) => {
-      const json = response.json();
-      if (response.status === HTTP_CODE.CREATED) {
-        return json;
-      }
-      return Promise.reject({ ...await json, status: response.status });
-    })
-    .then(({ resetPasswordToken, password }) => {
-      const link = getResetPasswordLink(resetPasswordToken);
-      return EmailService.sendPassword(req.body.email, link, password)
-        .then(() => messageCreator(USER.USER_ADDED));
-    });
+      .then(async (response) => {
+        const json = response.json();
+        if (response.status === HTTP_CODE.CREATED) {
+          return json;
+        }
+        return Promise.reject({ ...(await json), status: response.status });
+      })
+      .then(({ resetPasswordToken, password }) => {
+        const link = getResetPasswordLink(resetPasswordToken);
+        return EmailService.sendPassword(req.body.email, link, password).then(() => messageCreator(USER.USER_ADDED));
+      });
   }
 
   @validation(Login, { error_message: USER.LOGIN_FAIL })
@@ -486,16 +460,17 @@ class UserRouter extends Router {
     const query = `
       query Login($email: String!, $password: String!) {
         user {
-          login(email: $email, password: $password) ${
-            req.body.query
-          }
+          login(email: $email, password: $password) ${req.body.query}
         }
       }`;
-    return self.execute(query, {
-      email: req.body.email,
-      password: req.body.password,
-    },
-    req.body.query);
+    return self.execute(
+      query,
+      {
+        email: req.body.email,
+        password: req.body.password,
+      },
+      req.body.query
+    );
   }
 
   @validateResultExecute(HTTP_CODE.OK)
@@ -511,22 +486,23 @@ class UserRouter extends Router {
       }
     }
 
-    return fetchHelper(`${url}/login-process`,
+    return fetchHelper(
+      `${url}/login-process`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      JSON.stringify(req.body),
-    ).then(async (response) => {
-      const json = response.json();
-      if (response.status === HTTP_CODE.OK) {
-        return json;
-      }
-      return Promise.reject({ ...await json, status: response.status });
-    })
-    .then((json) => {
-      return self.Service.updateUserSessionId(req.session.id, json.userId)
-        .then(() => {
+      JSON.stringify(req.body)
+    )
+      .then(async (response) => {
+        const json = response.json();
+        if (response.status === HTTP_CODE.OK) {
+          return json;
+        }
+        return Promise.reject({ ...(await json), status: response.status });
+      })
+      .then((json) => {
+        return self.Service.updateUserSessionId(req.session.id, json.userId).then(() => {
           req.session.user = {
             userId: json.userId,
             email: json.email,
@@ -534,9 +510,9 @@ class UserRouter extends Router {
             apiKey: json.apiKey,
             role: json.role,
           };
-        return json;
+          return json;
+        });
       });
-    });
   }
 
   @validation(UserForgetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
@@ -555,37 +531,39 @@ class UserRouter extends Router {
   }
 
   @validateResultExecute(HTTP_CODE.OK)
-  _forgetPassword(req, res, next, self) {
+  _forgetPassword(req) {
     const url = getOriginInternalServerUrl(req);
 
-    return fetchHelper(`${url}/forget-password-process`,
+    return fetchHelper(
+      `${url}/forget-password-process`,
       METHOD.POST,
       {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      JSON.stringify(req.body),
-    ).then(async (response) => {
-      const json = response.json();
-      if (response.status === HTTP_CODE.OK) {
-        return json;
-      }
-      return Promise.reject({ ...await json, status: response.status });
-    })
-    .then(({ resetPasswordToken, password }) => {
-      const link = getResetPasswordLink(resetPasswordToken);
-      return EmailService.sendPassword(req.body.email, link, password)
-        .then(() => messageCreator(USER.UPDATE_PASSWORD));
-    });
+      JSON.stringify(req.body)
+    )
+      .then(async (response) => {
+        const json = response.json();
+        if (response.status === HTTP_CODE.OK) {
+          return json;
+        }
+        return Promise.reject({ ...(await json), status: response.status });
+      })
+      .then(({ resetPasswordToken, password }) => {
+        const link = getResetPasswordLink(resetPasswordToken);
+        return EmailService.sendPassword(req.body.email, link, password).then(() =>
+          messageCreator(USER.UPDATE_PASSWORD)
+        );
+      });
   }
 
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
   _logout(req, res, next, self) {
-    return self.Service.deleteUserSessionId(req.session.user.userId)
-      .then(async () => {
-        await req.session.destroy();
-        return messageCreator(USER.LOGOUT_SUCCESS);
-      });
+    return self.Service.deleteUserSessionId(req.session.user.userId).then(async () => {
+      await req.session.destroy();
+      return messageCreator(USER.LOGOUT_SUCCESS);
+    });
   }
 }
 

@@ -8,10 +8,14 @@ module.exports = describe('admin allowed', () => {
     expect.hasAssertions();
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
-      session: sessionData
+      session: sessionData,
     };
 
-    onlyAdminAllowed(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    onlyAdminAllowed(
+      globalThis.expressMiddleware.req,
+      globalThis.expressMiddleware.res,
+      globalThis.expressMiddleware.next
+    );
     expect(globalThis.expressMiddleware.next).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.next).toHaveBeenCalled();
     done();
@@ -25,17 +29,23 @@ module.exports = describe('admin allowed', () => {
         user: {
           ...sessionData.user,
           role: POWER.USER,
-        }
-      }
+        },
+      },
     };
 
-    onlyAdminAllowed(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    onlyAdminAllowed(
+      globalThis.expressMiddleware.req,
+      globalThis.expressMiddleware.res,
+      globalThis.expressMiddleware.next
+    );
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.NOT_PERMISSION);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: USER.NOT_PERMISSION,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: USER.NOT_PERMISSION,
+      })
+    );
     done();
   });
 
@@ -43,16 +53,22 @@ module.exports = describe('admin allowed', () => {
     expect.hasAssertions();
     globalThis.expressMiddleware.req = {
       ...globalThis.expressMiddleware.req,
-      session: {}
+      session: {},
     };
 
-    onlyAdminAllowed(globalThis.expressMiddleware.req, globalThis.expressMiddleware.res, globalThis.expressMiddleware.next);
+    onlyAdminAllowed(
+      globalThis.expressMiddleware.req,
+      globalThis.expressMiddleware.res,
+      globalThis.expressMiddleware.next
+    );
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledTimes(1);
     expect(globalThis.expressMiddleware.res.status).toHaveBeenCalledWith(HTTP_CODE.SERVER_ERROR);
     expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledTimes(1);
-    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(expect.objectContaining({
-      message: COMMON.INTERNAL_ERROR_MESSAGE,
-    }));
+    expect(globalThis.expressMiddleware.res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: COMMON.INTERNAL_ERROR_MESSAGE,
+      })
+    );
     done();
   });
 });

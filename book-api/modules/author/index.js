@@ -6,11 +6,11 @@ module.exports = (prisma) => {
   return {
     query: {
       type: query,
-      resolve: () => service
+      resolve: () => service,
     },
     mutation: {
       type: mutation,
-      resolve: () => service
-    }
-  }
+      resolve: () => service,
+    },
+  };
 };

@@ -14,24 +14,20 @@ class UserDummyData extends DummyDataApi {
    * Create user dummy data instance.
    */
   constructor() {
-    super(
-      mockUser,
-      null,
-      {
-        userId: expect.any(String),
-        name: expect.any(String),
-        firstName: expect.any(String),
-        lastName: expect.any(String),
-        email: expect.any(String),
-        avatar: expect.any(String),
-        phone: expect.any(String),
-        sex: expect.any(Number),
-        role: expect.any(String),
-        power: expect.any(Boolean),
-        isAdmin: expect.any(Boolean),
-        mfaEnable: expect.any(Boolean),
-      }
-    );
+    super(mockUser, null, {
+      userId: expect.any(String),
+      name: expect.any(String),
+      firstName: expect.any(String),
+      lastName: expect.any(String),
+      email: expect.any(String),
+      avatar: expect.any(String),
+      phone: expect.any(String),
+      sex: expect.any(Number),
+      role: expect.any(String),
+      power: expect.any(Boolean),
+      isAdmin: expect.any(Boolean),
+      mfaEnable: expect.any(Boolean),
+    });
   }
 
   /**
@@ -47,7 +43,7 @@ class UserDummyData extends DummyDataApi {
     return Array.apply(null, Array(length)).map(() => {
       return UserDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
     });
-  };
+  }
 
   /**
    * Create the user list for test.
@@ -56,9 +52,9 @@ class UserDummyData extends DummyDataApi {
    * @param {number} length - The number of users who want to create.
    * @return {object[]} - The user list.
    */
-  static createMockUserList (length) {
+  static createMockUserList(length) {
     return Array.apply(null, Array(length)).map(() => UserDummyData.MockData);
-  };
+  }
 }
 
 module.exports = UserDummyData;

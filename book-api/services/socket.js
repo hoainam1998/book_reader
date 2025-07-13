@@ -15,31 +15,31 @@ class WsClient {
   _name;
 
   /**
-  * Init.
-  *
-  * @constructor
-  * @param {object} ws - The web socket client.
-  * @param {string} name - The name of client.
-  */
+   * Init.
+   *
+   * @constructor
+   * @param {object} ws - The web socket client.
+   * @param {string} name - The name of client.
+   */
   constructor(ws, name) {
     this._ws = ws;
     this._name = name;
   }
 
   /**
-  * Return current ws client.
-  *
-  * @return {WebSocket}
-  */
+   * Return current ws client.
+   *
+   * @return {WebSocket}
+   */
   get Ws() {
     return this._ws;
   }
 
   /**
-  * Sending data.
-  *
-  * @param {*} data - The data sending.
-  */
+   * Sending data.
+   *
+   * @param {*} data - The data sending.
+   */
   send(data) {
     if (this.Ws) {
       this.Ws.send(JSON.stringify({ name: this._name, ...data }));
@@ -58,18 +58,18 @@ class Socket {
   _clients = new Map();
 
   /**
-  * A socket instance.
-  *
-  * @type {Socket}
-  * @static
-  */
+   * A socket instance.
+   *
+   * @type {Socket}
+   * @static
+   */
   static instance;
 
   /**
-  * Init.
-  *
-  * @constructor
-  */
+   * Init.
+   *
+   * @constructor
+   */
   constructor() {
     if (!Socket.instance && process.env.NODE_ENV !== 'test') {
       this.subscribe();
@@ -77,44 +77,44 @@ class Socket {
   }
 
   /**
-  * A socket instance.
-  *
-  * @return {WebSocket}
-  */
+   * A socket instance.
+   *
+   * @return {WebSocket}
+   */
   get Ws() {
     return this._ws;
   }
 
   /**
-  * A socket server instance.
-  *
-  * @return {WebSocketServer}
-  */
+   * A socket server instance.
+   *
+   * @return {WebSocketServer}
+   */
   get Wss() {
     return this._wss;
   }
 
   /**
-  * Return all ws client subscribed.
-  *
-  * @return {Map}
-  */
+   * Return all ws client subscribed.
+   *
+   * @return {Map}
+   */
   get Clients() {
     return this._clients;
   }
 
   /**
-  * A callback trigger when onmessage event fire.
-  *
-  * @callback onMessageCallback
-  * @param {object} event
-  */
+   * A callback trigger when onmessage event fire.
+   *
+   * @callback onMessageCallback
+   * @param {object} event
+   */
 
   /**
-  * Set onMessage event.
-  *
-  * @param {onMessageCallback} callback - A function call when onmessage event fire.
-  */
+   * Set onMessage event.
+   *
+   * @param {onMessageCallback} callback - A function call when onmessage event fire.
+   */
   set onMessage(callback) {
     if (this.Ws) {
       this.Ws.onmessage = callback;
@@ -122,8 +122,8 @@ class Socket {
   }
 
   /**
-  * Startup socket server.
-  */
+   * Startup socket server.
+   */
   subscribe() {
     const socketPort = process.env.NODE_ENV === 'test' ? process.env.SOCKET_TEST_PORT : process.env.SOCKET_PORT;
     this._wss = new WebSocketServer({ port: socketPort });
@@ -150,10 +150,10 @@ class Socket {
   }
 
   /**
-  * Close web socket server.
-  *
-  * @static
-  */
+   * Close web socket server.
+   *
+   * @static
+   */
   static close() {
     if (Socket.instance) {
       Socket.instance.Wss?.close((error) => {
@@ -167,11 +167,11 @@ class Socket {
   }
 
   /**
-  * Take current socket instance.
-  *
-  * @static
-  * @return {Socket} - The current socket instance.
-  */
+   * Take current socket instance.
+   *
+   * @static
+   * @return {Socket} - The current socket instance.
+   */
   static getInstance() {
     if (!Socket.instance) {
       Socket.instance = new Socket();

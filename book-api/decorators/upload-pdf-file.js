@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
   },
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../public/pdf'));
-  }
+  },
 });
 
 const upload = multer({
@@ -25,7 +25,7 @@ const upload = multer({
     } else {
       cb(new Error(COMMON.FILE_NOT_PDF));
     }
-  }
+  },
 });
 
 /**
@@ -48,8 +48,7 @@ module.exports = (field) => {
         } else {
           if (request.file) {
             if (isEmptyFile(request.file)) {
-              return response.status(HTTP_CODE.BAD_REQUEST)
-                .json(messageCreator(COMMON.FILE_IS_EMPTY));
+              return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(COMMON.FILE_IS_EMPTY));
             }
             request.body[field] = `${field}/${request.file.filename}`;
           } else {
@@ -57,8 +56,7 @@ module.exports = (field) => {
               originalMethod.apply(null, args);
               return;
             }
-            return response.status(HTTP_CODE.BAD_REQUEST)
-              .json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(field)));
+            return response.status(HTTP_CODE.BAD_REQUEST).json(messageCreator(COMMON.FIELD_NOT_PROVIDE.format(field)));
           }
           originalMethod.apply(null, args);
         }

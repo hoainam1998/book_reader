@@ -10,8 +10,8 @@ class CategoryDummyData extends DummyDataApi {
   static default = new CategoryDummyData();
 
   /**
-  * Create category dummy data instance.
-  */
+   * Create category dummy data instance.
+   */
   constructor() {
     super(
       {
@@ -19,7 +19,7 @@ class CategoryDummyData extends DummyDataApi {
         name: 'category name',
         avatar: 'avatar',
         _count: {
-          book: 2
+          book: 2,
         },
       },
       null,
@@ -45,7 +45,7 @@ class CategoryDummyData extends DummyDataApi {
     return Array.apply(null, Array(length)).map(() => {
       return CategoryDummyData.generateExpectedObject(requestBodyQuery, excludeFields);
     });
-  };
+  }
 
   /**
    * Create the category list for test.
@@ -54,9 +54,9 @@ class CategoryDummyData extends DummyDataApi {
    * @param {number} length - The number of categories who want to create.
    * @return {object[]} - The category list.
    */
-  static createMockCategoryList (length) {
+  static createMockCategoryList(length) {
     return Array.apply(null, Array(length)).map(() => CategoryDummyData.MockData);
-  };
+  }
 }
 
 module.exports = CategoryDummyData;

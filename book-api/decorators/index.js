@@ -5,7 +5,6 @@ const { HTTP_CODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { COMMON } = require('#messages');
 const { messageCreator, getGeneratorFunctionData, graphqlQueryParser } = require('#utils');
 const { plainToInstance } = require('class-transformer');
-const { Validator } = require('#services/validator');
 const Logger = require('#services/logger');
 
 /**
@@ -14,47 +13,46 @@ const Logger = require('#services/logger');
  * @param {Object} - information of graphql execute function.
  * @returns {Object} - new decorator object.
  */
-const validateExecuteQuery =
-  (target) => {
-    const originalMethod = target.descriptor.value;
-    target.descriptor.value = function* (...args) {
-      const query = args[0];
-      const schema = this._schema;
-      args[2] = args[2] ? this.PrismaField.parseToPrismaSelect(args[2]) : args[2];
-      try {
-        const queryAst = parse(query);
-        // validate graphql query
-        const errors = validate(schema, queryAst);
-        // if get errors, log those errors, then return internal server error.
-        if (errors.length > 0) {
-          errors.forEach(err => Logger.error(this.constructor.name, err.message));
-          return {
-            json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
-            status: HTTP_CODE.SERVER_ERROR
-          };
-        }
-        args[0] = queryAst;
-        // if call origin method error, log error, return internal server error.
-        try {
-          return yield originalMethod.apply(this, args);
-        } catch (error) {;
-          Logger.error(this.constructor.name, error.message);
-          return {
-            json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
-            status: HTTP_CODE.SERVER_ERROR
-          };
-        }
-      } catch (error) {
-        // any other error, log error, return internal server error.
-        Logger.error(this.constructor.name, error.message);
+const validateExecuteQuery = (target) => {
+  const originalMethod = target.descriptor.value;
+  target.descriptor.value = function* (...args) {
+    const query = args[0];
+    const schema = this._schema;
+    args[2] = args[2] ? this.PrismaField.parseToPrismaSelect(args[2]) : args[2];
+    try {
+      const queryAst = parse(query);
+      // validate graphql query
+      const errors = validate(schema, queryAst);
+      // if get errors, log those errors, then return internal server error.
+      if (errors.length > 0) {
+        errors.forEach((err) => Logger.error(this.constructor.name, err.message));
         return {
-          json: messageCreator(error.message),
-          status: HTTP_CODE.SERVER_ERROR
+          json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
+          status: HTTP_CODE.SERVER_ERROR,
         };
       }
+      args[0] = queryAst;
+      // if call origin method error, log error, return internal server error.
+      try {
+        return yield originalMethod.apply(this, args);
+      } catch (error) {
+        Logger.error(this.constructor.name, error.message);
+        return {
+          json: messageCreator(COMMON.INTERNAL_ERROR_MESSAGE),
+          status: HTTP_CODE.SERVER_ERROR,
+        };
+      }
+    } catch (error) {
+      // any other error, log error, return internal server error.
+      Logger.error(this.constructor.name, error.message);
+      return {
+        json: messageCreator(error.message),
+        status: HTTP_CODE.SERVER_ERROR,
+      };
     }
-    return target;
   };
+  return target;
+};
 
 /**
  * Return function validate result query execute decorator.
@@ -71,70 +69,62 @@ const validateResultExecute = (httpCode) => {
       try {
         const finalResult = getGeneratorFunctionData(originalMethod.apply(null, args));
         if (finalResult instanceof Promise) {
-          finalResult.then(result => {
-            const resultClone = JSON.parse(JSON.stringify(result));
-            try {
-              if (resultClone.errors) {
-                const error = resultClone.errors[0];
-                // check error is graphql error
-                if (error.extensions) {
-                  const status = error.extensions?.http.status || HTTP_CODE.BAD_REQUEST;
-                  if (error.extensions?.response) {
-                    return response.status(status).json(error.extensions.response);
-                  }
-                  if (error.extensions?.http.error_code) {
-                    response.status(status)
-                      .json(messageCreator(error.message, error.extensions?.http.error_code));
+          finalResult
+            .then((result) => {
+              const resultClone = JSON.parse(JSON.stringify(result));
+              try {
+                if (resultClone.errors) {
+                  const error = resultClone.errors[0];
+                  // check error is graphql error
+                  if (error.extensions) {
+                    const status = error.extensions?.http.status || HTTP_CODE.BAD_REQUEST;
+                    if (error.extensions?.response) {
+                      return response.status(status).json(error.extensions.response);
+                    }
+                    if (error.extensions?.http.error_code) {
+                      response.status(status).json(messageCreator(error.message, error.extensions?.http.error_code));
+                    } else {
+                      response.status(status).json(messageCreator(error.message));
+                    }
                   } else {
-                    response.status(status).json(messageCreator(error.message));
+                    response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
                   }
+                  self.Logger.error(error.message);
                 } else {
-                  response.status(HTTP_CODE.SERVER_ERROR)
-                    .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+                  if (Object.hasOwn(resultClone, 'status') && Object.hasOwn(resultClone, 'json')) {
+                    return response.status(resultClone.status).json(resultClone.json);
+                  }
+                  return response.status(httpCode).json(resultClone);
                 }
-                self.Logger.error(error.message);
-              } else {
-                if (Object.hasOwn(resultClone, 'status') && Object.hasOwn(resultClone, 'json')) {
-                  return response.status(resultClone.status).json(resultClone.json);
-                }
-                return response.status(httpCode).json(resultClone);
+              } catch (err) {
+                Logger.error('Validate graphql execute result', err.message);
+                response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
               }
-            } catch (err) {
+            })
+            .catch((err) => {
+              if ([HTTP_CODE.BAD_REQUEST, HTTP_CODE.UNAUTHORIZED, HTTP_CODE.NOT_FOUND].includes(err.status)) {
+                const sts = err.status;
+                delete err.status;
+                return response.status(sts).json(err);
+              }
               Logger.error('Validate graphql execute result', err.message);
-              response.status(HTTP_CODE.SERVER_ERROR)
-                .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
-            }
-          })
-          .catch(err => {
-            if ([HTTP_CODE.BAD_REQUEST, HTTP_CODE.UNAUTHORIZED, HTTP_CODE.NOT_FOUND].includes(err.status)) {
-              const sts = err.status;
-              delete err.status;
-              return response.status(sts).json(err);
-            }
-            Logger.error('Validate graphql execute result', err.message);
-            response.status(HTTP_CODE.SERVER_ERROR)
-              .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
-          });
+              response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+            });
         } else if (finalResult?.errors) {
-          finalResult.errors.forEach(error => self.Logger.error(error.message));
-          response.status(HTTP_CODE.SERVER_ERROR)
-            .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+          finalResult.errors.forEach((error) => self.Logger.error(error.message));
+          response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
         } else if (finalResult?.data) {
           response.status(httpCode).json(finalResult.data);
-        } else if (finalResult
-          && Object.hasOwn(finalResult, 'status')
-          && Object.hasOwn(finalResult, 'json')) {
+        } else if (finalResult && Object.hasOwn(finalResult, 'status') && Object.hasOwn(finalResult, 'json')) {
           response.status(finalResult.status).json(finalResult.json);
         } else if (finalResult) {
           response.status(httpCode).json(finalResult);
         } else {
-          response.status(HTTP_CODE.SERVER_ERROR)
-            .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+          response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
         }
       } catch (error) {
         self.Logger.error(error.message);
-        response.status(HTTP_CODE.SERVER_ERROR)
-          .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+        response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
       }
     };
     return target;
@@ -176,21 +166,21 @@ const graphqlExecuteWrapper = (target) => {
     _graphqlExecute;
 
     /**
-    * Create new graphql execute service class.
-    * @param {...*} args - The new graphql execute object.
-    */
+     * Create new graphql execute service class.
+     * @param {...*} args - The new graphql execute object.
+     */
     constructor(...args) {
       super(...args);
       this._graphqlExecute = args.pop();
     }
 
     /**
-    * Execute graphql query.
-    * @param {...*} args - The arguments provided for execute function.
-    */
+     * Execute graphql query.
+     * @param {...*} args - The arguments provided for execute function.
+     */
     execute(...args) {
       return this._graphqlExecute.execute.apply(this._graphqlExecute, args);
-    };
+    }
   };
 };
 
@@ -205,17 +195,17 @@ const loggerWrapper = (target) => {
     _logger;
 
     /**
-    * Create new logger service class.
-    * @param {...*} args - The new logger object.
-    */
+     * Create new logger service class.
+     * @param {...*} args - The new logger object.
+     */
     constructor(...args) {
       super(...args);
       this._logger = new Logger(target.name);
     }
 
     /**
-    * Getter, return logger instance.
-    */
+     * Getter, return logger instance.
+     */
     get Logger() {
       return this._logger;
     }
@@ -232,9 +222,9 @@ const loggerWrapper = (target) => {
 const zodValidateClassWrapper = (target, validateClass) => {
   return class extends target {
     /**
-    * Create new dto class.
-    * Passing validate class to graphql response base class.
-    */
+     * Create new dto class.
+     * Passing validate class to graphql response base class.
+     */
     constructor() {
       super(validateClass);
     }
@@ -254,13 +244,12 @@ const serializer = (serializerClass) => {
       const finalResult = getGeneratorFunctionData(originMethod.apply(this, args));
       if (!(finalResult instanceof Error)) {
         if (finalResult instanceof Promise) {
-          return finalResult.then(value => {
+          return finalResult.then((value) => {
             // convert value into the instance serializerClass, then compare value had been got with origin value
             // if it is equal return value, else throw bad request
             // if value is the error, it will be throw direct for the later process.
             if (!Object.hasOwn(value, 'errors')) {
-              const { success, message, data }
-                = serializerClass.parse(plainToInstance(serializerClass, value));
+              const { success, message, data } = serializerClass.parse(plainToInstance(serializerClass, value));
               if (!success) {
                 return {
                   status: HTTP_CODE.BAD_REQUEST,
@@ -313,7 +302,7 @@ const validation = (...args) => {
           }
         };
         const { groups, request_data_passed_type, error_message, exclude_query_fields } = options || {};
-         // error_message was provided, append it into default error message.
+        // error_message was provided, append it into default error message.
         const errorMessage = (error_message || '').concat('\n', COMMON.INPUT_VALIDATE_FAIL);
 
         /**
@@ -330,8 +319,7 @@ const validation = (...args) => {
             // convert request incoming data to instance validate class.
             // all validate class extended by Validator, therefor it owned validated method
             // run validate method with parameter, return errors array
-            const errorsValidated
-              = plainToInstance(validateClass, incomingData).validate(groups)?.errors;
+            const errorsValidated = plainToInstance(validateClass, incomingData).validate(groups)?.errors;
             const listErrorMessages = preValidateErrors.concat(errorsValidated);
             // error is empty, skip
             if (listErrorMessages.length) {
@@ -339,14 +327,14 @@ const validation = (...args) => {
               turnOffLastRunFlag();
               return response.status(HTTP_CODE.BAD_REQUEST).json({
                 errors: listErrorMessages,
-                message: errorMessage
+                message: errorMessage,
               });
             }
           } else {
             turnOffLastRunFlag();
             return response.status(HTTP_CODE.BAD_REQUEST).json({
               errors: [COMMON.REQUEST_DATA_EMPTY],
-              message: errorMessage
+              message: errorMessage,
             });
           }
         };
@@ -389,7 +377,8 @@ const validation = (...args) => {
         if (request.body && request.body.query) {
           // parsing
           let queryFields = request.body.query;
-          const excludeFields = typeof exclude_query_fields === 'function' ? exclude_query_fields(request) : exclude_query_fields;
+          const excludeFields =
+            typeof exclude_query_fields === 'function' ? exclude_query_fields(request) : exclude_query_fields;
           if (Array.isArray(excludeFields) && excludeFields.length) {
             queryFields = Object.keys(request.body.query).reduce((query, key) => {
               if (!excludeFields.includes(key)) {
@@ -405,8 +394,7 @@ const validation = (...args) => {
       } catch (error) {
         // if any error, return server error.
         Logger.error('Validation', error.message);
-        return response.status(HTTP_CODE.SERVER_ERROR)
-          .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+        return response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
       }
     };
     return target;

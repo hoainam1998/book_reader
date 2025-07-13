@@ -8,6 +8,6 @@ class MessageResponse extends OutputValidate {
 
   @Type(() => String)
   errorCode = ErrorCode.ALL_FINE;
-};
+}
 
 module.exports = MessageResponse;

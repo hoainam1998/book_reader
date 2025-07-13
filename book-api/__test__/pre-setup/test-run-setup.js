@@ -5,7 +5,7 @@ globalThis.prismaClient = prismaClient;
 
 globalThis.expressMiddleware = {
   req: {
-    get: function(field) {
+    get: function (field) {
       return this[field];
     },
   },

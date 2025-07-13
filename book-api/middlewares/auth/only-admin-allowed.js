@@ -20,13 +20,11 @@ const onlyAdminAllowed = (req, res, next) => {
     } else {
       // else return unauthorized message
       logger.warn('unauthorized error');
-      return res.status(HTTP_CODE.NOT_PERMISSION)
-        .json(messageCreator(USER.NOT_PERMISSION));
+      return res.status(HTTP_CODE.NOT_PERMISSION).json(messageCreator(USER.NOT_PERMISSION));
     }
   } catch (error) {
     logger.error(error.message);
-    return res.status(HTTP_CODE.SERVER_ERROR)
-      .json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
+    return res.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
   }
 };
 

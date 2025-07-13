@@ -10,11 +10,7 @@ const RESET_PASSWORD_URL = '{0}/reset-password?token={1}';
  * @return {string} - The reset password token.
  */
 const signingResetPasswordToken = (email, expires = '1h') => {
-  return jwt.sign(
-    { email },
-    process.env.ADMIN_RESET_PASSWORD_SECRET_KEY,
-    { expiresIn: expires }
-  );
+  return jwt.sign({ email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY, { expiresIn: expires });
 };
 
 /**
@@ -23,7 +19,8 @@ const signingResetPasswordToken = (email, expires = '1h') => {
  * @param {string} resetPasswordToken - The reset password token.
  * @return {object} - The verify result.
  */
-const verifyResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
+const verifyResetPasswordToken = (resetPasswordToken) =>
+  jwt.verify(resetPasswordToken, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY);
 
 /**
  * Verify client reset password token.
@@ -31,7 +28,8 @@ const verifyResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswor
  * @param {string} resetPasswordToken - The reset password token.
  * @return {object} - The verify result.
  */
-const verifyClientResetPasswordToken = (resetPasswordToken) => jwt.verify(resetPasswordToken, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY);
+const verifyClientResetPasswordToken = (resetPasswordToken) =>
+  jwt.verify(resetPasswordToken, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY);
 
 /**
  * Signing login token with payload is email and userId.
@@ -40,7 +38,8 @@ const verifyClientResetPasswordToken = (resetPasswordToken) => jwt.verify(resetP
  * @param {string} email - An email register.
  * @return {string} - The login token.
  */
-const signLoginToken = (userId, email, power) => jwt.sign({ userId, email, power }, process.env.SECRET_KEY, { expiresIn: '1h' });
+const signLoginToken = (userId, email, power) =>
+  jwt.sign({ userId, email, power }, process.env.SECRET_KEY, { expiresIn: '1h' });
 
 /**
  * Signing client login token with payload is email.
@@ -64,7 +63,8 @@ const verifyClientLoginToken = (clientLoginToken) => jwt.verify(clientLoginToken
  * @param {string} email - An email register.
  * @return {string} - The client reset password token.
  */
-const signClientResetPasswordToken = (email) => jwt.sign({ email }, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY, { expiresIn: '1h' });
+const signClientResetPasswordToken = (email) =>
+  jwt.sign({ email }, process.env.CLIENT_RESET_PASSWORD_SECRET_KEY, { expiresIn: '1h' });
 
 /**
  * Verify login token.
@@ -124,7 +124,6 @@ const generateOtp = () => {
 const getResetPasswordLink = (resetPasswordToken) => {
   return RESET_PASSWORD_URL.format(process.env.ORIGIN_CORS, resetPasswordToken);
 };
-
 
 /**
  * Return client reset password link.

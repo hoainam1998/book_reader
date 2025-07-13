@@ -57,26 +57,26 @@ class BookDetailDTO extends BookDTO {
   @Type(() => Introduce)
   get introduce() {
     if (this.introduce_file) {
-      const [html, json] = this.introduce_file?.split(',');
+      const [html, json] = this.introduce_file.split(',');
       return {
         html,
-        json
+        json,
       };
     }
     return {
       html: '',
-      json: ''
+      json: '',
     };
-  };
+  }
 
   @Type(() => [Image])
   get images() {
     return this.book_image;
-  };
+  }
 
   @Type(() => [Object])
   get authors() {
-    return this.book_author.map(({author}) => ({ ...author, authorId: author.author_id }));
+    return this.book_author.map(({ author }) => ({ ...author, authorId: author.author_id }));
   }
 }
 

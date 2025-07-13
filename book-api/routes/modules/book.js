@@ -1,13 +1,7 @@
 const Router = require('../router');
 const multer = require('multer');
 const BookRoutePath = require('#services/route-paths/book');
-const {
-  validateResultExecute,
-  uploadPdf,
-  upload,
-  serializer,
-  validation
-} = require('#decorators');
+const { validateResultExecute, uploadPdf, upload, serializer, validation } = require('#decorators');
 const authentication = require('#middlewares/auth/authentication');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD } = require('#constants');
@@ -19,7 +13,7 @@ const {
   fetchHelper,
   messageCreator,
   convertDtoToZodObject,
-  getOriginInternalServerUrl
+  getOriginInternalServerUrl,
 } = require('#utils');
 const { BookPagination } = require('#dto/book/book-in');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -27,7 +21,7 @@ const {
   AllBooksResponse,
   BookCreatedResponse,
   BookDetailResponse,
-  BookPaginationResponse
+  BookPaginationResponse,
 } = require('#dto/book/book-out');
 const {
   AllBooks,
@@ -44,7 +38,7 @@ const BookCreated = require('#dto/book/book-created');
 const cpUpload = multer().fields([
   { name: 'pdf', maxCount: 1 },
   { name: 'images', maxCount: 8 },
-  { name: 'avatar', maxCount: 1 }
+  { name: 'avatar', maxCount: 1 },
 ]);
 
 /**
@@ -59,7 +53,7 @@ const filterResponse = (promise) =>
     if (data.status === HTTP_CODE.CREATED) {
       return data;
     }
-    return Promise.reject({ ...await data.json(), status: data.status });
+    return Promise.reject({ ...(await data.json()), status: data.status });
   });
 
 /**
@@ -87,7 +81,7 @@ const createBookFormData = (req, bookId = Date.now()) => {
     }
 
     return formData;
-  }, new FormData);
+  }, new FormData());
 
   !req.body.bookId && bookForm.append('bookId', bookId);
   bookForm.append('avatar', createFile(avatar), avatar.originalname);
@@ -104,7 +98,7 @@ const createBookFormData = (req, bookId = Date.now()) => {
   return {
     book: bookForm,
     pdf: pdfForm,
-    authors
+    authors,
   };
 };
 
@@ -115,11 +109,11 @@ const createBookFormData = (req, bookId = Date.now()) => {
  */
 class BookRouter extends Router {
   /**
-  * Create bookRouter instance.
-  *
-  * @param {Object} express - The express object.
-  * @param {Object} graphqlExecute - The graphql execute instance.
-  */
+   * Create bookRouter instance.
+   *
+   * @param {Object} express - The express object.
+   * @param {Object} graphqlExecute - The graphql execute instance.
+   */
   constructor(express, graphqlExecute) {
     super(express, graphqlExecute);
     this.post(BookRoutePath.saveIntroduce, authentication, this._saveIntroduceHtmlFile);
@@ -144,7 +138,7 @@ class BookRouter extends Router {
 
   @validation(RelateBook, {
     request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
-    error_message: BOOK.DELETE_FAVORITE_BOOK_FAIL
+    error_message: BOOK.DELETE_FAVORITE_BOOK_FAIL,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
@@ -183,7 +177,7 @@ class BookRouter extends Router {
 
   @validation(RelateBook, {
     request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
-    error_message: BOOK.DELETE_READ_LATE_BOOK_FAIL
+    error_message: BOOK.DELETE_READ_LATE_BOOK_FAIL,
   })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(MessageSerializerResponse)
@@ -277,7 +271,7 @@ class BookRouter extends Router {
       html: req.body.html,
       name: req.body.fileName,
       json: req.body.json,
-      bookId: req.body.bookId
+      bookId: req.body.bookId,
     });
   }
 
@@ -297,7 +291,7 @@ class BookRouter extends Router {
       html: req.body.html,
       name: req.body.fileName,
       json: req.body.json,
-      bookId: req.body.bookId
+      bookId: req.body.bookId,
     });
   }
 
@@ -307,9 +301,7 @@ class BookRouter extends Router {
   _getBookDetail(req, res, next, self) {
     const query = `query GetBookDetail($bookId: ID!) {
       book {
-        detail(bookId: $bookId) ${
-          req.body.query
-        }
+        detail(bookId: $bookId) ${req.body.query}
       }
     }`;
 
@@ -322,9 +314,7 @@ class BookRouter extends Router {
   _getAllBooks(req, res, next, self) {
     const query = `query GetAllBooks {
       book {
-        all ${
-          req.body.query
-        }
+        all ${req.body.query}
       }
     }`;
 
@@ -338,9 +328,7 @@ class BookRouter extends Router {
     const query = `query BookPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String, $by: ByCondition) {
       book {
         pagination(pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword, by: $by) {
-          list ${
-            req.body.query
-          },
+          list ${req.body.query},
           total,
           page,
           pages,
@@ -349,7 +337,8 @@ class BookRouter extends Router {
       }
     }`;
 
-    return self.execute(query,
+    return self.execute(
+      query,
       {
         pageNumber: req.body.pageNumber,
         pageSize: req.body.pageSize,
@@ -367,8 +356,8 @@ class BookRouter extends Router {
     },
     {
       name: 'images',
-      maxCount: 8
-    }
+      maxCount: 8,
+    },
   ])
   @validation(BookCreate, { error_message: BOOK.CREATE_BOOK_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
@@ -394,8 +383,8 @@ class BookRouter extends Router {
         ...req.body,
         avatar: req.body.avatar[0],
         images,
-        publishedTime: +req.body.publishedTime
-      }
+        publishedTime: +req.body.publishedTime,
+      },
     });
   }
 
@@ -406,8 +395,8 @@ class BookRouter extends Router {
     },
     {
       name: 'images',
-      maxCount: 8
-    }
+      maxCount: 8,
+    },
   ])
   @validation(BookCreate, { error_message: BOOK.UPDATE_BOOK_FAIL })
   @validateResultExecute(HTTP_CODE.CREATED)
@@ -433,8 +422,8 @@ class BookRouter extends Router {
         ...req.body,
         avatar: req.body.avatar[0],
         images,
-        publishedTime: +req.body.publishedTime
-      }
+        publishedTime: +req.body.publishedTime,
+      },
     });
   }
 
@@ -453,7 +442,7 @@ class BookRouter extends Router {
 
     return self.execute(query, {
       bookId: req.body.bookId,
-      pdf: req.body.pdf
+      pdf: req.body.pdf,
     });
   }
 
@@ -473,7 +462,7 @@ class BookRouter extends Router {
     return self.execute(query, {
       bookId: req.body.bookId,
       pdf: req.body.pdf,
-      name: req.body.name
+      name: req.body.name,
     });
   }
 
@@ -489,10 +478,7 @@ class BookRouter extends Router {
       }
     }`;
 
-    return self.execute(
-      query,
-      { authors: req.body.authors }
-    );
+    return self.execute(query, { authors: req.body.authors });
   }
 
   @validation(
@@ -504,29 +490,35 @@ class BookRouter extends Router {
       {
         validate_class: BookFileCreated,
         request_data_passed_type: REQUEST_DATA_PASSED_TYPE.FILES,
-      }
+      },
     ],
     {
       error_message: BOOK.CREATE_BOOK_FAIL,
-      groups: ['create']
+      groups: ['create'],
     }
   )
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(BookCreatedResponse)
-  _createBookInformation(req, res, next, self) {
+  _createBookInformation(req) {
     const url = getOriginInternalServerUrl(req);
     const bookId = Date.now();
     const { book, pdf, authors } = createBookFormData(req, bookId);
 
     return promiseAll([
-      () => filterResponse(fetchHelper(`${url}/save-book-info`, METHOD.POST, book )),
+      () => filterResponse(fetchHelper(`${url}/save-book-info`, METHOD.POST, book)),
       () => filterResponse(fetchHelper(`${url}/save-pdf`, METHOD.POST, pdf)),
-      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
-          'Content-Type': 'application/json',
-        },
-        JSON.stringify({ authors })))
-    ])
-    .then(() => {
+      () =>
+        filterResponse(
+          fetchHelper(
+            `${url}/save-book-authors`,
+            METHOD.POST,
+            {
+              'Content-Type': 'application/json',
+            },
+            JSON.stringify({ authors })
+          )
+        ),
+    ]).then(() => {
       return convertDtoToZodObject(BookCreated, {
         ...messageCreator(BOOK.CREATE_BOOK_SUCCESS),
         bookId: bookId.toString(),
@@ -538,7 +530,7 @@ class BookRouter extends Router {
     [
       {
         validate_class: BookSave,
-        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY
+        request_data_passed_type: REQUEST_DATA_PASSED_TYPE.BODY,
       },
       {
         validate_class: BookFileCreated,
@@ -547,12 +539,12 @@ class BookRouter extends Router {
     ],
     {
       error_message: BOOK.UPDATE_BOOK_FAIL,
-      groups: ['update']
+      groups: ['update'],
     }
   )
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  _updateBookInformation(req, res, next, self) {
+  _updateBookInformation(req) {
     const url = getOriginInternalServerUrl(req);
     const bookId = req.body.bookId;
     const { book, pdf, authors } = createBookFormData(req, bookId);
@@ -560,12 +552,18 @@ class BookRouter extends Router {
     return promiseAll([
       () => filterResponse(fetchHelper(`${url}/update-book-info`, METHOD.PUT, book)),
       () => filterResponse(fetchHelper(`${url}/update-pdf`, METHOD.PUT, pdf)),
-      () => filterResponse(fetchHelper(`${url}/save-book-authors`, METHOD.POST, {
-          'Content-Type': 'application/json'
-        },
-        JSON.stringify({ authors })))
-    ])
-    .then(() => {
+      () =>
+        filterResponse(
+          fetchHelper(
+            `${url}/save-book-authors`,
+            METHOD.POST,
+            {
+              'Content-Type': 'application/json',
+            },
+            JSON.stringify({ authors })
+          )
+        ),
+    ]).then(() => {
       return messageCreator(BOOK.UPDATE_BOOK_SUCCESS);
     });
   }

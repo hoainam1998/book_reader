@@ -37,8 +37,7 @@ const findOrigins = (originUrl) => {
     } else {
       break;
     }
-
-  } while (origins.length === 0)
+  } while (origins.length === 0);
   return origins;
 };
 
