@@ -42,6 +42,9 @@ class ClientDTO extends OutputValidate {
   @Type(() => String)
   avatar;
 
+  @Type(() => Number)
+  blocked;
+
   @Type(() => [Object])
   favorite_books;
 

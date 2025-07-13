@@ -132,6 +132,7 @@ model reader {
   email                     String            @unique @db.VarChar(100)
   phone                     String?           @unique @db.VarChar(11)
   sex                       Int               @default(0) @db.UnsignedTinyInt
+  blocked                   Int               @default(0) @db.UnsignedTinyInt
   reset_password_token      String?           @db.Text
   book_reader               book_reader[]
   favorite_books            favorite_books[]

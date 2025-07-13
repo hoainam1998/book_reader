@@ -39,6 +39,9 @@ const CLIENT = {
   sex: {
     type: GraphQLInt,
   },
+  blocked: {
+    type: GraphQLInt,
+  },
   phone: {
     type: GraphQLString,
   },

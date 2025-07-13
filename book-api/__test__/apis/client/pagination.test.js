@@ -25,6 +25,7 @@ const requestBody = {
     email: true,
     phone: true,
     sex: true,
+    blocked: true,
   },
 };
 
