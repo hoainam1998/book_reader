@@ -66,7 +66,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
     }
 
     // this function using to add previous page of current
-    const addPrevious = (pageActive: any) => {
+    const addPrevious = (pageActive: any): void => {
       // adding head of pagination list
       array.unshift(pageActive);
 
@@ -82,7 +82,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
     };
 
     // this function using to add next page of current
-    const addNext = (pageActive: any) => {
+    const addNext = (pageActive: any): void => {
       array.push(pageActive);
 
       if (pageActive.data.page !== lastPageAdded) {
@@ -139,7 +139,7 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
 };
 
 function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.Element {
-  const { setResetPage } = useClientPaginationContext();
+  const paginationContext = useClientPaginationContext();
   const pages = useMemo<Node<PageButton>[]>(() => {
     const paginationArray: PageButton[] = [];
 
@@ -196,8 +196,8 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
   }, [pageNumber]);
 
   useEffect(() => {
-    if (reset) {
-      setResetPage(() => reset);
+    if (reset && paginationContext) {
+      paginationContext.setResetPage(() => reset);
     }
   }, [reset]);
 

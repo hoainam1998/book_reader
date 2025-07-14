@@ -11,6 +11,7 @@ import Category, { loadInitCategory } from 'views/category/category';
 import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail/author-detail';
+import ReaderList, { clientPagination } from 'views/reader/reader';
 import AuthorList, { authorPagination } from 'views/author-group/author-list/author-list';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
@@ -188,7 +189,19 @@ const adminRoutes: RoutePropsUnion[] = [
             }
           },
         ]
-      }
+      },
+      {
+        path: path.READER,
+        name: 'readers',
+        icon: 'application.png',
+        element: <ReaderList />,
+        errorElement: <ApiError alignCenter />,
+        handle: {
+          crumb: (match: UIMatch) =>
+            <span key={match.pathname}>Readers</span>
+        },
+        loader: clientPagination,
+      },
     ]
   }
 ];

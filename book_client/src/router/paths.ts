@@ -11,6 +11,7 @@ export default Object.freeze({
   PERSONAL: '/personal',
   AUTHOR: 'author',
   AUTHORS: 'authors',
+  READER: 'readers',
   NEW: 'new',
   FORGET_PASSWORD: '/forget-password',
   RESET_PASSWORD: '/reset-password',
