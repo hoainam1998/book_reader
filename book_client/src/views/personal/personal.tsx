@@ -18,6 +18,7 @@ import { clsx, convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
 import { PersonalType } from 'interfaces';
 import './style.scss';
+let haveCallGetAllUser = false;
 
 type PersonalStateType = Omit<PersonalType, 'id'>;
 
@@ -141,7 +142,7 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
             avatar.watch(res);
           }
         });
-      getAllUsers(personal.id)
+      !haveCallGetAllUser && getAllUsers(personal.id)
         .then((res: AxiosResponse<PersonalType[]>) => {
           const { emailsList, phonesList } =
             res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
@@ -153,8 +154,13 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
             setEmails(emailsList);
             setPhones(phonesList);
           })
-          .catch(() => setEmails([]));
+          .catch(() => setEmails([]))
+          .finally(() => haveCallGetAllUser = true);
     }
+    return () => {
+      haveCallGetAllUser = false;
+      reset();
+    };
   }, [personal]);
 
   return (

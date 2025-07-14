@@ -16,10 +16,9 @@ type HeaderDashboardPropsType = {
 
 function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: HeaderDashboardPropsType): JSX.Element {
   const paginationContext = useClientPaginationContext();
-  const setClearOldKeyword = paginationContext.setClearOldKeyword;
   const headerRef = useRef<HTMLDivElement>(null);
   const [isClear, setIsClear] = useState<boolean>(false);
-  const [keyword, setKeyword] = useState<string>(paginationContext.keyword);
+  const [keyword, setKeyword] = useState<string>((paginationContext || {}).keyword || '');
   const [disableSearchButton, setDisableSearchButton] = useState<boolean>(!keyword.trim());
   const oldKeyword = useRef<string>(keyword);
 
@@ -73,8 +72,8 @@ function HeaderDashboard({ disabled, hiddenNewBtn, className, add, search }: Hea
   }, [search]);
 
   useEffect(() => {
-    if (globalThis.isClient) {
-      setClearOldKeyword(() => reset);
+    if (globalThis.isClient && paginationContext) {
+      paginationContext.setClearOldKeyword(() => reset);
     }
   }, []);
 

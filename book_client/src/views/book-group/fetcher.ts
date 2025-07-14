@@ -132,7 +132,10 @@ const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse>
       pdf: true,
       publishedTime: true,
       publishedDay: true,
-      category: true,
+      category: {
+        name: true,
+        avatar: true,
+      },
       introduce: true,
       avatar: true
     },
