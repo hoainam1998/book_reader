@@ -136,5 +136,7 @@ module.exports = deepFreeze({
     LOAD_ALL_CLIENT_FAIL: 'Load all client was failed!',
     READERS_EMPTY: 'Readers is empty!',
     PAGINATION_LOAD_CLIENT_FAIL: 'Pagination load client was failed!',
+    BLOCK_CLIENT_SUCCESS: 'Block client was success!',
+    BLOCK_CLIENT_FAIL: 'Block client was failed!',
   },
 });

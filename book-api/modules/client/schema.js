@@ -232,6 +232,25 @@ const mutation = new GraphQLObjectType({
         );
       },
     },
+    blockClient: {
+      type: ResponseType,
+      args: {
+        clientId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+      },
+      resolve: async (service, { clientId }) => {
+        return handleResolveResult(
+          async () => {
+            await service.blockReader(clientId);
+            return messageCreator(READER.BLOCK_CLIENT_SUCCESS);
+          },
+          {
+            RECORD_NOT_FOUND: USER.USER_NOT_FOUND,
+          }
+        );
+      },
+    },
   },
 });
 

@@ -221,6 +221,12 @@ const query = new GraphQLObjectType({
           name: {
             type: new GraphQLNonNull(GraphQLString),
           },
+          firstName: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
+          lastName: {
+            type: new GraphQLNonNull(GraphQLString),
+          },
           apiKey: {
             type: GraphQLString,
           },

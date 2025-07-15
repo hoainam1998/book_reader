@@ -36,6 +36,16 @@ const ClientPagination = (validators, className) => {
   );
 };
 
+const BlockClient = (validators, className) => {
+  return classCreator(
+    class extends Validator {
+      @validators(IsId('clientId must be numeric string and contain 13 character'))
+      clientId;
+    },
+    className
+  );
+};
+
 const AllClient = (validators, className) => {
   return classCreator(
     class extends Validator {
@@ -150,4 +160,5 @@ module.exports = {
   ClientUpdate: Validation(ClientUpdate),
   AllClient: Validation(AllClient),
   ClientPagination: Validation(ClientPagination),
+  BlockClient: Validation(BlockClient),
 };

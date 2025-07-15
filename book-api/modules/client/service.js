@@ -218,6 +218,17 @@ class ClientService extends Service {
       return clients;
     });
   }
+
+  blockReader(clientId) {
+    return this.PrismaInstance.reader.update({
+      where: {
+        reader_id: clientId,
+      },
+      data: {
+        blocked: 1,
+      },
+    });
+  }
 }
 
 module.exports = ClientService;

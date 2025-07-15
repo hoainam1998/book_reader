@@ -57,6 +57,11 @@ class ClientRoutePath {
    * Relative: /pagination *Absolute: client/pagination
    */
   static pagination = createRoutePath({ url: 'pagination' }, [process.env.ORIGIN_CORS]);
+
+  /**
+   * Relative: /block *Absolute: client/block
+   */
+  static block = createRoutePath({ url: 'block' }, [process.env.ORIGIN_CORS]);
 }
 
 module.exports = ClientRoutePath;

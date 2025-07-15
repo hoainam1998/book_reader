@@ -5,6 +5,7 @@ const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const clientLoginRequire = require('#middlewares/auth/client-login-require');
 const authentication = require('#middlewares/auth/authentication');
+const onlyAdminAllowed = require('#middlewares/auth/only-admin-allowed');
 const { UPLOAD_MODE, HTTP_CODE, METHOD } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
@@ -23,6 +24,7 @@ const {
   ClientUpdate,
   AllClient,
   ClientPagination,
+  BlockClient,
 } = require('#dto/client/client-in');
 const Login = require('#dto/common/login-validator');
 const { ClientDetailResponse, AllClientsResponse, ClientPaginationResponse } = require('#dto/client/client-out');
@@ -54,6 +56,33 @@ class ClientRouter extends Router {
     this.put(ClientRoutePath.updatePerson, authentication, this._updateClient);
     this.post(ClientRoutePath.all, authentication, this._getAllClient);
     this.post(ClientRoutePath.pagination, authentication, this._pagination);
+    this.put(ClientRoutePath.block, authentication, onlyAdminAllowed, this._blockClient);
+  }
+
+  @validation(BlockClient, {
+    error_message: READER.BLOCK_CLIENT_FAIL,
+  })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _blockClient(req, res, next, self) {
+    const query = `mutation BlockClient($clientId: ID!) {
+      client {
+        blockClient (clientId: $clientId) {
+          message
+        }
+      }
+    }`;
+
+    return self.Service.deleteClientSessionId(req.body.clientId).then((client) => {
+      return new Promise((resolve) => {
+        return req.sessionStore.destroy(client.session_id, function () {
+          if (self.Socket.Clients.has(req.body.clientId)) {
+            self.Socket.Clients.get(req.body.clientId).send({ delete: true });
+          }
+          resolve(getGeneratorFunctionData(self.execute(query, { clientId: req.body.clientId })));
+        });
+      });
+    });
   }
 
   @validation(ClientPagination, {
