@@ -103,6 +103,11 @@ class BookRoutePath {
   static deleteUsedReadBook = createRoutePath({ url: 'delete-used-read-book', subUrl: ':bookId' }, [
     process.env.CLIENT_ORIGIN_CORS,
   ]);
+
+  /**
+   * Relative: /delete/:bookId *Absolute: book/delete/:bookId
+   */
+  static delete = createRoutePath({ url: 'delete', subUrl: ':bookId' }, [process.env.ORIGIN_CORS]);
 }
 
 module.exports = BookRoutePath;

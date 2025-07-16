@@ -346,6 +346,42 @@ class BookService extends Service {
         return result;
       });
   }
+
+  deleteBook(bookId) {
+    return this.PrismaInstance.book
+      .update({
+        where: {
+          book_id: bookId,
+        },
+        data: {
+          book_image: {
+            deleteMany: {},
+          },
+          book_reader: {
+            deleteMany: {},
+          },
+          book_author: {
+            deleteMany: {},
+          },
+          favorite_books: {
+            deleteMany: {},
+          },
+          read_late: {
+            deleteMany: {},
+          },
+          used_read: {
+            deleteMany: {},
+          },
+        },
+      })
+      .then(() => {
+        return this.PrismaInstance.book.delete({
+          where: {
+            book_id: bookId,
+          },
+        });
+      });
+  }
 }
 
 module.exports = BookService;
