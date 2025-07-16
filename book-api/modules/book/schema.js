@@ -475,6 +475,25 @@ const mutation = new GraphQLObjectType({
         );
       },
     },
+    deleteBook: {
+      type: ResponseType,
+      args: {
+        bookId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+      },
+      resolve: async (service, { bookId }) => {
+        return handleResolveResult(
+          async () => {
+            await service.deleteBook(bookId);
+            return messageCreator(BOOK.DELETE_BOOK_SUCCESS);
+          },
+          {
+            RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
+          }
+        );
+      },
+    },
   },
 });
 

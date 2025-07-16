@@ -94,6 +94,8 @@ module.exports = deepFreeze({
     ADD_USED_READ_DUPLICATE: 'Used read adding already exist!',
     ADD_READ_LATE_BOOK_DUPLICATE: 'Read late book adding already exist!',
     ADD_FAVORITE_BOOK_DUPLICATE: 'Favorite book adding already exist!',
+    DELETE_BOOK_SUCCESS: 'Delete this book was success!',
+    DELETE_BOOK_FAIL: 'Delete this book was failed!',
   },
   AUTHOR: {
     CREATE_AUTHOR_SUCCESS: 'Create author was success!',

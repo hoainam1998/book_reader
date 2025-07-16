@@ -33,6 +33,7 @@ const {
   IntroduceHTMLFileSave,
   BookAuthors,
   RelateBook,
+  DeleteBook,
 } = require('#dto/book/book-in');
 const BookCreated = require('#dto/book/book-created');
 const cpUpload = multer().fields([
@@ -134,6 +135,27 @@ class BookRouter extends Router {
     this.delete(BookRoutePath.deleteReadLateBook, authentication, this._deleteReadLateBook);
     this.post(BookRoutePath.addUsedReadBook, authentication, this._addUsedReadBook);
     this.delete(BookRoutePath.deleteUsedReadBook, authentication, this._deleteUsedReadBook);
+    this.delete(BookRoutePath.delete, authentication, this._deleteBook);
+  }
+
+  @validation(DeleteBook, {
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+    error_message: BOOK.DELETE_BOOK_FAIL,
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _deleteBook(req, res, next, self) {
+    const query = `mutation DeleteBook($bookId: ID!) {
+      book {
+        deleteBook(bookId: $bookId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, {
+      bookId: req.params.bookId,
+    });
   }
 
   @validation(RelateBook, {
