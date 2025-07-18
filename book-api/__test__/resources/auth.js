@@ -17,7 +17,7 @@ const mockUser = {
   mfa_enable: true,
   password: 'namtran9',
   otp_code: generateOtp(),
-  power: true,
+  power: 1,
   phone: '0987654321',
   sex: 0,
   role: POWER.ADMIN,

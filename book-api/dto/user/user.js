@@ -24,12 +24,22 @@ class UserDTO extends OutputValidate {
   @Type(() => Boolean)
   mfa_enable;
 
-  @Type(() => Boolean)
+  @Type(() => Number)
   power;
 
   @Type(() => String)
   get role() {
-    return this.power ? POWER.ADMIN : POWER.USER;
+    switch (this.power) {
+      case 1: {
+        return POWER.ADMIN;
+      };
+      case 2: {
+        return POWER.SUPER_ADMIN;
+      };
+      default: {
+        return POWER.USER;
+      };
+    }
   }
 
   @Type(() => String)
@@ -50,7 +60,7 @@ class UserDTO extends OutputValidate {
 
   @Type(() => Boolean)
   get isAdmin() {
-    return this.power;
+    return this.power > 0;
   }
 
   @Type(() => String)

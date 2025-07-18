@@ -1,5 +1,5 @@
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { PRISMA_ERROR_CODE, HTTP_CODE } = require('#constants');
+const { PRISMA_ERROR_CODE, HTTP_CODE, POWER } = require('#constants');
 const { USER } = require('#messages');
 const { messageCreator } = require('#utils');
 
@@ -110,6 +110,35 @@ class SharedService {
         }
         throw error;
       });
+  }
+
+  checkYouHaveRightPermission(you, targetUserId) {
+    return this.PrismaClient.user.findUniqueOrThrow({
+      where: {
+        user_id: targetUserId,
+      },
+      select: {
+        power: true,
+      },
+    }).then((user) => {
+      if (you.role === POWER.ADMIN && user.power > 0) {
+        throw {
+          status: HTTP_CODE.NOT_PERMISSION,
+          ...messageCreator(USER.NOT_PERMISSION),
+        };
+      }
+      return user;
+    }).catch((error) => {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+          throw {
+            status: HTTP_CODE.NOT_FOUND,
+            ...messageCreator(USER.USER_NOT_FOUND),
+          };
+        }
+      }
+      throw error;
+    });
   }
 
   deleteClientSessionId(clientId) {

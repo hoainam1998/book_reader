@@ -28,6 +28,13 @@ class WebSocketCreator {
   }
 
   /**
+   * The WebSocketCreator instance.
+   *
+   * @static
+   */
+  static instance;
+
+  /**
    * This callback called when onopen websocket event trigger.
    *
    * @callback onOpenCallback
@@ -44,12 +51,23 @@ class WebSocketCreator {
    */
   static startUp(onOpenCallback) {
     return new Promise((resolve) => {
-      const wsCreator = new WebSocketCreator();
-      wsCreator.Ws.onopen = function (event) {
+      WebSocketCreator.instance = new WebSocketCreator();
+      WebSocketCreator.instance.Ws.onopen = function (event) {
         onOpenCallback(event, this);
-        resolve(wsCreator);
+        resolve(WebSocketCreator.instance);
       };
     });
+  }
+
+  /**
+   * Close socket.
+   *
+   * @static
+   */
+  static turnDown() {
+    if (WebSocketCreator.instance) {
+      WebSocketCreator.instance.Ws.close();
+    }
   }
 }
 

@@ -1,9 +1,9 @@
 const { PrismaDuplicateError } = require('#test/mocks/prisma-error');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER, REGEX } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   mockUser,
@@ -15,7 +15,6 @@ const {
   getResetPasswordLink,
   destroySession,
 } = require('#test/resources/auth');
-const { autoGeneratePassword } = require('#utils');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const createUserUrl = UserRoutePath.createUser.abs;
@@ -33,10 +32,23 @@ const requestBody = {
   sex: mockUser.sex,
   phone: mockUser.phone,
   mfa: true,
-  power: true,
+  power: 1,
 };
 
-afterAll((done) => globalThis.TestServer.removeTestMiddleware(done));
+const requestBodyWithUserRole = {
+  ...requestBody,
+  power: 0,
+};
+
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
+};
+
+const sessionDataWithUserRole = {
+  ...sessionData.user,
+  role: POWER.USER,
+};
 
 describe('create user', () => {
   commonTest(
@@ -156,34 +168,29 @@ describe('create user', () => {
     });
 
     test('create user failed with do not enough permission', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = { ...sessionData.user, role: POWER.USER };
-      });
-
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
-
       expect.hasAssertions();
-      globalThis.api
-        .post(createUserUrl)
-        .set('authorization', authenticationToken)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.NOT_PERMISSION)
-        .then((response) => {
-          expect(fetch).not.toHaveBeenCalled();
-          expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: USER.NOT_PERMISSION,
+      signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
+        globalThis.api
+          .post(createUserUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', authenticationToken)
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.NOT_PERMISSION)
+          .then((response) => {
+            expect(fetch).not.toHaveBeenCalled();
+            expect(sendPassword).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.NOT_PERMISSION,
+            });
+            done();
           });
-          done();
-        });
+      });
     });
 
     test('create user failed with bad request', (done) => {
       // missing email field
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = sessionData.user;
-      });
 
       fetch.mockResolvedValue(
         new Response(
@@ -198,38 +205,37 @@ describe('create user', () => {
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
 
       expect.hasAssertions();
-      globalThis.api
-        .post(createUserUrl)
-        .set('authorization', authenticationToken)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .then((response) => {
-          expect(fetch).toHaveBeenCalledTimes(1);
-          expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(addUserUrl),
-            expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json',
-              }),
-              body: JSON.stringify(requestBody),
-            })
-          );
-          expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: getInputValidateMessage(USER.ADD_USER_FAIL),
-            errors: expect.any(Array),
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createUserUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch).toHaveBeenCalledWith(
+              expect.stringContaining(addUserUrl),
+              expect.objectContaining({
+                method: METHOD.POST,
+                headers: expect.objectContaining({
+                  'Content-Type': 'application/json',
+                }),
+                body: JSON.stringify(requestBody),
+              })
+            );
+            expect(sendPassword).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(USER.ADD_USER_FAIL),
+              errors: expect.any(Array),
+            });
+            done();
           });
-          done();
-        });
+      });
     });
 
     test('create user failed with server error', (done) => {
-      globalThis.TestServer.addMiddleware((request) => {
-        request.session.user = sessionData.user;
-      });
-
       fetch.mockResolvedValue(
         new Response(
           JSON.stringify({
@@ -242,30 +248,33 @@ describe('create user', () => {
       const sendPassword = jest.spyOn(EmailService, 'sendPassword').mockRejectedValue();
 
       expect.hasAssertions();
-      globalThis.api
-        .post(createUserUrl)
-        .set('authorization', authenticationToken)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.SERVER_ERROR)
-        .then((response) => {
-          expect(fetch).toHaveBeenCalledTimes(1);
-          expect(fetch).toHaveBeenCalledWith(
-            expect.stringContaining(addUserUrl),
-            expect.objectContaining({
-              method: METHOD.POST,
-              headers: expect.objectContaining({
-                'Content-Type': 'application/json',
-              }),
-              body: JSON.stringify(requestBody),
-            })
-          );
-          expect(sendPassword).not.toHaveBeenCalled();
-          expect(response.body).toEqual({
-            message: COMMON.INTERNAL_ERROR_MESSAGE,
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createUserUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(fetch).toHaveBeenCalledTimes(1);
+            expect(fetch).toHaveBeenCalledWith(
+              expect.stringContaining(addUserUrl),
+              expect.objectContaining({
+                method: METHOD.POST,
+                headers: expect.objectContaining({
+                  'Content-Type': 'application/json',
+                }),
+                body: JSON.stringify(requestBody),
+              })
+            );
+            expect(sendPassword).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
+            });
+            done();
           });
-          done();
-        });
+      });
     });
   });
 
@@ -283,7 +292,7 @@ describe('create user', () => {
   );
 
   describe(createDescribeTest(METHOD.POST, addUserUrl), () => {
-    test('add user will be success', (done) => {
+    test('add user will be success with admin - user role', (done) => {
       globalThis.prismaClient.user.create.mockResolvedValue({
         plain_password: createUserResponse.password,
         reset_password_token: createUserResponse.resetPasswordToken,
@@ -291,16 +300,94 @@ describe('create user', () => {
       });
 
       expect.hasAssertions();
-      globalThis.api
-        .post(addUserUrl)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.CREATED)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-              data: expect.objectContaining({
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBodyWithUserRole)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.CREATED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith(
+              expect.objectContaining({
+                data: expect.objectContaining({
+                  first_name: requestBodyWithUserRole.firstName,
+                  last_name: requestBodyWithUserRole.lastName,
+                  email: requestBodyWithUserRole.email,
+                  sex: requestBodyWithUserRole.sex,
+                  power: requestBodyWithUserRole.power,
+                  phone: requestBodyWithUserRole.phone,
+                  mfa_enable: requestBodyWithUserRole.mfa,
+                }),
+              })
+            );
+            expect(response.body).toEqual({
+              password: expect.stringMatching(REGEX.PASSWORD),
+              resetPasswordToken: expect.any(String),
+            });
+            done();
+          });
+      });
+    });
+
+    test('add user success with super admin - user role', (done) => {
+      globalThis.prismaClient.user.create.mockResolvedValue({
+        plain_password: createUserResponse.password,
+        reset_password_token: createUserResponse.resetPasswordToken,
+        power: true,
+      });
+
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBodyWithUserRole)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.CREATED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith({
+              data: {
+                first_name: requestBodyWithUserRole.firstName,
+                last_name: requestBodyWithUserRole.lastName,
+                email: requestBodyWithUserRole.email,
+                sex: requestBodyWithUserRole.sex,
+                power: requestBodyWithUserRole.power,
+                phone: requestBodyWithUserRole.phone,
+                mfa_enable: requestBodyWithUserRole.mfa,
+              },
+            });
+            expect(response.body).toEqual({
+              password: expect.any(String),
+              resetPasswordToken: expect.any(String),
+            });
+            expect(response.body.password).toHaveLength(8);
+            done();
+          });
+      });
+    });
+
+    test('add user success with super admin - admin role', (done) => {
+      globalThis.prismaClient.user.create.mockResolvedValue({
+        plain_password: createUserResponse.password,
+        reset_password_token: createUserResponse.resetPasswordToken,
+        power: true,
+      });
+
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.CREATED)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith({
+              data: {
                 first_name: requestBody.firstName,
                 last_name: requestBody.lastName,
                 email: requestBody.email,
@@ -308,16 +395,16 @@ describe('create user', () => {
                 power: requestBody.power,
                 phone: requestBody.phone,
                 mfa_enable: requestBody.mfa,
-              }),
-            })
-          );
-          expect(response.body).toEqual({
-            password: expect.any(String),
-            resetPasswordToken: expect.any(String),
+              },
+            });
+            expect(response.body).toEqual({
+              password: expect.any(String),
+              resetPasswordToken: expect.any(String),
+            });
+            expect(response.body.password).toHaveLength(8);
+            done();
           });
-          expect(response.body.password).toHaveLength(8);
-          done();
-        });
+      });
     });
 
     test('add user failed with bad request', (done) => {
@@ -343,6 +430,25 @@ describe('create user', () => {
         });
     });
 
+    test('add user failed with admin - admin role', (done) => {
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.NOT_PERMISSION)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.NOT_PERMISSION,
+            });
+            done();
+          });
+      });
+    });
+
     test('add user failed with output validate error', (done) => {
       globalThis.prismaClient.user.create.mockResolvedValue({
         plain_password: createUserResponse.password,
@@ -350,40 +456,35 @@ describe('create user', () => {
         power: true,
       });
 
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
-        GraphqlResponse.dto.parse({
-          data: {
-            password: autoGeneratePassword(),
-          },
-        })
-      );
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
-      globalThis.api
-        .post(addUserUrl)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(HTTP_CODE.BAD_REQUEST)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-              data: expect.objectContaining({
-                first_name: requestBody.firstName,
-                last_name: requestBody.lastName,
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .send(requestBodyWithUserRole)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith({
+              data: {
+                first_name: requestBodyWithUserRole.firstName,
+                last_name: requestBodyWithUserRole.lastName,
                 email: requestBody.email,
-                sex: requestBody.sex,
-                power: requestBody.power,
-                phone: requestBody.phone,
-                mfa_enable: requestBody.mfa,
-              }),
-            })
-          );
-          expect(response.body).toEqual({
-            message: COMMON.OUTPUT_VALIDATE_FAIL,
+                sex: requestBodyWithUserRole.sex,
+                power: requestBodyWithUserRole.power,
+                phone: requestBodyWithUserRole.phone,
+                mfa_enable: requestBodyWithUserRole.mfa,
+              },
+            });
+            expect(response.body).toEqual({
+              message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
           });
-          done();
-        });
+      });
     });
 
     test.each([
@@ -407,29 +508,32 @@ describe('create user', () => {
       globalThis.prismaClient.user.create.mockRejectedValue(cause);
 
       expect.hasAssertions();
-      globalThis.api
-        .post(addUserUrl)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(status)
-        .then((response) => {
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-              data: expect.objectContaining({
-                first_name: requestBody.firstName,
-                last_name: requestBody.lastName,
-                email: requestBody.email,
-                sex: requestBody.sex,
-                power: requestBody.power,
-                phone: requestBody.phone,
-                mfa_enable: requestBody.mfa,
-              }),
-            })
-          );
-          expect(response.body).toEqual(expected);
-          done();
-        });
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .send(requestBodyWithUserRole)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(status)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.create).toHaveBeenCalledWith(
+              expect.objectContaining({
+                data: expect.objectContaining({
+                  first_name: requestBodyWithUserRole.firstName,
+                  last_name: requestBodyWithUserRole.lastName,
+                  email: requestBodyWithUserRole.email,
+                  sex: requestBodyWithUserRole.sex,
+                  power: requestBodyWithUserRole.power,
+                  phone: requestBodyWithUserRole.phone,
+                  mfa_enable: requestBodyWithUserRole.mfa,
+                }),
+              })
+            );
+            expect(response.body).toEqual(expected);
+            done();
+          });
+      });
     });
   });
 });

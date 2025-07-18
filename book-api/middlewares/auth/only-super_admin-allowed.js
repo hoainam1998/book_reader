@@ -2,7 +2,7 @@ const { HTTP_CODE, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { messageCreator } = require('#utils');
 const Logger = require('#services/logger');
-const logger = new Logger('Admin allowed!');
+const logger = new Logger('Super admin allowed!');
 
 /**
  * Checking user dose have permission to execute this behavior.
@@ -12,9 +12,9 @@ const logger = new Logger('Admin allowed!');
  * @param {Object} next - next function.
  * @return - by next middleware if pass, otherwise return unauthorized json response.
  */
-const onlyAdminAllowed = (req, res, next) => {
+const onlySuperAdminAllowed = (req, res, next) => {
   try {
-    if ([POWER.ADMIN, POWER.SUPER_ADMIN].includes(req.session.user.role)) {
+    if (req.session.user.role === POWER.SUPER_ADMIN) {
       // if user have a right role, then switch to next middleware.
       return next();
     } else {
@@ -28,4 +28,4 @@ const onlyAdminAllowed = (req, res, next) => {
   }
 };
 
-module.exports = onlyAdminAllowed;
+module.exports = onlySuperAdminAllowed;

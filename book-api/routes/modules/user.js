@@ -17,6 +17,7 @@ const loginRequire = require('#middlewares/auth/login-require');
 const otpAllowed = require('#middlewares/auth/otp-allowed');
 const authentication = require('#middlewares/auth/authentication');
 const onlyAdminAllowed = require('#middlewares/auth/only-admin-allowed');
+const onlySuperAdminAllowed = require('#middlewares/auth/only-super_admin-allowed');
 const allowInternalCall = require('#middlewares/only-allow-internal-call');
 const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const {
@@ -77,7 +78,7 @@ class UserRouter extends Router {
     this.post(UserRoutePath.add, allowInternalCall, this._addUser);
     this.post(UserRoutePath.pagination, authentication, this._pagination);
     this.post(UserRoutePath.updateMfa, authentication, onlyAdminAllowed, this._updateMfaState);
-    this.post(UserRoutePath.updatePower, authentication, onlyAdminAllowed, this._updatePower);
+    this.post(UserRoutePath.updatePower, authentication, onlySuperAdminAllowed, this._updatePower);
     this.post(UserRoutePath.resetPassword, onlyAllowOneDevice, this._resetPassword);
     this.delete(UserRoutePath.delete, authentication, onlyAdminAllowed, this._deleteUser);
     this.post(UserRoutePath.userDetail, authentication, onlyAdminAllowed, this._getUserDetail);
@@ -107,15 +108,24 @@ class UserRouter extends Router {
         }
       }
     }`;
+
     const variables = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       email: req.body.email,
       sex: +req.body.sex,
       phone: req.body.phone,
-      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : undefined,
+      power: req.body.power,
       mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
+
+    if (req.session.user.role === POWER.ADMIN && req.body.power > 0) {
+      return {
+        status: HTTP_CODE.NOT_PERMISSION,
+        json: messageCreator(USER.NOT_PERMISSION),
+      };
+    }
+
     return self.execute(query, { user: variables });
   }
 
@@ -160,9 +170,14 @@ class UserRouter extends Router {
         }
       }
     }`;
-    return self.execute(query, {
-      userId: req.body.userId,
-      mfaEnable: req.body.mfaEnable,
+
+    return self.Service.checkYouHaveRightPermission(req.session.user, req.body.userId).then(() => {
+      return getGeneratorFunctionData(
+        self.execute(query, {
+          userId: req.body.userId,
+          mfaEnable: req.body.mfaEnable,
+        })
+      );
     });
   }
 
@@ -170,7 +185,7 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updatePower(req, res, next, self) {
-    const query = `mutation UpdatePower($userId: ID!, $power: Boolean!) {
+    const query = `mutation UpdatePower($userId: ID!, $power: Int!) {
       user {
         updatePower(userId: $userId, power: $power) {
           message
@@ -198,13 +213,15 @@ class UserRouter extends Router {
       }
     }`;
 
-    return self.Service.deleteUserSessionId(req.params.id).then((user) => {
-      return new Promise((resolve) => {
-        return req.sessionStore.destroy(user.session_id, function () {
-          if (self.Socket.Clients.has(req.params.id)) {
-            self.Socket.Clients.get(req.params.id).send({ delete: true });
-          }
-          resolve(getGeneratorFunctionData(self.execute(query, { userId: req.params.id })));
+    return self.Service.checkYouHaveRightPermission(req.session.user, req.params.id).then(() => {
+      return self.Service.deleteUserSessionId(req.params.id).then((user) => {
+        return new Promise((resolve) => {
+          return req.sessionStore.destroy(user.session_id, function () {
+            if (self.Socket.Clients.has(req.params.id)) {
+              self.Socket.Clients.get(req.params.id).send({ delete: true });
+            }
+            resolve(getGeneratorFunctionData(self.execute(query, { userId: req.params.id })));
+          });
         });
       });
     });
@@ -221,7 +238,7 @@ class UserRouter extends Router {
       email: req.body.email,
       sex: +req.body.sex,
       phone: req.body.phone,
-      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : undefined,
+      power: Object.hasOwn(req.body, 'power') ? req.body.power : undefined,
       mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
     const query = `mutation UpdateUser($user: UserInformationInput!) {
@@ -231,7 +248,12 @@ class UserRouter extends Router {
         }
       }
     }`;
-    return self.execute(query, { user: variables });
+
+    return self.Service.checkYouHaveRightPermission(req.session.user, req.body.userId).then(() => {
+      return getGeneratorFunctionData(
+        self.execute(query, { user: variables })
+      );
+    });
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
@@ -264,12 +286,20 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserDetailResponse)
   _getUserDetail(req, res, next, self) {
-    const query = `query GetUserDetail($userId: ID!) {
+    const query = `query GetUserDetail($userId: ID!, $yourRole: String!) {
       user {
-        detail(userId: $userId) ${req.body.query}
+        detail(userId: $userId, yourRole: $yourRole) ${req.body.query}
       }
     }`;
-    return self.execute(query, { userId: req.body.userId }, req.body.query);
+
+    return self.execute(
+      query,
+      {
+        userId: req.body.userId,
+        yourRole: req.session.user.role,
+      },
+      req.body.query
+    );
   }
 
   @validation(AdminResetPassword, { error_message: USER.RESET_PASSWORD_FAIL })
@@ -437,6 +467,7 @@ class UserRouter extends Router {
       METHOD.POST,
       {
         'Content-Type': 'application/json',
+        Cookie: [req.headers.cookie],
       },
       JSON.stringify(req.body)
     )

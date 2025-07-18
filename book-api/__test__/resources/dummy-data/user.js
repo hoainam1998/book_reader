@@ -24,7 +24,7 @@ class UserDummyData extends DummyDataApi {
       phone: expect.any(String),
       sex: expect.any(Number),
       role: expect.any(String),
-      power: expect.any(Boolean),
+      power: expect.any(Number),
       isAdmin: expect.any(Boolean),
       mfaEnable: expect.any(Boolean),
     });

@@ -71,9 +71,9 @@ describe('get all user', () => {
           .post(allUserUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
           .expect(HTTP_CODE.OK)
           .expect('Content-Type', /application\/json/)
-          .send(requestBody)
           .then((response) => {
             const selectExpected = parseToPrismaSelect.mock.results[0].value;
             expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
@@ -303,7 +303,7 @@ describe('get all user', () => {
         globalThis.api
           .post(allUserUrl)
           .set('authorization', authenticationToken)
-          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Cookie', responseSign.header['set-cookie'])
           .expect(HTTP_CODE.BAD_REQUEST)
           .expect('Content-Type', /application\/json/)
           .send(requestBody)
@@ -335,7 +335,7 @@ describe('get all user', () => {
         globalThis.api
           .post(allUserUrl)
           .set('authorization', authenticationToken)
-          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Cookie', responseSign.header['set-cookie'])
           .expect(HTTP_CODE.SERVER_ERROR)
           .expect('Content-Type', /application\/json/)
           .send(requestBody)

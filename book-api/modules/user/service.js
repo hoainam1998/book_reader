@@ -8,7 +8,8 @@ const {
   checkArrayHaveValues,
 } = require('#utils');
 const { USER } = require('#messages');
-const { graphqlNotFoundErrorOption } = require('../common-schema');
+const { POWER } = require('#constants');
+const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
@@ -259,12 +260,17 @@ class UserService extends Service {
     });
   }
 
-  getUserDetail(userId, select) {
+  getUserDetail(userId, yourRole, select) {
     return this.PrismaInstance.user.findUniqueOrThrow({
       where: {
         user_id: userId,
       },
       select,
+    }).then((user) => {
+      if (yourRole === POWER.ADMIN && user.power > 0) {
+        throw new GraphQLError(USER.NOT_PERMISSION, graphqlNotPermissionErrorOption);
+      }
+      return user;
     });
   }
 

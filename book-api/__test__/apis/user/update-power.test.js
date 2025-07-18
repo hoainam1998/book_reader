@@ -1,14 +1,14 @@
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
+  sessionData,
   mockUser,
   authenticationToken,
-  sessionData,
   signedTestCookie,
   destroySession,
 } = require('#test/resources/auth');
@@ -18,7 +18,12 @@ const updatePowerUrl = UserRoutePath.updatePower.abs;
 
 const requestBody = {
   userId: mockUser.user_id,
-  power: true,
+  power: 0,
+};
+
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
 };
 
 describe('update power', () => {
@@ -53,7 +58,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)
@@ -85,7 +90,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('Cookie', [responseSign.header['set-cookie']])
@@ -130,7 +135,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie({ ...sessionData.user, role: POWER.USER }).then((responseSign) => {
+      signedTestCookie({ ...sessionDataWithSuperAdminRole, role: POWER.USER }).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)
@@ -152,7 +157,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)
@@ -180,7 +185,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)
@@ -200,18 +205,11 @@ describe('update power', () => {
     });
 
     test('update power failed output validate failed', (done) => {
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
-        GraphqlResponse.dto.parse({
-          data: {
-            message: 'unknown',
-          },
-        })
-      );
-
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)
@@ -260,7 +258,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockRejectedValue(cause);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)

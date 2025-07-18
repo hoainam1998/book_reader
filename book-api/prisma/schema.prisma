@@ -116,7 +116,7 @@ model user {
   email                     String        @unique @db.VarChar(100)
   phone                     String        @unique @db.VarChar(11)
   sex                       Int           @default(0) @db.UnsignedTinyInt
-  power                     Boolean
+  power                     Int           @default(0) @db.UnsignedTinyInt
   mfa_enable                Boolean
   otp_code                  String?       @unique @db.VarChar(10)
   reset_password_token      String?       @db.Text
