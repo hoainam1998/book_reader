@@ -16,6 +16,8 @@ import { required, email as emailValidate, ErrorFieldInfo, matchPattern } from '
 import { addUser, updateUser, getAllUsers, getUserDetail } from '../fetcher';
 import { showToast } from 'utils';
 import BlockerProvider from 'contexts/blocker';
+import { Role } from 'enums';
+import auth from 'store/auth';
 import { HaveLoadedFnType, UserType } from 'interfaces';
 import paths from 'router/paths';
 import constants from 'read-only-variables';
@@ -40,6 +42,7 @@ function UserDetail(): JSX.Element {
   const [emails, setEmails] = useState<string[]>([]);
   const [phones, setPhones] = useState<string[]>([]);
   const [name, setName] = useState<string[]>([]);
+  const [allowLeave, setAllowLeave] = useState<boolean>(false);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -106,12 +109,13 @@ function UserDetail(): JSX.Element {
 
   const backToUserList = useCallback((): void => {
     navigate(`${paths.HOME}/${paths.USER}`);
-  }, []);
+    reset();
+  }, [reset]);
 
   const handleUserSaved = useCallback((promise: Promise<AxiosResponse>, title: string): void => {
     promise.then((res) => {
-      reset();
       showToast(title, res.data.message);
+      setAllowLeave(true);
       setTimeout(backToUserList, 200);
     })
     .catch((error) => showToast(title, error.response.data.message));
@@ -170,12 +174,11 @@ function UserDetail(): JSX.Element {
               .catch((error) => showToast('User detail!', error.response.data.message));
           }
       }
-      return reset;
     };
   }, []);
 
   return (
-    <BlockerProvider isNavigate={validate.dirty}>
+    <BlockerProvider isNavigate={validate.dirty && !allowLeave}>
       <UserForm>
         <section className="user-detail">
           <Button variant="outline" className="back-btn" onClick={backToUserList}>
@@ -258,18 +261,24 @@ function UserDetail(): JSX.Element {
                     lg: 4
                   }} />
               </GridItem>
-              <GridItem sm={12} md={4} lg={3}>
-                <Switch
-                  {...power}
-                  label="Admin"
-                  name="power"
-                  inputColumnSize={{
-                    lg: 8
-                  }}
-                  labelColumnSize={{
-                    lg: 4
-                  }} />
-              </GridItem>
+              {
+                auth.Role === Role.SUPER_ADMIN
+                  ? <GridItem sm={12} md={4} lg={3}>
+                      <Switch
+                        {...power}
+                        label="Admin"
+                        name="power"
+                        checkValue={1}
+                        notCheckValue={0}
+                        inputColumnSize={{
+                          lg: 8
+                        }}
+                        labelColumnSize={{
+                          lg: 4
+                        }} />
+                    </GridItem>
+                  : <></>
+              }
               <GridItem sm={12} md={4} lg={3}>
                 <Radio
                   {...sex}

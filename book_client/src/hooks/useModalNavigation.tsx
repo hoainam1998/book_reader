@@ -4,7 +4,7 @@ import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import { ModalSlotPropsType } from 'interfaces';
 import { showModal } from 'utils';
-import { tablet, desktop, extra } from '../static/js/break-point';
+import { tablet, extra } from '../static/js/break-point';
 import { useBlockerContext } from 'contexts/blocker';
 import { SCREEN_SIZE } from 'enums';
 
@@ -19,7 +19,7 @@ export default ({ body, footer, onLeaveAction }: ModalNavigationPropsType = {}):
   const blocker: Blocker = useBlockerContext();
   const windowWidth: number = window.innerWidth;
   const size = useMemo<SCREEN_SIZE>(() => {
-    if (windowWidth >= tablet && windowWidth < desktop) {
+    if (windowWidth >= tablet && windowWidth < extra) {
       return SCREEN_SIZE.MEDIUM;
     } else if (windowWidth >= extra) {
       return SCREEN_SIZE.SMALL;

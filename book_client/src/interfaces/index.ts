@@ -67,6 +67,7 @@ export type PaginationCondition = {
 export type PersonalType = Omit<UserType, 'mfa' | 'power' | 'userId'> & {
   avatar: string;
   id: string;
+  mfaEnable: boolean;
 };
 
 export type HorizontalBookType = {

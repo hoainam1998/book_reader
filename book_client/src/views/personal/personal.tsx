@@ -14,10 +14,12 @@ import useForm, { RuleType } from 'hooks/useForm';
 import useModalNavigation from 'hooks/useModalNavigation';
 import store from 'store/auth';
 import path from 'router/paths';
+import { Role } from 'enums';
 import { clsx, convertBase64ToSingleFile, showToast } from 'utils';
 import constants from 'read-only-variables';
 import { PersonalType } from 'interfaces';
 import './style.scss';
+import Switch from 'components/form/form-control/switch/switch';
 let haveCallGetAllUser = false;
 
 type PersonalStateType = Omit<PersonalType, 'id'>;
@@ -29,6 +31,7 @@ const state: PersonalStateType = {
   avatar: '',
   phone: '',
   sex: 0,
+  mfaEnable: false,
 };
 
 const formId: string = 'personal-form';
@@ -79,6 +82,7 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
     lastName: { required },
     avatar: { required },
     sex: { required },
+    mfaEnable: {},
     phone: {
       required,
       phoneDuplicateValidate: phoneDuplicateValidate('Phone is duplicate!'),
@@ -93,6 +97,7 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
     email,
     phone,
     sex,
+    mfaEnable,
     handleSubmit,
     validate,
     reset
@@ -136,31 +141,34 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
       email.watch(personal.email);
       phone.watch(personal.phone);
       sex.watch(personal.sex);
+      mfaEnable.watch(personal.mfaEnable);
       convertBase64ToSingleFile(personal.avatar, personalName)
         .then(res => {
           if (res.type.includes('image')) {
             avatar.watch(res);
           }
         });
-      !haveCallGetAllUser && getAllUsers(personal.id)
-        .then((res: AxiosResponse<PersonalType[]>) => {
-          const { emailsList, phonesList } =
-            res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
-              flat.phonesList.push(current.phone);
-              flat.emailsList.push(current.email);
-              return flat;
-            }, { phonesList: [], emailsList: [] });
 
-            setEmails(emailsList);
-            setPhones(phonesList);
-          })
-          .catch(() => setEmails([]))
-          .finally(() => haveCallGetAllUser = true);
+        if (!haveCallGetAllUser) {
+          haveCallGetAllUser = true;
+          getAllUsers(personal.id)
+            .then((res: AxiosResponse<PersonalType[]>) => {
+              const { emailsList, phonesList } =
+                res.data.reduce<{ phonesList: string[], emailsList: string[]}>((flat, current) => {
+                  flat.phonesList.push(current.phone);
+                  flat.emailsList.push(current.email);
+                  return flat;
+                }, { phonesList: [], emailsList: [] });
+                haveCallGetAllUser = true;
+
+                setEmails(emailsList);
+                setPhones(phonesList);
+              })
+              .catch(() => setEmails([]))
+              .finally(() => haveCallGetAllUser = false);
+        }
     }
-    return () => {
-      haveCallGetAllUser = false;
-      reset();
-    };
+    return reset;
   }, [personal]);
 
   return (
@@ -223,7 +231,7 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
               <GridItem sm={12} md={12} lg={6}
                 style={{
                   lg: {
-                    gridRow: 'span 4'
+                    gridRow: 'span 5'
                   }
                 }}>
                 <FileDragDropUpload
@@ -265,6 +273,22 @@ function Personal({ personal, update, getAllUsers, logout }: PersonalPropsType):
                     lg: 8
                   }} />
               </GridItem>
+              {
+                globalThis.isAdmin && store.Role === Role.SUPER_ADMIN
+                ? <GridItem sm={12} md={12} lg={6}>
+                    <Switch
+                      {...mfaEnable}
+                      label="Mfa"
+                      name="mfa"
+                      inputColumnSize={{
+                        lg: 8
+                      }}
+                      labelColumnSize={{
+                        lg: 4
+                      }} />
+                </GridItem>
+                : <></>
+              }
             </Grid>
           </Form>
         </section>
