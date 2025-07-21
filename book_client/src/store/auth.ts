@@ -1,14 +1,9 @@
-/* eslint-disable no-unused-vars */
 import Store from './store';
 import { SilentPromise } from 'services';
 import startSocket from 'services/socket-setup';
 import WebSocketInit from 'services/web-socket';
+import { Role } from 'enums';
 import { UserLogin, ApiKeyStorage, UserStorage, Storage } from 'storage';
-
-enum Role {
-  ADMIN = 'Admin',
-  USER = 'User',
-};
 
 class AuthStore extends Store<UserLogin | null> {
 
@@ -71,9 +66,23 @@ class AuthStore extends Store<UserLogin | null> {
 
   get IsAdmin() {
     if (this.isContainData('role')) {
-      return this.CurrentStore!.role === Role.ADMIN;
+      return ([Role.ADMIN, Role.SUPER_ADMIN] as string[]).includes(this.CurrentStore!.role);
     }
     return false;
+  }
+
+  get Role() {
+    if (this.isContainData('role')) {
+      return this.CurrentStore!.role;
+    }
+    return Role.USER;
+  }
+
+  get UserId() {
+    if (this.isContainData('userId')) {
+      return this.CurrentStore!.userId;
+    }
+    return null;
   }
 
   destroyResetPasswordToken(): void {

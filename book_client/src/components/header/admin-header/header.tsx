@@ -105,7 +105,7 @@ function Header(): JSX.Element {
         <img src={require('images/book.png')} alt="logo" width="40" height="40" />
         <div className="personal-information-group" ref={personalBoxRef}>
           <Button className="button-avatar" onClick={toggleMenuDropdown}>
-            <img src={avatar} alt="logo" width="30" height="30" />
+            <img src={avatar || require('images/employee.png')} alt="logo" width="30" height="30" />
           </Button>
           <div>
             <span data-testid="name">{userName}</span>

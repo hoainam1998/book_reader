@@ -10,6 +10,7 @@ import Tooltip from 'components/tooltip/tooltip';
 import constants from 'read-only-variables';
 import { showToast } from 'utils';
 import auth from 'store/auth';
+import { Role } from 'enums';
 import { loadInitUser, updateMfaState, updatePower, deleteUser as _deleteUser } from '../fetcher';
 import './style.scss';
 
@@ -58,6 +59,7 @@ function UserList(): JSX.Element {
       key: 'role'
     },
   ];
+
   if (auth.IsAdmin) {
     const adminFields: Field[] = [
       {
@@ -77,6 +79,11 @@ function UserList(): JSX.Element {
         }
       },
     ];
+
+    if (auth.Role === Role.ADMIN) {
+      adminFields.splice(1, 1);
+    }
+
     return defaultFields.concat(adminFields);
   }
   return defaultFields;
@@ -131,14 +138,29 @@ function UserList(): JSX.Element {
         .catch((error) => showToast('Delete user!', error.response.data.message));
     }, [userId]);
 
-    return (
-      <div>
-        <Button variant="success" onClick={getUserDetail}>Update</Button>
-          &nbsp;&nbsp;
-        <Button variant="dangerous" onClick={deleteUser}>Delete</Button>
-      </div>
-    );
+    if (userId) {
+      return (
+        <div>
+          <Button variant="success" onClick={getUserDetail}>Update</Button>
+            &nbsp;&nbsp;
+          <Button variant="dangerous" onClick={deleteUser}>Delete</Button>
+        </div>
+      );
+    }
+    return <></>;
   }, []);
+
+  const checkYouHavePermissionToUpdatePower = useCallback((userId: string): boolean => {
+    let havePermission = false;
+    if (auth.Role === Role.SUPER_ADMIN) {
+      if (userId) {
+        if (auth.UserId !== userId) {
+          havePermission = true;
+        }
+      }
+    }
+    return havePermission;
+  }, [auth.UserId]);
 
   return (
     <>
@@ -151,20 +173,34 @@ function UserList(): JSX.Element {
         emptyMessage="Users are not found!"
         onLoad={fetchUser}>
           <Slot<UserType> name="avatar" render={
-            (slotProp) => <img height="50px" width="50px" src={slotProp.avatar} alt="category-avatar"/>
+            (slotProp) => <img
+              height="50px"
+              width="50px"
+              src={slotProp.avatar || require('images/employee.png')}
+              alt="category-avatar"/>
             } />
           <Slot<UserType> name="email" render={
             (slotProp) => <Tooltip className="email-col"><div className="line-clamp">{slotProp.email}</div></Tooltip>
             } />
           <Slot<UserType> name="sex" render={({ sex }) => constants.SEX[sex] } />
           <Slot<UserType> name="mfaEnable" render={
-            (slotProp) => <Switch label="" name="mfa"
+            (slotProp) => (slotProp.mfaEnable !== null ? <Switch label="" name="mfa"
               value={slotProp.mfaEnable} onChange={(mfaEnable) => updateMfa(slotProp.userId, mfaEnable)} />
+              : <></>
+            )
             } />
           <Slot<UserType> name="isAdmin" render={
-            (slotProp) => <Switch label="" name="admin"
-              value={slotProp.isAdmin} onChange={(power) => updatePermission(slotProp.userId, power)} />
-            } />
+            (slotProp) => (checkYouHavePermissionToUpdatePower(slotProp.userId)
+              ? <Switch
+                  label=""
+                  name="admin"
+                  checkValue={1}
+                  notCheckValue={0}
+                  value={slotProp.isAdmin}
+                  onChange={(power) => updatePermission(slotProp.userId, power)} />
+              : <></>
+            )
+          } />
           <Slot name="operation" render={operationSlot} />
       </Table>
     </>

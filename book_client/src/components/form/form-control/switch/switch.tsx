@@ -1,4 +1,4 @@
-import { ChangeEvent, Fragment, JSX, useCallback, useEffect, useMemo } from 'react';
+import { ChangeEvent, Fragment, JSX, useCallback, useEffect, useMemo, useState } from 'react';
 import FormControl, { FormControlProps } from '../form-control';
 import { FieldValidateProps } from 'hooks/useForm';
 import './style.scss';
@@ -26,10 +26,15 @@ function Switch({
   onFocus,
   watch,
 }: SwitchPropsType): JSX.Element {
+  const [checked, setChecked] = useState<boolean>(false);
 
   const valueConverter = useCallback((checked: boolean | string): string => {
-    if (checkValue && notCheckValue) {
-      return (checked === true ? checkValue : notCheckValue).toString();
+    const haveValidCustomValue = [checkValue, notCheckValue].every((labelValue) => labelValue != undefined);
+    if (haveValidCustomValue) {
+      if (typeof checked === 'boolean') {
+        return (checked === true ? checkValue! : notCheckValue!).toString();
+      }
+      return (checked == checkValue ? checkValue! : notCheckValue!).toString();
     }
     return (checked || false).toString();
   }, [checkValue, notCheckValue]);
@@ -41,9 +46,10 @@ function Switch({
     return value as boolean;
   }, [value]);
 
-  const valueConverted = useMemo<string>(() => valueConverter(value), [checkValue, notCheckValue, value]);
+  const valueConverted = useMemo<string>(() => valueConverter(checked), [checkValue, notCheckValue, checked]);
 
   const switchOnChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
+    setChecked(event.target.checked);
     onChange && onChange(JSON.parse(valueConverter(event.target.checked)));
   }, [valueConverted]);
 

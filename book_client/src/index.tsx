@@ -12,6 +12,7 @@ const root = ReactDOM.createRoot(
 );
 
 globalThis.isClient = process.env.APP_NAME === 'client';
+globalThis.isAdmin = globalThis.isClient === false;
 
 root.render(
   <React.StrictMode>

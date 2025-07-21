@@ -21,3 +21,9 @@ export enum SOCKET_NAME {
   USER = 'user',
   CLIENT = 'client',
 };
+
+export enum Role {
+  SUPER_ADMIN = 'Super Admin',
+  ADMIN = 'Admin',
+  USER = 'User',
+};
