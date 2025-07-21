@@ -26,6 +26,11 @@ const sessionDataWithSuperAdminRole = {
   role: POWER.SUPER_ADMIN,
 };
 
+const sessionDataWithUserRole = {
+  ...sessionData.user,
+  role: POWER.USER,
+};
+
 describe('update power', () => {
   commonTest(
     'update power common test',
@@ -135,7 +140,7 @@ describe('update power', () => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
-      signedTestCookie({ ...sessionDataWithSuperAdminRole, role: POWER.USER }).then((responseSign) => {
+      signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
         globalThis.api
           .post(updatePowerUrl)
           .set('authorization', authenticationToken)

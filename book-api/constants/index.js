@@ -44,7 +44,7 @@ module.exports = deepFreeze({
   POWER_NUMERIC: {
     USER: 0,
     ADMIN: 1,
-    SUPER_ADMIN: 2
+    SUPER_ADMIN: 2,
   },
   REGEX: {
     PASSWORD: /[A-Za-z0-9@$#%!^&*()]{8}/,

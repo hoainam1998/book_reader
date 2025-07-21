@@ -50,7 +50,7 @@ const MessageSerializerResponse = require('#dto/common/message-serializer-respon
 /**
  * Remove some fields that do not allow loading when the user has a user role.
  *
- * @param {Object} req - The express request.
+ * @param {object} req - The express request.
  * @param {string[]} - The exclude fields.
  */
 const excludePaginationQueryFields = (req) => {
@@ -63,7 +63,7 @@ const excludePaginationQueryFields = (req) => {
 /**
  * Checking are you have super admin for update mfa or not?
  *
- * @param {Object} req - The express request.
+ * @param {object} req - The express request.
  * @returns {string|void} - The error message if you do not have permission.
  */
 const onlyAllowMfaWhenSuperAdminRole = (req) => {
