@@ -9,9 +9,8 @@ const RESET_PASSWORD_URL = '{0}/reset-password?token={1}';
  * @param {string} [expires='1h'] - The register email.
  * @return {string} - The reset password token.
  */
-const signingResetPasswordToken = (email, expires = '1h') => {
-  return jwt.sign({ email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY, { expiresIn: expires });
-};
+const signingResetPasswordToken = (email, expires = '1h') =>
+  jwt.sign({ email }, process.env.ADMIN_RESET_PASSWORD_SECRET_KEY, { expiresIn: expires });
 
 /**
  * Verify reset password token.
@@ -121,9 +120,8 @@ const generateOtp = () => {
  * @param {string} resetPasswordToken - The reset password token.
  * @return {string} - The reset password link.
  */
-const getResetPasswordLink = (resetPasswordToken) => {
-  return RESET_PASSWORD_URL.format(process.env.ORIGIN_CORS, resetPasswordToken);
-};
+const getResetPasswordLink = (resetPasswordToken) =>
+  RESET_PASSWORD_URL.format(process.env.ORIGIN_CORS, resetPasswordToken);
 
 /**
  * Return client reset password link.
@@ -131,9 +129,8 @@ const getResetPasswordLink = (resetPasswordToken) => {
  * @param {string} resetPasswordToken - The reset password token.
  * @return {string} - The reset password link.
  */
-const getClientResetPasswordLink = (resetPasswordToken) => {
-  return RESET_PASSWORD_URL.format(process.env.CLIENT_ORIGIN_CORS, resetPasswordToken);
-};
+const getClientResetPasswordLink = (resetPasswordToken) =>
+  RESET_PASSWORD_URL.format(process.env.CLIENT_ORIGIN_CORS, resetPasswordToken);
 
 module.exports = {
   signingResetPasswordToken,

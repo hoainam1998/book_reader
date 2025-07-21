@@ -1,11 +1,11 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
 const UserDummyData = require('#test/resources/dummy-data/user');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -25,6 +25,21 @@ const requestBody = {
     power: true,
     sex: true,
   },
+};
+
+const mockUserWithUserRole = {
+  ...mockUser,
+  power: POWER_NUMERIC.USER,
+};
+
+const sessionDataWithUserRole = {
+  ...sessionData.user,
+  role: POWER.USER,
+};
+
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
 };
 
 describe('user detail', () => {
@@ -55,10 +70,9 @@ describe('user detail', () => {
   );
 
   describe(createDescribeTest(METHOD.POST, userDetailUrl), () => {
-    test('get user detail will be success', (done) => {
+    test('get user detail will be success admin - user', (done) => {
       const userDetailExpected = UserDummyData.generateExpectedObject(requestBody.query);
-      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
-
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithUserRole);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
@@ -73,14 +87,71 @@ describe('user detail', () => {
           .then((response) => {
             const selectExpected = parseToPrismaSelect.mock.results[0].value;
             expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith(
-              expect.objectContaining({
-                where: {
-                  user_id: requestBody.userId,
-                },
-                select: selectExpected,
-              })
-            );
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
+            expect(response.body).toEqual(userDetailExpected);
+            done();
+          });
+      });
+    });
+
+    test('get user detail success with super admin - user', (done) => {
+      expect.hasAssertions();
+      const userDetailExpected = UserDummyData.generateExpectedObject(requestBody.query);
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithUserRole);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .post(userDetailUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.OK)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
+            expect(response.body).toEqual(userDetailExpected);
+            done();
+          });
+      });
+    });
+
+    test('get user detail success with super admin - admin', (done) => {
+      const userDetailExpected = UserDummyData.generateExpectedObject(requestBody.query);
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .post(userDetailUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.OK)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
             expect(response.body).toEqual(userDetailExpected);
             done();
           });
@@ -130,7 +201,7 @@ describe('user detail', () => {
 
     test('get user detail failed with user have user role', (done) => {
       expect.hasAssertions();
-      signedTestCookie({ ...sessionData.user, role: POWER.USER }).then((responseSign) => {
+      signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
         globalThis.api
           .post(userDetailUrl)
           .set('authorization', authenticationToken)
@@ -140,6 +211,35 @@ describe('user detail', () => {
           .expect('Content-Type', /application\/json/)
           .then((response) => {
             expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.NOT_PERMISSION,
+            });
+            done();
+          });
+      });
+    });
+
+    test('get user detail failed with admin - admin', (done) => {
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(userDetailUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect(HTTP_CODE.NOT_PERMISSION)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
             expect(response.body).toEqual({
               message: USER.NOT_PERMISSION,
             });
@@ -188,9 +288,8 @@ describe('user detail', () => {
             expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(USER.LOAD_USER_DETAIL_FAIL),
-              errors: expect.any(Array),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
-            expect(response.body.errors).toHaveLength(1);
             done();
           });
       });
@@ -224,12 +323,8 @@ describe('user detail', () => {
     });
 
     test('get user detail failed with output validate error', (done) => {
-      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUser);
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
-        GraphqlResponse.dto.parse({
-          data: {},
-        })
-      );
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithUserRole);
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
@@ -244,14 +339,12 @@ describe('user detail', () => {
           .then((response) => {
             const selectExpected = parseToPrismaSelect.mock.results[0].value;
             expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith(
-              expect.objectContaining({
-                where: {
-                  user_id: requestBody.userId,
-                },
-                select: selectExpected,
-              })
-            );
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
@@ -293,14 +386,12 @@ describe('user detail', () => {
           .then((response) => {
             const selectExpected = parseToPrismaSelect.mock.results[0].value;
             expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith(
-              expect.objectContaining({
-                where: {
-                  user_id: requestBody.userId,
-                },
-                select: selectExpected,
-              })
-            );
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                user_id: requestBody.userId,
+              },
+              select: selectExpected,
+            });
             expect(response.body).toEqual(expected);
             done();
           });

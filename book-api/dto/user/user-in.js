@@ -96,7 +96,7 @@ const PowerUpdate = (validators, className) => {
       @validators(IsId('userId must be numeric string and contain 13 character'))
       userId;
 
-      @validators(IsBoolean('power must be boolean!'))
+      @validators(IsNumeric('power must be a number!'))
       power;
     },
     className
@@ -160,7 +160,7 @@ const UserUpdate = (validators, className) => {
       )
       phone;
 
-      @validators(IsBoolean('mfa must be boolean!'))
+      @validators(IsNumeric('power must be a number!'))
       power;
 
       @validators(IsBoolean('mfa must be boolean!'))
@@ -194,6 +194,12 @@ const PersonUpdate = (validators, className) => {
 
       @validators(IsOptional(), IsBase64Image('avatar must be image!'))
       avatar;
+
+      @validators(
+        IsOptional(),
+        IsBoolean('mfa must be boolean!')
+      )
+      mfa;
     },
     className
   );

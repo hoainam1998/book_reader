@@ -1,9 +1,9 @@
 const { PrismaNotFoundError, PrismaDuplicateError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, PATH, METHOD } = require('#constants');
+const { HTTP_CODE, PATH, METHOD, POWER } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   mockUser,
@@ -15,7 +15,11 @@ const {
 const { getInputValidateMessage, getStaticFile, createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const updatePersonUrl = UserRoutePath.updatePerson.abs;
-let sessionToken;
+
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
+};
 
 describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   commonTest(
@@ -44,15 +48,14 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     'update person common test'
   );
 
-  test('update person will be success', (done) => {
+  test('update person will be success without mfa field', (done) => {
     expect.hasAssertions();
-    signedTestCookie(sessionData.user).then((responseApiSignin) => {
-      sessionToken = responseApiSignin.header['set-cookie'];
+    signedTestCookie(sessionData.user).then((responseSign) => {
       globalThis.prismaClient.user.update.mockResolvedValue();
       globalThis.api
         .put(updatePersonUrl)
         .set('authorization', authenticationToken)
-        .set('Cookie', [sessionToken])
+        .set('Cookie', responseSign.header['set-cookie'])
         .field('firstName', mockUser.first_name)
         .field('lastName', mockUser.last_name)
         .field('email', mockUser.email)
@@ -86,12 +89,81 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     });
   });
 
-  test('update person failed with authentication token unset', (done) => {
+  test('update person will be success with mfa field and super admin field', (done) => {
     expect.hasAssertions();
-    signedTestCookie(sessionData.user).then((responseApiSignin) => {
+    signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+      globalThis.prismaClient.user.update.mockResolvedValue();
       globalThis.api
         .put(updatePersonUrl)
-        .set('Cookie', [responseApiSignin.header['set-cookie']])
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .field('mfa', mockUser.mfa_enable)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.CREATED)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+            where: {
+              user_id: mockUser.user_id,
+            },
+            data: {
+              first_name: mockUser.first_name,
+              last_name: mockUser.last_name,
+              email: mockUser.email,
+              sex: mockUser.sex,
+              phone: mockUser.phone,
+              avatar: expect.any(String),
+              mfa_enable: mockUser.mfa_enable,
+            },
+          });
+          expect(response.body).toEqual({
+            message: USER.UPDATE_SELF_INFORMATION_SUCCESS,
+          });
+          done();
+        });
+    });
+  });
+
+  test('update person failed with mfa field and not super admin field', (done) => {
+    expect.hasAssertions();
+    signedTestCookie(sessionData.user).then((responseApiSignin) => {
+      globalThis.prismaClient.user.update.mockResolvedValue();
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseApiSignin.header['set-cookie'])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .field('mfa', mockUser.mfa_enable)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+            errors: [USER.ONLY_ALLOW_MFA_WITH_SUPER_ADMIN],
+          });
+          done();
+        });
+    });
+  });
+
+  test('update person failed with authentication token unset', (done) => {
+    expect.hasAssertions();
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('Cookie', [responseSign.header['set-cookie']])
         .set('Connection', 'keep-alive')
         .field('firstName', mockUser.first_name)
         .field('lastName', mockUser.last_name)
@@ -141,25 +213,27 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   test('update person failed with bad request', (done) => {
     // missing email field
     expect.hasAssertions();
-    globalThis.api
-      .put(updatePersonUrl)
-      .set('authorization', authenticationToken)
-      .set('Cookie', [sessionToken])
-      .field('firstName', mockUser.first_name)
-      .field('lastName', mockUser.last_name)
-      .field('sex', mockUser.sex)
-      .field('phone', mockUser.phone)
-      .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-      .expect('Content-Type', /application\/json/)
-      .expect(HTTP_CODE.BAD_REQUEST)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toEqual({
-          message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
-          errors: expect.arrayContaining([expect.any(String)]),
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+            errors: expect.arrayContaining([expect.any(String)]),
+          });
+          done();
         });
-        done();
-      });
+    });
   });
 
   test.each([
@@ -190,134 +264,136 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
   ])('update person failed with $describe', ({ cause, expected, status }, done) => {
     expect.hasAssertions();
     globalThis.prismaClient.user.update.mockRejectedValue(cause);
-    globalThis.api
-      .put(updatePersonUrl)
-      .set('authorization', authenticationToken)
-      .set('Cookie', [sessionToken])
-      .field('firstName', mockUser.first_name)
-      .field('lastName', mockUser.last_name)
-      .field('email', mockUser.email)
-      .field('sex', mockUser.sex)
-      .field('phone', mockUser.phone)
-      .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-      .expect('Content-Type', /application\/json/)
-      .expect(status)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-        expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            where: expect.objectContaining({
-              user_id: mockUser.user_id,
-            }),
-            data: expect.objectContaining({
-              first_name: mockUser.first_name,
-              last_name: mockUser.last_name,
-              email: mockUser.email,
-              sex: mockUser.sex,
-              phone: mockUser.phone,
-              avatar: expect.any(String),
-            }),
-          })
-        );
-        expect(response.body).toEqual(expected);
-        done();
-      });
+
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(status)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                user_id: mockUser.user_id,
+              }),
+              data: expect.objectContaining({
+                first_name: mockUser.first_name,
+                last_name: mockUser.last_name,
+                email: mockUser.email,
+                sex: mockUser.sex,
+                phone: mockUser.phone,
+                avatar: expect.any(String),
+              }),
+            })
+          );
+          expect(response.body).toEqual(expected);
+          done();
+        });
+    });
   });
 
   test('update person failed with avatar not be image', (done) => {
     expect.hasAssertions();
-    globalThis.api
-      .put(updatePersonUrl)
-      .set('authorization', authenticationToken)
-      .set('Cookie', [sessionToken])
-      .set('Connection', 'keep-alive')
-      .field('firstName', mockUser.first_name)
-      .field('lastName', mockUser.last_name)
-      .field('email', mockUser.email)
-      .field('sex', mockUser.sex)
-      .field('phone', mockUser.phone)
-      .attach('avatar', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
-      .expect('Content-Type', /application\/json/)
-      .expect(HTTP_CODE.BAD_REQUEST)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toEqual({
-          message: COMMON.FILE_NOT_IMAGE,
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/pdf/pdf-test.pdf'), { contentType: 'application/pdf' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: COMMON.FILE_NOT_IMAGE,
+          });
+          done();
         });
-        done();
-      });
+    });
   });
 
   test('update person failed with avatar is empty file', (done) => {
     expect.hasAssertions();
-    globalThis.api
-      .put(updatePersonUrl)
-      .set('authorization', authenticationToken)
-      .set('Cookie', [sessionToken])
-      .set('Connection', 'keep-alive')
-      .field('firstName', mockUser.first_name)
-      .field('lastName', mockUser.last_name)
-      .field('email', mockUser.email)
-      .field('sex', mockUser.sex)
-      .field('phone', mockUser.phone)
-      .attach('avatar', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
-      .expect('Content-Type', /application\/json/)
-      .expect(HTTP_CODE.BAD_REQUEST)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
-        expect(response.body).toEqual({
-          message: COMMON.FILE_IS_EMPTY,
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/empty.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: COMMON.FILE_IS_EMPTY,
+          });
+          done();
         });
-        done();
-      });
+    });
   });
 
   test('update person failed with output validate error', (done) => {
     expect.hasAssertions();
     globalThis.prismaClient.user.update.mockResolvedValue();
+    jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
-    jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
-      GraphqlResponse.dto.parse({
-        data: {
-          message: 'Expected message!',
-        },
-      })
-    );
-
-    globalThis.api
-      .put(updatePersonUrl)
-      .set('authorization', authenticationToken)
-      .set('Cookie', [sessionToken])
-      .set('Connection', 'keep-alive')
-      .field('firstName', mockUser.first_name)
-      .field('lastName', mockUser.last_name)
-      .field('email', mockUser.email)
-      .field('sex', mockUser.sex)
-      .field('phone', mockUser.phone)
-      .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
-      .expect('Content-Type', /application\/json/)
-      .expect(HTTP_CODE.BAD_REQUEST)
-      .then((response) => {
-        expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-        expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-          expect.objectContaining({
-            where: expect.objectContaining({
-              user_id: mockUser.user_id,
-            }),
-            data: expect.objectContaining({
-              first_name: mockUser.first_name,
-              last_name: mockUser.last_name,
-              email: mockUser.email,
-              sex: mockUser.sex,
-              phone: mockUser.phone,
-              avatar: expect.any(String),
-            }),
-          })
-        );
-        expect(response.body).toEqual({
-          message: COMMON.OUTPUT_VALIDATE_FAIL,
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('email', mockUser.email)
+        .field('sex', mockUser.sex)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+              where: expect.objectContaining({
+                user_id: mockUser.user_id,
+              }),
+              data: expect.objectContaining({
+                first_name: mockUser.first_name,
+                last_name: mockUser.last_name,
+                email: mockUser.email,
+                sex: mockUser.sex,
+                phone: mockUser.phone,
+                avatar: expect.any(String),
+              }),
+            })
+          );
+          expect(response.body).toEqual({
+            message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
         });
-        done();
-      });
+    });
   });
 });

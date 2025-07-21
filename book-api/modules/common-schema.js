@@ -4,10 +4,10 @@ const { HTTP_CODE } = require('#constants');
 /**
  * Create graphql error option.
  *
- * @param {('BAD_REQUEST' | 'NOT_FOUND' | 'UNAUTHORIZED')} code - The file object.
+ * @param {('BAD_REQUEST' | 'NOT_FOUND' | 'UNAUTHORIZED' | 'NOT_PERMISSION')} code - The file object.
  * @return {{
  * extensions: {
- *  code: 'BAD_REQUEST' | 'NOT_FOUND' | 'UNAUTHORIZED',
+ *  code: 'BAD_REQUEST' | 'NOT_FOUND' | 'UNAUTHORIZED' | 'NOT_PERMISSION',
  *  http: {
  *    status: number
  *  }
@@ -44,6 +44,8 @@ const graphqlNotFoundErrorOption = createGraphqlError('NOT_FOUND');
 
 const graphqlUnauthorizedErrorOption = createGraphqlError('UNAUTHORIZED');
 
+const graphqlNotPermissionErrorOption = createGraphqlError('NOT_PERMISSION');
+
 const ResponseType = new GraphQLObjectType({
   name: 'Response',
   fields: {
@@ -58,4 +60,5 @@ module.exports = {
   graphqlNotFoundErrorOption,
   graphqlErrorOption,
   graphqlUnauthorizedErrorOption,
+  graphqlNotPermissionErrorOption,
 };

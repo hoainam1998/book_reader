@@ -6,7 +6,7 @@ const {
   getClientResetPasswordLink,
   getResetPasswordLink,
 } = require('#utils');
-const { POWER } = require('#constants');
+const { POWER, POWER_NUMERIC } = require('#constants');
 
 const mockUser = {
   user_id: Date.now().toString(),
@@ -17,7 +17,7 @@ const mockUser = {
   mfa_enable: true,
   password: 'namtran9',
   otp_code: generateOtp(),
-  power: true,
+  power: POWER_NUMERIC.ADMIN,
   phone: '0987654321',
   sex: 0,
   role: POWER.ADMIN,

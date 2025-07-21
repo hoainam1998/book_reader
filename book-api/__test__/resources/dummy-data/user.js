@@ -24,7 +24,7 @@ class UserDummyData extends DummyDataApi {
       phone: expect.any(String),
       sex: expect.any(Number),
       role: expect.any(String),
-      power: expect.any(Boolean),
+      power: expect.any(Number),
       isAdmin: expect.any(Boolean),
       mfaEnable: expect.any(Boolean),
     });
@@ -53,7 +53,10 @@ class UserDummyData extends DummyDataApi {
    * @return {object[]} - The user list.
    */
   static createMockUserList(length) {
-    return Array.apply(null, Array(length)).map(() => UserDummyData.MockData);
+    return Array.apply(null, Array(length)).map((_, index) => ({
+      ...UserDummyData.MockData,
+      user_id: (+UserDummyData.MockData.user_id + index).toString(),
+    }));
   }
 }
 

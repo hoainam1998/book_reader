@@ -1,5 +1,5 @@
 const { ServerError } = require('#test/mocks/other-errors');
-const GraphqlResponse = require('#dto/common/graphql-response');
+const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const UserDummyData = require('#test/resources/dummy-data/user');
@@ -28,6 +28,11 @@ const requestBody = {
     role: true,
     isAdmin: true,
   },
+};
+
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
 };
 
 const userLength = 2;
@@ -60,20 +65,31 @@ describe('get all user', () => {
   );
 
   describe(createDescribeTest(METHOD.POST, allUserUrl), () => {
-    test('get all user success', (done) => {
+    test.each([
+      {
+        describe: 'admin role',
+        sessionData: sessionData.user,
+        excludeFields: ['userId', 'mfaEnable'],
+      },
+      {
+        describe: 'super admin role',
+        sessionData: sessionDataWithSuperAdminRole,
+        excludeFields: [],
+      }
+    ])('get all user success with $describe', ({ sessionData, excludeFields }, done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userExpectedList = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
+      const userExpected = UserDummyData.generateExpectedObject(requestBody.query, excludeFields);
       globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionData).then((responseSign) => {
         globalThis.api
           .post(allUserUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
           .expect(HTTP_CODE.OK)
           .expect('Content-Type', /application\/json/)
-          .send(requestBody)
           .then((response) => {
             const selectExpected = parseToPrismaSelect.mock.results[0].value;
             expect(globalThis.prismaClient.user.findMany).toHaveBeenCalledTimes(1);
@@ -85,7 +101,7 @@ describe('get all user', () => {
                 },
               })
             );
-            expect(response.body).toEqual(userExpectedList);
+            expect(response.body).toEqual(expect.toBeMatchList(sessionData.userId, sessionData.role, userExpected));
             expect(response.body).toHaveLength(userLength);
             done();
           });
@@ -99,7 +115,7 @@ describe('get all user', () => {
       };
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userExpectedList = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
+      const userExpected = UserDummyData.generateExpectedObject(requestBody.query, ['userId', 'mfaEnable']);
       globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
 
       expect.hasAssertions();
@@ -127,7 +143,7 @@ describe('get all user', () => {
                 },
               })
             );
-            expect(response.body).toEqual(userExpectedList);
+            expect(response.body).toEqual(expect.toBeMatchList(sessionData.user.userId, sessionData.user.role, userExpected));
             expect(response.body).toHaveLength(userLength);
             done();
           });
@@ -292,18 +308,14 @@ describe('get all user', () => {
     test('get all user failed with output validate error', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       globalThis.prismaClient.user.findMany.mockResolvedValue(UserDummyData.createMockUserList(userLength));
-      jest.spyOn(GraphqlResponse, 'parse').mockImplementation(() =>
-        GraphqlResponse.dto.parse({
-          data: [],
-        })
-      );
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
           .post(allUserUrl)
           .set('authorization', authenticationToken)
-          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Cookie', responseSign.header['set-cookie'])
           .expect(HTTP_CODE.BAD_REQUEST)
           .expect('Content-Type', /application\/json/)
           .send(requestBody)
@@ -335,7 +347,7 @@ describe('get all user', () => {
         globalThis.api
           .post(allUserUrl)
           .set('authorization', authenticationToken)
-          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Cookie', responseSign.header['set-cookie'])
           .expect(HTTP_CODE.SERVER_ERROR)
           .expect('Content-Type', /application\/json/)
           .send(requestBody)

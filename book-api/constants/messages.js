@@ -56,6 +56,7 @@ module.exports = deepFreeze({
     NOT_PERMISSION: 'You do not have permission to perform this operation!',
     UPDATE_PASSWORD: 'Update your password success. Please check your email!',
     ONLY_ONE_DEVICE: 'Do not allow multiple account on the same only one device!',
+    ONLY_ALLOW_MFA_WITH_SUPER_ADMIN: 'Only allow update mfa when user have super admin role!',
   },
   BOOK: {
     CREATE_BOOK_FAIL: 'Create book was failed!',

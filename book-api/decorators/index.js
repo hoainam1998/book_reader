@@ -102,11 +102,17 @@ const validateResultExecute = (httpCode) => {
               }
             })
             .catch((err) => {
-              if ([HTTP_CODE.BAD_REQUEST, HTTP_CODE.UNAUTHORIZED, HTTP_CODE.NOT_FOUND].includes(err.status)) {
-                const sts = err.status;
-                delete err.status;
-                return response.status(sts).json(err);
-              }
+              if ([
+                HTTP_CODE.BAD_REQUEST,
+                HTTP_CODE.UNAUTHORIZED,
+                HTTP_CODE.NOT_FOUND,
+                HTTP_CODE.NOT_PERMISSION,
+                ].includes(err.status))
+                {
+                  const sts = err.status;
+                  delete err.status;
+                  return response.status(sts).json(err);
+                }
               Logger.error('Validate graphql execute result', err.message);
               response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
             });
@@ -289,6 +295,7 @@ const validation = (...args) => {
     target.descriptor.value = function (...args) {
       const request = args[0];
       const response = args[1];
+      const preInitErrorMessages = [];
 
       try {
         // it is flag will be determinate, origin method will run or not.
@@ -301,7 +308,7 @@ const validation = (...args) => {
             lastRun = false;
           }
         };
-        const { groups, request_data_passed_type, error_message, exclude_query_fields } = options || {};
+        const { groups, request_data_passed_type, error_message, exclude_query_fields, validate_chain } = options || {};
         // error_message was provided, append it into default error message.
         const errorMessage = (error_message || '').concat('\n', COMMON.INPUT_VALIDATE_FAIL);
 
@@ -320,7 +327,7 @@ const validation = (...args) => {
             // all validate class extended by Validator, therefor it owned validated method
             // run validate method with parameter, return errors array
             const errorsValidated = plainToInstance(validateClass, incomingData).validate(groups)?.errors;
-            const listErrorMessages = preValidateErrors.concat(errorsValidated);
+            const listErrorMessages = preInitErrorMessages.concat(preValidateErrors.concat(errorsValidated));
             // error is empty, skip
             if (listErrorMessages.length) {
               // update lastRun flag, and return bad request response.
@@ -361,6 +368,17 @@ const validation = (...args) => {
               break;
           }
         };
+
+        // run custom validate
+        if (validate_chain && validate_chain.length) {
+          validate_chain.reduce((errorMessages, validateFn) => {
+            const errorMessage = validateFn(request);
+            if (validateFn(request)) {
+              errorMessages.push(errorMessage);
+            }
+            return errorMessages;
+          }, preInitErrorMessages);
+        }
 
         // validateInfo will be array to validate multiple request data passed type, or will be object
         // In case validateInfo is object, default request data passed type will be 'body'

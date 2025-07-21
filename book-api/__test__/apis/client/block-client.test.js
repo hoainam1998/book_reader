@@ -54,15 +54,21 @@ describe('block client', () => {
   );
 
   describe(createDescribeTest(METHOD.DELETE, blockUserUrl), () => {
-    beforeAll(async () => {
+    beforeAll((done) => {
       Socket.instance.subscribe();
-      await WebSocketCreator.startUp((event, ws) => {
+      WebSocketCreator.startUp((event, ws) => {
         ws.send(JSON.stringify({ name: 'client', id: mockClient.reader_id }));
+        done();
       });
     });
 
     afterEach((done) => {
       wsSend.mockReset();
+      done();
+    });
+
+    afterAll((done) => {
+      WebSocketCreator.turnDown();
       done();
     });
 
