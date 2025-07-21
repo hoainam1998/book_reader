@@ -22,7 +22,7 @@ import './style.scss';
 import Switch from 'components/form/form-control/switch/switch';
 let haveCallGetAllUser = false;
 
-type PersonalStateType = Omit<PersonalType, 'id'>
+type PersonalStateType = Omit<PersonalType, 'id'>;
 
 const state: PersonalStateType = {
   firstName: '',
