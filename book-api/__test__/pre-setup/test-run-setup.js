@@ -1,6 +1,7 @@
 const TestServer = require('#test/resources/test-server');
 const prismaClientMock = require('#test/mocks/prisma-client');
 const prismaClient = require('#services/prisma-client');
+require('#test/resources/extends/index');
 globalThis.prismaClient = prismaClient;
 
 globalThis.expressMiddleware = {

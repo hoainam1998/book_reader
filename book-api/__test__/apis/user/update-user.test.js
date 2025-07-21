@@ -3,7 +3,7 @@ const { ServerError } = require('#test/mocks/other-errors');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   mockUser,
@@ -24,12 +24,12 @@ const requestBody = {
   sex: mockUser.sex,
   phone: mockUser.phone,
   mfa: true,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const mockUserWithUserRole = {
   ...mockUser,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const sessionDataWithUserRole = {

@@ -5,7 +5,7 @@ const UserDummyData = require('#test/resources/dummy-data/user');
 const ErrorCode = require('#services/error-code');
 const PrismaField = require('#services/prisma-fields/prisma-field');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH, POWER } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -29,7 +29,7 @@ const requestBody = {
 
 const mockUserWithUserRole = {
   ...mockUser,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const sessionDataWithUserRole = {

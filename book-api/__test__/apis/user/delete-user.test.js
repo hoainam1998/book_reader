@@ -5,7 +5,7 @@ const WebSocketCreator = require('#test/resources/web-socket');
 const OutputValidate = require('#services/output-validate');
 const UserRoutePath = require('#services/route-paths/user');
 const { WsClient, Socket } = require('#services/socket');
-const { HTTP_CODE, METHOD, POWER, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, POWER, POWER_NUMERIC, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const { createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
@@ -22,7 +22,7 @@ const deleteUserUrl = `${UserRoutePath.delete.abs}/${deleteUserId}`;
 
 const mockUserWithUserRole = {
   ...mockUser,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const sessionDataWithUserRole = {

@@ -28,6 +28,11 @@ const requestBody = {
   },
 };
 
+const sessionDataWithSuperAdminRole = {
+  ...sessionData.user,
+  role: POWER.SUPER_ADMIN,
+};
+
 const userLength = 2;
 
 describe('user pagination', () => {
@@ -58,16 +63,25 @@ describe('user pagination', () => {
   );
 
   describe(createDescribeTest(METHOD.POST, paginationUrl), () => {
-    test('user pagination success', (done) => {
+    test.each([
+      {
+        describe: 'admin role',
+        sessionData: sessionData.user,
+      },
+      {
+        describe: 'super admin role',
+        sessionData: sessionDataWithSuperAdminRole,
+      }
+    ])('user pagination success with $describe', ({ sessionData }, done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
         UserDummyData.createMockUserList(userLength),
         userLength,
       ]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = UserDummyData.generateUserExpectedList(requestBody.query, userLength);
+      const userExpected = UserDummyData.generateExpectedObject(requestBody.query, ['userId', 'mfaEnable']);
 
       expect.hasAssertions();
-      signedTestCookie(sessionData.user).then((responseSign) => {
+      signedTestCookie(sessionData).then((responseSign) => {
         globalThis.api
           .post(paginationUrl)
           .set('authorization', authenticationToken)
@@ -94,7 +108,7 @@ describe('user pagination', () => {
             });
             expect(globalThis.prismaClient.user.count).toHaveBeenCalledTimes(1);
             expect(response.body).toEqual({
-              list: userListExpected,
+              list: expect.toBeMatchList(sessionData.userId, sessionData.role, userExpected),
               total: userLength,
               page: requestBody.pageNumber,
               pages: calcPages(requestBody.pageSize, userLength),
@@ -169,7 +183,7 @@ describe('user pagination', () => {
       ]);
 
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      const userListExpected = UserDummyData.generateUserExpectedList(requestBodyWithKeyValue.query, userLength);
+      const userExpected = UserDummyData.generateExpectedObject(requestBody.query, ['userId', 'mfaEnable']);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -229,7 +243,7 @@ describe('user pagination', () => {
               },
             });
             expect(response.body).toEqual({
-              list: userListExpected,
+              list: expect.toBeMatchList(sessionData.user.userId, sessionData.user.role, userExpected),
               total: userLength,
               page: requestBody.pageNumber,
               pages: calcPages(requestBody.pageSize, userLength),

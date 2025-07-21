@@ -5,7 +5,7 @@ const UserDTO = require('#dto/user/user');
 const GraphqlResponse = require('#dto/common/graphql-response');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { mockUser } = require('#test/resources/auth');
@@ -70,7 +70,7 @@ describe('login api', () => {
             avatar: mockUser.avatar,
             mfaEnable: true,
             apiKey: null,
-            power: 0,
+            power: POWER_NUMERIC.USER,
           })
         )
       );
@@ -129,7 +129,7 @@ describe('login api', () => {
             avatar: mockUser.avatar,
             mfaEnable: true,
             apiKey: null,
-            power: 0,
+            power: POWER_NUMERIC.USER,
           })
         )
       );

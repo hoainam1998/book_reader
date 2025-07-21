@@ -96,6 +96,9 @@ const USER_INFORMATION_UPDATE_PERSON_INPUT = new GraphQLInputObjectType({
     avatar: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    mfaEnable: {
+      type: GraphQLBoolean,
+    },
   },
 });
 
@@ -168,9 +171,15 @@ const query = new GraphQLObjectType({
         keyword: {
           type: GraphQLString,
         },
+        yourId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+        yourRole: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
       },
-      resolve: async (service, { pageSize, pageNumber, keyword }, context) => {
-        const [users, total, pages] = await service.pagination(pageSize, pageNumber, keyword, context);
+      resolve: async (service, { pageSize, pageNumber, keyword, yourId, yourRole }, context) => {
+        const [users, total, pages] = await service.pagination(pageSize, pageNumber, keyword, yourId, yourRole, context);
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(UserDTO, users),
           total: parseInt(total || 0),
@@ -186,9 +195,15 @@ const query = new GraphQLObjectType({
         exclude: {
           type: GraphQLID,
         },
+        yourId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+        yourRole: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
       },
-      resolve: async (service, { exclude }, context) => {
-        const users = await service.getAllUsers(exclude, context);
+      resolve: async (service, { exclude, yourId, yourRole }, context) => {
+        const users = await service.getAllUsers(exclude, yourId, yourRole, context);
         return convertDtoToZodObject(UserDTO, users);
       },
     },

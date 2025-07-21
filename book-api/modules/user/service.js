@@ -8,7 +8,7 @@ const {
   checkArrayHaveValues,
 } = require('#utils');
 const { USER } = require('#messages');
-const { POWER } = require('#constants');
+const { POWER, POWER_NUMERIC } = require('#constants');
 const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
@@ -16,7 +16,6 @@ const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/librar
 class UserService extends Service {
   addUser(user) {
     const { firstName, lastName, email, phone, sex, power, mfaEnable } = user;
-
     return this.PrismaInstance.user.create({
       data: {
         first_name: firstName,
@@ -30,7 +29,7 @@ class UserService extends Service {
     });
   }
 
-  pagination(pageSize, pageNumber, keyword, select) {
+  pagination(pageSize, pageNumber, keyword, yourId, yourRole, select) {
     select = { ...select, power: true };
     const offset = (pageNumber - 1) * pageSize;
     let paginationResultPromise;
@@ -102,7 +101,26 @@ class UserService extends Service {
           pages,
         };
         throw new GraphQLError(USER.USERS_EMPTY, graphqlNotFoundErrorOption);
+      } else {
+        if (yourRole === POWER.ADMIN) {
+          users[0] = users[0].map((user) => {
+            if (user.user_id === yourId || (user.power >= POWER_NUMERIC.ADMIN && user.user_id !== yourId)) {
+              user.mfa_enable = null;
+              user.user_id = null;
+            }
+            return user;
+          });
+        } else {
+          users[0] = users[0].map((user) => {
+            if (user.user_id === yourId) {
+              user.mfa_enable = null;
+              user.user_id = null;
+            }
+            return user;
+          });
+        }
       }
+
       users.push(pages);
       return users;
     });
@@ -274,7 +292,7 @@ class UserService extends Service {
     });
   }
 
-  getAllUsers(exclude, select) {
+  getAllUsers(exclude, yourId, yourRole, select) {
     const conditions = exclude
       ? {
           where: {
@@ -294,6 +312,24 @@ class UserService extends Service {
         if (!checkArrayHaveValues(result)) {
           graphqlNotFoundErrorOption.response = [];
           throw new GraphQLError(USER.USER_NOT_FOUND, graphqlNotFoundErrorOption);
+        } else {
+          if (yourRole === POWER.ADMIN) {
+            result = result.map((user) => {
+              if (user.user_id === yourId || (POWER_NUMERIC.ADMIN && user.user_id !== yourId)) {
+                user.mfa_enable = null;
+                user.user_id = null;
+              }
+              return user;
+            });
+          } else {
+            result = result.map((user) => {
+              if (user.user_id === yourId) {
+                user.mfa_enable = null;
+                user.user_id = null;
+              }
+              return user;
+            });
+          }
         }
         return result;
       });

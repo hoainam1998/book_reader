@@ -3,7 +3,7 @@ const { ServerError } = require('#test/mocks/other-errors');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, PATH, METHOD, POWER } = require('#constants');
+const { HTTP_CODE, PATH, METHOD, POWER, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   mockUser,
@@ -23,17 +23,17 @@ const requestBody = {
 
 const mockUserWithRoleUser = {
   ...mockUser,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const mockUserWithAdminRole = {
   ...mockUser,
-  power: 1,
+  power: POWER_NUMERIC.ADMIN,
 };
 
 const mockUserWithSuperAdminRole = {
   ...mockUser,
-  power: 2,
+  power: POWER_NUMERIC.SUPER_ADMIN,
 };
 
 const sessionDataWithUserRole = {

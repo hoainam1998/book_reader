@@ -3,7 +3,7 @@ const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
 const UserRoutePath = require('#services/route-paths/user');
-const { HTTP_CODE, METHOD, PATH, POWER, REGEX } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, POWER, POWER_NUMERIC, REGEX } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   mockUser,
@@ -32,12 +32,12 @@ const requestBody = {
   sex: mockUser.sex,
   phone: mockUser.phone,
   mfa: true,
-  power: 1,
+  power: POWER_NUMERIC.ADMIN,
 };
 
 const requestBodyWithUserRole = {
   ...requestBody,
-  power: 0,
+  power: POWER_NUMERIC.USER,
 };
 
 const sessionDataWithSuperAdminRole = {

@@ -61,6 +61,19 @@ const excludePaginationQueryFields = (req) => {
 };
 
 /**
+ * Checking are you have super admin for update mfa or not?
+ *
+ * @param {Object} req - The express request.
+ * @returns {string|void} - The error message if you do not have permission.
+ */
+const onlyAllowMfaWhenSuperAdminRole = (req) => {
+  if (Object.hasOwn(req.body, 'mfa')
+    && req.session.isDefined('user') && req.session.user.isDefined('role') && req.session.user.role !== POWER.SUPER_ADMIN) {
+    return USER.ONLY_ALLOW_MFA_WITH_SUPER_ADMIN;
+  }
+};
+
+/**
  * Organize user routes.
  * @class
  * @extends Router
@@ -115,7 +128,7 @@ class UserRouter extends Router {
       email: req.body.email,
       sex: +req.body.sex,
       phone: req.body.phone,
-      power: req.body.power,
+      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : 0,
       mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
 
@@ -136,9 +149,9 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(UserPagination)
   _pagination(req, res, next, self) {
-    const query = `query UserPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String) {
+    const query = `query UserPagination($pageSize: Int!, $pageNumber: Int!, $keyword: String, $yourId: ID!, $yourRole: String!) {
       user {
-        pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword) {
+        pagination (pageSize: $pageSize, pageNumber: $pageNumber, keyword: $keyword, yourId: $yourId, yourRole: $yourRole) {
           list ${req.body.query},
           total,
           pages,
@@ -154,6 +167,8 @@ class UserRouter extends Router {
         pageSize: req.body.pageSize,
         pageNumber: req.body.pageNumber,
         keyword: req.body.keyword,
+        yourId: req.session.user.userId,
+        yourRole: req.session.user.role,
       },
       req.body.query
     );
@@ -257,7 +272,7 @@ class UserRouter extends Router {
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
-  @validation(PersonUpdate, { error_message: USER.UPDATE_USER_FAIL })
+  @validation(PersonUpdate, { error_message: USER.UPDATE_USER_FAIL, validate_chain: [onlyAllowMfaWhenSuperAdminRole] })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
   _updatePerson(req, res, next, self) {
@@ -269,6 +284,7 @@ class UserRouter extends Router {
       sex: +req.body.sex,
       phone: req.body.phone,
       avatar: req.body.avatar,
+      mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
 
     const query = `mutation UpdatePerson($person: UserInformationUpdatePersonInput!) {
@@ -358,12 +374,16 @@ class UserRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllUsersResponse)
   _getAllUsers(req, res, next, self) {
-    const query = `query GetAllUsers($exclude: ID) {
+    const query = `query GetAllUsers($exclude: ID, $yourId: ID!, $yourRole: String!) {
       user {
-        all(exclude: $exclude) ${req.body.query}
+        all(exclude: $exclude, yourId: $yourId, yourRole: $yourRole) ${req.body.query}
       }
     }`;
-    return self.execute(query, { exclude: req.body.exclude }, req.body.query);
+    return self.execute(query, {
+      exclude: req.body.exclude,
+      yourId: req.session.user.userId,
+      yourRole: req.session.user.role,
+    }, req.body.query);
   }
 
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })

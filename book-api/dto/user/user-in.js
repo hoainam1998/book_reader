@@ -194,6 +194,12 @@ const PersonUpdate = (validators, className) => {
 
       @validators(IsOptional(), IsBase64Image('avatar must be image!'))
       avatar;
+
+      @validators(
+        IsOptional(),
+        IsBoolean('mfa must be boolean!')
+      )
+      mfa;
     },
     className
   );
