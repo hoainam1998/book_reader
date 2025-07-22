@@ -1,6 +1,5 @@
 import { JSX, useCallback, useMemo, useLayoutEffect } from 'react';
 import { AxiosResponse } from 'axios';
-import { format } from 'date-fns';
 import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
@@ -8,10 +7,12 @@ import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import paths from 'router/paths';
-import { bookPagination, getBookDetail } from '../fetcher';
+import { bookPagination, getBookDetail, deleteBook } from '../fetcher';
 import store from 'store/book';
 const { updateData, deleteAllStorage } = store;
-import { openFile, showToast } from 'utils';
+import { openFile, showToast, showModal, formatDate } from 'utils';
+import { SCREEN_SIZE } from 'enums';
+import { ModalSlotPropsType } from 'interfaces';
 import './style.scss';
 
 type BookType = {
@@ -84,6 +85,17 @@ function BookList(): JSX.Element {
     return (loaderData as AxiosResponse).data.total || 0;
   }, [fetcher.data, loaderData.data]);
 
+  const fetchBookPagination = (pageSize: number, pageNumber: number): void => {
+    _pageSize = pageSize;
+    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
+  };
+
+  const search = useCallback((keyword: string): void => {
+    _keyword = keyword;
+    fetchBookPagination(_pageSize, 1);
+  }, []);
+
+
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
     const { bookId } = slotProp;
 
@@ -93,7 +105,46 @@ function BookList(): JSX.Element {
           updateData({ ...res.data, bookId });
           navigate(bookId);
         })
-        .catch((err) => showToast('Book', err.response.data.message));
+        .catch((err) => showToast('Book detail!', err.response.data.message));
+    };
+
+    const deleteBookClick = (onClose: ModalSlotPropsType['onClose']): void => {
+      deleteBook(bookId)
+        .then((res) => {
+          showToast('Delete book success!', res.data.message);
+          fetchBookPagination(_pageSize, 1);
+        })
+        .catch((error) => showToast('Delete book failed!', error.response.data.message))
+        .finally(onClose);
+    };
+
+    const deleteBookModalChildren: JSX.Element =
+      (<>
+        <Slot<ModalSlotPropsType> name="body" render={() => (
+          <p className="text-center">This book will permanently delete out of system!<br/>Are you sure delete it.</p>
+        )} />
+        <Slot<ModalSlotPropsType>
+            name="footer"
+            render={({ onClose }) => (
+              <div className="footer-delete-book-modal">
+                <Button variant="success" className="flex-grow-1" onClick={onClose}>
+                  Close
+                </Button>
+                <Button variant="dangerous" className="flex-grow-1"
+                  onClick={() => deleteBookClick(onClose)}>
+                  Delete
+                </Button>
+              </div>
+            )}
+          />
+      </>);
+
+    const showModalWarningDeleteBook = (): void => {
+      showModal({
+        title: 'Delete book!',
+        children: deleteBookModalChildren,
+        size: SCREEN_SIZE.MEDIUM,
+      });
     };
 
     return (
@@ -102,21 +153,11 @@ function BookList(): JSX.Element {
           Update
         </Button>
         &nbsp;&nbsp;
-        <Button variant="dangerous" onClick={() => {}}>
+        <Button variant="dangerous" onClick={showModalWarningDeleteBook}>
           Delete
         </Button>
       </div>
     );
-  }, []);
-
-  const fetchBookPagination = (pageSize: number, pageNumber: number): void => {
-    _pageSize = pageSize;
-    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
-  };
-
-  const search = useCallback((keyword: string): void => {
-    _keyword = keyword;
-    fetchBookPagination(_pageSize, 1);
   }, []);
 
   useLayoutEffect(() => {
@@ -156,7 +197,7 @@ function BookList(): JSX.Element {
             )}/>
           <Slot<BookType>
             name="publishedDay"
-            render={(slotProp) => format(+slotProp.publishedDay, 'dd-MM-yyyy')
+            render={(slotProp) => formatDate(slotProp.publishedDay)
             }/>
           <Slot<BookType>
             name="introduce"

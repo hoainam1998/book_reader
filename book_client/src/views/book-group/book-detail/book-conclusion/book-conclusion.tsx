@@ -8,7 +8,6 @@ import {
   Children
 } from 'react';
 import { Blocker, useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 import Button from 'components/button/button';
 import Grid, { GridItem } from 'components/grid/grid';
 import List from 'components/list/list';
@@ -20,7 +19,7 @@ import { getCategoryDetail } from 'views/category/fetcher';
 import type { CategoryDetailType } from 'views/category/category';
 import { Image } from 'store/book';
 import { HaveLoadedFnType } from 'interfaces';
-import { showToast, openFile } from 'utils';
+import { showToast, openFile, formatDate } from 'utils';
 import { useBookStoreContext } from 'contexts/book-store';
 import paths from 'router/paths';
 import './style.scss';
@@ -90,7 +89,7 @@ function BookConclusion(): JSX.Element {
   const { data, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
   const navigate = useNavigate();
   const publishedDay: string = useMemo(
-    () => (data && data.publishedDay ? format(+data.publishedDay, 'dd-MM-yyyy') : ''),
+    () => (data && data.publishedDay ? formatDate(+data.publishedDay) : ''),
     [data]
   );
 

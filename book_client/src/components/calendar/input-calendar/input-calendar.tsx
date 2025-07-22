@@ -1,7 +1,6 @@
 import { forwardRef, useImperativeHandle, useRef, useMemo, JSX, Ref } from 'react';
 import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
-import { format } from 'date-fns';
-import { clsx } from 'utils';
+import { clsx, formatDate } from 'utils';
 import './style.scss';
 
 
@@ -28,7 +27,7 @@ function InputCalendar({
   onOpen,
   }: InputCalendarProps, ref: Ref<HTMLElement>): JSX.Element {
   const inputCalendar = useRef<HTMLElement>(null);
-  const dateFormatted: string = useMemo(() => value ? format(value, 'dd-MM-yyyy') : '', [value]);
+  const dateFormatted: string = useMemo(() => value ? formatDate(value) : '', [value]);
 
   useImperativeHandle(
     ref,
