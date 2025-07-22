@@ -1,4 +1,14 @@
-import { MouseEventHandler, JSX, ReactNode, useMemo, useRef, forwardRef, useImperativeHandle, Ref } from 'react';
+import {
+  MouseEventHandler,
+  JSX,
+  ReactNode,
+  useMemo,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+  Ref,
+  CSSProperties
+} from 'react';
 import { clsx } from 'utils';
 import './style.scss';
 
@@ -6,6 +16,7 @@ type ButtonPropsType = {
   onClick: MouseEventHandler<HTMLButtonElement>;
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
   variant?: 'success' | 'warning' | 'dangerous' | 'primary' | 'submit' | 'outline';
   disabled?: boolean;
 };
@@ -13,6 +24,7 @@ type ButtonPropsType = {
 function Button({
   children,
   className,
+  style,
   variant,
   disabled,
   onClick,
@@ -38,6 +50,7 @@ function Button({
   return (
     <button
       className={clsx('button', className, buttonTypeClass)}
+      style={style}
       onClick={onClick}
       disabled={disabled}
       ref={buttonRef}>

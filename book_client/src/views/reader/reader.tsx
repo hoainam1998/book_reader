@@ -8,7 +8,8 @@ import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import path from 'router/paths';
 import constants from 'read-only-variables';
-import { clientPagination } from './fetcher';
+import { clientPagination, blockClient } from './fetcher';
+import { showToast } from 'utils';
 
 type ClientType = {
   clientId: string;
@@ -70,16 +71,6 @@ function AuthorList(): JSX.Element {
     return (loaderData as AxiosResponse).data.total || 0;
   }, [fetcher.data]);
 
-  const operationSlot = useCallback((slotProp: ClientType): JSX.Element => {
-    // const { clientId } = slotProp;
-
-    const block = (): void => {
-      // TODO;
-    };
-
-    return (<Button variant="dangerous" onClick={block}>Block</Button>);
-  }, []);
-
   const fetchAuthorPagination = (pageSize: number, pageNumber: number): void => {
     _pageSize = pageSize;
     fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
@@ -88,6 +79,23 @@ function AuthorList(): JSX.Element {
   const search = useCallback((keyword: string): void => {
     _keyword = keyword;
     fetchAuthorPagination(_pageSize, 1);
+  }, []);
+
+  const operationSlot = useCallback((slotProp: ClientType): JSX.Element => {
+    const { clientId } = slotProp;
+
+    const block = (): void => {
+      blockClient(clientId)
+        .then((res) => {
+          showToast('Block client!', res.data.message);
+          fetchAuthorPagination(_pageSize, 1);
+        })
+        .catch((error) => {
+          showToast('Block client!', error.response.data.message);
+        });
+    };
+
+    return (<Button variant="dangerous" onClick={block}>Block</Button>);
   }, []);
 
   return (

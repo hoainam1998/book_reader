@@ -8,9 +8,12 @@ import paths from 'router/paths';
 import store from 'store/auth';
 import router from 'router';
 import { UserStorage } from 'storage';
-import { SOCKET_NAME } from 'enums';
+import { SCREEN_SIZE, SOCKET_NAME } from 'enums';
 
-const onCloseModalEvent = () => {
+/**
+ * Close block user modal.
+ */
+const onCloseModalEvent = (): void => {
   store.logout();
   router.navigate(paths.LOGIN);
 };
@@ -25,43 +28,65 @@ const footer: JSX.Element = (
   <Slot<any>
     name="footer"
     render={({ onClose }) => (
-      <Button variant="success" onClick={onClose}>
+      <Button variant="success" style={{ width: '100%' }} onClick={onClose}>
         Close
       </Button>
   )} />
 );
 
-const userSocket = Socket.getInstance('user');
+const userSocket = Socket.getInstance(SOCKET_NAME.USER);
+const clientSocket = Socket.getInstance(SOCKET_NAME.CLIENT);
 
-userSocket?.messageController((data) => {
+/**
+ * ws onMessage event handle function.
+ *
+ * @param {object} - The data received.
+ */
+const messageControllerFn = (data: any) : void => {
   if (data.delete && window.location.pathname.includes(paths.HOME)) {
     showModal({
       children:
-      <Fragment>
-        {body}
-        {footer}
-      </Fragment>,
+        <Fragment>
+          {body}
+          {footer}
+        </Fragment>,
       bodyStyle: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       },
       title: 'User blocked!',
+      size: SCREEN_SIZE.SMALL,
       onClose: onCloseModalEvent,
     });
   }
-});
+};
+
+userSocket?.messageController(messageControllerFn);
+clientSocket?.messageController(messageControllerFn);
 
 export default () => {
-  WebSocketInit.onOpen = function() {
+  /**
+   * ws onOpen event.
+   */
+  WebSocketInit.onOpen = function(): void {
     const user = UserStorage.getItem();
-    (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
+    if (globalThis.isAdmin) {
+      (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
+    } else {
+      (this as any).send(JSON.stringify({ name: SOCKET_NAME.CLIENT, id: user.clientId }));
+    }
   };
 
-  WebSocketInit.onMessage = function(event) {
+  /**
+   * ws onMessage event.
+   */
+  WebSocketInit.onMessage = function(event): void {
     const data = JSON.parse((event as any).data);
     if (data.name === SOCKET_NAME.USER) {
       userSocket?.onMessage(data);
+    } else {
+      clientSocket?.onMessage(data);
     }
   };
 
