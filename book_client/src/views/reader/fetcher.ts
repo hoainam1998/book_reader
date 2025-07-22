@@ -23,3 +23,9 @@ export const clientPagination = ({ request }: LoaderFunctionArgs): Promise<Axios
     keyword,
   });
 };
+
+export const blockClient = (clientId: string) => {
+  return ClientService.put('block', {
+    clientId
+  });
+};

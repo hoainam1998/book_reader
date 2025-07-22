@@ -65,6 +65,6 @@ class Socket {
   }
 };
 
-Socket.createInstances('user');
+Socket.createInstances('user', 'client');
 
 export default Socket;

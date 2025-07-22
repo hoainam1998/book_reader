@@ -8,7 +8,7 @@ import paths from 'router/paths';
 import store from 'store/auth';
 import router from 'router';
 import { UserStorage } from 'storage';
-import { SOCKET_NAME } from 'enums';
+import { SCREEN_SIZE, SOCKET_NAME } from 'enums';
 
 const onCloseModalEvent = () => {
   store.logout();
@@ -25,15 +25,16 @@ const footer: JSX.Element = (
   <Slot<any>
     name="footer"
     render={({ onClose }) => (
-      <Button variant="success" onClick={onClose}>
+      <Button variant="success" style={{ width: '100%' }} onClick={onClose}>
         Close
       </Button>
   )} />
 );
 
-const userSocket = Socket.getInstance('user');
+const userSocket = Socket.getInstance(SOCKET_NAME.USER);
+const clientSocket = Socket.getInstance(SOCKET_NAME.CLIENT);
 
-userSocket?.messageController((data) => {
+const messageControllerFn = (data: any) => {
   if (data.delete && window.location.pathname.includes(paths.HOME)) {
     showModal({
       children:
@@ -47,21 +48,31 @@ userSocket?.messageController((data) => {
         justifyContent: 'center'
       },
       title: 'User blocked!',
+      size: SCREEN_SIZE.MEDIUM,
       onClose: onCloseModalEvent,
     });
   }
-});
+};
+
+userSocket?.messageController(messageControllerFn);
+clientSocket?.messageController(messageControllerFn);
 
 export default () => {
   WebSocketInit.onOpen = function() {
     const user = UserStorage.getItem();
-    (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
+    if (globalThis.isAdmin) {
+      (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
+    } else {
+      (this as any).send(JSON.stringify({ name: SOCKET_NAME.CLIENT, id: user.clientId }));
+    }
   };
 
   WebSocketInit.onMessage = function(event) {
     const data = JSON.parse((event as any).data);
     if (data.name === SOCKET_NAME.USER) {
       userSocket?.onMessage(data);
+    } else {
+      clientSocket?.onMessage(data);
     }
   };
 
