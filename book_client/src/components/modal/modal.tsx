@@ -46,7 +46,7 @@ function Modal({
       if (child.props.children.length > 0) {
         child.props.children.forEach((c: JSX.Element) => slotMapping(c, onClose, slots));
       } else {
-        slotMapping(child, onClose, slots);
+        slotMapping(child.props.children, onClose, slots);
       }
     });
   }

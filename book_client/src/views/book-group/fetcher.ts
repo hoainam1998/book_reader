@@ -19,6 +19,10 @@ const updateBookInformation = (formData: FormData): Promise<AxiosResponse> => {
   return BookService.put('update-book', formData);
 };
 
+const deleteBook = (bookId: string): Promise<AxiosResponse> => {
+  return BookService.delete(`delete/${bookId}`);
+};
+
 const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Promise<AxiosResponse> => {
   let select: RequestBody = {
     name: true,
@@ -156,4 +160,5 @@ export {
   updateBookInformation,
   updateIntroduceFile,
   getAuthors,
+  deleteBook,
 };
