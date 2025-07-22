@@ -10,7 +10,6 @@ import {
   getAllReaders,
   getReaderDetail,
   getReaderInformation,
-  logout,
   deleteFavoriteBook,
   deleteReadLateBook,
   deleteUsedReadBook,
@@ -18,6 +17,7 @@ import {
   getReadLateBooks,
   getUsedReadBooks,
 } from './fetcher';
+import { logout } from 'views/login-group/login/client-login/fetcher';
 import { HaveLoadedFnType, PersonalType, HorizontalBookType } from 'interfaces';
 
 type ReaderType = PersonalType & {

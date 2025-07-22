@@ -10,7 +10,10 @@ import router from 'router';
 import { UserStorage } from 'storage';
 import { SCREEN_SIZE, SOCKET_NAME } from 'enums';
 
-const onCloseModalEvent = () => {
+/**
+ * Close block user modal.
+ */
+const onCloseModalEvent = (): void => {
   store.logout();
   router.navigate(paths.LOGIN);
 };
@@ -34,21 +37,26 @@ const footer: JSX.Element = (
 const userSocket = Socket.getInstance(SOCKET_NAME.USER);
 const clientSocket = Socket.getInstance(SOCKET_NAME.CLIENT);
 
-const messageControllerFn = (data: any) => {
+/**
+ * ws onMessage event handle function.
+ *
+ * @param {object} - The data received.
+ */
+const messageControllerFn = (data: any) : void => {
   if (data.delete && window.location.pathname.includes(paths.HOME)) {
     showModal({
       children:
-      <Fragment>
-        {body}
-        {footer}
-      </Fragment>,
+        <Fragment>
+          {body}
+          {footer}
+        </Fragment>,
       bodyStyle: {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       },
       title: 'User blocked!',
-      size: SCREEN_SIZE.MEDIUM,
+      size: SCREEN_SIZE.SMALL,
       onClose: onCloseModalEvent,
     });
   }
@@ -58,7 +66,10 @@ userSocket?.messageController(messageControllerFn);
 clientSocket?.messageController(messageControllerFn);
 
 export default () => {
-  WebSocketInit.onOpen = function() {
+  /**
+   * ws onOpen event.
+   */
+  WebSocketInit.onOpen = function(): void {
     const user = UserStorage.getItem();
     if (globalThis.isAdmin) {
       (this as any).send(JSON.stringify({ name: SOCKET_NAME.USER, id: user.userId }));
@@ -67,7 +78,10 @@ export default () => {
     }
   };
 
-  WebSocketInit.onMessage = function(event) {
+  /**
+   * ws onMessage event.
+   */
+  WebSocketInit.onMessage = function(event): void {
     const data = JSON.parse((event as any).data);
     if (data.name === SOCKET_NAME.USER) {
       userSocket?.onMessage(data);

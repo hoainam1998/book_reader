@@ -102,10 +102,6 @@ export const getUsedReadBooks = (): Promise<AxiosResponse> => {
   });
 };
 
-export const logout = (): Promise<any> => {
-  return new Promise((resolve) => resolve('ok'));
-};
-
 export const deleteFavoriteBook = (bookId: string): Promise<AxiosResponse> => {
   return BookService.delete(`delete-favorite-book/${bookId}`);
 };
