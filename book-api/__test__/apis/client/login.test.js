@@ -5,7 +5,7 @@ const PrismaField = require('#services/prisma-fields/prisma-field');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const ClientRoutePath = require('#services/route-paths/client');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, BLOCK } = require('#constants');
 const { USER, READER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { signedTestCookie } = require('#test/resources/auth');
@@ -27,6 +27,11 @@ const requestBody = {
     avatar: true,
     email: true,
   },
+};
+
+const mockClientWithBlocked = {
+  ...clientMock,
+  blocked: BLOCK.ON,
 };
 
 describe('client login', () => {
@@ -82,7 +87,7 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(response.body).toEqual(clientExpected);
     });
@@ -114,7 +119,7 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
@@ -153,7 +158,7 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
@@ -213,10 +218,45 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(response.body).toEqual({
         message: READER.USER_NOT_FOUND,
+      });
+    });
+
+    test('login failed with user was block', async () => {
+      globalThis.prismaClient.reader.findFirstOrThrow.mockResolvedValue({
+        ...mockClientWithBlocked,
+        password: await clientMock.password,
+      });
+      const requestBodyWithNewPassword = {
+        ...requestBody,
+        password: autoGeneratePassword(),
+      };
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
+      expect.hasAssertions();
+      const response = await globalThis.api.post(loginUrl).send(requestBodyWithNewPassword);
+      const selectExpected = parseToPrismaSelect.mock.results[0].value;
+      expect(response.header['content-type']).toMatch(/application\/json/);
+      expect(response.status).toBe(HTTP_CODE.NOT_PERMISSION);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            {
+              email: requestBody.email,
+            },
+            {
+              reader_id: requestBody.email,
+            },
+          ],
+        },
+        select: { ...selectExpected, password: true, blocked: true },
+      });
+      expect(response.body).toEqual({
+        message: READER.YOU_ARE_BLOCK,
       });
     });
 
@@ -303,7 +343,7 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(response.body).toEqual(expected);
     });
@@ -334,7 +374,7 @@ describe('client login', () => {
             },
           ],
         },
-        select: { ...selectExpected, password: true },
+        select: { ...selectExpected, password: true, blocked: true },
       });
       expect(response.body).toEqual({
         message: COMMON.OUTPUT_VALIDATE_FAIL,

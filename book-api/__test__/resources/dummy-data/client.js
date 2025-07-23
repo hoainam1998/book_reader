@@ -1,5 +1,6 @@
 const DummyDataApi = require('./api');
 const { autoGeneratePassword, passwordHashing, signClientResetPasswordToken, signClientLoginToken } = require('#utils');
+const { BLOCK } = require('#constants');
 const randomPassword = autoGeneratePassword();
 
 /**
@@ -47,7 +48,7 @@ class ClientDummyData extends DummyDataApi {
         avatar: 'avatar',
         email: 'unknown_client@gmail.com',
         sex: 0,
-        blocked: 0,
+        blocked: BLOCK.OFF,
         phone: '0987654321',
         favorite_books: createBooks(2),
         read_late: createBooks(2),
