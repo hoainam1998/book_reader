@@ -3,8 +3,9 @@ const { GraphQLError } = require('graphql');
 const { compare } = require('bcrypt');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues, calcPages } = require('#utils');
-const { graphqlNotFoundErrorOption } = require('../common-schema');
+const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { READER } = require('#messages');
+const { BLOCK } = require('#constants');
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password, sex) {
@@ -41,17 +42,29 @@ class ClientService extends Service {
   forgetPassword(email) {
     const resetToken = signClientResetPasswordToken(email);
     const randomPassword = autoGeneratePassword();
-    return this.PrismaInstance.reader
-      .update({
-        where: {
-          email,
-        },
-        data: {
-          reset_password_token: resetToken,
-          password: randomPassword,
-        },
-      })
-      .then((client) => ({ ...client, plain_password: randomPassword }));
+    return this.PrismaInstance.reader.findUniqueOrThrow({
+      where: {
+        email,
+      },
+      select: {
+        blocked: true,
+      },
+    }).then((user) => {
+      if (user.blocked === BLOCK.ON) {
+        throw new GraphQLError(READER.YOU_ARE_BLOCK, graphqlNotPermissionErrorOption);
+      }
+      return this.PrismaInstance.reader
+        .update({
+          where: {
+            email,
+          },
+          data: {
+            reset_password_token: resetToken,
+            password: randomPassword,
+          },
+        })
+        .then((client) => ({ ...client, plain_password: randomPassword }));
+    });
   }
 
   resetPassword(token, email, oldPassword, password) {
@@ -63,9 +76,13 @@ class ClientService extends Service {
         },
         select: {
           password: true,
+          blocked: true,
         },
       })
       .then(async (client) => {
+        if (client.blocked === BLOCK.ON) {
+          throw new GraphQLError(READER.YOU_ARE_BLOCK, graphqlNotPermissionErrorOption);
+        }
         if (await compare(oldPassword, client.password)) {
           return this.PrismaInstance.reader.update({
             where: {
@@ -99,9 +116,11 @@ class ClientService extends Service {
   }
 
   login(email, password, select) {
-    select = { ...select, password: true };
+    select = { ...select, password: true, blocked: true };
     return this.getClientDetail(email, select).then(async (client) => {
-      if (await compare(password, client.password)) {
+      if (client.blocked === BLOCK.ON) {
+        throw new GraphQLError(READER.YOU_ARE_BLOCK, graphqlNotPermissionErrorOption);
+      } else if (await compare(password, client.password)) {
         return client;
       }
       throw new PrismaClientKnownRequestError(READER.PASSWORD_NOT_MATCH, { code: 'P2025' });
@@ -225,7 +244,7 @@ class ClientService extends Service {
         reader_id: clientId,
       },
       data: {
-        blocked: 1,
+        blocked: BLOCK.ON,
       },
     });
   }

@@ -6,7 +6,7 @@ const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const ErrorCode = require('#services/error-code');
 const ClientRoutePath = require('#services/route-paths/client');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, BLOCK } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const commonTest = require('#test/apis/common/common');
 const { autoGeneratePassword } = require('#utils');
@@ -20,6 +20,11 @@ const requestBody = {
   email: mockRequestClient.email,
   oldPassword: ClientDummyData.password,
   password: autoGeneratePassword(),
+};
+
+const mockClientBlocked = {
+  ...clientMock,
+  blocked: BLOCK.ON,
 };
 
 describe('reset password', () => {
@@ -71,6 +76,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
@@ -86,6 +92,36 @@ describe('reset password', () => {
       });
       expect(response.body).toEqual({
         message: READER.RESET_PASSWORD_SUCCESS,
+      });
+    });
+
+    test('reset password failed with user was block', async () => {
+      globalThis.prismaClient.reader.findFirstOrThrow.mockResolvedValue({
+        ...mockClientBlocked,
+        password: await clientMock.password,
+      });
+      globalThis.prismaClient.reader.update.mockResolvedValue(clientMock);
+
+      expect.hasAssertions();
+      const response = await globalThis.api
+        .post(resetPasswordUrl)
+        .send(requestBody)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_PERMISSION);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(globalThis.prismaClient.reader.findFirstOrThrow).toHaveBeenCalledWith({
+        where: {
+          reset_password_token: requestBody.resetPasswordToken,
+          email: requestBody.email,
+        },
+        select: {
+          password: true,
+          blocked: true,
+        },
+      });
+      expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+      expect(response.body).toEqual({
+        message: READER.YOU_ARE_BLOCK,
       });
     });
 
@@ -258,6 +294,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
@@ -293,6 +330,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
@@ -322,6 +360,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
@@ -357,6 +396,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
@@ -386,6 +426,7 @@ describe('reset password', () => {
         },
         select: {
           password: true,
+          blocked: true,
         },
       });
       expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);

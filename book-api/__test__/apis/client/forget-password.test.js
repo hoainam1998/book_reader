@@ -5,7 +5,7 @@ const ClientDummyData = require('#test/resources/dummy-data/client');
 const OutputValidate = require('#services/output-validate');
 const EmailService = require('#services/email');
 const ClientRoutePath = require('#services/route-paths/client');
-const { HTTP_CODE, METHOD, PATH, REGEX } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, REGEX, BLOCK } = require('#constants');
 const { READER, COMMON } = require('#messages');
 const { signClientResetPasswordToken } = require('#utils');
 const commonTest = require('#test/apis/common/common');
@@ -23,6 +23,11 @@ const forgetPasswordResponse = {
 
 const requestBody = {
   email: clientMock.email,
+};
+
+const mockClientBlocked = {
+  ...clientMock,
+  blocked: BLOCK.ON,
 };
 
 describe('forget-password', () => {
@@ -103,6 +108,13 @@ describe('forget-password', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
       },
+      {
+        describe: 'not permission error',
+        expected: {
+          message: READER.YOU_ARE_BLOCK,
+        },
+        status: HTTP_CODE.NOT_PERMISSION,
+      },
     ])('forget password failed with $describe', ({ expected, status }, done) => {
       fetch.mockResolvedValue(new Response(JSON.stringify(expected), { status }));
       const sendEmail = jest.spyOn(EmailService, 'sendPassword').mockResolvedValue();
@@ -148,6 +160,7 @@ describe('forget-password', () => {
   describe(createDescribeTest(METHOD.POST, generatedResetPasswordUrl), () => {
     test('generate reset password token success', (done) => {
       const resetPasswordToken = signClientResetPasswordToken(clientMock.email);
+      globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue(clientMock);
       globalThis.prismaClient.reader.update.mockResolvedValue({
         ...clientMock,
         reset_password_token: resetPasswordToken,
@@ -160,6 +173,15 @@ describe('forget-password', () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.OK)
         .then((response) => {
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+            where: {
+              email: requestBody.email,
+            },
+            select: {
+              blocked: true,
+            },
+          });
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
             where: {
@@ -174,6 +196,38 @@ describe('forget-password', () => {
             message: READER.SEND_RESET_PASSWORD_SUCCESS,
             password: expect.stringMatching(REGEX.PASSWORD),
             resetPasswordToken: resetPasswordToken,
+          });
+          done();
+        });
+    });
+
+    test('generate reset password token failed with user was block', (done) => {
+      const resetPasswordToken = signClientResetPasswordToken(clientMock.email);
+      globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue(mockClientBlocked);
+      globalThis.prismaClient.reader.update.mockResolvedValue({
+        ...clientMock,
+        reset_password_token: resetPasswordToken,
+      });
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(generatedResetPasswordUrl)
+        .send(requestBody)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_PERMISSION)
+        .then((response) => {
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+            where: {
+              email: requestBody.email,
+            },
+            select: {
+              blocked: true,
+            },
+          });
+          expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: READER.YOU_ARE_BLOCK,
           });
           done();
         });
@@ -235,7 +289,50 @@ describe('forget-password', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
       },
-    ])('generate reset password token failed with $describe', ({ cause, expected, status }, done) => {
+    ])('generate reset password token failed with findUniqueOrThrows method got $describe', ({ cause, expected, status }, done) => {
+      globalThis.prismaClient.reader.findUniqueOrThrow.mockRejectedValue(cause);
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(generatedResetPasswordUrl)
+        .send(requestBody)
+        .expect('Content-Type', /application\/json/)
+        .expect(status)
+        .then((response) => {
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+            where: {
+              email: requestBody.email,
+            },
+            select: {
+              blocked: true,
+            },
+          });
+          expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual(expected);
+          done();
+        });
+    });
+
+    test.each([
+      {
+        describe: 'client not found',
+        cause: PrismaNotFoundError,
+        expected: {
+          message: READER.EMAIL_NOT_FOUND,
+        },
+        status: HTTP_CODE.NOT_FOUND,
+      },
+      {
+        describe: 'server error',
+        cause: ServerError,
+        expected: {
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
+        },
+        status: HTTP_CODE.SERVER_ERROR,
+      },
+    ])('generate reset password token failed with update method got $describe', ({ cause, expected, status }, done) => {
+      globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue(clientMock);
       globalThis.prismaClient.reader.update.mockRejectedValue(cause);
 
       expect.hasAssertions();
@@ -245,6 +342,15 @@ describe('forget-password', () => {
         .expect('Content-Type', /application\/json/)
         .expect(status)
         .then((response) => {
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+            where: {
+              email: requestBody.email,
+            },
+            select: {
+              blocked: true,
+            },
+          });
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
             where: {
