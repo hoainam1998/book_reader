@@ -1,4 +1,5 @@
 import { customError } from 'utils';
+import { SOCKET_NAME } from 'enums';
 
 /**
  * Web socket service.
@@ -65,6 +66,6 @@ class Socket {
   }
 };
 
-Socket.createInstances('user', 'client');
+Socket.createInstances(SOCKET_NAME.USER, SOCKET_NAME.CLIENT);
 
 export default Socket;

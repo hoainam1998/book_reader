@@ -12,8 +12,15 @@ let popupHeight: number = 0;
 
 /**
  * Show pop-up frame.
+ *
+ * @param {string} title - The toast title.
+ * @param {ReactNode} children - The toast content.
  */
 const showToast = (title: string, children: ReactNode): void => {
+  if (!title || !children) {
+    console.warn('[Toast] Title or body is missing!');
+    return;
+  }
   const popUpContainer = createElementWrapper('pop-up', 'pop-up');
   popUpContainer.dataset.testid = 'toast';
 
