@@ -79,7 +79,7 @@ class ClientRouter extends Router {
           if (self.Socket.Clients.has(req.body.clientId)) {
             self.Socket.Clients.get(req.body.clientId).send({ delete: true });
           }
-          resolve(getGeneratorFunctionData(getGeneratorFunctionData(self.execute(query, { clientId: req.body.clientId }))));
+          resolve(getGeneratorFunctionData(self.execute(query, { clientId: req.body.clientId })));
         });
       });
     });
