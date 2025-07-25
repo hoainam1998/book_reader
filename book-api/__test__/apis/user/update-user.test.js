@@ -17,7 +17,7 @@ const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/i
 const updateUserUrl = UserRoutePath.updateUser.abs;
 
 const requestBody = {
-  userId: mockUser.user_id,
+  userId: Date.now().toString(),
   firstName: mockUser.first_name,
   lastName: mockUser.last_name,
   email: mockUser.email,
@@ -271,10 +271,37 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
+          expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
             errors: [COMMON.FIELD_NOT_EXPECT.format(undefineField)],
+          });
+          done();
+        });
+    });
+  });
+
+  test('update user failed when user updated is yourself', (done) => {
+    const yourRequestBody = {
+      ...requestBody,
+      userId: sessionData.user.userId,
+    };
+
+    expect.hasAssertions();
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updateUserUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .send(yourRequestBody)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.NOT_PERMISSION)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: USER.NOT_PERMISSION,
           });
           done();
         });
@@ -299,6 +326,7 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
         .expect('Content-Type', /application\/json/)
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
+          expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
@@ -467,6 +495,34 @@ describe(createDescribeTest(METHOD.POST, updateUserUrl), () => {
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
+        });
+    });
+  });
+
+  test('update user failed with invalid gender', (done) => {
+    const requestBodyWithInvalidSex = {
+      ...requestBody,
+      sex: 2,
+    };
+
+    expect.hasAssertions();
+    signedTestCookie(sessionData.user).then((responseApiSignin) => {
+      const sessionToken = responseApiSignin.header['set-cookie'];
+      globalThis.api
+        .put(updateUserUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', [sessionToken])
+        .send(requestBodyWithInvalidSex)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+            errors: expect.arrayContaining([expect.any(String)]),
           });
           done();
         });

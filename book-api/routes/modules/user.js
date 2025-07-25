@@ -1,6 +1,6 @@
 const Router = require('../router');
 const { upload, validateResultExecute, serializer, validation } = require('#decorators');
-const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, POWER } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, REQUEST_DATA_PASSED_TYPE, METHOD, POWER, POWER_NUMERIC } = require('#constants');
 const { USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -90,8 +90,8 @@ class UserRouter extends Router {
     this.post(UserRoutePath.createUser, authentication, onlyAdminAllowed, this._createUser);
     this.post(UserRoutePath.add, allowInternalCall, this._addUser);
     this.post(UserRoutePath.pagination, authentication, this._pagination);
-    this.post(UserRoutePath.updateMfa, authentication, onlyAdminAllowed, this._updateMfaState);
-    this.post(UserRoutePath.updatePower, authentication, onlySuperAdminAllowed, this._updatePower);
+    this.put(UserRoutePath.updateMfa, authentication, onlyAdminAllowed, this._updateMfaState);
+    this.put(UserRoutePath.updatePower, authentication, onlySuperAdminAllowed, this._updatePower);
     this.post(UserRoutePath.resetPassword, onlyAllowOneDevice, this._resetPassword);
     this.delete(UserRoutePath.delete, authentication, onlyAdminAllowed, this._deleteUser);
     this.post(UserRoutePath.userDetail, authentication, onlyAdminAllowed, this._getUserDetail);
@@ -128,11 +128,11 @@ class UserRouter extends Router {
       email: req.body.email,
       sex: +req.body.sex,
       phone: req.body.phone,
-      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : 0,
+      power: Object.hasOwn(req.body, 'power') ? JSON.parse(req.body.power) : POWER_NUMERIC.USER,
       mfaEnable: Object.hasOwn(req.body, 'mfa') ? JSON.parse(req.body.mfa) : undefined,
     };
 
-    if (req.session.user.role === POWER.ADMIN && req.body.power > 0) {
+    if (req.session.user.role === POWER.ADMIN && req.body.power > POWER_NUMERIC.USER) {
       return {
         status: HTTP_CODE.NOT_PERMISSION,
         json: messageCreator(USER.NOT_PERMISSION),

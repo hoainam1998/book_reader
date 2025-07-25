@@ -46,9 +46,17 @@ module.exports = deepFreeze({
     ADMIN: 1,
     SUPER_ADMIN: 2,
   },
+  VALID_POWER_NUMERIC: {
+    USER: 0,
+    ADMIN: 1,
+  },
   BLOCK: {
     OFF: 0,
     ON: 1,
+  },
+  SEX: {
+    MALE: 0,
+    FEMALE: 1,
   },
   REGEX: {
     PASSWORD: /[A-Za-z0-9@$#%!^&*()]{8}/,
@@ -58,6 +66,7 @@ module.exports = deepFreeze({
     UNIQUE_DUPLICATE: 'P2002',
     UNAUTHORIZED: 'P2025',
     FOREIGN_KEY_CONFLICT: 'P2003',
+    DATA_VALIDATION: 'P2007',
   },
   REDIS_PREFIX: 'book-app:',
 });

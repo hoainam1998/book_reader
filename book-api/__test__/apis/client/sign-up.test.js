@@ -17,7 +17,7 @@ const requestBody = {
   lastName: mockRequestClient.last_name,
   email: mockRequestClient.email,
   password: ClientDummyData.password,
-  sex: mockRequestClient.sex.toString(),
+  sex: mockRequestClient.sex,
 };
 
 describe('client signup', () => {
@@ -199,6 +199,28 @@ describe('client signup', () => {
           });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
+        });
+    });
+
+    test('client signup failed with invalid gender', (done) => {
+      const requestBodyWithInvalidSex = {
+        ...requestBody,
+        sex: 2,
+      };
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(clientSignupUrl)
+        .send(requestBodyWithInvalidSex)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.reader.create).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(READER.SIGNUP_FAIL),
+            errors:  expect.arrayContaining([expect.any(String)]),
           });
           done();
         });

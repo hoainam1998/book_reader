@@ -1,5 +1,5 @@
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
-const { PRISMA_ERROR_CODE, HTTP_CODE, POWER } = require('#constants');
+const { PRISMA_ERROR_CODE, HTTP_CODE, POWER, POWER_NUMERIC } = require('#constants');
 const { USER } = require('#messages');
 const { messageCreator } = require('#utils');
 
@@ -113,6 +113,12 @@ class SharedService {
   }
 
   checkYouHaveRightPermission(you, targetUserId) {
+    if (you.userId === targetUserId) {
+      return Promise.reject({
+        status: HTTP_CODE.NOT_PERMISSION,
+        ...messageCreator(USER.NOT_PERMISSION),
+      });
+    }
     return this.PrismaClient.user.findUniqueOrThrow({
       where: {
         user_id: targetUserId,
@@ -121,7 +127,7 @@ class SharedService {
         power: true,
       },
     }).then((user) => {
-      if (you.role === POWER.ADMIN && user.power > 0) {
+      if (you.role === POWER.ADMIN && user.power > POWER_NUMERIC.USER) {
         throw {
           status: HTTP_CODE.NOT_PERMISSION,
           ...messageCreator(USER.NOT_PERMISSION),
@@ -169,6 +175,11 @@ class SharedService {
             throw {
               status: HTTP_CODE.NOT_FOUND,
               ...messageCreator(USER.USER_NOT_FOUND),
+            };
+          } else if (error.code === PRISMA_ERROR_CODE.DATA_VALIDATION) {
+            throw {
+              status: HTTP_CODE.BAD_REQUEST,
+              ...messageCreator(error.message),
             };
           }
         }

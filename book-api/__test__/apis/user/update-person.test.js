@@ -236,6 +236,32 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     });
   });
 
+    test('update person failed invalid gender', (done) => {
+    const invalidGender = 2;
+    expect.hasAssertions();
+    signedTestCookie(sessionData.user).then((responseSign) => {
+      globalThis.api
+        .put(updatePersonUrl)
+        .set('authorization', authenticationToken)
+        .set('Cookie', responseSign.header['set-cookie'])
+        .field('firstName', mockUser.first_name)
+        .field('lastName', mockUser.last_name)
+        .field('sex', invalidGender)
+        .field('phone', mockUser.phone)
+        .attach('avatar', getStaticFile('/images/application.png'))
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(USER.UPDATE_USER_FAIL),
+            errors: expect.arrayContaining([expect.any(String)]),
+          });
+          done();
+        });
+    });
+  });
+
   test.each([
     {
       describe: 'user not found error',
@@ -280,21 +306,19 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
         .expect(status)
         .then((response) => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: expect.objectContaining({
-                user_id: mockUser.user_id,
-              }),
-              data: expect.objectContaining({
-                first_name: mockUser.first_name,
-                last_name: mockUser.last_name,
-                email: mockUser.email,
-                sex: mockUser.sex,
-                phone: mockUser.phone,
-                avatar: expect.any(String),
-              }),
-            })
-          );
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+            where: {
+              user_id: mockUser.user_id,
+            },
+            data: {
+              first_name: mockUser.first_name,
+              last_name: mockUser.last_name,
+              email: mockUser.email,
+              sex: mockUser.sex,
+              phone: mockUser.phone,
+              avatar: expect.any(String),
+            },
+          });
           expect(response.body).toEqual(expected);
           done();
         });
@@ -374,21 +398,19 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith(
-            expect.objectContaining({
-              where: expect.objectContaining({
-                user_id: mockUser.user_id,
-              }),
-              data: expect.objectContaining({
-                first_name: mockUser.first_name,
-                last_name: mockUser.last_name,
-                email: mockUser.email,
-                sex: mockUser.sex,
-                phone: mockUser.phone,
-                avatar: expect.any(String),
-              }),
-            })
-          );
+          expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+            where: {
+              user_id: mockUser.user_id,
+            },
+            data: {
+              first_name: mockUser.first_name,
+              last_name: mockUser.last_name,
+              email: mockUser.email,
+              sex: mockUser.sex,
+              phone: mockUser.phone,
+              avatar: expect.any(String),
+            },
+          });
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });

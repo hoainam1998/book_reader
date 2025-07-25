@@ -13,7 +13,11 @@ const {
   IsId,
   Length,
 } = require('#decorators/validators');
+const { VALID_POWER_NUMERIC, SEX } = require('#constants');
 const { classCreator, Validation } = require('../helper.js');
+
+const validPower = Object.values(VALID_POWER_NUMERIC);
+const validSex = Object.values(SEX);
 
 const UserPaginationInput = (validators, className) => {
   return classCreator(
@@ -96,7 +100,10 @@ const PowerUpdate = (validators, className) => {
       @validators(IsId('userId must be numeric string and contain 13 character'))
       userId;
 
-      @validators(IsNumeric('power must be a number!'))
+      @validators(
+        IsNumeric('power must be a number!'),
+        IsRangeContain(validPower, 'power must in [0, 1]!')
+      )
       power;
     },
     className
@@ -150,7 +157,10 @@ const UserUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(IsNumeric('sex must be a numeric!'))
+      @validators(
+        IsNumeric('sex must be a numeric!'),
+        IsRangeContain(validSex, 'sex must in [0, 1]!')
+      )
       sex;
 
       @validators(
@@ -160,7 +170,10 @@ const UserUpdate = (validators, className) => {
       )
       phone;
 
-      @validators(IsNumeric('power must be a number!'))
+      @validators(
+        IsNumeric('power must be a number!'),
+        IsRangeContain(validPower, 'power must in [0, 1]!')
+      )
       power;
 
       @validators(IsBoolean('mfa must be boolean!'))
@@ -182,7 +195,10 @@ const PersonUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(IsNumeric('sex must be a numeric!'))
+      @validators(
+        IsNumeric('sex must be a numeric!'),
+        IsRangeContain(validSex, 'sex must in [0, 1]!')
+      )
       sex;
 
       @validators(

@@ -313,4 +313,33 @@ describe(createDescribeTest(METHOD.POST, updateClientUrl), () => {
         });
     });
   });
+
+  test('update client failed with invalid gender', (done) => {
+    expect.hasAssertions();
+    const invalidGender = 2;
+
+    signedTestCookie(sessionData, 'client').then((responseApiSignin) => {
+      globalThis.api
+        .put(updateClientUrl)
+        .set('authorization', apiKey)
+        .set('Cookie', [responseApiSignin.header['set-cookie']])
+        .set('Connection', 'keep-alive')
+        .field('firstName', mockClient.first_name)
+        .field('lastName', mockClient.last_name)
+        .field('email', mockClient.email)
+        .field('sex', invalidGender)
+        .field('phone', mockClient.phone)
+        .attach('avatar', getStaticFile('/images/application.png'))
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.BAD_REQUEST)
+        .then((response) => {
+          expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: getInputValidateMessage(READER.ADD_PERSONAL_INFORMATION_FAIL),
+            errors: expect.arrayContaining([expect.any(String)]),
+          });
+          done();
+        });
+    });
+  });
 });

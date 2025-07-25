@@ -5,7 +5,7 @@ const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/librar
 const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues, calcPages } = require('#utils');
 const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { READER } = require('#messages');
-const { BLOCK } = require('#constants');
+const { BLOCK, PRISMA_ERROR_CODE } = require('#constants');
 
 class ClientService extends Service {
   signUp(firstName, lastName, email, password, sex) {
@@ -95,7 +95,7 @@ class ClientService extends Service {
             },
           });
         }
-        throw new PrismaClientKnownRequestError(READER.OLD_PASSWORD_NOT_MATCH, { code: 'P2025' });
+        throw new PrismaClientKnownRequestError(READER.OLD_PASSWORD_NOT_MATCH, { code: PRISMA_ERROR_CODE.UNAUTHORIZED });
       });
   }
 
@@ -123,7 +123,7 @@ class ClientService extends Service {
       } else if (await compare(password, client.password)) {
         return client;
       }
-      throw new PrismaClientKnownRequestError(READER.PASSWORD_NOT_MATCH, { code: 'P2025' });
+      throw new PrismaClientKnownRequestError(READER.PASSWORD_NOT_MATCH, { code: PRISMA_ERROR_CODE.UNAUTHORIZED });
     });
   }
 

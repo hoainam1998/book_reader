@@ -40,6 +40,11 @@ const requestBodyWithUserRole = {
   power: POWER_NUMERIC.USER,
 };
 
+const requestBodyWithSuperAdminRole = {
+  ...requestBody,
+  power: POWER_NUMERIC.SUPER_ADMIN,
+};
+
 const sessionDataWithSuperAdminRole = {
   ...sessionData.user,
   role: POWER.SUPER_ADMIN,
@@ -481,6 +486,51 @@ describe('create user', () => {
             });
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
+          });
+      });
+    });
+
+    test('add user failed with invalid gender', (done) => {
+      const requestBodyWithUserRoleAndInvalidGender = {
+        ...requestBodyWithUserRole,
+        sex: 2,
+      };
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .send(requestBodyWithUserRoleAndInvalidGender)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(USER.ADD_USER_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
+            });
+            done();
+          });
+      });
+    });
+
+    test('add user failed with invalid power', (done) => {
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .post(addUserUrl)
+          .send(requestBodyWithSuperAdminRole)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.create).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(USER.ADD_USER_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
             done();
           });
