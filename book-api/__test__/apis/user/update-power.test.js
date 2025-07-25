@@ -39,7 +39,7 @@ describe('update power', () => {
         name: 'url test',
         describe: 'url is invalid',
         url: `${PATH.USER}/unknown`,
-        method: METHOD.POST.toLowerCase(),
+        method: METHOD.PUT.toLowerCase(),
       },
       {
         name: 'method test',
@@ -51,21 +51,21 @@ describe('update power', () => {
         name: 'cors test',
         describe: 'update power api cors',
         url: updatePowerUrl,
-        method: METHOD.POST.toLowerCase(),
+        method: METHOD.PUT.toLowerCase(),
         origin: process.env.ORIGIN_CORS,
       },
     ],
     'update power common test'
   );
 
-  describe(createDescribeTest(METHOD.POST, updatePowerUrl), () => {
+  describe(createDescribeTest(METHOD.PUT, updatePowerUrl), () => {
     test('update power will be success', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue(mockUser);
 
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)
@@ -97,7 +97,7 @@ describe('update power', () => {
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)
           .expect('Content-Type', /application\/json/)
@@ -119,7 +119,7 @@ describe('update power', () => {
       expect.hasAssertions();
       destroySession().then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)
@@ -142,7 +142,7 @@ describe('update power', () => {
       expect.hasAssertions();
       signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)
@@ -158,13 +158,39 @@ describe('update power', () => {
       });
     });
 
+    test('update power failed with super admin ', (done) => {
+      const requestBodyWithInvalidPower = {
+        ...requestBody,
+        power: POWER_NUMERIC.SUPER_ADMIN,
+      };
+
+      expect.hasAssertions();
+      signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
+        globalThis.api
+          .put(updatePowerUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBodyWithInvalidPower)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(USER.UPDATE_POWER_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
+            });
+            done();
+          });
+      });
+    });
+
     test('update power failed request body empty', (done) => {
       globalThis.prismaClient.user.update.mockResolvedValue();
 
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send({})
@@ -192,7 +218,7 @@ describe('update power', () => {
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(badRequestBody)
@@ -216,7 +242,7 @@ describe('update power', () => {
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)
@@ -265,7 +291,7 @@ describe('update power', () => {
       expect.hasAssertions();
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         globalThis.api
-          .post(updatePowerUrl)
+          .put(updatePowerUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', [responseSign.header['set-cookie']])
           .send(requestBody)

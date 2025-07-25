@@ -17,7 +17,7 @@ const commonTest = require('#test/apis/common/common');
 const updateMfaUrl = UserRoutePath.updateMfa.abs;
 
 const requestBody = {
-  userId: mockUser.user_id,
+  userId: Date.now().toString(),
   mfaEnable: mockUser.mfa_enable,
 };
 
@@ -54,7 +54,7 @@ describe('update mfa', () => {
         name: 'url test',
         describe: 'url is invalid',
         url: `${PATH.USER}/unknown`,
-        method: METHOD.POST.toLowerCase(),
+        method: METHOD.PUT.toLowerCase(),
       },
       {
         name: 'method test',
@@ -66,14 +66,14 @@ describe('update mfa', () => {
         name: 'cors test',
         describe: 'update mfa api cors',
         url: updateMfaUrl,
-        method: METHOD.POST.toLowerCase(),
+        method: METHOD.PUT.toLowerCase(),
         origin: process.env.ORIGIN_CORS,
       },
     ],
     'update mfa common test'
   );
 
-  describe(createDescribeTest(METHOD.POST, updateMfaUrl), () => {
+  describe(createDescribeTest(METHOD.PUT, updateMfaUrl), () => {
     test.each([
       {
         describe: 'admin role',
@@ -91,7 +91,7 @@ describe('update mfa', () => {
       signedTestCookie(sessionData).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', cookie)
           .send(requestBody)
@@ -132,7 +132,7 @@ describe('update mfa', () => {
       signedTestCookie(sessionDataWithSuperAdminRole).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', cookie)
           .send(requestBody)
@@ -173,7 +173,7 @@ describe('update mfa', () => {
       signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', cookie)
           .send(requestBody)
@@ -206,7 +206,7 @@ describe('update mfa', () => {
       signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', cookie)
           .send(requestBody)
@@ -229,7 +229,7 @@ describe('update mfa', () => {
       signedTestCookie(sessionData.user).then((responseSign) => {
         const cookie = responseSign.header['set-cookie'];
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .send(requestBody)
           .set('Cookie', cookie)
           .expect(HTTP_CODE.UNAUTHORIZED)
@@ -251,7 +251,7 @@ describe('update mfa', () => {
 
       destroySession().then(() => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .send(requestBody)
           .set('authorization', authenticationToken)
           .expect(HTTP_CODE.UNAUTHORIZED)
@@ -274,7 +274,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send({})
@@ -303,7 +303,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send(badRequestBody)
@@ -333,7 +333,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send(badRequestBody)
@@ -351,6 +351,34 @@ describe('update mfa', () => {
       });
     });
 
+    test('update mfa failed user updated is yourself', (done) => {
+      const badRequestBody = {
+        ...requestBody,
+        userId: sessionData.user.userId,
+      };
+
+      globalThis.prismaClient.user.update.mockResolvedValue();
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateMfaUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', responseSign.header['set-cookie'])
+          .send(badRequestBody)
+          .expect(HTTP_CODE.NOT_PERMISSION)
+          .expect('Content-Type', /application\/json/)
+          .then((response) => {
+            expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.NOT_PERMISSION,
+            });
+            done();
+          });
+      });
+    });
+
     test('update mfa failed with output validated error', (done) => {
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
       globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithRoleUser);
@@ -359,7 +387,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send(requestBody)
@@ -416,7 +444,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send(requestBody)
@@ -463,7 +491,7 @@ describe('update mfa', () => {
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
-          .post(updateMfaUrl)
+          .put(updateMfaUrl)
           .set('authorization', authenticationToken)
           .set('Cookie', responseSign.header['set-cookie'])
           .send(requestBody)

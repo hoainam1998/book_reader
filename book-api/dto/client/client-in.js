@@ -13,6 +13,9 @@ const {
   IsRangeContain,
   IsPositive,
 } = require('#decorators/validators');
+const { SEX } = require('#constants');
+
+const validSex = Object.values(SEX);
 
 const ClientPagination = (validators, className) => {
   return classCreator(
@@ -74,7 +77,10 @@ const ClientUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(IsNumeric('sex must be a numeric!'))
+      @validators(
+        IsNumeric('sex must be a numeric!'),
+        IsRangeContain(validSex, 'sex must in [0, 1]!')
+      )
       sex;
 
       @validators(IsBase64Image('avatar must be image!'))
@@ -116,7 +122,10 @@ const SignUp = (validators, className) => {
       @validators(IsPassword('Invalid password!'))
       password;
 
-      @validators(IsNumeric('sex must be a numeric!'))
+      @validators(
+        IsNumeric('sex must be a numeric!'),
+        IsRangeContain(validSex, 'sex must in [0, 1]!')
+      )
       sex;
     },
     className

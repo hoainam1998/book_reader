@@ -8,7 +8,7 @@ const {
   checkArrayHaveValues,
 } = require('#utils');
 const { USER } = require('#messages');
-const { POWER, POWER_NUMERIC } = require('#constants');
+const { POWER, POWER_NUMERIC, PRISMA_ERROR_CODE } = require('#constants');
 const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { GraphQLError } = require('graphql');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
@@ -165,7 +165,7 @@ class UserService extends Service {
       .then((user) => {
         return compare(password, user.password).then((compareResult) => {
           if (!compareResult) {
-            throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+            throw new PrismaClientKnownRequestError('Password not match!', { code: PRISMA_ERROR_CODE.UNAUTHORIZED });
           }
           return user;
         });
@@ -210,7 +210,7 @@ class UserService extends Service {
             },
           });
         }
-        throw new PrismaClientKnownRequestError('Password not match!', { code: 'P2025' });
+        throw new PrismaClientKnownRequestError('Password not match!', { code: PRISMA_ERROR_CODE.UNAUTHORIZED });
       });
   }
 

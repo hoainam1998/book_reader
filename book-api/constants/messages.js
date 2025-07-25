@@ -57,6 +57,10 @@ module.exports = deepFreeze({
     UPDATE_PASSWORD: 'Update your password success. Please check your email!',
     ONLY_ONE_DEVICE: 'Do not allow multiple account on the same only one device!',
     ONLY_ALLOW_MFA_WITH_SUPER_ADMIN: 'Only allow update mfa when user have super admin role!',
+    CAN_NOT_DELETE_SUPER_ADMIN: 'Can not delete super admin user!',
+    CAN_NOT_CREATE_SUPER_ADMIN: 'Can not create super admin user!',
+    YOUR_POWER_INVALID: 'Your power invalid!',
+    YOUR_GENDER_INVALID: 'Your gender invalid!',
   },
   BOOK: {
     CREATE_BOOK_FAIL: 'Create book was failed!',
@@ -142,5 +146,6 @@ module.exports = deepFreeze({
     BLOCK_CLIENT_SUCCESS: 'Block client was success!',
     BLOCK_CLIENT_FAIL: 'Block client was failed!',
     YOU_ARE_BLOCK: 'You are blocking. Please contact with manager!',
+    BLOCK_STATE_INVALID: 'Your block state invalid!',
   },
 });

@@ -1,5 +1,5 @@
 const { ServerError } = require('#test/mocks/other-errors');
-const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const { PrismaNotFoundError, PrismaDataValidationError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const WebSocketCreator = require('#test/resources/web-socket');
 const OutputValidate = require('#services/output-validate');
@@ -347,6 +347,70 @@ describe('delete user', () => {
       });
     });
 
+    test('delete user failed with data validation error', (done) => {
+      globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithUserRole);
+      globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue(mockUserWithUserRole);
+      jest.spyOn(Socket.prototype, 'Clients', 'get').mockImplementation(() => new Map());
+      globalThis.prismaClient.user.delete.mockRejectedValue(new PrismaDataValidationError(USER.CAN_NOT_DELETE_SUPER_ADMIN));
+      globalThis.prismaClient.user.update.mockResolvedValue(mockUserWithUserRole);
+
+      expect.hasAssertions();
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          const sessionId = responseSign.body.sessionId;
+          globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue({ session_id: sessionId });
+
+          globalThis.api
+            .delete(deleteUserUrl)
+            .set('Cookie', responseSign.header['set-cookie'])
+            .set('authorization', authenticationToken)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .then((response) => {
+              expect(wsSend).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  user_id: deleteUserId,
+                },
+                select: {
+                  power: true,
+                },
+              });
+              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.findFirstOrThrow).toHaveBeenCalledWith({
+                where: {
+                  user_id: deleteUserId,
+                },
+                select: {
+                  session_id: true,
+                },
+              });
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.update).toHaveBeenCalledWith({
+                where: {
+                  user_id: deleteUserId,
+                },
+                data: {
+                  session_id: null,
+                },
+              });
+              expect(globalThis.prismaClient.user.delete).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.user.delete).toHaveBeenCalledWith({
+                where: {
+                  user_id: deleteUserId,
+                },
+              });
+              expect(response.body).toEqual({
+                message: USER.CAN_NOT_DELETE_SUPER_ADMIN,
+              });
+              done();
+            });
+        });
+      });
+    });
+
     test('delete user failed with authentication token unset', (done) => {
       expect.hasAssertions();
 
@@ -407,6 +471,33 @@ describe('delete user', () => {
         signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
           globalThis.api
             .delete(deleteUserUrl)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .set('authorization', authenticationToken)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.NOT_PERMISSION)
+            .then((response) => {
+              expect(wsSend).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.delete).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: USER.NOT_PERMISSION,
+              });
+              done();
+            });
+        });
+      });
+    });
+
+    test('delete user failed when user deleted is yourself', (done) => {
+      expect.hasAssertions();
+      const deleteYourSelfUrl = `${UserRoutePath.delete.abs}/${sessionData.user.userId}`;
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.api
+            .delete(deleteYourSelfUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
             .expect('Content-Type', /application\/json/)

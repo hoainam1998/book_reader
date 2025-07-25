@@ -1,5 +1,5 @@
 const isRangeContain = (value, range, message) => {
-  if (!range.includes(value)) {
+  if (!range.includes(+value)) {
     return message;
   }
 };

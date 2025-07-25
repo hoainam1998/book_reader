@@ -44,6 +44,9 @@ const handleError = (err, messages, errorCodes) => {
       case PRISMA_ERROR_CODE.FOREIGN_KEY_CONFLICT:
         message = messages['FOREIGN_KEY_CONFLICT'] || 'Can not delete this record!';
         throw new GraphQLError(message, graphqlErrorOption);
+      case PRISMA_ERROR_CODE.DATA_VALIDATION:
+        message = message['DATA_VALIDATION'] || err.message;
+        throw new GraphQLError(message, graphqlErrorOption);
       default:
         throw new GraphQLError(err.meta.cause, graphqlErrorOption);
     }

@@ -1,12 +1,12 @@
 const { ServerError } = require('#test/mocks/other-errors');
-const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const { PrismaNotFoundError, PrismaDataValidationError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const WebSocketCreator = require('#test/resources/web-socket');
 const OutputValidate = require('#services/output-validate');
 const ClientRoutePath = require('#services/route-paths/client');
 const ClientDummyData = require('#test/resources/dummy-data/client');
 const { WsClient, Socket } = require('#services/socket');
-const { HTTP_CODE, METHOD, POWER, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, POWER, PATH, BLOCK } = require('#constants');
 const { USER, COMMON, READER } = require('#messages');
 const { createDescribeTest } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
@@ -22,6 +22,11 @@ const mockClient = ClientDummyData.MockData;
 
 const requestBody = {
   clientId: mockClient.reader_id,
+};
+
+const sessionDataWithUserRole = {
+  ...sessionData.user,
+  role: POWER.USER,
 };
 
 const wsSend = jest.fn();
@@ -120,7 +125,7 @@ describe('block client', () => {
                       reader_id: requestBody.clientId,
                     },
                     data: {
-                      blocked: 1,
+                      blocked: BLOCK.ON,
                     },
                   },
                 ],
@@ -180,7 +185,7 @@ describe('block client', () => {
                       reader_id: requestBody.clientId,
                     },
                     data: {
-                      blocked: 1,
+                      blocked: BLOCK.ON,
                     },
                   },
                 ],
@@ -249,7 +254,7 @@ describe('block client', () => {
       expect.hasAssertions();
 
       clearAllSession().then(() => {
-        signedTestCookie({ ...sessionData.user, role: POWER.USER }).then((responseSign) => {
+        signedTestCookie(sessionDataWithUserRole).then((responseSign) => {
           globalThis.api
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
@@ -270,9 +275,53 @@ describe('block client', () => {
       });
     });
 
+    test('block client failed with invalid block state', (done) => {
+      expect.hasAssertions();
+      jest.spyOn(Socket.prototype, 'Clients', 'get').mockImplementation(() => new Map());
+      globalThis.prismaClient.reader.update.mockRejectedValue(new PrismaDataValidationError(READER.BLOCK_STATE_INVALID));
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue({ session_id: responseSign.body.sessionId });
+          globalThis.api
+            .put(blockUserUrl)
+            .set('Cookie', responseSign.header['set-cookie'])
+            .set('authorization', authenticationToken)
+            .send(requestBody)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .then((response) => {
+              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+                where: {
+                  reader_id: requestBody.clientId,
+                },
+                select: {
+                  session_id: true,
+                },
+              });
+              expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
+              expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
+                where: {
+                  reader_id: requestBody.clientId,
+                },
+                data: {
+                  session_id: null,
+                },
+              });
+              expect(response.body).toEqual({
+                message: READER.BLOCK_STATE_INVALID,
+              });
+              done();
+            });
+        });
+      });
+    });
+
     test('block client failed with output validate error', (done) => {
       jest.spyOn(Socket.prototype, 'Clients', 'get').mockImplementation(() => new Map());
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
+      globalThis.prismaClient.reader.update.mockResolvedValue(mockClient);
       const wsClientSend = jest.spyOn(WsClient.prototype, 'send').mockReset();
 
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -317,7 +366,7 @@ describe('block client', () => {
                     reader_id: requestBody.clientId,
                   },
                   data: {
-                    blocked: 1,
+                    blocked: BLOCK.ON,
                   },
                 },
               ],

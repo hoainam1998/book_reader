@@ -6,7 +6,7 @@ const {
   getClientResetPasswordLink,
   getResetPasswordLink,
 } = require('#utils');
-const { POWER, POWER_NUMERIC } = require('#constants');
+const { POWER, POWER_NUMERIC, SEX } = require('#constants');
 
 const mockUser = {
   user_id: Date.now().toString(),
@@ -19,7 +19,7 @@ const mockUser = {
   otp_code: generateOtp(),
   power: POWER_NUMERIC.ADMIN,
   phone: '0987654321',
-  sex: 0,
+  sex: SEX.MALE,
   role: POWER.ADMIN,
   reset_password_token: signingResetPasswordToken('namdang201999@gmail.com'),
 };

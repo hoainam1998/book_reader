@@ -1,5 +1,8 @@
 const { compare } = require('bcrypt');
 const { passwordHashing } = require('#utils');
+const { BLOCK, PRISMA_ERROR_CODE, SEX } = require('#constants');
+const { READER, USER } = require('#messages');
+const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 
 /**
  * Return reader prisma extension.
@@ -12,17 +15,29 @@ module.exports = (prisma) => {
     create: async ({ args, query }) => {
       const password = await passwordHashing(args.data.password);
 
+      if (args.data.sex && !Object.values(SEX).includes(args.data.sex)) {
+        throw new PrismaClientKnownRequestError(USER.YOUR_GENDER_INVALID, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+      }
+
       args.data = {
         ...args.data,
         password,
         reader_id: Date.now().toString(),
       };
 
-      return query(args);
+      return await query(args);
     },
 
     update: async ({ args, query }) => {
       let condition;
+
+      if (args.data.sex && !Object.values(SEX).includes(args.data.sex)) {
+        throw new PrismaClientKnownRequestError(USER.YOUR_GENDER_INVALID, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+      }
+
+      if (args.data.blocked && !Object.values(BLOCK).includes(args.data.blocked)) {
+        throw new PrismaClientKnownRequestError(READER.BLOCK_STATE_INVALID, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+      }
 
       if (args.where.reader_id) {
         condition = { reader_id: args.where.reader_id };
@@ -42,7 +57,7 @@ module.exports = (prisma) => {
         }
       }
 
-      return query(args);
+      return await query(args);
     },
   };
 };
