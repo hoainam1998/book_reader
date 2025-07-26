@@ -100,10 +100,7 @@ const PowerUpdate = (validators, className) => {
       @validators(IsId('userId must be numeric string and contain 13 character'))
       userId;
 
-      @validators(
-        IsNumeric('power must be a number!'),
-        IsRangeContain(validPower, 'power must in [0, 1]!')
-      )
+      @validators(IsNumeric('power must be a number!'), IsRangeContain(validPower, 'power must in [0, 1]!'))
       power;
     },
     className
@@ -157,10 +154,7 @@ const UserUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(
-        IsNumeric('sex must be a numeric!'),
-        IsRangeContain(validSex, 'sex must in [0, 1]!')
-      )
+      @validators(IsNumeric('sex must be a numeric!'), IsRangeContain(validSex, 'sex must in [0, 1]!'))
       sex;
 
       @validators(
@@ -170,10 +164,7 @@ const UserUpdate = (validators, className) => {
       )
       phone;
 
-      @validators(
-        IsNumeric('power must be a number!'),
-        IsRangeContain(validPower, 'power must in [0, 1]!')
-      )
+      @validators(IsNumeric('power must be a number!'), IsRangeContain(validPower, 'power must in [0, 1]!'))
       power;
 
       @validators(IsBoolean('mfa must be boolean!'))
@@ -195,10 +186,7 @@ const PersonUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(
-        IsNumeric('sex must be a numeric!'),
-        IsRangeContain(validSex, 'sex must in [0, 1]!')
-      )
+      @validators(IsNumeric('sex must be a numeric!'), IsRangeContain(validSex, 'sex must in [0, 1]!'))
       sex;
 
       @validators(
@@ -211,10 +199,7 @@ const PersonUpdate = (validators, className) => {
       @validators(IsOptional(), IsBase64Image('avatar must be image!'))
       avatar;
 
-      @validators(
-        IsOptional(),
-        IsBoolean('mfa must be boolean!')
-      )
+      @validators(IsOptional(), IsBoolean('mfa must be boolean!'))
       mfa;
     },
     className

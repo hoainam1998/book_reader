@@ -8,11 +8,14 @@ const mockData = Object.defineProperty(
     avatar: 'avatar',
     year_of_birth: 1900,
     year_of_dead: 2000,
+    _count: {
+      book_author: 1,
+    },
   },
   'story',
   {
     get() {
-      return `/html/author/${this.author_id}//${this.name}.html, /json/author/${this.author_id}/${this.name}.json`;
+      return `/html/author/${this.author_id}/${this.name}.html, /json/author/${this.author_id}/${this.name}.json`;
     },
   }
 );
@@ -46,6 +49,7 @@ class AuthorDummyData extends DummyDataApi {
       yearOfBirth: expect.any(Number),
       yearOfDead: expect.any(Number),
       story: expect.any(String),
+      disabled: expect.any(Boolean),
       storyFile: {
         html: expect.any(String),
         json: expect.any(String),

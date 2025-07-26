@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 /* eslint-disable no-unused-vars */
 const fsPromise = require('fs/promises');
 const fs = require('fs');
@@ -7,7 +8,7 @@ const ErrorCode = require('#services/error-code');
 const AuthorDummyData = require('#test/resources/dummy-data/author');
 const OutputValidate = require('#services/output-validate');
 const AuthorRoutePath = require('#services/route-paths/author');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
 const { AUTHOR, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -67,36 +68,32 @@ describe('create author', () => {
           .expect(HTTP_CODE.CREATED)
           .then((response) => {
             expect(mkdir).toHaveBeenCalledTimes(2);
-            expect(mkdir).toHaveBeenCalledWith(
-              expect.stringMatching(
-                new RegExp(path.resolve('public/html/author/{0}').replace(/\\/gm, '\\\\').format('\\d+'), 'gm')
-              ),
-              { recursive: true }
-            );
+            expect(mkdir.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+            ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -402,12 +399,20 @@ describe('create author', () => {
           .expect(HTTP_CODE.SERVER_ERROR)
           .then((response) => {
             expect(mkdir).toHaveBeenCalledTimes(2);
-            expect(mkdir).toHaveBeenCalledWith(
-              expect.stringMatching(
-                new RegExp(path.resolve('public/html/author/{0}').replace(/\\/gm, '\\\\').format('\\d+'), 'gm')
-              ),
-              { recursive: true }
-            );
+            expect(mkdir.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+            ]);
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.create).not.toHaveBeenCalled();
             expect(response.body).toEqual({
@@ -474,36 +479,32 @@ describe('create author', () => {
           .expect(HTTP_CODE.SERVER_ERROR)
           .then((response) => {
             expect(mkdir).toHaveBeenCalledTimes(2);
-            expect(mkdir).toHaveBeenCalledWith(
-              expect.stringMatching(
-                new RegExp(path.resolve('public/html/author/{0}').replace(/\\/gm, '\\\\').format('\\d+'), 'gm')
-              ),
-              { recursive: true }
-            );
+            expect(mkdir.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+            ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -540,36 +541,32 @@ describe('create author', () => {
           .expect(HTTP_CODE.SERVER_ERROR)
           .then((response) => {
             expect(mkdir).toHaveBeenCalledTimes(2);
-            expect(mkdir).toHaveBeenCalledWith(
-              expect.stringMatching(
-                new RegExp(path.resolve('public/html/author/{0}').replace(/\\/gm, '\\\\').format('\\d+'), 'gm')
-              ),
-              { recursive: true }
-            );
+            expect(mkdir.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+            ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -626,36 +623,32 @@ describe('create author', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(mkdir).toHaveBeenCalledTimes(2);
-            expect(mkdir).toHaveBeenCalledWith(
-              expect.stringMatching(
-                new RegExp(path.resolve('public/html/author/{0}').replace(/\\/gm, '\\\\').format('\\d+'), 'gm')
-              ),
-              { recursive: true }
-            );
+            expect(mkdir.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                ),
+                { recursive: true },
+              ],
+            ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/html/author/{0}')}/${`${mockRequestAuthor.name}.html`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringMatching(
-                  new RegExp(
-                    `${path.resolve('public/json/author/{0}')}/${`${mockRequestAuthor.name}.json`}`
-                      .replace(/\\/gm, '\\\\')
-                      .format('\\d+'),
-                    'gm'
-                  ),
-                  'gm'
+                expect.stringContaining(
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),

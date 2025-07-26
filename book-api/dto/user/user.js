@@ -32,13 +32,13 @@ class UserDTO extends OutputValidate {
     switch (this.power) {
       case 1: {
         return POWER.ADMIN;
-      };
+      }
       case 2: {
         return POWER.SUPER_ADMIN;
-      };
+      }
       default: {
         return POWER.USER;
-      };
+      }
     }
   }
 

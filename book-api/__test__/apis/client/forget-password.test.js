@@ -289,30 +289,33 @@ describe('forget-password', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
       },
-    ])('generate reset password token failed with findUniqueOrThrows method got $describe', ({ cause, expected, status }, done) => {
-      globalThis.prismaClient.reader.findUniqueOrThrow.mockRejectedValue(cause);
+    ])(
+      'generate reset password token failed with findUniqueOrThrows method got $describe',
+      ({ cause, expected, status }, done) => {
+        globalThis.prismaClient.reader.findUniqueOrThrow.mockRejectedValue(cause);
 
-      expect.hasAssertions();
-      globalThis.api
-        .post(generatedResetPasswordUrl)
-        .send(requestBody)
-        .expect('Content-Type', /application\/json/)
-        .expect(status)
-        .then((response) => {
-          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
-          expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
-            where: {
-              email: requestBody.email,
-            },
-            select: {
-              blocked: true,
-            },
+        expect.hasAssertions();
+        globalThis.api
+          .post(generatedResetPasswordUrl)
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(status)
+          .then((response) => {
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                email: requestBody.email,
+              },
+              select: {
+                blocked: true,
+              },
+            });
+            expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
+            expect(response.body).toEqual(expected);
+            done();
           });
-          expect(globalThis.prismaClient.reader.update).not.toHaveBeenCalled();
-          expect(response.body).toEqual(expected);
-          done();
-        });
-    });
+      }
+    );
 
     test.each([
       {

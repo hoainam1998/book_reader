@@ -220,7 +220,7 @@ describe('client signup', () => {
           expect(globalThis.prismaClient.reader.create).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(READER.SIGNUP_FAIL),
-            errors:  expect.arrayContaining([expect.any(String)]),
+            errors: expect.arrayContaining([expect.any(String)]),
           });
           done();
         });

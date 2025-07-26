@@ -75,7 +75,7 @@ describe('get all user', () => {
         describe: 'super admin role',
         sessionData: sessionDataWithSuperAdminRole,
         excludeFields: [],
-      }
+      },
     ])('get all user success with $describe', ({ sessionData, excludeFields }, done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const userExpected = UserDummyData.generateExpectedObject(requestBody.query, excludeFields);
@@ -143,7 +143,9 @@ describe('get all user', () => {
                 },
               })
             );
-            expect(response.body).toEqual(expect.toBeMatchList(sessionData.user.userId, sessionData.user.role, userExpected));
+            expect(response.body).toEqual(
+              expect.toBeMatchList(sessionData.user.userId, sessionData.user.role, userExpected)
+            );
             expect(response.body).toHaveLength(userLength);
             done();
           });

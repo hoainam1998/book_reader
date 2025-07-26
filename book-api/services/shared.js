@@ -119,32 +119,35 @@ class SharedService {
         ...messageCreator(USER.NOT_PERMISSION),
       });
     }
-    return this.PrismaClient.user.findUniqueOrThrow({
-      where: {
-        user_id: targetUserId,
-      },
-      select: {
-        power: true,
-      },
-    }).then((user) => {
-      if (you.role === POWER.ADMIN && user.power > POWER_NUMERIC.USER) {
-        throw {
-          status: HTTP_CODE.NOT_PERMISSION,
-          ...messageCreator(USER.NOT_PERMISSION),
-        };
-      }
-      return user;
-    }).catch((error) => {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+    return this.PrismaClient.user
+      .findUniqueOrThrow({
+        where: {
+          user_id: targetUserId,
+        },
+        select: {
+          power: true,
+        },
+      })
+      .then((user) => {
+        if (you.role === POWER.ADMIN && user.power > POWER_NUMERIC.USER) {
           throw {
-            status: HTTP_CODE.NOT_FOUND,
-            ...messageCreator(USER.USER_NOT_FOUND),
+            status: HTTP_CODE.NOT_PERMISSION,
+            ...messageCreator(USER.NOT_PERMISSION),
           };
         }
-      }
-      throw error;
-    });
+        return user;
+      })
+      .catch((error) => {
+        if (error instanceof PrismaClientKnownRequestError) {
+          if (error.code === PRISMA_ERROR_CODE.RECORD_NOT_FOUND) {
+            throw {
+              status: HTTP_CODE.NOT_FOUND,
+              ...messageCreator(USER.USER_NOT_FOUND),
+            };
+          }
+        }
+        throw error;
+      });
   }
 
   deleteClientSessionId(clientId) {

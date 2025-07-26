@@ -351,7 +351,9 @@ describe('delete user', () => {
       globalThis.prismaClient.user.findUniqueOrThrow.mockResolvedValue(mockUserWithUserRole);
       globalThis.prismaClient.user.findFirstOrThrow.mockResolvedValue(mockUserWithUserRole);
       jest.spyOn(Socket.prototype, 'Clients', 'get').mockImplementation(() => new Map());
-      globalThis.prismaClient.user.delete.mockRejectedValue(new PrismaDataValidationError(USER.CAN_NOT_DELETE_SUPER_ADMIN));
+      globalThis.prismaClient.user.delete.mockRejectedValue(
+        new PrismaDataValidationError(USER.CAN_NOT_DELETE_SUPER_ADMIN)
+      );
       globalThis.prismaClient.user.update.mockResolvedValue(mockUserWithUserRole);
 
       expect.hasAssertions();

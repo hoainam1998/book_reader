@@ -67,8 +67,12 @@ const excludePaginationQueryFields = (req) => {
  * @returns {string|void} - The error message if you do not have permission.
  */
 const onlyAllowMfaWhenSuperAdminRole = (req) => {
-  if (Object.hasOwn(req.body, 'mfa')
-    && req.session.isDefined('user') && req.session.user.isDefined('role') && req.session.user.role !== POWER.SUPER_ADMIN) {
+  if (
+    Object.hasOwn(req.body, 'mfa') &&
+    req.session.isDefined('user') &&
+    req.session.user.isDefined('role') &&
+    req.session.user.role !== POWER.SUPER_ADMIN
+  ) {
     return USER.ONLY_ALLOW_MFA_WITH_SUPER_ADMIN;
   }
 };
@@ -265,9 +269,7 @@ class UserRouter extends Router {
     }`;
 
     return self.Service.checkYouHaveRightPermission(req.session.user, req.body.userId).then(() => {
-      return getGeneratorFunctionData(
-        self.execute(query, { user: variables })
-      );
+      return getGeneratorFunctionData(self.execute(query, { user: variables }));
     });
   }
 
@@ -379,11 +381,15 @@ class UserRouter extends Router {
         all(exclude: $exclude, yourId: $yourId, yourRole: $yourRole) ${req.body.query}
       }
     }`;
-    return self.execute(query, {
-      exclude: req.body.exclude,
-      yourId: req.session.user.userId,
-      yourRole: req.session.user.role,
-    }, req.body.query);
+    return self.execute(
+      query,
+      {
+        exclude: req.body.exclude,
+        yourId: req.session.user.userId,
+        yourRole: req.session.user.role,
+      },
+      req.body.query
+    );
   }
 
   @validation(OtpVerify, { error_message: USER.VERIFY_OTP_FAIL })

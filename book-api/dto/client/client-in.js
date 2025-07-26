@@ -77,10 +77,7 @@ const ClientUpdate = (validators, className) => {
       @validators(IsEmail('Invalid email!'))
       email;
 
-      @validators(
-        IsNumeric('sex must be a numeric!'),
-        IsRangeContain(validSex, 'sex must in [0, 1]!')
-      )
+      @validators(IsNumeric('sex must be a numeric!'), IsRangeContain(validSex, 'sex must in [0, 1]!'))
       sex;
 
       @validators(IsBase64Image('avatar must be image!'))
@@ -122,10 +119,7 @@ const SignUp = (validators, className) => {
       @validators(IsPassword('Invalid password!'))
       password;
 
-      @validators(
-        IsNumeric('sex must be a numeric!'),
-        IsRangeContain(validSex, 'sex must in [0, 1]!')
-      )
+      @validators(IsNumeric('sex must be a numeric!'), IsRangeContain(validSex, 'sex must in [0, 1]!'))
       sex;
     },
     className
