@@ -279,17 +279,19 @@ class UserService extends Service {
   }
 
   getUserDetail(userId, yourRole, select) {
-    return this.PrismaInstance.user.findUniqueOrThrow({
-      where: {
-        user_id: userId,
-      },
-      select,
-    }).then((user) => {
-      if (yourRole === POWER.ADMIN && user.power > 0) {
-        throw new GraphQLError(USER.NOT_PERMISSION, graphqlNotPermissionErrorOption);
-      }
-      return user;
-    });
+    return this.PrismaInstance.user
+      .findUniqueOrThrow({
+        where: {
+          user_id: userId,
+        },
+        select,
+      })
+      .then((user) => {
+        if (yourRole === POWER.ADMIN && user.power > 0) {
+          throw new GraphQLError(USER.NOT_PERMISSION, graphqlNotPermissionErrorOption);
+        }
+        return user;
+      });
   }
 
   getAllUsers(exclude, yourId, yourRole, select) {

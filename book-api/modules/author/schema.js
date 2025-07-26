@@ -7,6 +7,7 @@ const {
   GraphQLID,
   GraphQLList,
   GraphQLError,
+  GraphQLBoolean,
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
 const PaginationResponse = require('#dto/common/pagination-response');
@@ -86,6 +87,9 @@ const AUTHOR_LIST = new GraphQLList(
       ...COMMON_AUTHOR_FIELDS,
       storyFile: {
         type: GraphQLString,
+      },
+      disabled: {
+        type: GraphQLBoolean,
       },
     },
   })

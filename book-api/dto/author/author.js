@@ -45,6 +45,11 @@ class AuthorDTO extends OutputValidate {
   get authorId() {
     return this.author_id;
   }
+
+  @Type(() => Boolean)
+  get disabled() {
+    return this._count.book_author > 0;
+  }
 }
 
 module.exports = AuthorDTO;

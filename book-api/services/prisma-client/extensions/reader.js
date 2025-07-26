@@ -36,7 +36,9 @@ module.exports = (prisma) => {
       }
 
       if (args.data.blocked && !Object.values(BLOCK).includes(args.data.blocked)) {
-        throw new PrismaClientKnownRequestError(READER.BLOCK_STATE_INVALID, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+        throw new PrismaClientKnownRequestError(READER.BLOCK_STATE_INVALID, {
+          code: PRISMA_ERROR_CODE.DATA_VALIDATION,
+        });
       }
 
       if (args.where.reader_id) {

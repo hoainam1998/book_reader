@@ -15,7 +15,9 @@ module.exports = (prisma) => {
 
       if (args.data.power) {
         if (args.data.power === POWER_NUMERIC.SUPER_ADMIN) {
-          throw new PrismaClientKnownRequestError(USER.CAN_NOT_CREATE_SUPER_ADMIN, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+          throw new PrismaClientKnownRequestError(USER.CAN_NOT_CREATE_SUPER_ADMIN, {
+            code: PRISMA_ERROR_CODE.DATA_VALIDATION,
+          });
         } else if (!Object.values(VALID_POWER).includes(args.data.power)) {
           throw new PrismaClientKnownRequestError(USER.YOUR_POWER_INVALID, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
         }
@@ -48,7 +50,9 @@ module.exports = (prisma) => {
 
       if (args.data.power) {
         if (args.data.power === POWER_NUMERIC.SUPER_ADMIN) {
-          throw new PrismaClientKnownRequestError(USER.CAN_NOT_CREATE_SUPER_ADMIN, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+          throw new PrismaClientKnownRequestError(USER.CAN_NOT_CREATE_SUPER_ADMIN, {
+            code: PRISMA_ERROR_CODE.DATA_VALIDATION,
+          });
         } else if (!Object.values(POWER_NUMERIC).includes(args.data.power)) {
           throw new PrismaClientKnownRequestError(USER.VALID_POWER, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
         }
@@ -100,11 +104,13 @@ module.exports = (prisma) => {
         if (deleteUser.power !== POWER_NUMERIC.SUPER_ADMIN) {
           return await query(args);
         } else {
-          throw new PrismaClientKnownRequestError(USER.CAN_NOT_DELETE_SUPER_ADMIN, { code: PRISMA_ERROR_CODE.DATA_VALIDATION });
+          throw new PrismaClientKnownRequestError(USER.CAN_NOT_DELETE_SUPER_ADMIN, {
+            code: PRISMA_ERROR_CODE.DATA_VALIDATION,
+          });
         }
       } else {
         throw new PrismaClientKnownRequestError(USER.USER_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
       }
-    }
+    },
   };
 };

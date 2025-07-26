@@ -1,15 +1,15 @@
-const { join } = require('path');
 const { GraphQLError } = require('graphql');
 const { saveFile, deleteFile, checkArrayHaveValues, calcPages } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const Service = require('#services/prisma');
 const { BOOK } = require('#messages');
+const { PUBLIC_PATH, PRISMA_ERROR_CODE } = require('#constants');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 
 class BookService extends Service {
   saveIntroduceHtmlFile(fileName, html, json, bookId) {
     const fileNameSaved = fileName.replace(/\s/, '-');
-    const filePath = (filePath) => join(__dirname, `../../public/${filePath}/${fileNameSaved}.${filePath}`);
+    const filePath = (filePath) => `${PUBLIC_PATH}/${filePath}/${fileNameSaved}.${filePath}`;
 
     return Promise.all([saveFile(filePath('html'), html), saveFile(filePath('json'), json)]).then(() => {
       const introduceFilePath = `html/${fileNameSaved}.html,json/${fileNameSaved}.json`;
@@ -66,7 +66,7 @@ class BookService extends Service {
       .then((result) => {
         const oldPdfFile = `pdf/${name}.pdf`;
         if (result.pdf !== oldPdfFile) {
-          const filePath = join(__dirname, `../../public/${result.pdf}`);
+          const filePath = `${PUBLIC_PATH}/${result.pdf}`;
           return deleteFile(filePath);
         }
       });
@@ -85,11 +85,13 @@ class BookService extends Service {
       .then((result) => {
         if (result && result.introduce_file) {
           const filePath = result.introduce_file.split(',');
-          const htmlFilePath = join(__dirname, `../../public/${filePath[0].trim()}`);
-          const jsonFilePath = join(__dirname, `../../public/${filePath[1].trim()}`);
+          const htmlFilePath = `${PUBLIC_PATH}/${filePath[0].trim()}`;
+          const jsonFilePath = `${PUBLIC_PATH}/${filePath[1].trim()}`;
           return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
         }
-        throw new PrismaClientKnownRequestError(BOOK.INTRODUCE_FILE_NOT_FOUND, { code: 'P2025' });
+        throw new PrismaClientKnownRequestError(BOOK.INTRODUCE_FILE_NOT_FOUND, {
+          code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND,
+        });
       });
   }
 
@@ -140,13 +142,16 @@ class BookService extends Service {
         select,
       })
       .then((result) => {
-        return {
-          ...result,
-          category: {
-            ...result.category,
-            categoryId: result.category.category_id,
-          },
-        };
+        if (Object.hasOwn(result, 'category')) {
+          return {
+            ...result,
+            category: {
+              ...result.category,
+              categoryId: result.category.category_id,
+            },
+          };
+        }
+        return result;
       });
   }
 
@@ -277,7 +282,7 @@ class BookService extends Service {
       })
       .then((result) => {
         if (result.count === 0) {
-          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: 'P2025' });
+          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
         return result;
       });
@@ -309,7 +314,7 @@ class BookService extends Service {
       })
       .then((result) => {
         if (result.count === 0) {
-          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: 'P2025' });
+          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
         return result;
       });
@@ -341,7 +346,7 @@ class BookService extends Service {
       })
       .then((result) => {
         if (result.count === 0) {
-          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: 'P2025' });
+          throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
         return result;
       });

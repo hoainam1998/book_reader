@@ -26,8 +26,12 @@ class PrismaDataValidationError extends PrismaClientKnownRequestError {
 }
 
 module.exports = {
-  PrismaNotFoundError: new PrismaClientKnownRequestError('Record not found!', { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND }),
-  PrismaDuplicateError: new PrismaClientKnownRequestError('Some fields was duplicate!', { code: PRISMA_ERROR_CODE.UNIQUE_DUPLICATE }),
+  PrismaNotFoundError: new PrismaClientKnownRequestError('Record not found!', {
+    code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND,
+  }),
+  PrismaDuplicateError: new PrismaClientKnownRequestError('Some fields was duplicate!', {
+    code: PRISMA_ERROR_CODE.UNIQUE_DUPLICATE,
+  }),
   PrismaDataValidationError,
   PrismaForeignConflict,
 };

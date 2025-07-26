@@ -5,7 +5,7 @@ const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -1079,7 +1079,7 @@ describe('update book', () => {
           });
           expect(unLink).toHaveBeenCalledTimes(1);
           expect(unLink).toHaveBeenCalledWith(
-            expect.stringContaining(`/public/${mockRequestBook.pdf}`.replace(/\//gm, '\\')),
+            expect.stringContaining(`${PUBLIC_PATH}/${mockRequestBook.pdf}`),
             expect.any(Function)
           );
           expect(response.body).toEqual({
@@ -1320,7 +1320,7 @@ describe('update book', () => {
           });
           expect(unLink).toHaveBeenCalledTimes(1);
           expect(unLink).toHaveBeenCalledWith(
-            expect.stringContaining(`/public/${mockRequestBook.pdf}`.replace(/\//gm, '\\')),
+            expect.stringContaining(`${PUBLIC_PATH}/${mockRequestBook.pdf}`),
             expect.any(Function)
           );
           expect(response.body).toEqual({

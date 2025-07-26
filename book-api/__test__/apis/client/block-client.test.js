@@ -278,11 +278,15 @@ describe('block client', () => {
     test('block client failed with invalid block state', (done) => {
       expect.hasAssertions();
       jest.spyOn(Socket.prototype, 'Clients', 'get').mockImplementation(() => new Map());
-      globalThis.prismaClient.reader.update.mockRejectedValue(new PrismaDataValidationError(READER.BLOCK_STATE_INVALID));
+      globalThis.prismaClient.reader.update.mockRejectedValue(
+        new PrismaDataValidationError(READER.BLOCK_STATE_INVALID)
+      );
 
       clearAllSession().then(() => {
         signedTestCookie(sessionData.user).then((responseSign) => {
-          globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue({ session_id: responseSign.body.sessionId });
+          globalThis.prismaClient.reader.findUniqueOrThrow.mockResolvedValue({
+            session_id: responseSign.body.sessionId,
+          });
           globalThis.api
             .put(blockUserUrl)
             .set('Cookie', responseSign.header['set-cookie'])

@@ -102,17 +102,15 @@ const validateResultExecute = (httpCode) => {
               }
             })
             .catch((err) => {
-              if ([
-                HTTP_CODE.BAD_REQUEST,
-                HTTP_CODE.UNAUTHORIZED,
-                HTTP_CODE.NOT_FOUND,
-                HTTP_CODE.NOT_PERMISSION,
-                ].includes(err.status))
-                {
-                  const sts = err.status;
-                  delete err.status;
-                  return response.status(sts).json(err);
-                }
+              if (
+                [HTTP_CODE.BAD_REQUEST, HTTP_CODE.UNAUTHORIZED, HTTP_CODE.NOT_FOUND, HTTP_CODE.NOT_PERMISSION].includes(
+                  err.status
+                )
+              ) {
+                const sts = err.status;
+                delete err.status;
+                return response.status(sts).json(err);
+              }
               Logger.error('Validate graphql execute result', err.message);
               response.status(HTTP_CODE.SERVER_ERROR).json(messageCreator(COMMON.INTERNAL_ERROR_MESSAGE));
             });

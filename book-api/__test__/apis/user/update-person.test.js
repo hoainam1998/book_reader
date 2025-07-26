@@ -236,7 +236,7 @@ describe(createDescribeTest(METHOD.POST, updatePersonUrl), () => {
     });
   });
 
-    test('update person failed invalid gender', (done) => {
+  test('update person failed invalid gender', (done) => {
     const invalidGender = 2;
     expect.hasAssertions();
     signedTestCookie(sessionData.user).then((responseSign) => {

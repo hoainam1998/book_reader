@@ -1,12 +1,11 @@
 const fs = require('fs');
-const path = require('path');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const ErrorCode = require('#services/error-code');
 const AuthorDummyData = require('#test/resources/dummy-data/author');
 const OutputValidate = require('#services/output-validate');
 const AuthorRoutePath = require('#services/route-paths/author');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
 const { AUTHOR, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -78,21 +77,21 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/html/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.html`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/json/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.json`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -462,8 +461,8 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.update).not.toHaveBeenCalled();
@@ -511,21 +510,21 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/html/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.html`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/json/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.json`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -575,21 +574,21 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/html/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.html`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/json/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.json`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -694,21 +693,21 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/html/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.html`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/json/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.json`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -807,21 +806,21 @@ describe('update author', () => {
             });
             expect(unLink).toHaveBeenCalledTimes(2);
             expect(unLink.mock.calls).toEqual([
-              [expect.stringContaining(path.resolve(`public${storyFile[0].trim()}`)), expect.any(Function)],
-              [expect.stringContaining(path.resolve(`public${storyFile[1].trim()}`)), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/html/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.html`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
-                expect.stringContaining(
-                  `${path.resolve(`public/json/author/${mockRequestAuthor.author_id}`)}/${mockRequestAuthor.name}.json`
+                expect.stringMatching(
+                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),

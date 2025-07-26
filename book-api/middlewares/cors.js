@@ -58,7 +58,7 @@ module.exports = (req, callback) => {
     if (whitelist.indexOf(originUrl) !== -1) {
       const origins = findOrigins(req.originalUrl);
 
-      if (/json|html/.test(req.originalUrl)) {
+      if (/json|html|pdf/.test(req.originalUrl)) {
         corsOptionOrigin = toggleOrigin(true);
       } else if (origins.includes(originUrl)) {
         corsOptionOrigin = toggleOrigin(true);

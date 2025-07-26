@@ -1,9 +1,9 @@
 const { GraphQLError } = require('graphql');
 const { createFolder, deleteFile, checkArrayHaveValues, calcPages, saveFile } = require('#utils');
-const { join } = require('path');
 const Service = require('#services/prisma');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { AUTHOR } = require('#messages');
+const { PUBLIC_PATH } = require('#constants');
 // eslint-disable-next-line no-useless-escape
 const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
@@ -25,7 +25,14 @@ class AuthorService extends Service {
           orderBy: {
             author_id: 'desc',
           },
-          select,
+          select: {
+            ...select,
+            _count: {
+              select: {
+                book_author: true,
+              },
+            },
+          },
         }),
         this.PrismaInstance.author.count({
           where: {
@@ -43,7 +50,14 @@ class AuthorService extends Service {
           orderBy: {
             author_id: 'desc',
           },
-          select,
+          select: {
+            ...select,
+            _count: {
+              select: {
+                book_author: true,
+              },
+            },
+          },
         }),
         this.PrismaInstance.author.count(),
       ]);
@@ -110,15 +124,14 @@ class AuthorService extends Service {
       story: true,
     }).then((author) => {
       const storyFile = author.story.split(',');
-      const htmlFilePath = join(__dirname, `../../public/${storyFile[0].trim()}`);
-      const jsonFilePath = join(__dirname, `../../public/${storyFile[1].trim()}`);
+      const htmlFilePath = `${PUBLIC_PATH}${storyFile[0].trim()}`;
+      const jsonFilePath = `${PUBLIC_PATH}${storyFile[1].trim()}`;
       return Promise.all([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
     });
   }
 
   updateAuthor(author) {
-    const filePath = (extName) =>
-      `${join(__dirname, `../../public/${extName}/author/${author.authorId}`)}/${author.name}.${extName}`;
+    const filePath = (extName) => `${PUBLIC_PATH}/${extName}/author/${author.authorId}/${author.name}.${extName}`;
     const htmlSave = saveFile(filePath('html'), author.story.html);
     const jsonSave = saveFile(filePath('json'), author.story.json);
 
@@ -154,8 +167,8 @@ class AuthorService extends Service {
     const authorId = Date.now().toString();
 
     return Promise.all([
-      createFolder(join(__dirname, `../../public/html/author/${authorId}`)),
-      createFolder(join(__dirname, `../../public/json/author/${authorId}`)),
+      createFolder(`${PUBLIC_PATH}/html/author/${authorId}`),
+      createFolder(`${PUBLIC_PATH}/json/author/${authorId}`),
     ]).then((urls) => {
       const extNames = ['html', 'json'];
 

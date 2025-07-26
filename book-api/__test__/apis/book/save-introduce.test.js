@@ -5,7 +5,7 @@ const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -65,8 +65,16 @@ describe('save introduce', () => {
             const bookName = mockBook.name.replace(/\s/, '-');
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringContaining(`\\public\\html\\${bookName}.html`), requestBody.html, expect.any(Function)],
-              [expect.stringContaining(`\\public\\json\\${bookName}.json`), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
@@ -164,8 +172,16 @@ describe('save introduce', () => {
             const bookName = mockBook.name.replace(/\s/, '-');
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringContaining(`\\public\\html\\${bookName}.html`), requestBody.html, expect.any(Function)],
-              [expect.stringContaining(`\\public\\json\\${bookName}.json`), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
@@ -278,8 +294,16 @@ describe('save introduce', () => {
             const bookName = mockBook.name.replace(/\s/, '-');
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringContaining(`\\public\\html\\${bookName}.html`), requestBody.html, expect.any(Function)],
-              [expect.stringContaining(`\\public\\json\\${bookName}.json`), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({

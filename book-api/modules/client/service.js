@@ -42,29 +42,31 @@ class ClientService extends Service {
   forgetPassword(email) {
     const resetToken = signClientResetPasswordToken(email);
     const randomPassword = autoGeneratePassword();
-    return this.PrismaInstance.reader.findUniqueOrThrow({
-      where: {
-        email,
-      },
-      select: {
-        blocked: true,
-      },
-    }).then((user) => {
-      if (user.blocked === BLOCK.ON) {
-        throw new GraphQLError(READER.YOU_ARE_BLOCK, graphqlNotPermissionErrorOption);
-      }
-      return this.PrismaInstance.reader
-        .update({
-          where: {
-            email,
-          },
-          data: {
-            reset_password_token: resetToken,
-            password: randomPassword,
-          },
-        })
-        .then((client) => ({ ...client, plain_password: randomPassword }));
-    });
+    return this.PrismaInstance.reader
+      .findUniqueOrThrow({
+        where: {
+          email,
+        },
+        select: {
+          blocked: true,
+        },
+      })
+      .then((user) => {
+        if (user.blocked === BLOCK.ON) {
+          throw new GraphQLError(READER.YOU_ARE_BLOCK, graphqlNotPermissionErrorOption);
+        }
+        return this.PrismaInstance.reader
+          .update({
+            where: {
+              email,
+            },
+            data: {
+              reset_password_token: resetToken,
+              password: randomPassword,
+            },
+          })
+          .then((client) => ({ ...client, plain_password: randomPassword }));
+      });
   }
 
   resetPassword(token, email, oldPassword, password) {
@@ -95,7 +97,9 @@ class ClientService extends Service {
             },
           });
         }
-        throw new PrismaClientKnownRequestError(READER.OLD_PASSWORD_NOT_MATCH, { code: PRISMA_ERROR_CODE.UNAUTHORIZED });
+        throw new PrismaClientKnownRequestError(READER.OLD_PASSWORD_NOT_MATCH, {
+          code: PRISMA_ERROR_CODE.UNAUTHORIZED,
+        });
       });
   }
 

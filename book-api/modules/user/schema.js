@@ -179,7 +179,14 @@ const query = new GraphQLObjectType({
         },
       },
       resolve: async (service, { pageSize, pageNumber, keyword, yourId, yourRole }, context) => {
-        const [users, total, pages] = await service.pagination(pageSize, pageNumber, keyword, yourId, yourRole, context);
+        const [users, total, pages] = await service.pagination(
+          pageSize,
+          pageNumber,
+          keyword,
+          yourId,
+          yourRole,
+          context
+        );
         return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(UserDTO, users),
           total: parseInt(total || 0),

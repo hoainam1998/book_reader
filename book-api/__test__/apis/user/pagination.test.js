@@ -71,7 +71,7 @@ describe('user pagination', () => {
       {
         describe: 'super admin role',
         sessionData: sessionDataWithSuperAdminRole,
-      }
+      },
     ])('user pagination success with $describe', ({ sessionData }, done) => {
       globalThis.prismaClient.$transaction.mockResolvedValue([
         UserDummyData.createMockUserList(userLength),
