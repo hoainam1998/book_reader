@@ -6,7 +6,7 @@ const BookRoutePath = require('#services/route-paths/book');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { USER, COMMON, BOOK } = require('#messages');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const {
   authenticationToken,
@@ -143,6 +143,31 @@ describe('delete book', () => {
               expect(response.body).toEqual({
                 message: USER.WORKING_SESSION_EXPIRE,
                 errorCode: ErrorCode.WORKING_SESSION_ENDED,
+              });
+              done();
+            });
+        });
+      });
+    });
+
+    test('delete book failed with invalid request param', (done) => {
+      const deleteBookUrlWithInvalidRequestParam =  `${BookRoutePath.delete.abs}/unknown`;
+      expect.hasAssertions();
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.api
+            .delete(deleteBookUrlWithInvalidRequestParam)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .set('authorization', authenticationToken)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .then((response) => {
+              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(BOOK.DELETE_BOOK_FAIL),
+                errors: expect.arrayContaining([expect.any(String)]),
               });
               done();
             });

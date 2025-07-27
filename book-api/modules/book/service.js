@@ -158,6 +158,12 @@ class BookService extends Service {
   getAllBooks(select) {
     return this.PrismaInstance.book.findMany({
       select,
+    }).then((books) => {
+      if (!checkArrayHaveValues(books)) {
+        graphqlNotFoundErrorOption.response = [];
+        throw new GraphQLError(BOOK.BOOK_NOT_FOUND, graphqlNotFoundErrorOption);
+      }
+      return books;
     });
   }
 
@@ -224,10 +230,12 @@ class BookService extends Service {
       ]);
     }
 
-    return promiseResult.then((books) => {
-      const total = books[1];
+    return promiseResult.then((results) => {
+      const books = results[0];
+      const total = results[1];
       const pages = calcPages(pageSize, total);
-      if (!checkArrayHaveValues(books[0])) {
+
+      if (!checkArrayHaveValues(books)) {
         const response = {
           list: [],
           total: 0,
@@ -238,8 +246,9 @@ class BookService extends Service {
         graphqlNotFoundErrorOption.response = response;
         throw new GraphQLError(BOOK.BOOKS_EMPTY, graphqlNotFoundErrorOption);
       }
-      books.push(pages);
-      return books;
+
+      results.push(pages);
+      return results;
     });
   }
 

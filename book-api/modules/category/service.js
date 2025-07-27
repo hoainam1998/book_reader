@@ -1,5 +1,8 @@
 const Service = require('#services/prisma');
-const { calcPages } = require('#utils');
+const { GraphQLError } = require('graphql');
+const { checkArrayHaveValues, calcPages } = require('#utils');
+const { graphqlNotFoundErrorOption } = require('../common-schema');
+const { CATEGORY } = require('#messages');
 
 class CategoryService extends Service {
   create(category) {
@@ -26,6 +29,12 @@ class CategoryService extends Service {
     return this.PrismaInstance.category.findMany({
       ...condition,
       select,
+    }).then((categories) => {
+      if (!checkArrayHaveValues(categories)) {
+        graphqlNotFoundErrorOption.response = [];
+        throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
+      }
+      return categories;
     });
   }
 
@@ -46,8 +55,20 @@ class CategoryService extends Service {
       }),
       this.PrismaInstance.category.count(),
     ]).then((results) => {
+      const categories = results[0];
       const total = results[1];
       const pages = calcPages(pageSize, total);
+
+      if (!checkArrayHaveValues(categories)) {
+        graphqlNotFoundErrorOption.response = {
+          list: [],
+          total: 0,
+          page: pageNumber,
+          pages,
+          pageSize,
+        };
+        throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
+      }
       results.push(pages);
       return results;
     });

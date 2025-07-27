@@ -6,16 +6,15 @@ const {
   GraphQLNonNull,
   GraphQLID,
   GraphQLList,
-  GraphQLError,
   GraphQLBoolean,
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
 const PaginationResponse = require('#dto/common/pagination-response');
 const AuthorDTO = require('#dto/author/author');
 const AuthorDetailDTO = require('#dto/author/author-detail');
-const { AUTHOR, CATEGORY } = require('#messages');
-const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema.js');
-const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const { AUTHOR } = require('#messages');
+const { ResponseType } = require('../common-schema.js');
+const { messageCreator, convertDtoToZodObject } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
 
 const COMMON_AUTHOR_FIELDS = {
@@ -186,10 +185,6 @@ const query = new GraphQLObjectType({
       },
       resolve: async (author, { authorIds }, context) => {
         const authors = await author.getAuthors(authorIds, context);
-        if (!checkArrayHaveValues(authors)) {
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
-          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
-        }
         return convertDtoToZodObject(AuthorDTO, authors);
       },
     },
@@ -197,10 +192,6 @@ const query = new GraphQLObjectType({
       type: AUTHOR_LIST,
       resolve: async (author, args, context) => {
         const authors = await author.loadAuthorMenu(context);
-        if (!checkArrayHaveValues(authors)) {
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
-          throw new GraphQLError(AUTHOR.AUTHOR_NOT_FOUND, graphqlNotFoundErrorOption);
-        }
         return convertDtoToZodObject(AuthorDTO, authors);
       },
     },
@@ -235,6 +226,25 @@ const mutation = new GraphQLObjectType({
             await service.deleteStoryFile(author.authorId);
             await service.updateAuthor(author);
             return messageCreator(AUTHOR.UPDATE_AUTHOR_SUCCESS);
+          },
+          {
+            RECORD_NOT_FOUND: AUTHOR.AUTHOR_NOT_FOUND,
+          }
+        );
+      },
+    },
+    delete: {
+      type: ResponseType,
+      args: {
+        authorId: {
+          type: new GraphQLNonNull(GraphQLID),
+        },
+      },
+      resolve: async (service, { authorId }) => {
+        return handleResolveResult(
+          async () => {
+            await service.deleteAuthor(authorId);
+            return messageCreator(AUTHOR.DELETE_AUTHOR_SUCCESS);
           },
           {
             RECORD_NOT_FOUND: AUTHOR.AUTHOR_NOT_FOUND,

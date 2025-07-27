@@ -508,7 +508,7 @@ const query = new GraphQLObjectType({
             return convertDtoToZodObject(BookDTO, await book.getAllBooks(context));
           },
           {
-            RECORD_NOT_FOUND: 'Books not found!',
+            RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,
           }
         );
       },

@@ -63,10 +63,12 @@ class AuthorService extends Service {
       ]);
     }
 
-    return paginationPromiseResult.then((authors) => {
-      const total = authors[1];
+    return paginationPromiseResult.then((results) => {
+      const authors = results[0];
+      const total = results[1];
       const pages = calcPages(pageSize, total);
-      if (!checkArrayHaveValues(authors[0])) {
+
+      if (!checkArrayHaveValues(authors)) {
         const response = {
           list: [],
           total: 0,
@@ -77,8 +79,8 @@ class AuthorService extends Service {
         graphqlNotFoundErrorOption.response = response;
         throw new GraphQLError(AUTHOR.AUTHORS_EMPTY, graphqlNotFoundErrorOption);
       }
-      authors.push(pages);
-      return authors;
+      results.push(pages);
+      return results;
     });
   }
 
@@ -93,21 +95,37 @@ class AuthorService extends Service {
         }
       : {};
 
-    return this.PrismaInstance.author.findMany({
-      select,
-      ...conditions,
-    });
+    return this.PrismaInstance.author
+      .findMany({
+        select,
+        ...conditions,
+      })
+      .then((authors) => {
+        if (!checkArrayHaveValues(authors)) {
+          graphqlNotFoundErrorOption.response = [];
+          throw new GraphQLError(AUTHOR.AUTHORS_EMPTY, graphqlNotFoundErrorOption);
+        }
+        return authors;
+      });
   }
 
   loadAuthorMenu(select) {
-    return this.PrismaInstance.author.findMany({
-      select,
-      where: {
-        book_author: {
-          some: {},
+    return this.PrismaInstance.author
+      .findMany({
+        select,
+        where: {
+          book_author: {
+            some: {},
+          },
         },
-      },
-    });
+      })
+      .then((menus) => {
+        if (!checkArrayHaveValues(menus)) {
+          graphqlNotFoundErrorOption.response = [];
+          throw new GraphQLError(AUTHOR.AUTHOR_NOT_FOUND, graphqlNotFoundErrorOption);
+        }
+        return menus;
+      });
   }
 
   getAuthorDetail(authorId, select) {
@@ -200,6 +218,29 @@ class AuthorService extends Service {
           },
         });
       });
+    });
+  }
+
+  deleteAuthor(authorId) {
+    return this.deleteStoryFile(authorId).then(() => {
+      return this.PrismaInstance.author
+        .update({
+          where: {
+            author_id: authorId,
+          },
+          data: {
+            book_author: {
+              deleteMany: {},
+            },
+          },
+        })
+        .then(() => {
+          return this.PrismaInstance.author.delete({
+            where: {
+              author_id: authorId,
+            },
+          });
+        });
     });
   }
 }
