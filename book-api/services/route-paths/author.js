@@ -37,6 +37,11 @@ class AuthorRoutePath {
    * Relative: /menu *Absolute: author/menu
    */
   static menu = createRoutePath({ url: 'menu' }, [process.env.CLIENT_ORIGIN_CORS]);
+
+  /**
+   * Relative: /delete/:authorId *Absolute: author/delete/:authorId
+   */
+  static delete = createRoutePath({ url: 'delete', subUrl: ':authorId' }, [process.env.ORIGIN_CORS]);
 }
 
 module.exports = AuthorRoutePath;

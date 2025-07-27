@@ -9,7 +9,7 @@ const { HTTP_CODE, METHOD, PATH } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const mockRequestBook = BookDummyData.MockRequestData;
 const sessionData = ClientDummyData.session.client;
 const apiKey = ClientDummyData.apiKey;
@@ -114,6 +114,28 @@ describe('delete read late book', () => {
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
               errorCode: ErrorCode.WORKING_SESSION_ENDED,
+            });
+            done();
+          });
+      });
+    });
+
+    test('delete read late book failed with invalid request param', (done) => {
+      const deleteReadLateBookWithInvalidRequestParam = `${BookRoutePath.deleteReadLateBook.abs}/unknown`;
+      expect.hasAssertions();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .delete(deleteReadLateBookWithInvalidRequestParam)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(globalThis.prismaClient.read_late.deleteMany).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.DELETE_READ_LATE_BOOK_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
             done();
           });

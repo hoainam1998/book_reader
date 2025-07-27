@@ -4,14 +4,13 @@ const {
   GraphQLInputObjectType,
   GraphQLList,
   GraphQLID,
-  GraphQLError,
   GraphQLInt,
   GraphQLBoolean,
   GraphQLNonNull,
 } = require('graphql');
 const { plainToInstance } = require('class-transformer');
-const { graphqlNotFoundErrorOption, ResponseType } = require('../common-schema');
-const { messageCreator, convertDtoToZodObject, checkArrayHaveValues } = require('#utils');
+const { ResponseType } = require('../common-schema');
+const { messageCreator, convertDtoToZodObject } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const { CategoriesDTO, CategoryDTO } = require('#dto/category/category');
 const PaginationResponse = require('#dto/common/pagination-response');
@@ -98,10 +97,6 @@ const query = new GraphQLObjectType({
       },
       resolve: async (category, { haveValue }, context) => {
         const categories = await category.all(haveValue, context);
-        if (!checkArrayHaveValues(categories)) {
-          graphqlNotFoundErrorOption.extensions = { ...graphqlNotFoundErrorOption.extensions, response: [] };
-          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
-        }
         return convertDtoToZodObject(CategoryDTO, categories);
       },
     },
@@ -136,19 +131,13 @@ const query = new GraphQLObjectType({
       },
       resolve: async (service, { pageNumber, pageSize }) => {
         const [categories, total, pages] = await service.pagination(pageSize, pageNumber);
-        const response = convertDtoToZodObject(PaginationResponse, {
+        return convertDtoToZodObject(PaginationResponse, {
           list: plainToInstance(CategoriesDTO, categories),
           total: parseInt(total || 0),
           page: pageNumber,
           pageSize,
           pages,
         });
-
-        if (!checkArrayHaveValues(categories)) {
-          graphqlNotFoundErrorOption.response = response;
-          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
-        }
-        return response;
       },
     },
     detail: {

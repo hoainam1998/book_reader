@@ -4,8 +4,8 @@ const { validateResultExecute, upload, serializer, validation } = require('#deco
 const authentication = require('#middlewares/auth/authentication');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
 const { AuthorPaginationResponse, AuthorDetailResponse, AllAuthorResponse } = require('#dto/author/author-out');
-const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter, AuthorMenu } = require('#dto/author/author-in');
-const { HTTP_CODE, UPLOAD_MODE } = require('#constants');
+const { AuthorSave, AuthorPagination, AuthorDetail, AuthorFilter, AuthorMenu, DeleteAuthor } = require('#dto/author/author-in');
+const { HTTP_CODE, UPLOAD_MODE, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { AUTHOR } = require('#messages');
 
 /**
@@ -28,6 +28,7 @@ class AuthorRouter extends Router {
     this.put(AuthorRoutePath.update, authentication, this._updateAuthor);
     this.post(AuthorRoutePath.filter, authentication, this._getAuthors);
     this.post(AuthorRoutePath.menu, authentication, this._loadAuthorMenu);
+    this.delete(AuthorRoutePath.delete, authentication, this._deleteAuthor);
   }
 
   @upload(UPLOAD_MODE.SINGLE, 'avatar')
@@ -151,6 +152,24 @@ class AuthorRouter extends Router {
     }`;
 
     return self.execute(query, undefined, req.body.query);
+  }
+
+  @validation(DeleteAuthor, {
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+    error_message: AUTHOR.DELETE_AUTHOR_FAIL,
+  })
+  @validateResultExecute(HTTP_CODE.OK)
+  @serializer(MessageSerializerResponse)
+  _deleteAuthor(req, res, next, self) {
+    const query = `mutation DeleteAuthor($authorId: ID!) {
+      author {
+        delete(authorId: $authorId) {
+          message
+        }
+      }
+    }`;
+
+    return self.execute(query, { authorId: req.params.authorId });
   }
 }
 

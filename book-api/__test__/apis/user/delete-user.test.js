@@ -7,7 +7,7 @@ const UserRoutePath = require('#services/route-paths/user');
 const { WsClient, Socket } = require('#services/socket');
 const { HTTP_CODE, METHOD, POWER, POWER_NUMERIC, PATH } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const {
   authenticationToken,
@@ -459,6 +459,34 @@ describe('delete user', () => {
               expect(response.body).toEqual({
                 message: USER.WORKING_SESSION_EXPIRE,
                 errorCode: ErrorCode.WORKING_SESSION_ENDED,
+              });
+              done();
+            });
+        });
+      });
+    });
+
+    test('delete user failed with invalid request param', (done) => {
+      const deleteUserUrlWithInvalidRequestParam = `${UserRoutePath.delete.abs}/unknown`;
+      expect.hasAssertions();
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.api
+            .delete(deleteUserUrlWithInvalidRequestParam)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .set('authorization', authenticationToken)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .then((response) => {
+              expect(wsSend).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findUniqueOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.delete).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(USER.DELETE_USER_FAIL),
+                errors: expect.arrayContaining([expect.any(String)]),
               });
               done();
             });

@@ -107,6 +107,8 @@ module.exports = deepFreeze({
     CREATE_AUTHOR_FAIL: 'Create author was failed!',
     UPDATE_AUTHOR_FAIL: 'Update author was failed!',
     UPDATE_AUTHOR_SUCCESS: 'Update author was success!',
+    DELETE_AUTHOR_SUCCESS: 'Delete author was success!',
+    DELETE_AUTHOR_FAIL: 'Delete author was failed!',
     AUTHOR_NOT_FOUND: 'The author not found!',
     LOAD_AUTHOR_DETAIL_FAIL: 'Load author detail was failed!',
     AUTHORS_EMPTY: 'Authors are empty!',

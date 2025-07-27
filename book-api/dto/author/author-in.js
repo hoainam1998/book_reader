@@ -105,10 +105,21 @@ const AuthorMenu = (validators, className) => {
   );
 };
 
+const DeleteAuthor = (validators, className) => {
+  return classCreator(
+    class extends Validator {
+      @validators(IsId('authorId must be a numeric and contain 13 character!'))
+      authorId;
+    },
+    className
+  );
+};
+
 module.exports = {
   AuthorSave: Validation(AuthorSave),
   AuthorPagination: Validation(AuthorPagination),
   AuthorDetail: Validation(AuthorDetail),
   AuthorFilter: Validation(AuthorFilter),
   AuthorMenu: Validation(AuthorMenu),
+  DeleteAuthor: Validation(DeleteAuthor),
 };
