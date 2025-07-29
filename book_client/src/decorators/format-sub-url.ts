@@ -12,7 +12,7 @@ export default function (
   propertyKey: string,
   descriptor: TypedPropertyDescriptor<any>): TypedPropertyDescriptor<any> {
     const originalMethod = descriptor.value;
-    descriptor.value = function(...args: any[]) {
+    descriptor.value = function (...args: any[]) {
       const subUrl: string = args[0];
       // if contain "/" then throw error, else run origin method.
       if (/^\/(\w|-)+/.test(subUrl)) {

@@ -11,6 +11,7 @@ import Button from 'components/button/button';
 import List from 'components/list/list';
 import useForm, { RuleType } from 'hooks/useForm';
 import { required } from 'hooks/useValidate';
+import useFetchDataTable from 'hooks/useFetchDataTable';
 import {
   loadInitCategory,
   getCategoryDetail,
@@ -58,10 +59,11 @@ function Category(): JSX.Element {
     validate,
     reset
   } = useForm<CategoryStateType, RuleType<CategoryStateType>>(state, rules, formId);
+  const { fetch, fetcherData, pageSelected } = useFetchDataTable();
   const [previewImage, setPreviewImage] = useState<string[]>([]);
   const fetcher = useFetcher();
   const revalidator = useRevalidator();
-  const loaderData: unknown = fetcher.data || useLoaderData();
+  const loaderData: unknown = fetcherData || useLoaderData();
 
   const fields: Field[] = [
     {
@@ -94,11 +96,11 @@ function Category(): JSX.Element {
   }, []);
 
   const reFetchCategory
-    = useCallback((promise: Promise<AxiosResponse>, title: string, callback?: () => void): Promise<AxiosResponse> => {
+    = useCallback((promise: Promise<AxiosResponse>, title: string, reset?: () => void): Promise<AxiosResponse> => {
       return promise.then(response => {
         showToast(title, response.data.message);
         revalidator.revalidate();
-        callback && callback();
+        reset && reset();
         document.querySelector('.table-wrapper')?.scrollTo({ top: currentOffset });
         return response;
       })
@@ -112,7 +114,7 @@ function Category(): JSX.Element {
     currentCategoryId = '';
     setPreviewImage([]);
     reset();
-  }, []);
+  }, [reset]);
 
   const onSubmit = useCallback((formData: FormData): void => {
     handleSubmit();
@@ -128,8 +130,8 @@ function Category(): JSX.Element {
   }, []);
 
   const fetchCategory = useCallback((pageSize: number, pageNumber: number): void => {
-    fetcher.submit({ pageSize, pageNumber });
-  }, []);
+    fetch({ pageSize, pageNumber });
+  }, [fetcher]);
 
   const fetchCategoryDetail = useCallback((categoryId: string): void => {
     currentCategoryId = categoryId;
@@ -140,7 +142,7 @@ function Category(): JSX.Element {
         categoryName?.watch(res.data.name);
         setPreviewImage([res.data.avatar]);
       })
-      .catch((error) => showToast('Category', error.response.data.message));
+      .catch((error) => showToast('Load category!', error.response.data.message));
   }, [categoryName]);
 
   const deleteCategory = useCallback((categoryId: string): void => {
@@ -172,6 +174,7 @@ function Category(): JSX.Element {
           classes="category-responsive-table"
           data={data}
           total={total}
+          pageSelected={pageSelected}
           emptyMessage="Categories are not found!"
           onLoad={fetchCategory}>
             <Slot<CategoryType> name="avatar" render={

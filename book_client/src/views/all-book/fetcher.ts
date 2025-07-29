@@ -11,7 +11,7 @@ const query = {
     authorId: true,
     name: true,
     avatar: true,
-  }
+  },
 };
 
 export const bookPagination = (pageNumber: number, condition?: PaginationCondition): Promise<AxiosResponse> => {

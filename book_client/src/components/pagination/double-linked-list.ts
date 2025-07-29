@@ -36,7 +36,7 @@ class LinkedList {
       node.next = null;
 
       if (previousNode) {
-        previousNode!.next = node;
+        previousNode.next = node;
       }
 
       LinkedList.insertToArray(node);

@@ -48,8 +48,6 @@ const clientRoutes: RoutePropsUnion[] = [
       },
       {
         path: path.ALL,
-        name: 'categories',
-        icon: 'select-all.png',
         element: <GridOutlet />,
         errorElement: <ApiError alignCenter />,
         children: [
@@ -61,8 +59,6 @@ const clientRoutes: RoutePropsUnion[] = [
       },
       {
         path: path.CATEGORIES,
-        name: 'categories',
-        icon: 'select-all.png',
         element: <GridOutlet />,
         errorElement: <ApiError alignCenter />,
         children: [
@@ -74,8 +70,6 @@ const clientRoutes: RoutePropsUnion[] = [
       },
       {
         path: path.AUTHORS,
-        name: 'categories',
-        icon: 'select-all.png',
         element: <GridOutlet />,
         errorElement: <ApiError alignCenter />,
         children: [

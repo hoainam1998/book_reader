@@ -2,12 +2,12 @@ import { AxiosResponse } from 'axios';
 import { LoaderFunctionArgs } from 'react-router-dom';
 import { CategoryService, BookService, AuthorService, RequestBody, IQueryType } from 'services';
 
-const loadAllCategory = (): Promise<AxiosResponse> => {
+const getAllCategories = (): Promise<AxiosResponse> => {
   return CategoryService.post('all', {
     query: {
       name: true,
       categoryId: true
-    }
+    },
   });
 };
 
@@ -30,6 +30,10 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
     publishedTime: true,
     publishedDay: true,
     categoryId: true,
+    category: {
+      name: true,
+      avatar: true,
+    },
     avatar: true,
     images: {
       image: true,
@@ -39,7 +43,7 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
       authorId: true,
       name: true,
       avatar: true,
-    }
+    },
   };
 
   if (includeIntroduceFieldFlag) {
@@ -47,8 +51,8 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
       ...select,
       introduce: {
         html: true,
-        json: true
-      }
+        json: true,
+      },
     };
   }
 
@@ -61,7 +65,7 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
 const getAllBooks = (): Promise<AxiosResponse> => {
   return BookService.post('all', {
     query: {
-      name: true
+      name: true,
     },
   });
 };
@@ -72,7 +76,7 @@ const getAuthors = (authorIds?: string[], query?: IQueryType): Promise<AxiosResp
   : {
     authorId: true,
     avatar: true,
-    name: true
+    name: true,
   };
 
   return AuthorService.post('filter', {
@@ -87,9 +91,9 @@ const getBookIntroduceFile = (bookId: string): Promise<AxiosResponse> => {
       introduce: {
         html: true,
         json: true,
-      }
+      },
     },
-    bookId
+    bookId,
   });
 };
 
@@ -118,7 +122,7 @@ const updateIntroduceFile = (
     html,
     json,
     fileName,
-    bookId
+    bookId,
   };
   return BookService.put('update-introduce', body);
 };
@@ -145,12 +149,12 @@ const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse>
     },
     pageSize,
     pageNumber,
-    keyword
+    keyword,
   });
 };
 
 export {
-  loadAllCategory,
+  getAllCategories,
   bookPagination,
   saveBookInformation,
   getBookDetail,

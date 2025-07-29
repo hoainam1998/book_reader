@@ -5,6 +5,16 @@ import { showLoading, hideLoading, showToast } from 'utils';
 import auth from 'store/auth';
 import router from '../router';
 
+/**
+ * Force login.
+ */
+const forceLogout = (): void => {
+  auth.logout();
+  if (!window.location.pathname.includes(paths.LOGIN)) {
+    router.navigate(paths.LOGIN);
+  }
+};
+
 const Api: AxiosInstance = axios.create({
   baseURL: process.env.BASE_URL,
   timeout: 5000,
@@ -23,21 +33,22 @@ const handleRequestError = (error: AxiosError<any, any>): void=> {
         case HttpStatusCode.Unauthorized: {
           const code = (error.response as AxiosResponse).data.errorCode || undefined;
           if (Object.values(UNAUTHORIZED_ERROR_CODE).includes(code)) {
-            auth.logout();
             showToast('Unauthorized error!', error.response?.data.message);
-            if (!window.location.pathname.includes(paths.LOGIN)) {
-              router.navigate(paths.LOGIN);
-            }
+            forceLogout();
           }
         };
         break;
         default: break;
       }
       break;
+    case AxiosError.ERR_NETWORK: {
+      forceLogout();
+    };
+    break;
     default: {
       showToast(error.code || '', error.message);
-      break;
     };
+    break;
   }
 };
 

@@ -1,13 +1,9 @@
-/* eslint-disable no-unused-vars */
 import { JSX, useLayoutEffect, useSyncExternalStore } from 'react';
 import { useParams, useNavigation } from 'react-router-dom';
 import BookInformation from './book-information/book-information';
 import BookIntroduce from './book-introduce/book-introduce';
 import BookConclusion from './book-conclusion/book-conclusion';
 import Stepper, { StepContent } from 'components/stepper/stepper';
-import {
-  loadAllCategory
-} from '../fetcher';
 import store, { CurrentStoreType } from 'store/book';
 import BlockerProvider from 'contexts/blocker';
 import BookStoreProvider from 'contexts/book-store';
@@ -60,5 +56,4 @@ function BookDetail(): JSX.Element {
   );
 }
 
-export { loadAllCategory };
 export default BookDetail;

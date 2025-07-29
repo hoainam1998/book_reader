@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Fragment, JSX } from 'react';
 
 type ListPropsType<T> = {
@@ -11,7 +10,7 @@ function List<T>({ items, render }: ListPropsType<T>): JSX.Element {
     <Fragment key={index}>{ render(item, index) }</Fragment>
   ));
 
-  return (<>{ childrenList }</>);
+  return (<>{childrenList}</>);
 }
 
 export default List;

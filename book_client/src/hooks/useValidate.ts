@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-unused-vars */
 import { useState, DependencyList, useLayoutEffect } from 'react';
 import { customError } from 'utils';
 

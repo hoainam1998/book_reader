@@ -1,17 +1,16 @@
 import {
   useCallback,
   useMemo,
-  useState,
   useEffect,
   JSX,
 } from 'react';
 import Button from 'components/button/button';
 import LinkedList, { Node } from './double-linked-list';
-import { useClientPaginationContext } from 'contexts/client-pagination';
 import { clsx } from 'utils';
 import './style.scss';
 
 type PaginationProps = {
+  pageSelected: number;
   pageNumber: number;
   onChange: (page: number) => void;
   horizontal?: boolean;
@@ -138,8 +137,15 @@ const renderPagination = (pageActive: Node<PageButton>, pages: Node<PageButton>[
   }
 };
 
-function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.Element {
-  const paginationContext = useClientPaginationContext();
+function Pagination({ pageSelected, pageNumber, onChange, horizontal }: PaginationProps): JSX.Element {
+  if (pageSelected <= 0) {
+    console.warn('[Pagination] pageSelected must great than or equal 1');
+    return <></>;
+  } else if (pageSelected > pageNumber) {
+    console.warn('[Pagination] pageSelected must less than pageNumber');
+    return <></>;
+  }
+
   const pages = useMemo<Node<PageButton>[]>(() => {
     const paginationArray: PageButton[] = [];
 
@@ -157,14 +163,9 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
     return [];
   }, [pageNumber]);
 
-  const [page, setPage] = useState<Node<PageButton>>(pages[0]);
+  const indexSelectedPage = useMemo<number>(() => pageSelected === 1 ? 0 : pageSelected - 1, [pages, pageSelected]);
 
-  const initPage = useMemo<Node<PageButton>>(() => {
-    if (page && page.data && page.data.page) {
-      return page.data.page === 1 ? pages[0] : page;
-    }
-    return page;
-  }, [pages, page]);
+  const initPage = useMemo<Node<PageButton>>(() => pages[indexSelectedPage], [pages, indexSelectedPage]);
 
   const pageList = useMemo<(Node<PageButton> | DotPageButton)[]>
     (() => pages.length ? renderPagination(initPage, pages) : [], [initPage, pageNumber]);
@@ -177,16 +178,9 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
   const pageClick = useCallback((page: Node<PageButton> | DotPageButton): void => {
     if (page && !(page as DotPageButton).dots
       && previousSelectedPage?.data.page !== (page as Node<PageButton>).data.page) {
-        setPage(page as Node<PageButton>);
         onChange((page as Node<PageButton>).data.page);
     }
   }, [pageList]);
-
-  const reset = useCallback((): void => {
-    if (pages && pages.length) {
-      setPage(pages[0]);
-    }
-  }, [pages]);
 
   useEffect(() => {
     if (pageList.length > 0 && (pageList[0] as Node<PageButton>)?.data) {
@@ -194,12 +188,6 @@ function Pagination({ pageNumber, onChange, horizontal }: PaginationProps): JSX.
       previousSelectedPage = (pageList[0] as Node<PageButton>);
     }
   }, [pageNumber]);
-
-  useEffect(() => {
-    if (reset && paginationContext) {
-      paginationContext.setResetPage(() => reset);
-    }
-  }, [reset]);
 
   if (pageList.length) {
     return (

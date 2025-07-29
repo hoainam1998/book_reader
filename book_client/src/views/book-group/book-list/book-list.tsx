@@ -1,12 +1,13 @@
-import { JSX, useCallback, useMemo, useLayoutEffect } from 'react';
+import { JSX, useCallback, useLayoutEffect } from 'react';
 import { AxiosResponse } from 'axios';
-import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import paths from 'router/paths';
+import useFetchDataTable from 'hooks/useFetchDataTable';
 import { bookPagination, getBookDetail, deleteBook } from '../fetcher';
 import store from 'store/book';
 const { updateData, deleteAllStorage } = store;
@@ -63,38 +64,17 @@ const fields: Field[] = [
   }
 ];
 
-let _keyword: string = '';
-let _pageSize: number = 10;
-
 function BookList(): JSX.Element {
-  const fetcher = useFetcher();
   const loaderData = useLoaderData() as AxiosResponse;
   const navigate = useNavigate();
+  const { fetcherData, fetch, pageSelected } = useFetchDataTable();
 
-  const books = useMemo<BookType[]>(() => {
-    if (fetcher.data) {
-      return fetcher.data.data.list;
-    }
-    return (loaderData as AxiosResponse).data.list || [];
-  }, [fetcher.data, loaderData.data]);
-
-  const total = useMemo<number>(() => {
-    if (fetcher.data) {
-      return fetcher.data.data.total;
-    }
-    return (loaderData as AxiosResponse).data.total || 0;
-  }, [fetcher.data, loaderData.data]);
-
-  const fetchBookPagination = (pageSize: number, pageNumber: number): void => {
-    _pageSize = pageSize;
-    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
-  };
+  const books: BookType[] = (fetcherData || loaderData).data.list;
+  const total: number = (fetcherData || loaderData).data.total;
 
   const search = useCallback((keyword: string): void => {
-    _keyword = keyword;
-    fetchBookPagination(_pageSize, 1);
-  }, []);
-
+    fetch({ pageNumber: 1, keyword });
+  }, [fetch]);
 
   const operationSlot = useCallback((slotProp: BookType): JSX.Element => {
     const { bookId } = slotProp;
@@ -112,7 +92,7 @@ function BookList(): JSX.Element {
       deleteBook(bookId)
         .then((res) => {
           showToast('Delete book success!', res.data.message);
-          fetchBookPagination(_pageSize, 1);
+          fetch({ pageNumber: 1 });
         })
         .catch((error) => showToast('Delete book failed!', error.response.data.message))
         .finally(onClose);
@@ -143,7 +123,7 @@ function BookList(): JSX.Element {
       showModal({
         title: 'Delete book!',
         children: deleteBookModalChildren,
-        size: SCREEN_SIZE.MEDIUM,
+        size: SCREEN_SIZE.SMALL,
       });
     };
 
@@ -160,21 +140,19 @@ function BookList(): JSX.Element {
     );
   }, []);
 
-  useLayoutEffect(() => {
-    deleteAllStorage(true);
-  }, []);
+  useLayoutEffect(() => deleteAllStorage(true), []);
 
   return (
     <section className="book-list">
       <HeaderDashboard disabled={total === 0} add={() => navigate(paths.NEW)} search={search} />
       <Table<BookType>
-        key={_keyword}
         responsive
         fields={fields}
+        pageSelected={pageSelected}
         data={books}
         total={total}
         emptyMessage="Books are not found!"
-        onLoad={fetchBookPagination}>
+        onLoad={fetch}>
           <Slot<BookType>
             name="avatar"
             render={(slotProp) => (

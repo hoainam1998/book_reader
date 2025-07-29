@@ -35,7 +35,7 @@ const convertBase64ToSingleFile = (imageBase64String: string, name: string): Pro
  * @returns {Promise} - The json content promise.
  */
 const getJsonFileContent = <T>(filePath: string): Promise<T> => {
-  return fetch(`${process.env.BASE_URL}${filePath}`)
+  return fetch(`${process.env.BASE_URL}/${filePath}`)
     .then(res => res.json())
     .then(json => json);
 };
