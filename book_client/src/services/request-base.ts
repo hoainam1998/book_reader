@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Request, Service } from 'services';
 

@@ -14,7 +14,6 @@ type SelectPropsType<T, R> = {
   labelField?: keyof R;
   children?: ReactElement;
   selectClass?: string;
-  // eslint-disable-next-line no-unused-vars
   onChange: (value: T) => void;
 }
 & Omit<Partial<FieldValidateProps<T>>, 'onChange' | 'options'>
@@ -54,7 +53,7 @@ function Select<T extends string | number | readonly string[] | undefined, R ext
       ];
     }
     return options;
-  }, [placeholder]);
+  }, [placeholder, options]);
 
   return (
     <FormControl

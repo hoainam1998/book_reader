@@ -15,8 +15,7 @@ import Slot from 'components/slot/slot';
 import { ModalSlotPropsType } from 'interfaces';
 import useModalNavigation from 'hooks/useModalNavigation';
 import useComponentWillMount from 'hooks/useComponentWillMount';
-import { getCategoryDetail } from 'views/category/fetcher';
-import type { CategoryDetailType } from 'views/category/category';
+import { BookInfoType } from 'storage';
 import { Image } from 'store/book';
 import { HaveLoadedFnType } from 'interfaces';
 import { showToast, openFile, formatDate } from 'utils';
@@ -85,7 +84,10 @@ const footerModal = (blocker: Blocker): JSX.Element => {
 };
 
 function BookConclusion(): JSX.Element {
-  const [category, setCategory] = useState<CategoryDetailType>({ name: '', avatar: ''});
+  const [category, setCategory] = useState<Omit<BookInfoType['category'], 'categoryId'>>({
+    name: '',
+    avatar: '',
+  });
   const { data, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
   const navigate = useNavigate();
   const publishedDay: string = useMemo(
@@ -112,10 +114,8 @@ function BookConclusion(): JSX.Element {
   useComponentWillMount((haveFetched: HaveLoadedFnType) => {
     return () => {
       if (!haveFetched()) {
-        if (Object.hasOwn(data, 'categoryId') && data.categoryId) {
-          getCategoryDetail(data.categoryId)
-            .then((res) => setCategory(res.data))
-            .catch(() => setCategory({ name: '', avatar: '' }));
+        if (Object.hasOwn(data, 'category')) {
+          setCategory(data.category);
         }
       }
     };

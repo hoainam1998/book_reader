@@ -30,6 +30,7 @@ type TableProps<T> = {
   fields: Field[];
   children?: ReactNode;
   total: number;
+  pageSelected?: number;
   data: T[];
   emptyMessage: string;
   responsive?: boolean;
@@ -77,6 +78,7 @@ function Table<T>({
   children,
   data,
   total,
+  pageSelected = 1,
   classes,
   responsive,
   emptyMessage,
@@ -151,7 +153,7 @@ function Table<T>({
                   name="page-size"
                   className="un-grid"
                   selectClass="page-size" />
-                <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} />
+                <Pagination onChange={pageNumberChange} pageNumber={totalPageNumber} pageSelected={pageSelected} />
               </div>
           }
         </section>

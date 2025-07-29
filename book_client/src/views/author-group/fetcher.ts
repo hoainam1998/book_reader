@@ -18,11 +18,12 @@ export const authorPagination = ({ request }: LoaderFunctionArgs): Promise<Axios
       avatar: true,
       storyFile: true,
       yearOfBirth: true,
-      yearOfDead: true
+      yearOfDead: true,
+      disabled: true,
     },
     pageSize,
     pageNumber,
-    keyword
+    keyword,
   });
 };
 
@@ -32,6 +33,10 @@ export const createAuthor = (formData: FormData): Promise<AxiosResponse> => {
 
 export const updateAuthor = (formData: FormData): Promise<AxiosResponse> => {
   return AuthorService.put('update', formData);
+};
+
+export const deleteAuthor = (authorId: string): Promise<AxiosResponse> => {
+  return AuthorService.delete(`delete/${authorId}`);
 };
 
 export const loadAuthorDetail = ({ params }: LoaderFunctionArgs): Promise<AxiosResponse | Response> => {

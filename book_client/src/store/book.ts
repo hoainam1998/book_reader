@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { StepStorage, DisableStepStorage, BookInfoStorage, BookInfoType } from 'storage';
 import type { Image } from 'storage';
 import Store from './store';

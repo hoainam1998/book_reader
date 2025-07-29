@@ -47,7 +47,7 @@ function GridLayout({ children }: GridLayoutPropsType): JSX.Element {
           {children}
         </div>
         <div className="grid-pagination">
-          <Pagination horizontal pageNumber={pages} onChange={onPageChangeWithCondition} />
+          <Pagination horizontal pageNumber={pages} pageSelected={page} onChange={onPageChangeWithCondition} />
         </div>
       </div>
     </section>

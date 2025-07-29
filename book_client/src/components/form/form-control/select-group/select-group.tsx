@@ -6,13 +6,14 @@ import {
   useLayoutEffect,
   useMemo,
   ReactNode,
+  useEffect,
 } from 'react';
 import FormControl, { FormControlProps } from 'components/form/form-control/form-control';
 import { FieldValidateProps } from 'hooks/useForm';
 import List from 'components/list/list';
 import Button from 'components/button/button';
-import './style.scss';
 import { clsx, stringRandom as id } from 'utils';
+import './style.scss';
 
 type SelectGroupPropsType<T>= {
   items: T[];
@@ -85,7 +86,7 @@ function SelectGroup<T>({
     }
 
     return [];
-  }, [items, placeholder]);
+  }, [items, placeholder, valueField, labelField]);
 
   const SelectionItem = ({
     options,
@@ -245,7 +246,7 @@ function SelectGroup<T>({
   }, [optionSelected]);
 
   const selectItemClone = useCallback(
-    (idx: number, el: JSX.Element): JSX.Element => {
+    (el: JSX.Element, idx: number): JSX.Element => {
       const id = el.props.id;
       const option = optionSelected.get(id);
 
@@ -260,19 +261,19 @@ function SelectGroup<T>({
     },
     [selectItems, values, optionSelected]);
 
-  useLayoutEffect(() => {
+  useEffect((): void => {
     if (items.length) {
       setSelectItems([<SelectionItem />]);
     }
   }, [items, optionsWithPlaceHolder]);
 
-  useLayoutEffect(() => {
+  useEffect((): void => {
     let valuesMapWithItems = values;
     if (selectItems.length !== values.length && selectItems.length > 0) {
       valuesMapWithItems = selectItems.map((_, index) => values[index]);
     }
 
-    if (values.length && optionsWithPlaceHolder.length) {
+    if (values.length && optionsWithPlaceHolder.length && valuesMapWithItems.length) {
       const { selectedItems, optionsSelected }
         = valuesMapWithItems.reduce<{ selectedItems: JSX.Element[], optionsSelected: Map<string, OptionType<T>> }>
         ((mappingObject, value, index) => {
@@ -282,7 +283,9 @@ function SelectGroup<T>({
             mappingObject.selectedItems.push(<SelectionItem id={selectItemId} />);
             mappingObject.optionsSelected.set(selectItemId, option);
           } else {
-            mappingObject.selectedItems.push(selectItems[index]);
+            if (selectItems[index]) {
+              mappingObject.selectedItems.push(selectItems[index]);
+            }
           }
           return mappingObject;
       }, { selectedItems: [], optionsSelected: new Map<string, OptionType<T>>([]) });
@@ -303,7 +306,7 @@ function SelectGroup<T>({
           <Button variant='success' disabled={canNotAddMore} onClick={addItem}>Add</Button>
           <Button variant='dangerous' className="clear" disabled={canNotClear} onClick={clear}>Clear</Button>
           <ul className="select-list">
-            <List<JSX.Element> items={selectItems} render={(item, index) => selectItemClone(index, item)} />
+            <List<JSX.Element> items={selectItems} render={selectItemClone} />
           </ul>
         </div>
     </FormControl>

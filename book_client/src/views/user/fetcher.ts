@@ -12,7 +12,7 @@ export const updateMfaState = (userId: string, mfaEnable: boolean): Promise<Axio
     userId,
     mfaEnable
   };
-  return UserService.post('update-mfa', body);
+  return UserService.put('update-mfa', body);
 };
 
 export const updatePower = (userId: string, power: boolean): Promise<AxiosResponse> => {
@@ -20,7 +20,7 @@ export const updatePower = (userId: string, power: boolean): Promise<AxiosRespon
     userId,
     power
   };
-  return UserService.post('update-power', body);
+  return UserService.put('update-power', body);
 };
 
 export const deleteUser = (userId: string): Promise<AxiosResponse> => {

@@ -6,7 +6,7 @@ import {
   useState,
   useLayoutEffect,
 } from 'react';
-import { useLoaderData, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import Grid, { GridItem } from 'components/grid/grid';
 import Calendar from 'components/calendar/calendar';
@@ -23,7 +23,14 @@ import useComponentWillMount from 'hooks/useComponentWillMount';
 import useSetTheLastNavigateName from 'hooks/useSetTheLastNavigateName';
 import { useBookStoreContext } from 'contexts/book-store';
 import { Image } from 'store/book';
-import { getBookDetail, saveBookInformation, getAllBooks, updateBookInformation, getAuthors } from '../../fetcher';
+import {
+  getBookDetail,
+  saveBookInformation,
+  getAllBooks,
+  updateBookInformation,
+  getAuthors,
+  getAllCategories,
+} from '../../fetcher';
 import { convertBase64ToSingleFile, getExtnameFromBlobType, showToast } from 'utils';
 import { HaveLoadedFnType } from 'interfaces';
 import './style.scss';
@@ -102,6 +109,7 @@ function BookInformation(): JSX.Element {
   const pdfRef = useRef<InputRefType>(null);
   const [authorsList, setAuthorsList] = useState<AuthorSelectType[]>([]);
   const [bookNames, setBookNames] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryOptionsType[]>([]);
   const { id } = useParams();
   const { data, step, updateBookInfo, updateConditionNavigate, deleteAllStorage } = useBookStoreContext();
 
@@ -142,9 +150,6 @@ function BookInformation(): JSX.Element {
     validate,
     reset
   } = useForm(state, rules, formId, [bookNames]);
-
-  const loaderData: AxiosResponse = useLoaderData() as AxiosResponse;
-  const categories: CategoryOptionsType[] = loaderData?.data || [];
 
   const authorInfoShowing = ({ avatar, name }: AuthorSelectType): JSX.Element => {
     return (
@@ -219,7 +224,7 @@ function BookInformation(): JSX.Element {
         categoryId.watch(data.categoryId);
         pdf.watch('');
         images.watch('');
-        authors.watch(data.authors);
+        authors.watch(data.authors.map((author) => author.authorId));
         if (!haveFetched()) {
           convertFilePathToFile(`${process.env.BASE_URL}/${data.pdf}`, data.name)
             .then((res) => pdf.watch(res));
@@ -246,6 +251,9 @@ function BookInformation(): JSX.Element {
           .catch(() => setAuthorsList([]));
         getAllBooks()
           .then((res) => setBookNames(res.data.map(({ name }: { name: string }) => name)));
+        getAllCategories()
+          .then((res) => setCategories(res.data))
+          .catch(() => setCategories([]));
       }
     };
   }, []);

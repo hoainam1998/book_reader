@@ -1,5 +1,5 @@
 import { JSX, useCallback, useMemo } from 'react';
-import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import Table from 'components/table/table';
 import Button from 'components/button/button';
 import type { Field } from 'components/table/table';
@@ -7,16 +7,14 @@ import Slot from 'components/slot/slot';
 import Switch from 'components/form/form-control/switch/switch';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Tooltip from 'components/tooltip/tooltip';
+import useFetchDataTable from 'hooks/useFetchDataTable';
 import constants from 'read-only-variables';
 import { showToast } from 'utils';
 import auth from 'store/auth';
+import path from 'router/paths';
 import { Role } from 'enums';
 import { loadInitUser, updateMfaState, updatePower, deleteUser as _deleteUser } from '../fetcher';
 import './style.scss';
-
-let _keyword: string = '';
-let _pageSize: number = 10;
-let _pageNumber: number = 1;
 
 type UserType = {
   userId: string;
@@ -30,10 +28,10 @@ type UserType = {
 };
 
 function UserList(): JSX.Element {
-  const fetcher = useFetcher();
+  const { fetcherData, fetch, pageSelected } = useFetchDataTable();
   const loaderData = useLoaderData();
   const navigate = useNavigate();
-  const responseData = fetcher.data || loaderData;
+  const responseData = fetcherData || loaderData;
 
   const users: UserType[] = responseData.data?.list || [];
   const total: number = responseData.data?.total || 0;
@@ -89,17 +87,11 @@ function UserList(): JSX.Element {
   return defaultFields;
   }, [auth.IsAdmin]);
 
-  const fetchUser = useCallback((pageSize: number, pageNumber: number): void => {
-    _pageSize = pageSize;
-    _pageNumber = pageNumber;
-    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
-  }, []);
-
   const updateMfa = useCallback((userId: string, mfaEnable: boolean): void => {
     updateMfaState(userId, mfaEnable)
       .then((response) => {
         showToast('Update mfa!', response.data.message);
-        fetchUser(_pageSize, _pageNumber);
+        fetch();
       })
       .catch((error) => showToast('Update mfa!', error.response.data.message));
   }, []);
@@ -108,19 +100,18 @@ function UserList(): JSX.Element {
     updatePower(userId, power)
       .then((response) => {
         showToast('Update permission!', response.data.message);
-        fetchUser(_pageSize, _pageNumber);
+        fetch();
       })
       .catch((error) => showToast('Update permission!', error.response.data.message));
   }, []);
 
   const navigateToDetailPage = useCallback((): void => {
-    navigate('new');
+    navigate(path.NEW);
   }, []);
 
   const search = useCallback((keyword: string): void => {
-    _keyword = keyword;
-    fetchUser(_pageSize, 1);
-  }, []);
+    fetch({ pageNumber: 1, keyword });
+  }, [fetch]);
 
   const operationSlot = useCallback((slotProp: UserType): JSX.Element => {
     const { userId } = slotProp;
@@ -132,7 +123,7 @@ function UserList(): JSX.Element {
     const deleteUser = useCallback((): void => {
       _deleteUser(userId).
         then((res) => {
-          fetchUser(_pageSize, 1);
+          fetch({ pageNumber: 1 });
           showToast('Delete user!', res.data.message);
         })
         .catch((error) => showToast('Delete user!', error.response.data.message));
@@ -170,8 +161,9 @@ function UserList(): JSX.Element {
         fields={fields}
         data={users}
         total={total}
+        pageSelected={pageSelected}
         emptyMessage="Users are not found!"
-        onLoad={fetchUser}>
+        onLoad={fetch}>
           <Slot<UserType> name="avatar" render={
             (slotProp) => <img
               height="50px"

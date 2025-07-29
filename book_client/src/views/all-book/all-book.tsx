@@ -1,11 +1,12 @@
 import { JSX, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import Books from 'components/re-use/books/books';
 import { useClientPaginationContext } from 'contexts/client-pagination';
 import useComponentDidMount from 'hooks/useComponentWillMount';
 import { bookPagination } from './fetcher';
+import path from 'router/paths';
 import { HaveLoadedFnType, BookPropsType, PaginationCondition } from 'interfaces';
-import { useBlocker } from 'react-router-dom';
 
 type PaginationType = {
   page: number;
@@ -18,7 +19,6 @@ function AllBooks(): JSX.Element {
     setOnPageChange,
     setPage,
     setPages,
-    resetPage,
     clearOldKeyword,
     getConditions
   } = useClientPaginationContext();
@@ -28,7 +28,6 @@ function AllBooks(): JSX.Element {
     return (pageNumber: number = 1, currentCondition: PaginationCondition = getConditions()) =>
        bookPagination(pageNumber, currentCondition)
         .then((result: AxiosResponse<PaginationType>) => {
-          resetPage && resetPage();
           setPage(result.data.page);
           setPages(result.data.pages);
           setBooks(result.data.list);
@@ -45,7 +44,9 @@ function AllBooks(): JSX.Element {
   }, []);
 
   useBlocker(({ currentLocation, nextLocation }): boolean => {
-    if (currentLocation.pathname !== nextLocation.pathname) {
+    if (currentLocation.pathname !== nextLocation.pathname
+      && (nextLocation.pathname.includes(path.AUTHOR) || nextLocation.pathname.includes(path.BOOK))
+    ) {
       clearOldKeyword && clearOldKeyword();
     }
     return false;

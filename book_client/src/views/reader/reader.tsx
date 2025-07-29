@@ -1,12 +1,11 @@
-import { JSX, useCallback, useMemo } from 'react';
-import { AxiosResponse } from 'axios';
-import { useFetcher, useLoaderData, useNavigate } from 'react-router-dom';
+import { JSX, useCallback } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import Table from 'components/table/table';
 import type { Field } from 'components/table/table';
 import HeaderDashboard from 'components/header-dashboard/header-dashboard';
 import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
-import path from 'router/paths';
+import useFetchDataTable from 'hooks/useFetchDataTable';
 import constants from 'read-only-variables';
 import { clientPagination, blockClient } from './fetcher';
 import { showToast } from 'utils';
@@ -45,41 +44,20 @@ const fields: Field[] = [
     style: {
       color: 'transparent',
       userSelect: 'none',
-    }
-  }
+    },
+  },
 ];
 
-let _keyword: string = '';
-let _pageSize: number = 10;
-
 function AuthorList(): JSX.Element {
-  const fetcher = useFetcher();
+  const { fetcherData, fetch, pageSelected } = useFetchDataTable();
   const loaderData = useLoaderData() as unknown;
-  const navigate = useNavigate();
 
-  const clients = useMemo<ClientType[]>(() => {
-    if (fetcher.data) {
-      return fetcher.data.data.list;
-    }
-    return (loaderData as AxiosResponse).data.list || [];
-  }, [fetcher.data]);
-
-  const total = useMemo<number>(() => {
-    if (fetcher.data) {
-      return fetcher.data.data.total;
-    }
-    return (loaderData as AxiosResponse).data.total || 0;
-  }, [fetcher.data]);
-
-  const fetchAuthorPagination = (pageSize: number, pageNumber: number): void => {
-    _pageSize = pageSize;
-    fetcher.submit({ pageSize, pageNumber, keyword: _keyword });
-  };
+  const clients: ClientType[] = (fetcherData || loaderData).data.list;
+  const total: number = (fetcherData || loaderData).data.total;
 
   const search = useCallback((keyword: string): void => {
-    _keyword = keyword;
-    fetchAuthorPagination(_pageSize, 1);
-  }, []);
+    fetch({ pageNumber: 1, keyword });
+  }, [fetch]);
 
   const operationSlot = useCallback((slotProp: ClientType): JSX.Element => {
     const { clientId } = slotProp;
@@ -88,7 +66,7 @@ function AuthorList(): JSX.Element {
       blockClient(clientId)
         .then((res) => {
           showToast('Block client!', res.data.message);
-          fetchAuthorPagination(_pageSize, 1);
+          fetch({ pageNumber: 1 });
         })
         .catch((error) => {
           showToast('Block client!', error.response.data.message);
@@ -100,15 +78,15 @@ function AuthorList(): JSX.Element {
 
   return (
     <section className="client-list">
-      <HeaderDashboard disabled={total === 0} hiddenNewBtn={true} add={() => navigate(path.NEW)} search={search} />
+      <HeaderDashboard disabled={total === 0} hiddenNewBtn={true} search={search} />
       <Table<ClientType>
-        key={_keyword}
         responsive
         fields={fields}
         data={clients}
         total={total}
+        pageSelected={pageSelected}
         emptyMessage="Clients are not found!"
-        onLoad={fetchAuthorPagination}>
+        onLoad={fetch}>
           <Slot<ClientType>
             name="avatar"
             render={(slotProp) => (

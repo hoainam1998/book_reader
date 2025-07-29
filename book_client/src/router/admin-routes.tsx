@@ -8,7 +8,7 @@ import AdminPersonal from 'views/personal/admin-personal/admin-personal';
 import UserList, { loadInitUser } from 'views/user/user-list/user-list';
 import UserDetail from 'views/user/user-detail/user-detail';
 import Category, { loadInitCategory } from 'views/category/category';
-import BookDetail, { loadAllCategory } from 'views/book-group/book-detail/book-detail';
+import BookDetail from 'views/book-group/book-detail/book-detail';
 import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail/author-detail';
 import ReaderList, { clientPagination } from 'views/reader/reader';
@@ -60,7 +60,7 @@ const adminRoutes: RoutePropsUnion[] = [
     children: [
       {
         index: true,
-        element: <Navigate replace to={path.CATEGORY} />
+        element: <Navigate replace to={path.CATEGORY} />,
       },
       {
         path: path.CATEGORY,
@@ -93,7 +93,7 @@ const adminRoutes: RoutePropsUnion[] = [
             errorElement: <ApiError alignCenter />
           },
           {
-            path: 'new',
+            path: path.NEW,
             element: <AdminRequire><UserDetail /></AdminRequire>,
             errorElement: <ApiError alignCenter />,
             handle: {
@@ -133,7 +133,6 @@ const adminRoutes: RoutePropsUnion[] = [
             path: path.ID,
             element: <BookDetail />,
             errorElement: <ApiError alignCenter />,
-            loader: loadAllCategory,
             handle: {
               crumb: ({ pathname, name }: NavigationRouteMatchType) =>
                 <span key={pathname}>{name}</span>
@@ -143,7 +142,6 @@ const adminRoutes: RoutePropsUnion[] = [
             path: path.NEW,
             element: <BookDetail />,
             errorElement: <ApiError alignCenter />,
-            loader: loadAllCategory,
             handle: {
               crumb: ({ pathname }: UIMatch) =>
                 <span key={pathname}>New</span>
