@@ -61,7 +61,12 @@ class ClientRoutePath {
   /**
    * Relative: /block *Absolute: client/block
    */
-  static block = createRoutePath({ url: 'block' }, [process.env.ORIGIN_CORS]);
+  static block = createRoutePath({ url: 'block', subUrl: ':clientId' }, [process.env.ORIGIN_CORS]);
+
+  /**
+   * Relative: /unblock *Absolute: client/unblock
+   */
+  static unblock = createRoutePath({ url: 'unblock', subUrl: ':clientId' }, [process.env.ORIGIN_CORS]);
 }
 
 module.exports = ClientRoutePath;

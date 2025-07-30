@@ -6,7 +6,7 @@ const onlyAllowOneDevice = require('#middlewares/auth/only-use-one-device');
 const clientLoginRequire = require('#middlewares/auth/client-login-require');
 const authentication = require('#middlewares/auth/authentication');
 const onlyAdminAllowed = require('#middlewares/auth/only-admin-allowed');
-const { UPLOAD_MODE, HTTP_CODE, METHOD } = require('#constants');
+const { UPLOAD_MODE, HTTP_CODE, METHOD, BLOCK, REQUEST_DATA_PASSED_TYPE } = require('#constants');
 const { READER, USER, COMMON } = require('#messages');
 const {
   messageCreator,
@@ -57,29 +57,53 @@ class ClientRouter extends Router {
     this.post(ClientRoutePath.all, authentication, this._getAllClient);
     this.post(ClientRoutePath.pagination, authentication, this._pagination);
     this.put(ClientRoutePath.block, authentication, onlyAdminAllowed, this._blockClient);
+    this.put(ClientRoutePath.unblock, authentication, onlyAdminAllowed, this._unBlockClient);
   }
 
   @validation(BlockClient, {
-    error_message: READER.BLOCK_CLIENT_FAIL,
+    error_message: READER.UNBLOCK_CLIENT_FAIL,
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
   })
   @validateResultExecute(HTTP_CODE.CREATED)
   @serializer(MessageSerializerResponse)
-  _blockClient(req, res, next, self) {
-    const query = `mutation BlockClient($clientId: ID!) {
+  _unBlockClient(req, res, next, self) {
+    const query = `mutation BlockClient($clientId: ID!, $state: Int!) {
       client {
-        blockClient (clientId: $clientId) {
+        blockClient (clientId: $clientId, state: $state) {
           message
         }
       }
     }`;
 
-    return self.Service.deleteClientSessionId(req.body.clientId).then((client) => {
+    return self.execute(query, { clientId: req.params.clientId, state: BLOCK.OFF });
+  }
+
+  @validation(BlockClient, {
+    error_message: READER.BLOCK_CLIENT_FAIL,
+    request_data_passed_type: REQUEST_DATA_PASSED_TYPE.PARAM,
+  })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  _blockClient(req, res, next, self) {
+    const query = `mutation BlockClient($clientId: ID!, $state: Int!) {
+      client {
+        blockClient (clientId: $clientId, state: $state) {
+          message
+        }
+      }
+    }`;
+
+    const clientId = req.params.clientId;
+
+    return self.Service.deleteClientSessionId(clientId).then((client) => {
       return new Promise((resolve) => {
         return req.sessionStore.destroy(client.session_id, function () {
-          if (self.Socket.Clients.has(req.body.clientId)) {
-            self.Socket.Clients.get(req.body.clientId).send({ delete: true });
+          if (self.Socket.Clients.has(clientId)) {
+            self.Socket.Clients.get(clientId).send({ delete: true });
           }
-          resolve(getGeneratorFunctionData(self.execute(query, { clientId: req.body.clientId })));
+          resolve(
+            getGeneratorFunctionData(self.execute(query, { clientId, state: BLOCK.ON }))
+          );
         });
       });
     });
