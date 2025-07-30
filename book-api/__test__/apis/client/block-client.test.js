@@ -49,7 +49,7 @@ describe('block client', () => {
         describe: 'block client api cors',
         url: blockUserUrl,
         method: METHOD.PUT.toLowerCase(),
-        origin: process.env.CLIENT_ORIGIN_CORS,
+        origin: process.env.ORIGIN_CORS,
       },
     ],
     'block client common test'

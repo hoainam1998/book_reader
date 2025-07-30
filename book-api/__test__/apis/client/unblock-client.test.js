@@ -45,7 +45,7 @@ describe('unblock client', () => {
         describe: 'unblock client api cors',
         url: blockUserUrl,
         method: METHOD.PUT.toLowerCase(),
-        origin: process.env.CLIENT_ORIGIN_CORS,
+        origin: process.env.ORIGIN_CORS,
       },
     ],
     'unblock client common test'
