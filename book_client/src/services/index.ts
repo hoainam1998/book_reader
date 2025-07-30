@@ -53,8 +53,8 @@ class Service extends RequestBase {
   * @param {RequestBody} requestBody - The request body.
   */
   @formatSubUrl
-  put(subUrl: string, requestBody: RequestBody): Promise<AxiosResponse> {
-    return Request.default.put(`${this._url}/${subUrl}`, requestBody);
+  put(subUrl: string, requestBody?: RequestBody): Promise<AxiosResponse> {
+    return Request.default.put(`${this._url}/${subUrl}`, requestBody || {});
   }
 
   /**

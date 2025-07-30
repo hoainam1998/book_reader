@@ -27,3 +27,8 @@ export enum Role {
   ADMIN = 'Admin',
   USER = 'User',
 };
+
+export enum Block {
+  OFF,
+  ON,
+};
