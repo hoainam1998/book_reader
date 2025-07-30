@@ -16,6 +16,7 @@ const ForgetPassword = require('#dto/client/forget-password');
 const PaginationResponse = require('#dto/common/pagination-response');
 const handleResolveResult = require('#utils/handle-resolve-result');
 const { READER, USER } = require('#messages');
+const { BLOCK } = require('#constants');
 
 const CLIENT = {
   clientId: {
@@ -238,12 +239,16 @@ const mutation = new GraphQLObjectType({
         clientId: {
           type: new GraphQLNonNull(GraphQLID),
         },
+        state: {
+          type: new GraphQLNonNull(GraphQLInt),
+        },
       },
-      resolve: async (service, { clientId }) => {
+      resolve: async (service, { clientId, state }) => {
         return handleResolveResult(
           async () => {
-            await service.blockReader(clientId);
-            return messageCreator(READER.BLOCK_CLIENT_SUCCESS);
+            await service.blockReader(clientId, state);
+            const successMessage = state === BLOCK.ON ? READER.BLOCK_CLIENT_SUCCESS : READER.UNBLOCK_CLIENT_SUCCESS;
+            return messageCreator(successMessage);
           },
           {
             RECORD_NOT_FOUND: USER.USER_NOT_FOUND,

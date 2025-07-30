@@ -109,7 +109,9 @@
     "test.client.pagination": "npm run test.requirement -- __test__/apis/client/pagination.test.js",
     "test.client.pagination.silent": "npm run test.requirement -- __test__/apis/client/pagination.test.js --silent",
     "test.client.block": "npm run test.requirement -- __test__/apis/client/block-client.test.js",
-    "test.client.block.silent": "npm run test.requirement -- __test__/apis/client/block-client.test.js --silent"
+    "test.client.block.silent": "npm run test.requirement -- __test__/apis/client/block-client.test.js --silent",
+    "test.client.unblock": "npm run test.requirement -- __test__/apis/client/unblock-client.test.js",
+    "test.client.unblock.silent": "npm run test.requirement -- __test__/apis/client/unblock-client.test.js --silent"
   },
   "author": "hoai nam",
   "license": "ISC",

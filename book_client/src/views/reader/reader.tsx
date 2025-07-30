@@ -7,7 +7,8 @@ import Slot from 'components/slot/slot';
 import Button from 'components/button/button';
 import useFetchDataTable from 'hooks/useFetchDataTable';
 import constants from 'read-only-variables';
-import { clientPagination, blockClient } from './fetcher';
+import { Block } from 'enums';
+import { clientPagination, blockClient, unblockClient } from './fetcher';
 import { showToast } from 'utils';
 
 type ClientType = {
@@ -60,7 +61,7 @@ function AuthorList(): JSX.Element {
   }, [fetch]);
 
   const operationSlot = useCallback((slotProp: ClientType): JSX.Element => {
-    const { clientId } = slotProp;
+    const { clientId, blocked } = slotProp;
 
     const block = (): void => {
       blockClient(clientId)
@@ -68,12 +69,31 @@ function AuthorList(): JSX.Element {
           showToast('Block client!', res.data.message);
           fetch({ pageNumber: 1 });
         })
-        .catch((error) => {
-          showToast('Block client!', error.response.data.message);
-        });
+        .catch((error) => showToast('Block client!', error.response.data.message));
     };
 
-    return (<Button variant="dangerous" onClick={block}>Block</Button>);
+    const unblock = (): void => {
+      unblockClient(clientId)
+        .then((res) => {
+          showToast('Unblock client!', res.data.message);
+          fetch({ pageNumber: 1 });
+        })
+        .catch((error) => showToast('Unblock client!', error.response.data.message));
+    };
+
+    return (
+      <>
+        {blocked === Block.ON ? (
+          <Button variant='success' onClick={unblock}>
+            Unblock
+          </Button>
+        ) : (
+          <Button variant='dangerous' onClick={block}>
+            Block
+          </Button>
+        )}
+      </>
+    );
   }, []);
 
   return (

@@ -242,13 +242,13 @@ class ClientService extends Service {
     });
   }
 
-  blockReader(clientId) {
+  blockReader(clientId, state) {
     return this.PrismaInstance.reader.update({
       where: {
         reader_id: clientId,
       },
       data: {
-        blocked: BLOCK.ON,
+        blocked: state,
       },
     });
   }

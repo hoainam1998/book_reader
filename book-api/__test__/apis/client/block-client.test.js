@@ -8,7 +8,7 @@ const ClientDummyData = require('#test/resources/dummy-data/client');
 const { WsClient, Socket } = require('#services/socket');
 const { HTTP_CODE, METHOD, POWER, PATH, BLOCK } = require('#constants');
 const { USER, COMMON, READER } = require('#messages');
-const { createDescribeTest } = require('#test/helpers/index');
+const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const {
   sessionData,
@@ -17,12 +17,9 @@ const {
   clearAllSession,
   destroySession,
 } = require('#test/resources/auth');
-const blockUserUrl = ClientRoutePath.block.abs;
 const mockClient = ClientDummyData.MockData;
-
-const requestBody = {
-  clientId: mockClient.reader_id,
-};
+const clientId = mockClient.reader_id;
+const blockUserUrl = `${ClientRoutePath.block.abs}/${mockClient.reader_id}`;
 
 const sessionDataWithUserRole = {
   ...sessionData.user,
@@ -52,7 +49,7 @@ describe('block client', () => {
         describe: 'block client api cors',
         url: blockUserUrl,
         method: METHOD.PUT.toLowerCase(),
-        origin: process.env.CLIENT_ORIGIN_CORS,
+        origin: process.env.ORIGIN_CORS,
       },
     ],
     'block client common test'
@@ -91,7 +88,6 @@ describe('block client', () => {
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.CREATED)
             .then((response) => {
@@ -101,7 +97,7 @@ describe('block client', () => {
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
                 where: {
-                  reader_id: requestBody.clientId,
+                  reader_id: clientId,
                 },
                 select: {
                   session_id: true,
@@ -112,7 +108,7 @@ describe('block client', () => {
                 [
                   {
                     where: {
-                      reader_id: requestBody.clientId,
+                      reader_id: clientId,
                     },
                     data: {
                       session_id: null,
@@ -122,7 +118,7 @@ describe('block client', () => {
                 [
                   {
                     where: {
-                      reader_id: requestBody.clientId,
+                      reader_id: clientId,
                     },
                     data: {
                       blocked: BLOCK.ON,
@@ -153,7 +149,6 @@ describe('block client', () => {
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.CREATED)
             .then((response) => {
@@ -161,7 +156,7 @@ describe('block client', () => {
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
                 where: {
-                  reader_id: requestBody.clientId,
+                  reader_id: clientId,
                 },
                 select: {
                   session_id: true,
@@ -172,7 +167,7 @@ describe('block client', () => {
                 [
                   {
                     where: {
-                      reader_id: requestBody.clientId,
+                      reader_id: clientId,
                     },
                     data: {
                       session_id: null,
@@ -182,7 +177,7 @@ describe('block client', () => {
                 [
                   {
                     where: {
-                      reader_id: requestBody.clientId,
+                      reader_id: clientId,
                     },
                     data: {
                       blocked: BLOCK.ON,
@@ -207,7 +202,6 @@ describe('block client', () => {
           globalThis.api
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .then((response) => {
@@ -233,7 +227,6 @@ describe('block client', () => {
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.UNAUTHORIZED)
             .then((response) => {
@@ -250,6 +243,32 @@ describe('block client', () => {
       });
     });
 
+    test('block client failed with invalid request param', (done) => {
+      expect.hasAssertions();
+      const blockUserUrlWithInvalidRequestParam = `${ClientRoutePath.block.abs}/unknown`;
+
+      clearAllSession().then(() => {
+        signedTestCookie(sessionData.user).then((responseSign) => {
+          globalThis.api
+            .put(blockUserUrlWithInvalidRequestParam)
+            .set('Cookie', [responseSign.header['set-cookie']])
+            .set('authorization', authenticationToken)
+            .expect('Content-Type', /application\/json/)
+            .expect(HTTP_CODE.BAD_REQUEST)
+            .then((response) => {
+              expect(wsSend).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.findFirstOrThrow).not.toHaveBeenCalled();
+              expect(globalThis.prismaClient.user.update).not.toHaveBeenCalled();
+              expect(response.body).toEqual({
+                message: getInputValidateMessage(READER.BLOCK_CLIENT_FAIL),
+                errors: expect.arrayContaining([expect.any(String)]),
+              });
+              done();
+            });
+        });
+      });
+    });
+
     test('block client failed with user login with role is user', (done) => {
       expect.hasAssertions();
 
@@ -259,7 +278,6 @@ describe('block client', () => {
             .put(blockUserUrl)
             .set('Cookie', [responseSign.header['set-cookie']])
             .set('authorization', authenticationToken)
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.NOT_PERMISSION)
             .then((response) => {
@@ -291,14 +309,13 @@ describe('block client', () => {
             .put(blockUserUrl)
             .set('Cookie', responseSign.header['set-cookie'])
             .set('authorization', authenticationToken)
-            .send(requestBody)
             .expect('Content-Type', /application\/json/)
             .expect(HTTP_CODE.BAD_REQUEST)
             .then((response) => {
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
                 where: {
-                  reader_id: requestBody.clientId,
+                  reader_id: clientId,
                 },
                 select: {
                   session_id: true,
@@ -307,7 +324,7 @@ describe('block client', () => {
               expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
                 where: {
-                  reader_id: requestBody.clientId,
+                  reader_id: clientId,
                 },
                 data: {
                   session_id: null,
@@ -338,7 +355,6 @@ describe('block client', () => {
           .put(blockUserUrl)
           .set('Cookie', [responseSign.header['set-cookie']])
           .set('authorization', authenticationToken)
-          .send(requestBody)
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
@@ -346,7 +362,7 @@ describe('block client', () => {
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
               where: {
-                reader_id: requestBody.clientId,
+                reader_id: clientId,
               },
               select: {
                 session_id: true,
@@ -357,7 +373,7 @@ describe('block client', () => {
               [
                 {
                   where: {
-                    reader_id: requestBody.clientId,
+                    reader_id: clientId,
                   },
                   data: {
                     session_id: null,
@@ -367,7 +383,7 @@ describe('block client', () => {
               [
                 {
                   where: {
-                    reader_id: requestBody.clientId,
+                    reader_id: clientId,
                   },
                   data: {
                     blocked: BLOCK.ON,
@@ -410,7 +426,6 @@ describe('block client', () => {
           .put(blockUserUrl)
           .set('Cookie', [responseSign.header['set-cookie']])
           .set('authorization', authenticationToken)
-          .send(requestBody)
           .expect('Content-Type', /application\/json/)
           .expect(status)
           .then((response) => {
@@ -418,7 +433,7 @@ describe('block client', () => {
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
               where: {
-                reader_id: requestBody.clientId,
+                reader_id: clientId,
               },
               select: {
                 session_id: true,
@@ -461,7 +476,6 @@ describe('block client', () => {
           .put(blockUserUrl)
           .set('Cookie', [responseSign.header['set-cookie']])
           .set('authorization', authenticationToken)
-          .send(requestBody)
           .expect('Content-Type', /application\/json/)
           .expect(status)
           .then((response) => {
@@ -469,7 +483,7 @@ describe('block client', () => {
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.reader.findUniqueOrThrow).toHaveBeenCalledWith({
               where: {
-                reader_id: requestBody.clientId,
+                reader_id: clientId,
               },
               select: {
                 session_id: true,
@@ -478,7 +492,7 @@ describe('block client', () => {
             expect(globalThis.prismaClient.reader.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.reader.update).toHaveBeenCalledWith({
               where: {
-                reader_id: requestBody.clientId,
+                reader_id: clientId,
               },
               data: {
                 session_id: null,

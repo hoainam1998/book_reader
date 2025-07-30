@@ -147,6 +147,8 @@ module.exports = deepFreeze({
     PAGINATION_LOAD_CLIENT_FAIL: 'Pagination load client was failed!',
     BLOCK_CLIENT_SUCCESS: 'Block client was success!',
     BLOCK_CLIENT_FAIL: 'Block client was failed!',
+    UNBLOCK_CLIENT_SUCCESS: 'Unblock client was success!',
+    UNBLOCK_CLIENT_FAIL: 'Unblock client was failed!',
     YOU_ARE_BLOCK: 'You are blocking. Please contact with manager!',
     BLOCK_STATE_INVALID: 'Your block state invalid!',
   },
