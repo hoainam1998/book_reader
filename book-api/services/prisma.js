@@ -7,14 +7,20 @@ const Singleton = require('#services/singleton');
  */
 class Service extends Singleton {
   _prisma;
+  _redisClient;
 
   /**
    * Create prisma service class.
    * @param {Object} prisma - The prisma object.
    */
-  constructor(prisma) {
+  constructor(prisma, redisClient) {
     super(Service);
     this._prisma = prisma;
+    this._redisClient = redisClient;
+  }
+
+  get RedisClient() {
+    return this._redisClient;
   }
 
   /**

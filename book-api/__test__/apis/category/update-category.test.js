@@ -1,10 +1,11 @@
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
 const ErrorCode = require('#services/error-code');
+const RedisClient = require('#services/redis-client/redis');
 const CategoryDummyData = require('#test/resources/dummy-data/category');
 const OutputValidate = require('#services/output-validate');
 const CategoryRoutePath = require('#services/route-paths/category');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, REDIS_KEYS } = require('#constants');
 const { CATEGORY, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -66,6 +67,8 @@ describe('update category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: CATEGORY.UPDATE_CATEGORY_SUCCESS,
             });
@@ -87,6 +90,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.USER_UNAUTHORIZED,
               errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -111,6 +115,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
               errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -132,6 +137,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.UPDATE_CATEGORY_FAIL),
               errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -156,9 +162,10 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.UPDATE_CATEGORY_FAIL),
-              errors: expect.any(Array),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
             expect(response.body.errors).toHaveLength(1);
             done();
@@ -185,6 +192,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.UPDATE_CATEGORY_FAIL),
               errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -208,6 +216,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.UPDATE_CATEGORY_FAIL),
               errors: expect.any(Array),
@@ -233,6 +242,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.FILE_IS_EMPTY,
             });
@@ -256,6 +266,7 @@ describe('update category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.FILE_NOT_IMAGE,
             });
@@ -290,6 +301,8 @@ describe('update category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
@@ -298,8 +311,25 @@ describe('update category', () => {
       });
     });
 
-    test('update category failed with author not found', (done) => {
-      globalThis.prismaClient.category.update.mockRejectedValue(PrismaNotFoundError);
+    test.each([
+      {
+        describe: 'author not found',
+        cause: PrismaNotFoundError,
+        status: HTTP_CODE.NOT_FOUND,
+        expected: {
+          message: CATEGORY.CATEGORY_NOT_FOUND,
+        },
+      },
+      {
+        describe: 'server error',
+        cause: ServerError,
+        status: HTTP_CODE.SERVER_ERROR,
+        expected: {
+          message: COMMON.INTERNAL_ERROR_MESSAGE,
+        },
+      }
+    ])('update category failed with $describe', ({ cause, expected, status }, done) => {
+      globalThis.prismaClient.category.update.mockRejectedValue(cause);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -312,7 +342,7 @@ describe('update category', () => {
           .field('name', mockRequestCategory.name)
           .attach('avatar', getStaticFile('/images/application.png'))
           .expect('Content-Type', /application\/json/)
-          .expect(HTTP_CODE.NOT_FOUND)
+          .expect(status)
           .then((response) => {
             expect(globalThis.prismaClient.category.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.category.update).toHaveBeenCalledWith({
@@ -324,16 +354,16 @@ describe('update category', () => {
                 avatar: expect.any(String),
               },
             });
-            expect(response.body).toEqual({
-              message: CATEGORY.CATEGORY_NOT_FOUND,
-            });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
+            expect(response.body).toEqual(expected);
             done();
           });
       });
     });
 
-    test('update category failed with server error', (done) => {
-      globalThis.prismaClient.category.update.mockRejectedValue(ServerError);
+    test('update category failed with del method got server error', (done) => {
+      globalThis.prismaClient.category.update.mockResolvedValue(mockCategory);
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -358,6 +388,8 @@ describe('update category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
             });

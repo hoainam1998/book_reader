@@ -1,9 +1,10 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const ErrorCode = require('#services/error-code');
+const RedisClient = require('#services/redis-client/redis');
 const CategoryDummyData = require('#test/resources/dummy-data/category');
 const OutputValidate = require('#services/output-validate');
 const CategoryRoutePath = require('#services/route-paths/category');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, REDIS_KEYS } = require('#constants');
 const { CATEGORY, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -62,6 +63,8 @@ describe('create category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: CATEGORY.CREATE_CATEGORY_SUCCESS,
             });
@@ -82,6 +85,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.USER_UNAUTHORIZED,
               errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -104,6 +108,7 @@ describe('create category', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
@@ -126,6 +131,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.CREATE_CATEGORY_FAIL),
               errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -149,6 +155,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.CREATE_CATEGORY_FAIL),
               errors: expect.any(Array),
@@ -177,6 +184,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.CREATE_CATEGORY_FAIL),
               errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -199,6 +207,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.CREATE_CATEGORY_FAIL),
               errors: expect.any(Array),
@@ -223,6 +232,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.FILE_IS_EMPTY,
             });
@@ -245,6 +255,7 @@ describe('create category', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.category.create).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.FILE_NOT_IMAGE,
             });
@@ -276,6 +287,8 @@ describe('create category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });
@@ -284,7 +297,7 @@ describe('create category', () => {
       });
     });
 
-    test('create category failed with server error', (done) => {
+    test('create category failed with findMany method got server error', (done) => {
       globalThis.prismaClient.category.create.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
@@ -307,6 +320,41 @@ describe('create category', () => {
                 avatar: expect.any(String),
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
+            });
+            done();
+          });
+      });
+    });
+
+    test('create category failed with del method got server error', (done) => {
+      globalThis.prismaClient.category.create.mockResolvedValue(mockCategory);
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .post(createCategoryUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('Connection', 'keep-alive')
+          .field('name', mockRequestCategory.name)
+          .attach('avatar', getStaticFile('/images/application.png'))
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.category.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.category.create).toHaveBeenCalledWith({
+              data: {
+                category_id: expect.stringMatching(/^(\d){13}$/g),
+                name: mockRequestCategory.name,
+                avatar: expect.any(String),
+              },
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.CATEGORIES);
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
             });

@@ -69,5 +69,8 @@ module.exports = deepFreeze({
     DATA_VALIDATION: 'P2007',
   },
   REDIS_PREFIX: 'book-app:',
+  REDIS_KEYS: {
+    CATEGORIES: 'categories',
+  },
   PUBLIC_PATH: `${process.cwd()}/public`,
 });

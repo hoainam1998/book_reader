@@ -1,42 +1,31 @@
-const { Type, Exclude } = require('class-transformer');
+const { Type } = require('class-transformer');
 const OutputValidate = require('#services/output-validate');
 
-class CategoriesDTO extends OutputValidate {
+class CategoryDTO extends OutputValidate {
+  @Type(() => Number)
+  category_id;
+
   @Type(() => String)
   name;
 
   @Type(() => String)
   avatar;
 
-  @Exclude()
   @Type(() => Number)
   count;
 
+  @Type(() => String)
+  get categoryId() {
+    return this.category_id;
+  }
+
   @Type(() => Boolean)
   get disabled() {
-    return this._count.book > 0;
-  }
-
-  @Type(() => String)
-  get categoryId() {
-    return this.category_id;
+    if (this._count) {
+      return this._count.book > 0;
+    }
+    return false;
   }
 }
 
-class CategoryDTO extends OutputValidate {
-  @Type(() => String)
-  get categoryId() {
-    return this.category_id;
-  }
-
-  @Type(() => String)
-  name;
-
-  @Type(() => String)
-  avatar;
-}
-
-module.exports = {
-  CategoriesDTO,
-  CategoryDTO,
-};
+module.exports = CategoryDTO;

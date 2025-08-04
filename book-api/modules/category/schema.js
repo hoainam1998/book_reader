@@ -12,7 +12,7 @@ const { plainToInstance } = require('class-transformer');
 const { ResponseType } = require('../common-schema');
 const { messageCreator, convertDtoToZodObject } = require('#utils');
 const handleResolveResult = require('#utils/handle-resolve-result');
-const { CategoriesDTO, CategoryDTO } = require('#dto/category/category');
+const CategoryDTO = require('#dto/category/category');
 const PaginationResponse = require('#dto/common/pagination-response');
 const { CATEGORY } = require('#messages');
 
@@ -91,12 +91,12 @@ const query = new GraphQLObjectType({
     all: {
       type: new GraphQLList(CATEGORY_TYPE),
       args: {
-        haveValue: {
+        used: {
           type: new GraphQLNonNull(GraphQLBoolean),
         },
       },
-      resolve: async (category, { haveValue }, context) => {
-        const categories = await category.all(haveValue, context);
+      resolve: async (category, { used }, context) => {
+        const categories = await category.all(used, context);
         return convertDtoToZodObject(CategoryDTO, categories);
       },
     },
@@ -132,7 +132,7 @@ const query = new GraphQLObjectType({
       resolve: async (service, { pageNumber, pageSize }) => {
         const [categories, total, pages] = await service.pagination(pageSize, pageNumber);
         return convertDtoToZodObject(PaginationResponse, {
-          list: plainToInstance(CategoriesDTO, categories),
+          list: plainToInstance(CategoryDTO, categories),
           total: parseInt(total || 0),
           page: pageNumber,
           pageSize,
