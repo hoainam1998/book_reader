@@ -3,6 +3,7 @@ const { GraphQLError } = require('graphql');
 const { checkArrayHaveValues, calcPages } = require('#utils');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { CATEGORY } = require('#messages');
+const { REDIS_KEYS } = require('#constants');
 
 class CategoryService extends Service {
   create(category) {
@@ -12,11 +13,14 @@ class CategoryService extends Service {
         name: category.name,
         avatar: category.avatar,
       },
+    }).then(async (result) => {
+      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+      return result;
     });
   }
 
-  all(hasRelation, select) {
-    const condition = hasRelation
+  async all(used, select) {
+    const condition = used
       ? {
           where: {
             book: {
@@ -26,14 +30,27 @@ class CategoryService extends Service {
         }
       : {};
 
+    if (!used) {
+      const cachingCategories = await this.RedisClient.Client.lRange(REDIS_KEYS.CATEGORIES, 0, -1);
+      if (cachingCategories.length) {
+        return cachingCategories.map((category) => JSON.parse(category));
+      }
+    }
+
     return this.PrismaInstance.category.findMany({
       ...condition,
       select,
-    }).then((categories) => {
+    }).then(async(categories) => {
       if (!checkArrayHaveValues(categories)) {
         graphqlNotFoundErrorOption.response = [];
         throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
       }
+
+      if (!used) {
+        const jsonCategories = categories.map((category) => JSON.stringify(category));
+        await this.RedisClient.Client.rPush(REDIS_KEYS.CATEGORIES, jsonCategories);
+      }
+
       return categories;
     });
   }
@@ -92,6 +109,9 @@ class CategoryService extends Service {
       where: {
         category_id: category.categoryId,
       },
+    }).then(async (result) => {
+      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+      return result;
     });
   }
 
@@ -100,6 +120,9 @@ class CategoryService extends Service {
       where: {
         category_id: id,
       },
+    }).then(async (result) => {
+      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+      return result;
     });
   }
 }

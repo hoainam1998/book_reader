@@ -21,9 +21,9 @@ const signedTestCookie = require('#middlewares/test/signed-test-cookie');
 const destroySession = require('#middlewares/test/destroy-session');
 const clearAllSession = require('#middlewares/test/clear-all-session');
 const corsOptionsDelegate = require('#middlewares/cors');
-const PrismaClient = require('#services/prisma-client');
 const Logger = require('#services/logger');
-const RedisClient = require('#services/redis');
+const RedisClient = require('#services/redis-client/redis').Instance;
+const PrismaClient = require('#services/prisma-client');
 
 const PORT = process.env.NODE_ENV === 'test' ? process.env.TEST_PORT : process.env.PORT;
 const layers = [];
@@ -32,7 +32,7 @@ const app = express();
 app.use(
   session({
     store: new RedisStore({
-      client: RedisClient,
+      client: RedisClient.Client,
       prefix: REDIS_PREFIX,
     }),
     resave: false,
@@ -53,11 +53,11 @@ app.use(unknownError);
 app.use((req, res, next) => validateUrl(req, res, next, layers));
 
 try {
-  const category = startCategory(PrismaClient);
-  const book = startBook(PrismaClient);
-  const user = startUser(PrismaClient);
-  const author = startAuthor(PrismaClient);
-  const client = startClient(PrismaClient);
+  const category = startCategory(PrismaClient, RedisClient);
+  const book = startBook(PrismaClient, RedisClient);
+  const user = startUser(PrismaClient, RedisClient);
+  const author = startAuthor(PrismaClient, RedisClient);
+  const client = startClient(PrismaClient, RedisClient);
 
   const query = new GraphQLObjectType({
     name: 'Query',

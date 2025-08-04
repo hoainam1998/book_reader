@@ -57,6 +57,17 @@ class CategoryDummyData extends DummyDataApi {
   static createMockCategoryList(length) {
     return Array.apply(null, Array(length)).map(() => CategoryDummyData.MockData);
   }
+
+  /**
+   * Create the category json list for test.
+   *
+   * @static
+   * @param {number} length - The number of categories who want to create.
+   * @return {string[]} - The category list.
+   */
+  static createMockCategoryJsonList(length) {
+    return Array.apply(null, Array(length)).map(() => JSON.stringify(CategoryDummyData.MockData));
+  }
 }
 
 module.exports = CategoryDummyData;

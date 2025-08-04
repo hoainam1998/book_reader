@@ -40,15 +40,16 @@ class CategoryRouter extends Router {
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllCategoryResponse)
   _getAll(req, res, next, self) {
-    const query = `query AllCategory($haveValue: Boolean!) {
+    const query = `query AllCategory($used: Boolean!) {
       category {
-        all (haveValue: $haveValue) ${req.body.query}
+        all (used: $used) ${req.body.query}
       }
     }`;
+
     return self.execute(
       query,
       {
-        haveValue: req.path === '/menu',
+        used: `${req.path}/` === `${CategoryRoutePath.menu}`,
       },
       req.body.query
     );

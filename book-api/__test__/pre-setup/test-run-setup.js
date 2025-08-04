@@ -1,5 +1,6 @@
 const TestServer = require('#test/resources/test-server');
 const prismaClientMock = require('#test/mocks/prisma-client');
+const redisClientMock = require('#test/mocks/redis');
 const prismaClient = require('#services/prisma-client');
 require('#test/resources/extends/index');
 globalThis.prismaClient = prismaClient;
@@ -26,6 +27,7 @@ afterAll((done) => TestServer.closeTestServer(done, global.name));
 
 afterEach((done) => {
   prismaClientMock.clearAllMocks();
+  redisClientMock.clearAllMocks();
   jest.restoreAllMocks();
   globalThis.expressMiddleware.res.status.mockClear();
   globalThis.expressMiddleware.res.json.mockClear();
