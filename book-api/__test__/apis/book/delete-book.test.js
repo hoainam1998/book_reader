@@ -1,17 +1,17 @@
+const fs = require('fs');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
 const BookDummyData = require('#test/resources/dummy-data/book');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
 const { USER, COMMON, BOOK } = require('#messages');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
 const {
   authenticationToken,
   sessionData,
-  mockUser,
   signedTestCookie,
   clearAllSession,
   destroySession,
@@ -51,6 +51,10 @@ describe('delete book', () => {
     test('delete book will be success', (done) => {
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
       globalThis.prismaClient.book.delete.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim();
+      const jsonFilePath = jsonFile.trim();
 
       expect.hasAssertions();
       clearAllSession().then(() => {
@@ -88,6 +92,12 @@ describe('delete book', () => {
                   },
                 },
               });
+              expect(unLink).toHaveBeenCalledTimes(3);
+              expect(unLink.mock.calls).toEqual([
+                [expect.stringContaining(`${PUBLIC_PATH}/${mockBook.pdf}`), expect.any(Function)],
+                [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
+                [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
+              ]);
               expect(globalThis.prismaClient.book.delete).toHaveBeenCalledTimes(1);
               expect(globalThis.prismaClient.book.delete).toHaveBeenCalledWith({
                 where: {
@@ -105,6 +115,7 @@ describe('delete book', () => {
 
     test('delete book failed with authentication token unset', (done) => {
       expect.hasAssertions();
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       clearAllSession().then(() => {
         signedTestCookie(sessionData.user).then((responseSign) => {
@@ -115,6 +126,7 @@ describe('delete book', () => {
             .expect(HTTP_CODE.UNAUTHORIZED)
             .then((response) => {
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.USER_UNAUTHORIZED,
@@ -128,6 +140,7 @@ describe('delete book', () => {
 
     test('delete book failed with session expired', (done) => {
       expect.hasAssertions();
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       clearAllSession().then(() => {
         destroySession().then((responseSign) => {
@@ -140,6 +153,7 @@ describe('delete book', () => {
             .then((response) => {
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: USER.WORKING_SESSION_EXPIRE,
                 errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -151,7 +165,8 @@ describe('delete book', () => {
     });
 
     test('delete book failed with invalid request param', (done) => {
-      const deleteBookUrlWithInvalidRequestParam =  `${BookRoutePath.delete.abs}/unknown`;
+      const deleteBookUrlWithInvalidRequestParam = `${BookRoutePath.delete.abs}/unknown`;
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       expect.hasAssertions();
 
       clearAllSession().then(() => {
@@ -165,6 +180,7 @@ describe('delete book', () => {
             .then((response) => {
               expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
               expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+              expect(unLink).not.toHaveBeenCalled();
               expect(response.body).toEqual({
                 message: getInputValidateMessage(BOOK.DELETE_BOOK_FAIL),
                 errors: expect.arrayContaining([expect.any(String)]),
@@ -177,8 +193,12 @@ describe('delete book', () => {
 
     test('delete book failed with output validate error', (done) => {
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
       globalThis.prismaClient.book.delete.mockResolvedValue(mockBook);
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim();
+      const jsonFilePath = jsonFile.trim();
 
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
@@ -214,6 +234,12 @@ describe('delete book', () => {
                 },
               },
             });
+            expect(unLink).toHaveBeenCalledTimes(3);
+            expect(unLink.mock.calls).toEqual([
+              [expect.stringContaining(`${PUBLIC_PATH}/${mockBook.pdf}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
+            ]);
             expect(globalThis.prismaClient.book.delete).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.delete).toHaveBeenCalledWith({
               where: {
@@ -247,7 +273,8 @@ describe('delete book', () => {
       },
     ])('delete book failed with update method throw $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.book.update.mockRejectedValue(cause);
-      globalThis.prismaClient.book.delete.mockResolvedValue(mockUser);
+      globalThis.prismaClient.book.delete.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
@@ -283,6 +310,7 @@ describe('delete book', () => {
                 },
               },
             });
+            expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.user.delete).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
             done();
@@ -309,7 +337,11 @@ describe('delete book', () => {
       },
     ])('delete book failed with delete method throw $describe', ({ expected, status, cause }, done) => {
       globalThis.prismaClient.book.delete.mockRejectedValue(cause);
-      globalThis.prismaClient.book.update.mockResolvedValue(mockUser);
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim();
+      const jsonFilePath = jsonFile.trim();
 
       signedTestCookie(sessionData.user).then((responseSign) => {
         globalThis.api
@@ -345,6 +377,12 @@ describe('delete book', () => {
                 },
               },
             });
+            expect(unLink).toHaveBeenCalledTimes(3);
+            expect(unLink.mock.calls).toEqual([
+              [expect.stringContaining(`${PUBLIC_PATH}/${mockBook.pdf}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
+            ]);
             expect(globalThis.prismaClient.book.delete).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.delete).toHaveBeenCalledWith({
               where: {

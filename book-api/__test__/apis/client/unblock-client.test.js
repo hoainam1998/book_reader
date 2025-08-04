@@ -52,7 +52,6 @@ describe('unblock client', () => {
   );
 
   describe(createDescribeTest(METHOD.DELETE, blockUserUrl), () => {
-
     test('unblock reader will be success', (done) => {
       expect.hasAssertions();
 
@@ -154,7 +153,7 @@ describe('unblock client', () => {
               done();
             });
         });
-      })
+      });
     });
 
     test('unblock client failed with user login with role is user', (done) => {
@@ -241,7 +240,6 @@ describe('unblock client', () => {
           });
       });
     });
-
 
     test.each([
       {

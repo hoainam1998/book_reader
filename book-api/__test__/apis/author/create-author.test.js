@@ -71,13 +71,19 @@ describe('create author', () => {
             expect(mkdir.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
@@ -86,14 +92,20 @@ describe('create author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -402,13 +414,19 @@ describe('create author', () => {
             expect(mkdir.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
@@ -482,13 +500,19 @@ describe('create author', () => {
             expect(mkdir.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
@@ -497,14 +521,20 @@ describe('create author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -544,13 +574,19 @@ describe('create author', () => {
             expect(mkdir.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
@@ -559,14 +595,20 @@ describe('create author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -626,13 +668,19 @@ describe('create author', () => {
             expect(mkdir.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/$/html/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1), 'm')
+                  new RegExp(
+                    `\/${PUBLIC_PATH}/json/author/{0}$`.replace(/\\/gm, '\\\\').format('\\d+').slice(0, 1),
+                    'm'
+                  )
                 ),
                 { recursive: true },
               ],
@@ -641,14 +689,20 @@ describe('create author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1)
+                  `\/${PUBLIC_PATH}html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringContaining(
-                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1)
+                  `\/${PUBLIC_PATH}json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                    0,
+                    1
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),

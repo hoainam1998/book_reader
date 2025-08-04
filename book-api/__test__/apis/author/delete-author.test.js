@@ -77,7 +77,7 @@ describe('delete author', () => {
               },
               data: {
                 book_author: {
-                  deleteMany: {}
+                  deleteMany: {},
                 },
               },
             });
@@ -203,7 +203,7 @@ describe('delete author', () => {
               },
               data: {
                 book_author: {
-                  deleteMany: {}
+                  deleteMany: {},
                 },
               },
             });
@@ -322,7 +322,7 @@ describe('delete author', () => {
               },
               data: {
                 book_author: {
-                  deleteMany: {}
+                  deleteMany: {},
                 },
               },
             });

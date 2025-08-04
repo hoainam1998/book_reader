@@ -101,9 +101,7 @@ class ClientRouter extends Router {
           if (self.Socket.Clients.has(clientId)) {
             self.Socket.Clients.get(clientId).send({ delete: true });
           }
-          resolve(
-            getGeneratorFunctionData(self.execute(query, { clientId, state: BLOCK.ON }))
-          );
+          resolve(getGeneratorFunctionData(self.execute(query, { clientId, state: BLOCK.ON })));
         });
       });
     });
