@@ -7,16 +7,18 @@ const { REDIS_KEYS } = require('#constants');
 
 class CategoryService extends Service {
   create(category) {
-    return this.PrismaInstance.category.create({
-      data: {
-        category_id: Date.now().toString(),
-        name: category.name,
-        avatar: category.avatar,
-      },
-    }).then(async (result) => {
-      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
-      return result;
-    });
+    return this.PrismaInstance.category
+      .create({
+        data: {
+          category_id: Date.now().toString(),
+          name: category.name,
+          avatar: category.avatar,
+        },
+      })
+      .then(async (result) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+        return result;
+      });
   }
 
   async all(used, select) {
@@ -37,22 +39,24 @@ class CategoryService extends Service {
       }
     }
 
-    return this.PrismaInstance.category.findMany({
-      ...condition,
-      select,
-    }).then(async(categories) => {
-      if (!checkArrayHaveValues(categories)) {
-        graphqlNotFoundErrorOption.response = [];
-        throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
-      }
+    return this.PrismaInstance.category
+      .findMany({
+        ...condition,
+        select,
+      })
+      .then(async (categories) => {
+        if (!checkArrayHaveValues(categories)) {
+          graphqlNotFoundErrorOption.response = [];
+          throw new GraphQLError(CATEGORY.CATEGORIES_EMPTY, graphqlNotFoundErrorOption);
+        }
 
-      if (!used) {
-        const jsonCategories = categories.map((category) => JSON.stringify(category));
-        await this.RedisClient.Client.rPush(REDIS_KEYS.CATEGORIES, jsonCategories);
-      }
+        if (!used) {
+          const jsonCategories = categories.map((category) => JSON.stringify(category));
+          await this.RedisClient.Client.rPush(REDIS_KEYS.CATEGORIES, jsonCategories);
+        }
 
-      return categories;
-    });
+        return categories;
+      });
   }
 
   pagination(pageSize, pageNumber) {
@@ -101,29 +105,33 @@ class CategoryService extends Service {
   }
 
   update(category) {
-    return this.PrismaInstance.category.update({
-      data: {
-        avatar: category.avatar,
-        name: category.name,
-      },
-      where: {
-        category_id: category.categoryId,
-      },
-    }).then(async (result) => {
-      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
-      return result;
-    });
+    return this.PrismaInstance.category
+      .update({
+        data: {
+          avatar: category.avatar,
+          name: category.name,
+        },
+        where: {
+          category_id: category.categoryId,
+        },
+      })
+      .then(async (result) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+        return result;
+      });
   }
 
   delete(id) {
-    return this.PrismaInstance.category.delete({
-      where: {
-        category_id: id,
-      },
-    }).then(async (result) => {
-      await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
-      return result;
-    });
+    return this.PrismaInstance.category
+      .delete({
+        where: {
+          category_id: id,
+        },
+      })
+      .then(async (result) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES);
+        return result;
+      });
   }
 }
 

@@ -156,15 +156,17 @@ class BookService extends Service {
   }
 
   getAllBooks(select) {
-    return this.PrismaInstance.book.findMany({
-      select,
-    }).then((books) => {
-      if (!checkArrayHaveValues(books)) {
-        graphqlNotFoundErrorOption.response = [];
-        throw new GraphQLError(BOOK.BOOK_NOT_FOUND, graphqlNotFoundErrorOption);
-      }
-      return books;
-    });
+    return this.PrismaInstance.book
+      .findMany({
+        select,
+      })
+      .then((books) => {
+        if (!checkArrayHaveValues(books)) {
+          graphqlNotFoundErrorOption.response = [];
+          throw new GraphQLError(BOOK.BOOK_NOT_FOUND, graphqlNotFoundErrorOption);
+        }
+        return books;
+      });
   }
 
   pagination(pageSize, pageNumber, keyword, by, select) {
@@ -388,12 +390,30 @@ class BookService extends Service {
           },
         },
       })
-      .then(() => {
-        return this.PrismaInstance.book.delete({
-          where: {
-            book_id: bookId,
-          },
-        });
+      .then((book) => {
+        const deleteProcessList = [];
+        if (book.pdf) {
+          const pdfFilePath = `${PUBLIC_PATH}/${book.pdf}`;
+          deleteProcessList.push(deleteFile(pdfFilePath));
+        }
+
+        if (book.introduce_file) {
+          const introduceFilePath = book.introduce_file.split(',');
+          const htmlFilePath = `${PUBLIC_PATH}/${introduceFilePath[0].trim()}`;
+          const jsonFilePath = `${PUBLIC_PATH}/${introduceFilePath[1].trim()}`;
+          deleteProcessList.concat([deleteFile(htmlFilePath), deleteFile(jsonFilePath)]);
+        }
+
+        if (deleteProcessList.length) {
+          return Promise.all(deleteProcessList).then(() => {
+            return this.PrismaInstance.book.delete({
+              where: {
+                book_id: bookId,
+              },
+            });
+          });
+        }
+        return book;
       });
   }
 }

@@ -25,7 +25,8 @@ class RedisClient {
    * Redis connect.
    */
   connect() {
-    this.redisClient.connect()
+    this.redisClient
+      .connect()
       .then(() => logger.log('Connect was success!'))
       .catch((error) => logger.error(error.message));
   }
@@ -35,8 +36,7 @@ class RedisClient {
    * @param {Event} - The event object.
    */
   publish(event) {
-    this.redisClient.publish(event.eventName, event.payload)
-      .catch((error) => Logger('Redis Pub', error.message));
+    this.redisClient.publish(event.eventName, event.payload).catch((error) => Logger('Redis Pub', error.message));
   }
 
   /**
@@ -45,8 +45,7 @@ class RedisClient {
    * @param {function} - The subscribe callback.
    */
   subscribe(eventName, fn) {
-    this.redisClient.subscribe(eventName, fn)
-      .catch((error) => Logger('Redis Sub', error.message));
+    this.redisClient.subscribe(eventName, fn).catch((error) => Logger('Redis Sub', error.message));
   }
 
   /**

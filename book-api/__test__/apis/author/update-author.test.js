@@ -84,14 +84,24 @@ describe('update author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -517,14 +527,24 @@ describe('update author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -581,14 +601,24 @@ describe('update author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -700,14 +730,24 @@ describe('update author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),
@@ -813,14 +853,24 @@ describe('update author', () => {
             expect(writeFile.mock.calls).toEqual([
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.html,
                 expect.any(Function),
               ],
               [
                 expect.stringMatching(
-                  new RegExp(`${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(0, 1))
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
                 ),
                 mockRequestAuthor.story.json,
                 expect.any(Function),

@@ -51,7 +51,9 @@ describe('get all category', () => {
   describe(createDescribeTest(METHOD.POST, getAllCategory), () => {
     test('get all category success by get caching data', (done) => {
       const categoryListExpected = CategoryDummyData.generateCategoryExpectedList(requestBody.query, categoryLength);
-      RedisClient.Instance.Client.lRange.mockResolvedValue(CategoryDummyData.createMockCategoryJsonList(categoryLength));
+      RedisClient.Instance.Client.lRange.mockResolvedValue(
+        CategoryDummyData.createMockCategoryJsonList(categoryLength)
+      );
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -76,7 +78,9 @@ describe('get all category', () => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const categoryListExpected = CategoryDummyData.generateCategoryExpectedList(requestBody.query, categoryLength);
-      globalThis.prismaClient.category.findMany.mockResolvedValue(CategoryDummyData.createMockCategoryList(categoryLength));
+      globalThis.prismaClient.category.findMany.mockResolvedValue(
+        CategoryDummyData.createMockCategoryList(categoryLength)
+      );
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -98,7 +102,7 @@ describe('get all category', () => {
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledWith(
               REDIS_KEYS.CATEGORIES,
-              CategoryDummyData.createMockCategoryJsonList(categoryLength),
+              CategoryDummyData.createMockCategoryJsonList(categoryLength)
             );
             expect(response.body).toEqual(categoryListExpected);
             done();
@@ -230,7 +234,9 @@ describe('get all category', () => {
     });
 
     test('get all category failed with output validate error', (done) => {
-      RedisClient.Instance.Client.lRange.mockResolvedValue(CategoryDummyData.createMockCategoryJsonList(categoryLength));
+      RedisClient.Instance.Client.lRange.mockResolvedValue(
+        CategoryDummyData.createMockCategoryJsonList(categoryLength)
+      );
 
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
@@ -311,7 +317,9 @@ describe('get all category', () => {
     test('get all category failed with rPush method got server error', (done) => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
       RedisClient.Instance.Client.rPush.mockRejectedValue(ServerError);
-      globalThis.prismaClient.category.findMany.mockResolvedValue(CategoryDummyData.createMockCategoryList(categoryLength));
+      globalThis.prismaClient.category.findMany.mockResolvedValue(
+        CategoryDummyData.createMockCategoryList(categoryLength)
+      );
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 
       expect.hasAssertions();
@@ -334,7 +342,7 @@ describe('get all category', () => {
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledWith(
               REDIS_KEYS.CATEGORIES,
-              CategoryDummyData.createMockCategoryJsonList(categoryLength),
+              CategoryDummyData.createMockCategoryJsonList(categoryLength)
             );
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,

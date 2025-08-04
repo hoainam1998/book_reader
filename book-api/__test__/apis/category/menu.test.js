@@ -52,7 +52,9 @@ describe('category menu', () => {
     test('category menu success', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const categoryListExpected = CategoryDummyData.generateCategoryExpectedList(requestBody.query, categoryLength);
-      globalThis.prismaClient.category.findMany.mockResolvedValue(CategoryDummyData.createMockCategoryList(categoryLength));
+      globalThis.prismaClient.category.findMany.mockResolvedValue(
+        CategoryDummyData.createMockCategoryList(categoryLength)
+      );
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -211,7 +213,9 @@ describe('category menu', () => {
 
     test('category menu failed with output validate error', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
-      globalThis.prismaClient.category.findMany.mockResolvedValue(CategoryDummyData.createMockCategoryJsonList(categoryLength));
+      globalThis.prismaClient.category.findMany.mockResolvedValue(
+        CategoryDummyData.createMockCategoryJsonList(categoryLength)
+      );
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();

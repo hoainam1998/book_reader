@@ -84,8 +84,16 @@ describe('update introduce', () => {
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))), requestBody.html, expect.any(Function)],
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
@@ -261,8 +269,16 @@ describe('update introduce', () => {
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))), requestBody.html, expect.any(Function)],
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
@@ -405,8 +421,16 @@ describe('update introduce', () => {
             ]);
             expect(writeFile).toHaveBeenCalledTimes(2);
             expect(writeFile.mock.calls).toEqual([
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))), requestBody.html, expect.any(Function)],
-              [expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))), requestBody.json, expect.any(Function)],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
             ]);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
             expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({

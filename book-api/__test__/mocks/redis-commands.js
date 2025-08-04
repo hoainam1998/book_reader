@@ -1,5 +1,1 @@
-module.exports = [
-  'del',
-  'lRange',
-  'rPush',
-];
+module.exports = ['del', 'lRange', 'rPush'];

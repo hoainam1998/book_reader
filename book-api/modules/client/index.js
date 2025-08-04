@@ -1,8 +1,8 @@
 const ClientService = require('./service');
 const { query, mutation } = require('./schema');
 
-module.exports = (prisma) => {
-  const service = new ClientService(prisma);
+module.exports = (prisma, redisClient) => {
+  const service = new ClientService(prisma, redisClient);
 
   return {
     query: {

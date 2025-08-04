@@ -327,7 +327,7 @@ describe('update category', () => {
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
-      }
+      },
     ])('update category failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.category.update.mockRejectedValue(cause);
 
