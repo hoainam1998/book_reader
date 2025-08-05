@@ -71,6 +71,7 @@ module.exports = deepFreeze({
   REDIS_PREFIX: 'book-app:',
   REDIS_KEYS: {
     CATEGORIES: 'categories',
+    AUTHORS: 'authors',
   },
   PUBLIC_PATH: `${process.cwd()}/public`,
 });

@@ -82,6 +82,17 @@ class AuthorDummyData extends DummyDataApi {
   static createMockAuthorList(length) {
     return Array.apply(null, Array(length)).map(() => AuthorDummyData.MockData);
   }
+
+  /**
+   * Create the author json list for test.
+   *
+   * @static
+   * @param {number} length - The number of authors who want to create.
+   * @return {object[]} - The author list.
+   */
+  static createMockAuthorJsonList(length) {
+    return Array.apply(null, Array(length)).map(() => JSON.stringify(AuthorDummyData.MockData));
+  }
 }
 
 module.exports = AuthorDummyData;

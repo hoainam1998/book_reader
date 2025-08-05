@@ -3,7 +3,7 @@ const { createFolder, deleteFile, checkArrayHaveValues, calcPages, saveFile } = 
 const Service = require('#services/prisma');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 const { AUTHOR } = require('#messages');
-const { PUBLIC_PATH } = require('#constants');
+const { PUBLIC_PATH, REDIS_KEYS } = require('#constants');
 // eslint-disable-next-line no-useless-escape
 const AUTHOR_FILE_PATH_PATTERN = /(\\([\w\.\s+\-]+)){4}$/gm;
 
@@ -109,7 +109,12 @@ class AuthorService extends Service {
       });
   }
 
-  loadAuthorMenu(select) {
+  async loadAuthorMenu(select) {
+    const cachingAuthors = await this.RedisClient.Client.lRange(REDIS_KEYS.AUTHORS, 0, -1);
+    if (cachingAuthors.length) {
+      return cachingAuthors.map((category) => JSON.parse(category));
+    }
+
     return this.PrismaInstance.author
       .findMany({
         select,
@@ -119,11 +124,14 @@ class AuthorService extends Service {
           },
         },
       })
-      .then((menus) => {
+      .then(async (menus) => {
         if (!checkArrayHaveValues(menus)) {
           graphqlNotFoundErrorOption.response = [];
           throw new GraphQLError(AUTHOR.AUTHOR_NOT_FOUND, graphqlNotFoundErrorOption);
         }
+
+        const jsonAuthors = menus.map((author) => JSON.stringify(author));
+        await this.RedisClient.Client.rPush(REDIS_KEYS.AUTHORS, jsonAuthors);
         return menus;
       });
   }

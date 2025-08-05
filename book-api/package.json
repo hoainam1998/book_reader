@@ -80,6 +80,8 @@
     "test.author.pagination.silent": "npm run test.requirement -- __test__/apis/author/pagination.test.js --silent",
     "test.author.delete": "npm run test.requirement -- __test__/apis/author/delete-author.test.js",
     "test.author.delete.silent": "npm run test.requirement -- __test__/apis/author/delete-author.test.js --silent",
+    "test.author.menu": "npm run test.requirement -- __test__/apis/author/menu.test.js",
+    "test.author.menu.silent": "npm run test.requirement -- __test__/apis/author/menu.test.js --silent",
     "test.category.create": "npm run test.requirement -- __test__/apis/category/create-category.test.js",
     "test.category.create.silent": "npm run test.requirement -- __test__/apis/category/create-category.test.js --silent",
     "test.category.update": "npm run test.requirement -- __test__/apis/category/update-category.test.js",
