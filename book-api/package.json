@@ -70,6 +70,8 @@
     "test.book.delete-used-read.silent": "npm run test.requirement -- __test__/apis/book/delete-used-read-book.test.js --silent",
     "test.book.delete": "npm run test.requirement -- __test__/apis/book/delete-book.test.js",
     "test.book.delete.silent": "npm run test.requirement -- __test__/apis/book/delete-book.test.js --silent",
+    "test.book.all": "npm run test.requirement -- __test__/apis/book/get-all-books.test.js",
+    "test.book.all.silent": "npm run test.requirement -- __test__/apis/book/get-all-books.test.js --silent",
     "test.author.create": "npm run test.requirement -- __test__/apis/author/create-author.test.js",
     "test.author.create.silent": "npm run test.requirement -- __test__/apis/author/create-author.test.js --silent",
     "test.author.update": "npm run test.requirement -- __test__/apis/author/update-author.test.js",

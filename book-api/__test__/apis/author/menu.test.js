@@ -31,7 +31,7 @@ describe('author menu', () => {
       {
         name: 'url test',
         describe: 'url is invalid',
-        url: `${PATH.CATEGORY}/unknown`,
+        url: `${PATH.AUTHOR}/unknown`,
         method: METHOD.POST.toLowerCase(),
       },
       {
@@ -45,7 +45,7 @@ describe('author menu', () => {
         describe: 'author menu api cors',
         url: menu,
         method: METHOD.POST.toLowerCase(),
-        origin: process.env.ORIGIN_CORS,
+        origin: process.env.CLIENT_ORIGIN_CORS,
       },
     ],
     'author menu common test'

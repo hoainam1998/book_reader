@@ -66,6 +66,9 @@ const AllBooks = (validators, className) => {
     class extends Validator {
       @validators(IsGraphqlSelect('Value of field must be boolean!'))
       query;
+
+      @validators(IsOptional(), IsArray('excludeIds must be an array!'))
+      excludeIds;
     },
     className
   );

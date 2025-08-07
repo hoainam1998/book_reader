@@ -63,18 +63,11 @@ class BookDummyData extends DummyDataApi {
         publishedDay: expect.any(String),
         publishedTime: expect.any(Number),
         avatar: expect.any(String),
-        images: expect.any(Array),
-        authors: expect.any(Array),
+        images: expect.toBeBookImages(),
+        authors: expect.toBeBookAuthors(),
         categoryId: expect.any(String),
-        category: {
-          name: expect.any(String),
-          categoryId: expect.any(String),
-          avatar: expect.any(String),
-        },
-        introduce: {
-          html: expect.any(String),
-          json: expect.any(String),
-        },
+        category: expect.toBeBookCategory(),
+        introduce: expect.toBeBookIntroduce(),
       }
     );
   }
@@ -103,6 +96,17 @@ class BookDummyData extends DummyDataApi {
    */
   static createMockBookList(length) {
     return Array.apply(null, Array(length)).map(() => BookDummyData.MockData);
+  }
+
+  /**
+   * Create the book list json for test.
+   *
+   * @static
+   * @param {number} length - The number of books who want to create.
+   * @return {object[]} - The book list.
+   */
+  static createMockBookJsonList(length) {
+    return Array.apply(null, Array(length)).map(() => JSON.stringify(BookDummyData.MockData));
   }
 }
 

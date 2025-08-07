@@ -61,6 +61,42 @@ const CATEGORY = new GraphQLObjectType({
   },
 });
 
+const INTRODUCE = new GraphQLObjectType({
+  name: 'IntroduceFile',
+  fields: {
+    json: {
+      type: GraphQLString,
+    },
+    html: {
+      type: GraphQLString,
+    },
+  },
+});
+
+const IMAGES = new GraphQLObjectType({
+  name: 'BookImages',
+  fields: {
+    name: {
+      type: GraphQLString,
+    },
+    image: {
+      type: GraphQLString,
+    },
+  },
+});
+
+const IMAGE_INPUT = new GraphQLInputObjectType({
+  name: 'ImageInput',
+  fields: {
+    image: {
+      type: GraphQLString,
+    },
+    name: {
+      type: GraphQLString,
+    },
+  },
+});
+
 const BOOK_TYPE = new GraphQLObjectType({
   name: 'Book',
   fields: {
@@ -74,10 +110,13 @@ const BOOK_TYPE = new GraphQLObjectType({
       type: new GraphQLNonNull(CATEGORY),
     },
     introduce: {
-      type: GraphQLString,
+      type: INTRODUCE,
     },
     avatar: {
       type: GraphQLString,
+    },
+    images: {
+      type: new GraphQLList(IMAGES),
     },
     authors: {
       type: new GraphQLNonNull(new GraphQLList(AUTHORS)),
@@ -96,19 +135,7 @@ const BOOK_INFORMATION_INPUT_TYPE = new GraphQLInputObjectType({
       type: GraphQLString,
     },
     images: {
-      type: new GraphQLList(
-        new GraphQLInputObjectType({
-          name: 'ImageInput',
-          fields: {
-            image: {
-              type: GraphQLString,
-            },
-            name: {
-              type: GraphQLString,
-            },
-          },
-        })
-      ),
+      type: new GraphQLList(IMAGE_INPUT),
     },
     ...COMMON_BOOK_FIELD,
   },
@@ -122,35 +149,13 @@ const BOOK_INFORMATION_TYPE = new GraphQLObjectType({
       type: GraphQLString,
     },
     images: {
-      type: new GraphQLList(
-        new GraphQLObjectType({
-          name: 'BookImages',
-          fields: {
-            name: {
-              type: GraphQLString,
-            },
-            image: {
-              type: GraphQLString,
-            },
-          },
-        })
-      ),
+      type: new GraphQLList(IMAGES),
     },
     avatar: {
       type: GraphQLString,
     },
     introduce: {
-      type: new GraphQLObjectType({
-        name: 'IntroduceFile',
-        fields: {
-          json: {
-            type: GraphQLString,
-          },
-          html: {
-            type: GraphQLString,
-          },
-        },
-      }),
+      type: INTRODUCE,
     },
     authors: {
       type: new GraphQLNonNull(new GraphQLList(AUTHORS)),
@@ -325,7 +330,6 @@ const mutation = new GraphQLObjectType({
       },
       resolve: async (book, { authors }) => {
         const authorList = authors.map((author) => ({ author_id: author.authorId, book_id: author.bookId }));
-
         await book.deleteBookAuthor(authorList[0].book_id);
         await book.saveBookAuthor(authorList);
         return messageCreator(BOOK.CREATE_BOOK_AUTHOR_SUCCESS);
@@ -502,10 +506,15 @@ const query = new GraphQLObjectType({
   fields: {
     all: {
       type: new GraphQLNonNull(new GraphQLList(BOOK_TYPE)),
-      resolve: async (book, args, context) => {
+      args: {
+        excludeIds: {
+          type: new GraphQLList(GraphQLID),
+        },
+      },
+      resolve: async (book, { excludeIds }, context) => {
         return handleResolveResult(
           async () => {
-            return convertDtoToZodObject(BookDTO, await book.getAllBooks(context));
+            return convertDtoToZodObject(BookDTO, await book.getAllBooks(context, excludeIds));
           },
           {
             RECORD_NOT_FOUND: BOOK.BOOK_NOT_FOUND,

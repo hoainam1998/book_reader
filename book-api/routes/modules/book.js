@@ -330,17 +330,17 @@ class BookRouter extends Router {
     return self.execute(query, { bookId: req.body.bookId }, req.body.query);
   }
 
-  @validation(AllBooks, { error_message: 'Load all books failed!' })
+  @validation(AllBooks, { error_message: BOOK.LOAD_ALL_BOOK_FAILED })
   @validateResultExecute(HTTP_CODE.OK)
   @serializer(AllBooksResponse)
   _getAllBooks(req, res, next, self) {
-    const query = `query GetAllBooks {
+    const query = `query GetAllBooks($excludeIds: [ID]) {
       book {
-        all ${req.body.query}
+        all (excludeIds: $excludeIds) ${req.body.query}
       }
     }`;
 
-    return self.execute(query, undefined, req.body.query);
+    return self.execute(query, { excludeIds: req.body.excludeIds }, req.body.query);
   }
 
   @validation(BookPagination, { error_message: BOOK.LOAD_BOOKS_FAIL })

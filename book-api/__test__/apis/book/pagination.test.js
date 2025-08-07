@@ -13,8 +13,6 @@ const { calcPages } = require('#utils');
 const paginationUrl = BookRoutePath.pagination.abs;
 const bookLength = 2;
 
-BookDummyData.ExpectedTypes = Object.assign(BookDummyData.ExpectedTypes, { introduce: expect.any(String) });
-
 const requestBody = {
   query: {
     bookId: true,
@@ -27,7 +25,9 @@ const requestBody = {
       avatar: true,
       categoryId: true,
     },
-    introduce: true,
+    introduce: {
+      html: true,
+    },
     avatar: true,
   },
   pageSize: 10,
