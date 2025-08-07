@@ -1,11 +1,12 @@
 const fs = require('fs');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const RedisClient = require('#services/redis-client/redis');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
-const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH, REDIS_KEYS } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -104,6 +105,8 @@ describe('update introduce', () => {
                 introduce_file: `html/${bookName}.html,json/${bookName}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
             expect(response.body).toEqual({
               message: BOOK.INTRODUCE_FILE_SAVE,
             });
@@ -126,6 +129,7 @@ describe('update introduce', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.book.findUniqueOrThrow).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
@@ -207,6 +211,7 @@ describe('update introduce', () => {
                 introduce_file: true,
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
@@ -218,7 +223,7 @@ describe('update introduce', () => {
 
     test.each([
       {
-        describe: 'book not found by update method',
+        describe: 'update method got book not found error',
         expected: {
           message: BOOK.INTRODUCE_FILE_NOT_FOUND,
         },
@@ -226,7 +231,7 @@ describe('update introduce', () => {
         status: HTTP_CODE.NOT_FOUND,
       },
       {
-        describe: 'server error by update method',
+        describe: 'update method got server error',
         expected: {
           message: COMMON.INTERNAL_ERROR_MESSAGE,
         },
@@ -289,6 +294,7 @@ describe('update introduce', () => {
                 introduce_file: `html/${bookName}.html,json/${bookName}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
             done();
           });
@@ -308,6 +314,7 @@ describe('update introduce', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
@@ -338,6 +345,7 @@ describe('update introduce', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
@@ -369,6 +377,7 @@ describe('update introduce', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
@@ -441,8 +450,77 @@ describe('update introduce', () => {
                 introduce_file: `html/${bookName}.html,json/${bookName}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
+          });
+      });
+    });
+
+    test('update introduce failed with del method got server error', (done) => {
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callback) => callback());
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.findUniqueOrThrow.mockResolvedValue(mockBook);
+      const [htmlFile, jsonFile] = mockBook.introduce_file.split(',');
+      const htmlFilePath = htmlFile.trim();
+      const jsonFilePath = jsonFile.trim();
+      const bookName = mockBook.name.replace(/\s/, '-');
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateIntroduceFileUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.book.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                book_id: requestBody.bookId,
+              },
+              select: {
+                introduce_file: true,
+              },
+            });
+            expect(unLink).toHaveBeenCalledTimes(2);
+            expect(unLink.mock.calls).toEqual([
+              [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
+            ]);
+            expect(writeFile).toHaveBeenCalledTimes(2);
+            expect(writeFile.mock.calls).toEqual([
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/html/${bookName}.html`.slice(0, 1))),
+                requestBody.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(new RegExp(`${PUBLIC_PATH}/json/${bookName}.json`.slice(0, 1))),
+                requestBody.json,
+                expect.any(Function),
+              ],
+            ]);
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+              where: {
+                book_id: mockBook.book_id,
+              },
+              data: {
+                introduce_file: `html/${bookName}.html,json/${bookName}.json`,
+              },
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
             done();
           });

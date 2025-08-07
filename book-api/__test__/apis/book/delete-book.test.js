@@ -1,11 +1,12 @@
 const fs = require('fs');
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
+const RedisClient = require('#services/redis-client/redis');
 const ErrorCode = require('#services/error-code');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
 const BookDummyData = require('#test/resources/dummy-data/book');
-const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH, REDIS_KEYS } = require('#constants');
 const { USER, COMMON, BOOK } = require('#messages');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
@@ -13,7 +14,6 @@ const {
   authenticationToken,
   sessionData,
   signedTestCookie,
-  clearAllSession,
   destroySession,
 } = require('#test/resources/auth');
 const deleteBookId = Date.now().toString();
@@ -48,6 +48,11 @@ describe('delete book', () => {
   );
 
   describe(createDescribeTest(METHOD.DELETE, deleteBookUrl), () => {
+    afterEach((done) => {
+      RedisClient.Instance.Client.del.mockReset();
+      done();
+    });
+
     test('delete book will be success', (done) => {
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
       globalThis.prismaClient.book.delete.mockResolvedValue(mockBook);
@@ -57,59 +62,59 @@ describe('delete book', () => {
       const jsonFilePath = jsonFile.trim();
 
       expect.hasAssertions();
-      clearAllSession().then(() => {
-        signedTestCookie(sessionData.user).then((responseSign) => {
-          globalThis.api
-            .delete(deleteBookUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('authorization', authenticationToken)
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.OK)
-            .then((response) => {
-              expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
-                where: {
-                  book_id: deleteBookId,
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .delete(deleteBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', authenticationToken)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.OK)
+          .then((response) => {
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+              where: {
+                book_id: deleteBookId,
+              },
+              data: {
+                book_image: {
+                  deleteMany: {},
                 },
-                data: {
-                  book_image: {
-                    deleteMany: {},
-                  },
-                  book_reader: {
-                    deleteMany: {},
-                  },
-                  book_author: {
-                    deleteMany: {},
-                  },
-                  favorite_books: {
-                    deleteMany: {},
-                  },
-                  read_late: {
-                    deleteMany: {},
-                  },
-                  used_read: {
-                    deleteMany: {},
-                  },
+                book_reader: {
+                  deleteMany: {},
                 },
-              });
-              expect(unLink).toHaveBeenCalledTimes(3);
-              expect(unLink.mock.calls).toEqual([
-                [expect.stringContaining(`${PUBLIC_PATH}/${mockBook.pdf}`), expect.any(Function)],
-                [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
-                [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
-              ]);
-              expect(globalThis.prismaClient.book.delete).toHaveBeenCalledTimes(1);
-              expect(globalThis.prismaClient.book.delete).toHaveBeenCalledWith({
-                where: {
-                  book_id: deleteBookId,
+                book_author: {
+                  deleteMany: {},
                 },
-              });
-              expect(response.body).toEqual({
-                message: BOOK.DELETE_BOOK_SUCCESS,
-              });
-              done();
+                favorite_books: {
+                  deleteMany: {},
+                },
+                read_late: {
+                  deleteMany: {},
+                },
+                used_read: {
+                  deleteMany: {},
+                },
+              },
             });
-        });
+            expect(unLink).toHaveBeenCalledTimes(3);
+            expect(unLink.mock.calls).toEqual([
+              [expect.stringContaining(`${PUBLIC_PATH}/${mockBook.pdf}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${htmlFilePath}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}/${jsonFilePath}`), expect.any(Function)],
+            ]);
+            expect(globalThis.prismaClient.book.delete).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.book.delete).toHaveBeenCalledWith({
+              where: {
+                book_id: deleteBookId,
+              },
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
+            expect(response.body).toEqual({
+              message: BOOK.DELETE_BOOK_SUCCESS,
+            });
+            done();
+          });
       });
     });
 
@@ -117,24 +122,23 @@ describe('delete book', () => {
       expect.hasAssertions();
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
-      clearAllSession().then(() => {
-        signedTestCookie(sessionData.user).then((responseSign) => {
-          globalThis.api
-            .delete(deleteBookUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
-              expect(unLink).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.USER_UNAUTHORIZED,
-                errorCode: ErrorCode.HAVE_NOT_LOGIN,
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .delete(deleteBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+            expect(unLink).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.USER_UNAUTHORIZED,
+              errorCode: ErrorCode.HAVE_NOT_LOGIN,
             });
-        });
+            done();
+          });
       });
     });
 
@@ -142,25 +146,23 @@ describe('delete book', () => {
       expect.hasAssertions();
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
 
-      clearAllSession().then(() => {
-        destroySession().then((responseSign) => {
-          globalThis.api
-            .delete(deleteBookUrl)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('authorization', authenticationToken)
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.UNAUTHORIZED)
-            .then((response) => {
-              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
-              expect(unLink).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: USER.WORKING_SESSION_EXPIRE,
-                errorCode: ErrorCode.WORKING_SESSION_ENDED,
-              });
-              done();
+      destroySession().then((responseSign) => {
+        globalThis.api
+          .delete(deleteBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', authenticationToken)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.UNAUTHORIZED)
+          .then((response) => {
+            expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+            expect(unLink).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: USER.WORKING_SESSION_EXPIRE,
+              errorCode: ErrorCode.WORKING_SESSION_ENDED,
             });
-        });
+            done();
+          });
       });
     });
 
@@ -169,25 +171,24 @@ describe('delete book', () => {
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       expect.hasAssertions();
 
-      clearAllSession().then(() => {
-        signedTestCookie(sessionData.user).then((responseSign) => {
-          globalThis.api
-            .delete(deleteBookUrlWithInvalidRequestParam)
-            .set('Cookie', [responseSign.header['set-cookie']])
-            .set('authorization', authenticationToken)
-            .expect('Content-Type', /application\/json/)
-            .expect(HTTP_CODE.BAD_REQUEST)
-            .then((response) => {
-              expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
-              expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
-              expect(unLink).not.toHaveBeenCalled();
-              expect(response.body).toEqual({
-                message: getInputValidateMessage(BOOK.DELETE_BOOK_FAIL),
-                errors: expect.arrayContaining([expect.any(String)]),
-              });
-              done();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .delete(deleteBookUrlWithInvalidRequestParam)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', authenticationToken)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.BAD_REQUEST)
+          .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+            expect(unLink).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: getInputValidateMessage(BOOK.DELETE_BOOK_FAIL),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
-        });
+            done();
+          });
       });
     });
 
@@ -246,8 +247,62 @@ describe('delete book', () => {
                 book_id: deleteBookId,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
+          });
+      });
+    });
+
+    test('delete book failed with del got server error', (done) => {
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+      globalThis.prismaClient.book.delete.mockResolvedValue(mockBook);
+
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .delete(deleteBookUrl)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', authenticationToken)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+              where: {
+                book_id: deleteBookId,
+              },
+              data: {
+                book_image: {
+                  deleteMany: {},
+                },
+                book_reader: {
+                  deleteMany: {},
+                },
+                book_author: {
+                  deleteMany: {},
+                },
+                favorite_books: {
+                  deleteMany: {},
+                },
+                read_late: {
+                  deleteMany: {},
+                },
+                used_read: {
+                  deleteMany: {},
+                },
+              },
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
+            expect(unLink).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.book.delete).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
             done();
           });
@@ -310,6 +365,7 @@ describe('delete book', () => {
                 },
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.user.delete).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
@@ -389,6 +445,8 @@ describe('delete book', () => {
                 book_id: deleteBookId,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
             expect(response.body).toEqual(expected);
             done();
           });

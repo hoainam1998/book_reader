@@ -37,7 +37,11 @@ class BookDTO extends OutputValidate {
 
   @Type(() => String)
   get introduce() {
-    return this.introduce_file?.split(',')[0] || '';
+    const [html, json] = (this.introduce_file || '').split(',');
+    return {
+      html: html || '',
+      json: json || '',
+    };
   }
 
   @Type(() => String)
@@ -63,6 +67,11 @@ class BookDTO extends OutputValidate {
   @Type(() => Array)
   get authors() {
     return this.book_author.map(({ author }) => ({ ...author, authorId: author.author_id }));
+  }
+
+  @Type(() => Array)
+  get images() {
+    return this.book_image;
   }
 }
 

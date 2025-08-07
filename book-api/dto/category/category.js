@@ -2,7 +2,7 @@ const { Type } = require('class-transformer');
 const OutputValidate = require('#services/output-validate');
 
 class CategoryDTO extends OutputValidate {
-  @Type(() => Number)
+  @Type(() => String)
   category_id;
 
   @Type(() => String)
@@ -11,8 +11,8 @@ class CategoryDTO extends OutputValidate {
   @Type(() => String)
   avatar;
 
-  @Type(() => Number)
-  count;
+  @Type(() => Object)
+  _count;
 
   @Type(() => String)
   get categoryId() {

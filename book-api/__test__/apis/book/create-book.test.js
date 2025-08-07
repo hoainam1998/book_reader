@@ -1,10 +1,11 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const ErrorCode = require('#services/error-code');
+const RedisClient = require('#services/redis-client/redis');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const OutputValidate = require('#services/output-validate');
 const BookRoutePath = require('#services/route-paths/book');
-const { HTTP_CODE, METHOD, PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, REDIS_KEYS } = require('#constants');
 const { BOOK, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -49,6 +50,11 @@ const createDataInsert = (authors) => {
 };
 
 describe('create book', () => {
+  afterEach((done) => {
+    RedisClient.Instance.Client.del.mockReset();
+    done();
+  });
+
   commonTest(
     'create book api common test',
     [
@@ -417,6 +423,8 @@ describe('create book', () => {
               },
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: BOOK.BOOK_CREATED,
           });
@@ -434,6 +442,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_IS_EMPTY,
           });
@@ -452,6 +461,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('images'),
           });
@@ -479,6 +489,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('avatar'),
           });
@@ -507,6 +518,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_FIELD_EMPTY.format('avatar'),
           });
@@ -533,6 +545,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_IMAGE,
           });
@@ -561,6 +574,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_FIELD_EMPTY.format('images'),
           });
@@ -588,6 +602,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_IMAGE,
           });
@@ -614,6 +629,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('images'),
           });
@@ -641,11 +657,11 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
-            errors: expect.any(Array),
+            errors: expect.arrayContaining([expect.any(String)]),
           });
-          expect(response.body.errors).toHaveLength(1);
           done();
         });
     });
@@ -673,14 +689,15 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.create).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
             errors: expect.any(Array),
           });
-          (expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
-            expect(response.body.errors).toEqual(
-              expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
-            ));
+          expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
+          expect(response.body.errors).toEqual(
+            expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
+          );
           done();
         });
     });
@@ -728,6 +745,8 @@ describe('create book', () => {
               },
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
@@ -777,6 +796,59 @@ describe('create book', () => {
               },
             },
           });
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
+          expect(response.body).toEqual({
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
+          });
+          done();
+        });
+    });
+
+    test('save book info failed with del method got server error', (done) => {
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      globalThis.prismaClient.book.create.mockResolvedValue(mockBook);
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(saveBookInfoUrl)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .field('publishedTime', mockRequestBook.published_time)
+        .field('publishedDay', mockRequestBook.published_day)
+        .field('imageNames', `${mockRequestBook.name}1.png`)
+        .field('imageNames', `${mockRequestBook.name}2.png`)
+        .field('categoryId', mockRequestBook.category_id)
+        .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .attach('images', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.SERVER_ERROR)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.create).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.create).toHaveBeenCalledWith({
+            data: {
+              book_id: mockRequestBook.book_id,
+              name: mockRequestBook.name,
+              avatar: expect.any(String),
+              published_time: mockRequestBook.published_time,
+              published_day: mockRequestBook.published_day,
+              category_id: mockRequestBook.category_id,
+              book_image: {
+                create: [
+                  {
+                    image: expect.any(String),
+                    name: `${mockRequestBook.name}1.png`,
+                  },
+                  {
+                    image: expect.any(String),
+                    name: `${mockRequestBook.name}2.png`,
+                  },
+                ],
+              },
+            },
+          });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
@@ -820,6 +892,8 @@ describe('create book', () => {
               pdf: expect.any(String),
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: BOOK.PDF_SAVED,
           });
@@ -865,6 +939,7 @@ describe('create book', () => {
               pdf: expect.any(String),
             },
           });
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual(expected);
           done();
         });
@@ -878,6 +953,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
             errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -897,11 +973,11 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
-            errors: expect.any(Array),
+            errors: expect.arrayContaining([expect.any(String)]),
           });
-          expect(response.body.errors).toHaveLength(1);
           done();
         });
     });
@@ -921,6 +997,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_PDF_FAIL),
             errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -940,6 +1017,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FIELD_NOT_PROVIDE.format('pdf'),
           });
@@ -958,6 +1036,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_IS_EMPTY,
           });
@@ -977,6 +1056,7 @@ describe('create book', () => {
         .expect(HTTP_CODE.BAD_REQUEST)
         .then((response) => {
           expect(globalThis.prismaClient.book.update).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.FILE_NOT_PDF,
           });
@@ -1006,8 +1086,41 @@ describe('create book', () => {
               pdf: expect.any(String),
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
+        });
+    });
+
+    test('save pfd file failed with del method got server error', (done) => {
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      globalThis.prismaClient.book.update.mockResolvedValue(mockBook);
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(savePdfFileUrl)
+        .field('bookId', mockRequestBook.book_id)
+        .field('name', mockRequestBook.name)
+        .attach('pdf', getStaticFile('/pdf/pdf-test.pdf'))
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.SERVER_ERROR)
+        .then((response) => {
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book.update).toHaveBeenCalledWith({
+            where: {
+              book_id: mockRequestBook.book_id,
+            },
+            data: {
+              pdf: expect.any(String),
+            },
+          });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
+          expect(response.body).toEqual({
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
         });
@@ -1050,6 +1163,11 @@ describe('create book', () => {
               book_id: requestBody[0].bookId,
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(2);
+          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([
+            [REDIS_KEYS.BOOKS],
+            [REDIS_KEYS.BOOKS],
+          ]);
           expect(response.body).toEqual({
             message: BOOK.CREATE_BOOK_AUTHOR_SUCCESS,
           });
@@ -1067,6 +1185,7 @@ describe('create book', () => {
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
             errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -1089,6 +1208,7 @@ describe('create book', () => {
         .then((response) => {
           expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_author.deleteMany).not.toHaveBeenCalled();
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: getInputValidateMessage(BOOK.SAVE_BOOK_AUTHOR_FAIL),
             errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -1116,6 +1236,7 @@ describe('create book', () => {
               book_id: requestBody[0].bookId,
             },
           });
+          expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
@@ -1124,10 +1245,9 @@ describe('create book', () => {
     });
 
     test('save book author failed with createMany method get server error', (done) => {
-      globalThis.prismaClient.book_author.createMany.mockRejectedValue(ServerError);
-      globalThis.prismaClient.book_author.deleteMany.mockReset();
-
       const dataInsert = createDataInsert(requestBody);
+      globalThis.prismaClient.book_author.createMany.mockRejectedValue(ServerError);
+      globalThis.prismaClient.book_author.deleteMany.mockResolvedValue({ count: dataInsert.length });
 
       expect.hasAssertions();
       globalThis.api
@@ -1148,6 +1268,8 @@ describe('create book', () => {
               book_id: requestBody[0].bookId,
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
           expect(response.body).toEqual({
             message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
@@ -1156,11 +1278,11 @@ describe('create book', () => {
     });
 
     test('save book author failed with output validate error', (done) => {
-      globalThis.prismaClient.book_author.createMany.mockReset();
-      globalThis.prismaClient.book_author.deleteMany.mockReset();
+      const dataInsert = createDataInsert(requestBody);
+      globalThis.prismaClient.book_author.createMany.mockResolvedValue({ count: dataInsert.length });
+      globalThis.prismaClient.book_author.deleteMany.mockResolvedValue({ count: dataInsert.length });
 
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
-      const dataInsert = createDataInsert(requestBody);
 
       expect.hasAssertions();
       globalThis.api
@@ -1181,8 +1303,44 @@ describe('create book', () => {
               book_id: requestBody[0].bookId,
             },
           });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(2);
+          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([
+            [REDIS_KEYS.BOOKS],
+            [REDIS_KEYS.BOOKS],
+          ]);
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
+          });
+          done();
+        });
+    });
+
+    test('save book author failed with del method got server error', (done) => {
+      const dataInsert = createDataInsert(requestBody);
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      globalThis.prismaClient.book_author.createMany.mockResolvedValue({ count: dataInsert.length });
+      globalThis.prismaClient.book_author.deleteMany.mockResolvedValue({ count: dataInsert.length });
+
+      expect.hasAssertions();
+      globalThis.api
+        .post(saveBookAuthorUrl)
+        .expect('Content-Type', /application\/json/)
+        .expect(HTTP_CODE.SERVER_ERROR)
+        .send({
+          authors: requestBody,
+        })
+        .then((response) => {
+          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();;
+          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
+          expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
+            where: {
+              book_id: requestBody[0].bookId,
+            },
+          });
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+          expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.BOOKS);
+          expect(response.body).toEqual({
+            message: COMMON.INTERNAL_ERROR_MESSAGE,
           });
           done();
         });

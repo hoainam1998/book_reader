@@ -3,7 +3,7 @@ const { saveFile, deleteFile, checkArrayHaveValues, calcPages } = require('#util
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const Service = require('#services/prisma');
 const { BOOK } = require('#messages');
-const { PUBLIC_PATH, PRISMA_ERROR_CODE } = require('#constants');
+const { PUBLIC_PATH, PRISMA_ERROR_CODE, REDIS_KEYS } = require('#constants');
 const { graphqlNotFoundErrorOption } = require('../common-schema');
 
 class BookService extends Service {
@@ -13,44 +13,59 @@ class BookService extends Service {
 
     return Promise.all([saveFile(filePath('html'), html), saveFile(filePath('json'), json)]).then(() => {
       const introduceFilePath = `html/${fileNameSaved}.html,json/${fileNameSaved}.json`;
-      return this.PrismaInstance.book.update({
-        where: {
-          book_id: bookId,
-        },
-        data: {
-          introduce_file: introduceFilePath,
-        },
-      });
+      return this.PrismaInstance.book
+        .update({
+          where: {
+            book_id: bookId,
+          },
+          data: {
+            introduce_file: introduceFilePath,
+          },
+        })
+        .then(async (book) => {
+          await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
+          return book;
+        });
     });
   }
 
   saveBookInfo(book) {
     const { name, avatar, publishedTime, publishedDay, images, categoryId, bookId } = book;
 
-    return this.PrismaInstance.book.create({
-      data: {
-        book_id: bookId,
-        name,
-        avatar,
-        published_day: publishedDay,
-        published_time: publishedTime,
-        category_id: categoryId,
-        book_image: {
-          create: images,
+    return this.PrismaInstance.book
+      .create({
+        data: {
+          book_id: bookId,
+          name,
+          avatar,
+          published_day: publishedDay,
+          published_time: publishedTime,
+          category_id: categoryId,
+          book_image: {
+            create: images,
+          },
         },
-      },
-    });
+      })
+      .then(async (book) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
+        return book;
+      });
   }
 
   savePdfFile(bookId, pdf) {
-    return this.PrismaInstance.book.update({
-      where: {
-        book_id: bookId,
-      },
-      data: {
-        pdf,
-      },
-    });
+    return this.PrismaInstance.book
+      .update({
+        where: {
+          book_id: bookId,
+        },
+        data: {
+          pdf,
+        },
+      })
+      .then(async (book) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
+        return book;
+      });
   }
 
   deletePdfFile(bookId, name) {
@@ -95,14 +110,6 @@ class BookService extends Service {
       });
   }
 
-  deleteImages(bookId) {
-    return this.PrismaInstance.book.delete({
-      where: {
-        book_id: bookId,
-      },
-    });
-  }
-
   updateBookInfo(book) {
     const { name, avatar, publishedTime, publishedDay, categoryId, bookId } = book;
     return this.PrismaInstance.book
@@ -118,7 +125,8 @@ class BookService extends Service {
           category_id: categoryId,
         },
       })
-      .then(() => {
+      .then(async () => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
         return this.PrismaInstance.book_image
           .deleteMany({
             where: {
@@ -155,16 +163,42 @@ class BookService extends Service {
       });
   }
 
-  getAllBooks(select) {
+  async getAllBooks(select, excludeIds) {
+    if ((excludeIds || []).length === 0) {
+      const cachedBooks = await this.RedisClient.Client.lRange(REDIS_KEYS.BOOKS, 0, -1);
+      if (cachedBooks.length) {
+        return cachedBooks.map((book) => JSON.parse(book));
+      }
+    }
+
+    const conditions = (excludeIds || []).length
+      ? {
+          where: {
+            book_id: {
+              notIn: excludeIds,
+            },
+          },
+        }
+      : {};
+
     return this.PrismaInstance.book
       .findMany({
+        ...conditions,
         select,
       })
-      .then((books) => {
+      .then(async (books) => {
         if (!checkArrayHaveValues(books)) {
           graphqlNotFoundErrorOption.response = [];
           throw new GraphQLError(BOOK.BOOK_NOT_FOUND, graphqlNotFoundErrorOption);
         }
+
+        if ((excludeIds || []).length === 0) {
+          const cacheBook = books.map((book) => JSON.stringify(book));
+          await this.RedisClient.Client.del(REDIS_KEYS.BOOKS).then(() =>
+            this.RedisClient.Client.rPush(REDIS_KEYS.BOOKS, cacheBook)
+          );
+        }
+
         return books;
       });
   }
@@ -255,17 +289,27 @@ class BookService extends Service {
   }
 
   saveBookAuthor(authors) {
-    return this.PrismaInstance.book_author.createMany({
-      data: authors,
-    });
+    return this.PrismaInstance.book_author
+      .createMany({
+        data: authors,
+      })
+      .then(async (result) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
+        return result;
+      });
   }
 
   deleteBookAuthor(bookId) {
-    return this.PrismaInstance.book_author.deleteMany({
-      where: {
-        book_id: bookId,
-      },
-    });
+    return this.PrismaInstance.book_author
+      .deleteMany({
+        where: {
+          book_id: bookId,
+        },
+      })
+      .then(async (result) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
+        return result;
+      });
   }
 
   addFavoriteBook(readerId, bookId) {
@@ -390,7 +434,8 @@ class BookService extends Service {
           },
         },
       })
-      .then((book) => {
+      .then(async (book) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.BOOKS);
         const deleteProcessList = [];
         if (book.pdf) {
           const pdfFilePath = `${PUBLIC_PATH}/${book.pdf}`;
@@ -413,6 +458,7 @@ class BookService extends Service {
             });
           });
         }
+
         return book;
       });
   }
