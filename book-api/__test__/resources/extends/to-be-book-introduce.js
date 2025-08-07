@@ -1,9 +1,16 @@
 const toBeBookRelationRecord = require('./utils/to-be-book-relation-record');
 
 /**
+ * @typedef Introduce
+ * @type {object}
+ * @property {string} [html] - html file
+ * @property {string} [json] - json file.
+ */
+
+/**
  * Custom assertion: Validate book introduce.
  *
- * @param {value} - The received value.
+ * @param {Introduce} value - The received value.
  * @return {{
  * message: () => string,
  * pass: boolean

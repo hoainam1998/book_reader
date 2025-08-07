@@ -1,9 +1,16 @@
 const toBeBookRelationRecords = require('./utils/to-be-book-relation-records');
 
 /**
+ * @typedef Image
+ * @type {object}
+ * @property {string} [name] - name
+ * @property {string} [image] - image
+ */
+
+/**
  * Custom assertion: Validate value is book images
  *
- * @param {value} - The received value.
+ * @param {Image[]} value - The received value.
  * @return {{
  * message: () => string,
  * pass: boolean
