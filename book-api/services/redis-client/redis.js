@@ -28,7 +28,7 @@ class RedisClient {
     this.redisClient
       .connect()
       .then(() => logger.log('Connect was success!'))
-      .catch((error) => logger.error(error.message));
+      .catch((error) => logger.error(error));
   }
 
   /**
