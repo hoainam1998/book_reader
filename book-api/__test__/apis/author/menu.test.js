@@ -83,6 +83,8 @@ describe('author menu', () => {
               },
               select: selectExpected,
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, authorJsonListExpected);
             expect(response.body).toEqual(authorListExpected);
@@ -112,6 +114,7 @@ describe('author menu', () => {
           .then((response) => {
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, 0, -1);
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
             expect(response.body).toEqual(authorListExpected);
@@ -147,6 +150,7 @@ describe('author menu', () => {
               },
               select: selectExpected,
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
             expect(response.body).toEqual([]);
             done();
@@ -164,6 +168,7 @@ describe('author menu', () => {
           .expect('Content-Type', /application\/json/)
           .send(requestBody)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.lRange).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.category.findMany).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
@@ -176,7 +181,7 @@ describe('author menu', () => {
       });
     });
 
-    test('author menu failed session expired', (done) => {
+    test('author menu failed with session expired', (done) => {
       expect.hasAssertions();
       destroySession().then((responseSign) => {
         globalThis.api
@@ -210,6 +215,7 @@ describe('author menu', () => {
           .expect('Content-Type', /application\/json/)
           .send({})
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.lRange).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.category.findMany).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
@@ -237,6 +243,7 @@ describe('author menu', () => {
           .expect('Content-Type', /application\/json/)
           .send(badRequestBody)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.lRange).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.category.findMany).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
@@ -265,6 +272,7 @@ describe('author menu', () => {
           .expect('Content-Type', /application\/json/)
           .send(requestBody)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, 0, -1);
             expect(globalThis.prismaClient.category.findMany).not.toHaveBeenCalled();
@@ -293,6 +301,7 @@ describe('author menu', () => {
 
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, 0, -1);
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findMany).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
             expect(response.body).toEqual({
@@ -330,6 +339,7 @@ describe('author menu', () => {
               },
               select: selectExpected,
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
@@ -370,8 +380,51 @@ describe('author menu', () => {
               },
               select: selectExpected,
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.rPush).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, authorJsonListExpected);
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
+            });
+            done();
+          });
+      });
+    });
+
+    test('author menu failed with del method got server error', (done) => {
+      RedisClient.Instance.Client.lRange.mockResolvedValue([]);
+      globalThis.prismaClient.author.findMany.mockResolvedValue(
+        AuthorDummyData.createMockAuthorList(authorLength)
+      );
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(menu)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .set('authorization', apiKey)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .expect('Content-Type', /application\/json/)
+          .send(requestBody)
+          .then((response) => {
+            const selectExpected = parseToPrismaSelect.mock.results[0].value;
+            expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, 0, -1);
+            expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.author.findMany).toHaveBeenCalledWith({
+              where: {
+                book_author: {
+                  some: {},
+                },
+              },
+              select: selectExpected,
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
+            expect(RedisClient.Instance.Client.rPush).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
             });

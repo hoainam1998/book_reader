@@ -1,11 +1,12 @@
 const fs = require('fs');
 const { PrismaNotFoundError } = require('#test/mocks/prisma-error');
 const { ServerError } = require('#test/mocks/other-errors');
+const RedisClient = require('#services/redis-client/redis');
 const ErrorCode = require('#services/error-code');
 const AuthorDummyData = require('#test/resources/dummy-data/author');
 const OutputValidate = require('#services/output-validate');
 const AuthorRoutePath = require('#services/route-paths/author');
-const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH } = require('#constants');
+const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH, REDIS_KEYS } = require('#constants');
 const { AUTHOR, USER, COMMON } = require('#messages');
 const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
@@ -121,6 +122,8 @@ describe('update author', () => {
                 story: `/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html, /json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
             expect(response.body).toEqual({
               message: AUTHOR.UPDATE_AUTHOR_SUCCESS,
             });
@@ -129,7 +132,7 @@ describe('update author', () => {
       });
     });
 
-    test('update author failed with authentication token unset', (done) => {
+    test('update author failed with session expired', (done) => {
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
 
@@ -164,7 +167,7 @@ describe('update author', () => {
       });
     });
 
-    test('update author failed with session expired', (done) => {
+    test('update author failed with authentication token unset', (done) => {
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
 
@@ -184,6 +187,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -210,6 +214,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -244,6 +249,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -282,6 +288,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -315,6 +322,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -350,6 +358,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -383,6 +392,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -428,6 +438,7 @@ describe('update author', () => {
             });
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.update).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
@@ -474,6 +485,7 @@ describe('update author', () => {
               [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
               [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
             ]);
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.update).not.toHaveBeenCalled();
             expect(response.body).toEqual({
@@ -550,6 +562,7 @@ describe('update author', () => {
                 expect.any(Function),
               ],
             ]);
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.update).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
@@ -638,6 +651,7 @@ describe('update author', () => {
                 story: `/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html, /json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
@@ -679,6 +693,7 @@ describe('update author', () => {
             });
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.update).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: AUTHOR.AUTHOR_NOT_FOUND,
@@ -767,6 +782,7 @@ describe('update author', () => {
                 story: `/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html, /json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: AUTHOR.AUTHOR_NOT_FOUND,
             });
@@ -797,6 +813,7 @@ describe('update author', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(unLink).not.toHaveBeenCalled();
             expect(writeFile).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.author.findUniqueOrThrow).not.toHaveBeenCalled();
@@ -890,8 +907,101 @@ describe('update author', () => {
                 story: `/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html, /json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`,
               },
             });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
+          });
+      });
+    });
+
+    test('update author failed with del method got server error', (done) => {
+      RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
+      globalThis.prismaClient.author.findUniqueOrThrow.mockResolvedValue(mockAuthor);
+      globalThis.prismaClient.author.update.mockResolvedValue(mockAuthor);
+      const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
+      const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
+      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData.user).then((responseSign) => {
+        globalThis.api
+          .put(updateAuthorUrl)
+          .set('authorization', authenticationToken)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .field('authorId', mockRequestAuthor.author_id)
+          .field('name', mockRequestAuthor.name)
+          .field('sex', mockRequestAuthor.sex)
+          .field('yearOfBirth', mockRequestAuthor.year_of_birth)
+          .field('yearOfDead', mockRequestAuthor.year_of_dead)
+          .field('storyHtml', mockRequestAuthor.story.html)
+          .field('storyJson', mockRequestAuthor.story.json)
+          .attach('avatar', getStaticFile('/images/application.png'), { contentType: 'image/png' })
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            const storyFile = mockAuthor.story.split(',');
+            expect(globalThis.prismaClient.author.findUniqueOrThrow).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.author.findUniqueOrThrow).toHaveBeenCalledWith({
+              where: {
+                author_id: mockRequestAuthor.author_id,
+              },
+              select: {
+                story: true,
+              },
+            });
+            expect(unLink).toHaveBeenCalledTimes(2);
+            expect(unLink.mock.calls).toEqual([
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[0].trim()}`), expect.any(Function)],
+              [expect.stringContaining(`${PUBLIC_PATH}${storyFile[1].trim()}`), expect.any(Function)],
+            ]);
+            expect(writeFile).toHaveBeenCalledTimes(2);
+            expect(writeFile.mock.calls).toEqual([
+              [
+                expect.stringMatching(
+                  new RegExp(
+                    `${PUBLIC_PATH}/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html`.slice(
+                      0,
+                      1
+                    )
+                  )
+                ),
+                mockRequestAuthor.story.html,
+                expect.any(Function),
+              ],
+              [
+                expect.stringMatching(
+                  new RegExp(
+                    `${PUBLIC_PATH}/json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`.slice(
+                      0,
+                      1
+                    )
+                  )
+                ),
+                mockRequestAuthor.story.json,
+                expect.any(Function),
+              ],
+            ]);
+            expect(globalThis.prismaClient.author.update).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.author.update).toHaveBeenCalledWith({
+              where: {
+                author_id: mockRequestAuthor.author_id,
+              },
+              data: {
+                name: mockRequestAuthor.name,
+                sex: mockRequestAuthor.sex,
+                avatar: expect.any(String),
+                year_of_birth: mockRequestAuthor.year_of_birth,
+                year_of_dead: mockRequestAuthor.year_of_dead,
+                story: `/html/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.html, /json/author/${mockRequestAuthor.author_id}/${mockRequestAuthor.name}.json`,
+              },
+            });
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS);
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
             done();
           });

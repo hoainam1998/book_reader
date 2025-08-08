@@ -131,7 +131,9 @@ class AuthorService extends Service {
         }
 
         const jsonAuthors = menus.map((author) => JSON.stringify(author));
-        await this.RedisClient.Client.rPush(REDIS_KEYS.AUTHORS, jsonAuthors);
+        await this.RedisClient.Client.del(REDIS_KEYS.AUTHORS).then(() =>
+          this.RedisClient.Client.rPush(REDIS_KEYS.AUTHORS, jsonAuthors)
+        );
         return menus;
       });
   }
@@ -161,31 +163,36 @@ class AuthorService extends Service {
     const htmlSave = saveFile(filePath('html'), author.story.html);
     const jsonSave = saveFile(filePath('json'), author.story.json);
 
-    return Promise.all([htmlSave, jsonSave]).then((paths) => {
-      const story = paths
-        .reduce((listPath, currentPath) => {
-          const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
-          if (relativePath) {
-            listPath.push(relativePath.replace(/\\/gm, '/'));
-          }
-          return listPath;
-        }, [])
-        .join(', ');
+    return Promise.all([htmlSave, jsonSave])
+      .then((paths) => {
+        const story = paths
+          .reduce((listPath, currentPath) => {
+            const relativePath = currentPath.match(AUTHOR_FILE_PATH_PATTERN)[0];
+            if (relativePath) {
+              listPath.push(relativePath.replace(/\\/gm, '/'));
+            }
+            return listPath;
+          }, [])
+          .join(', ');
 
-      return this.PrismaInstance.author.update({
-        where: {
-          author_id: author.authorId,
-        },
-        data: {
-          name: author.name,
-          sex: author.sex,
-          avatar: author.avatar,
-          year_of_birth: author.yearOfBirth,
-          year_of_dead: author.yearOfDead,
-          story,
-        },
+        return this.PrismaInstance.author.update({
+          where: {
+            author_id: author.authorId,
+          },
+          data: {
+            name: author.name,
+            sex: author.sex,
+            avatar: author.avatar,
+            year_of_birth: author.yearOfBirth,
+            year_of_dead: author.yearOfDead,
+            story,
+          },
+        });
+      })
+      .then(async (author) => {
+        await this.RedisClient.Client.del(REDIS_KEYS.AUTHORS);
+        return author;
       });
-    });
   }
 
   createAuthor(author) {
@@ -214,17 +221,22 @@ class AuthorService extends Service {
           }, [])
           .join(', ');
 
-        return this.PrismaInstance.author.create({
-          data: {
-            author_id: authorId,
-            name: author.name,
-            sex: author.sex,
-            avatar: author.avatar,
-            year_of_birth: author.yearOfBirth,
-            year_of_dead: author.yearOfDead,
-            story,
-          },
-        });
+        return this.PrismaInstance.author
+          .create({
+            data: {
+              author_id: authorId,
+              name: author.name,
+              sex: author.sex,
+              avatar: author.avatar,
+              year_of_birth: author.yearOfBirth,
+              year_of_dead: author.yearOfDead,
+              story,
+            },
+          })
+          .then(async (author) => {
+            await this.RedisClient.Client.del(REDIS_KEYS.AUTHORS);
+            return author;
+          });
       });
     });
   }
@@ -243,11 +255,16 @@ class AuthorService extends Service {
           },
         })
         .then(() => {
-          return this.PrismaInstance.author.delete({
-            where: {
-              author_id: authorId,
-            },
-          });
+          return this.PrismaInstance.author
+            .delete({
+              where: {
+                author_id: authorId,
+              },
+            })
+            .then(async (author) => {
+              await this.RedisClient.Client.del(REDIS_KEYS.AUTHORS);
+              return author;
+            });
         });
     });
   }
