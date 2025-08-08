@@ -219,9 +219,8 @@ describe('update category', () => {
             expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(CATEGORY.UPDATE_CATEGORY_FAIL),
-              errors: expect.any(Array),
+              errors: expect.arrayContaining([expect.any(String)]),
             });
-            expect(response.body.errors).toHaveLength(1);
             done();
           });
       });

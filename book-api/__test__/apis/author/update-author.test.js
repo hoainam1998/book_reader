@@ -923,7 +923,6 @@ describe('update author', () => {
       globalThis.prismaClient.author.update.mockResolvedValue(mockAuthor);
       const unLink = jest.spyOn(fs, 'unlink').mockImplementation((_, callBack) => callBack());
       const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
-      jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {

@@ -146,7 +146,7 @@ describe('create author', () => {
       });
     });
 
-    test('create author failed with session expire', (done) => {
+    test('create author failed with session expired', (done) => {
       const mkdir = jest.spyOn(fsPromise, 'mkdir').mockImplementation((filePath, object) => Promise.resolve(filePath));
       const writeFile = jest.spyOn(fs, 'writeFile').mockImplementation((filePath, content, callBack) => callBack());
 
