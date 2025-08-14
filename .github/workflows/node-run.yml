@@ -28,8 +28,14 @@ jobs:
         cache-dependency-path: book_client/package-lock.json
         cache: 'npm'
     - run: npm i
-    - name: Run command lines.
+    - name: Run command lines for client repository.
       if: ${{ contains(inputs.working-directory, 'book_client') }}
       run: |
         npm run lint
         npm run build
+    - name: Run command lines for api repository.
+      if: ${{ contains(inputs.working-directory, 'book-api') }}
+      run: |
+          npm run lint:check
+          npm run format:check
+          npm run test:silent
