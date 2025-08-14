@@ -12,15 +12,8 @@ jobs:
     uses: ./.github/workflows/node-run.yml
     with:
       working-directory: ./book_client
-    steps:
-      - run: npm run lint
-      - run: npm run build
 
   api:
     uses: ./.github/workflows/node-run.yml
     with:
       working-directory: ./book-api
-    steps:
-    - run: npm run lint:check
-    - run: npm run format:check
-    - run: npm run test:silent
