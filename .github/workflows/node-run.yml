@@ -28,6 +28,8 @@ jobs:
         cache-dependency-path: book_client/package-lock.json
         cache: 'npm'
     - run: npm i
-    - if: ${{ contains(inputs.working-directory. 'book_client') }}
-    - run: npm run lint
-    - run: npm run build
+    - name: Run command lines.
+      if: ${{ contains(inputs.working-directory. 'book_client') }}
+      run: |
+        npm run lint
+        npm run build
