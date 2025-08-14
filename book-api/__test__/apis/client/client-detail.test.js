@@ -101,7 +101,9 @@ describe('client detail', () => {
           .then((response) => {
             expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.exists).toHaveBeenCalledTimes(1);
-            expect(RedisClient.Instance.Client.exists).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`);
+            expect(RedisClient.Instance.Client.exists).toHaveBeenCalledWith(
+              `${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`
+            );
             expect(jsonGet).toHaveBeenCalledTimes(1);
             expect(jsonGet).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`, { path: '$' });
             expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
@@ -151,7 +153,9 @@ describe('client detail', () => {
               select: selectExpected,
             });
             expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
-            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(
+              `${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`
+            );
             expect(jsonSet).toHaveBeenCalledTimes(1);
             expect(jsonSet).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`, '$', mockClient);
             expect(response.body).toEqual(clientDetailExpected);
@@ -295,7 +299,9 @@ describe('client detail', () => {
           .then((response) => {
             expect(globalThis.prismaClient.reader.findFirstOrThrow).not.toHaveBeenCalled();
             expect(RedisClient.Instance.Client.exists).toHaveBeenCalledTimes(1);
-            expect(RedisClient.Instance.Client.exists).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`);
+            expect(RedisClient.Instance.Client.exists).toHaveBeenCalledWith(
+              `${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`
+            );
             expect(jsonGet).toHaveBeenCalledTimes(1);
             expect(jsonGet).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`, { path: '$' });
             expect(jsonSet).not.toHaveBeenCalled();
@@ -471,7 +477,9 @@ describe('client detail', () => {
               select: selectExpected,
             });
             expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(1);
-            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(`${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`);
+            expect(RedisClient.Instance.Client.del).toHaveBeenCalledWith(
+              `${REDIS_KEYS.CLIENT}:${mockClient.reader_id}`
+            );
             expect(jsonSet).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: COMMON.INTERNAL_ERROR_MESSAGE,

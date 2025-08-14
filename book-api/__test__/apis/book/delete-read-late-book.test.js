@@ -334,7 +334,7 @@ describe('delete read late book', () => {
             });
             done();
           });
-        });
+      });
     });
 
     test('delete read late book failed with output error', (done) => {

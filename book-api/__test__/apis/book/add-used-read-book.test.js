@@ -275,7 +275,7 @@ describe('add used read book', () => {
     });
 
     test('add used read book failed with output error', (done) => {
-      globalThis.prismaClient.used_read.create.mockResolvedValue()
+      globalThis.prismaClient.used_read.create.mockResolvedValue();
       globalThis.prismaClient.used_read.findMany.mockResolvedValue(mockClient.used_read);
       const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
@@ -390,7 +390,7 @@ describe('add used read book', () => {
             });
             done();
           });
-        });
+      });
     });
   });
 });

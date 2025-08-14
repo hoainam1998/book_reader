@@ -12,8 +12,10 @@ function toBeBookRelationRecord(value, expectedObject, globalJest) {
   const pass = Object.keys(value).every((key) => globalJest.equals(value[key], expectedObject[key]));
 
   const message = pass
-    ? () => `expected ${globalJest.utils.printReceived(value)} not match with ${globalJest.utils.printExpected(expectedObject)}`
-    : () => `expected ${globalJest.utils.printReceived(value)} match with ${globalJest.utils.printExpected(expectedObject)}`;
+    ? () =>
+        `expected ${globalJest.utils.printReceived(value)} not match with ${globalJest.utils.printExpected(expectedObject)}`
+    : () =>
+        `expected ${globalJest.utils.printReceived(value)} match with ${globalJest.utils.printExpected(expectedObject)}`;
 
   return {
     pass,

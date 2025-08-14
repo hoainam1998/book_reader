@@ -694,7 +694,7 @@ describe('create book', () => {
             message: getInputValidateMessage(BOOK.CREATE_BOOK_FAIL),
             errors: expect.any(Array),
           });
-          expect(response.body.errors.length).toBeGreaterThanOrEqual(1),
+          expect(response.body.errors.length).toBeGreaterThanOrEqual(1);
           expect(response.body.errors).toEqual(
             expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))])
           );
@@ -1164,10 +1164,7 @@ describe('create book', () => {
             },
           });
           expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(2);
-          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([
-            [REDIS_KEYS.BOOKS],
-            [REDIS_KEYS.BOOKS],
-          ]);
+          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([[REDIS_KEYS.BOOKS], [REDIS_KEYS.BOOKS]]);
           expect(response.body).toEqual({
             message: BOOK.CREATE_BOOK_AUTHOR_SUCCESS,
           });
@@ -1304,10 +1301,7 @@ describe('create book', () => {
             },
           });
           expect(RedisClient.Instance.Client.del).toHaveBeenCalledTimes(2);
-          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([
-            [REDIS_KEYS.BOOKS],
-            [REDIS_KEYS.BOOKS],
-          ]);
+          expect(RedisClient.Instance.Client.del.mock.calls).toEqual([[REDIS_KEYS.BOOKS], [REDIS_KEYS.BOOKS]]);
           expect(response.body).toEqual({
             message: COMMON.OUTPUT_VALIDATE_FAIL,
           });
@@ -1330,7 +1324,7 @@ describe('create book', () => {
           authors: requestBody,
         })
         .then((response) => {
-          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();;
+          expect(globalThis.prismaClient.book_author.createMany).not.toHaveBeenCalled();
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledTimes(1);
           expect(globalThis.prismaClient.book_author.deleteMany).toHaveBeenCalledWith({
             where: {

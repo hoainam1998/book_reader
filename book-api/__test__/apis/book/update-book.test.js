@@ -838,7 +838,6 @@ describe('update book', () => {
         });
     });
 
-
     test('update book info failed with deleteMany method get server error', (done) => {
       RedisClient.Instance.Client.del.mockReset();
       globalThis.prismaClient.book.update.mockResolvedValue(mockBook);

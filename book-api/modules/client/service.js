@@ -162,7 +162,7 @@ class ClientService extends Service {
   }
 
   async detail(clientId, select) {
-    if (await this.RedisClient.Client.exists(`${REDIS_KEYS.CLIENT}:${clientId}`) > 0) {
+    if ((await this.RedisClient.Client.exists(`${REDIS_KEYS.CLIENT}:${clientId}`)) > 0) {
       const [client] = await this.RedisClient.Client.json.get(`${REDIS_KEYS.CLIENT}:${clientId}`, { path: '$' });
       return client;
     }

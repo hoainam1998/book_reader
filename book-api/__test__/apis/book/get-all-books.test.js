@@ -75,9 +75,7 @@ describe('get all books', () => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const bookListExpected = BookDummyData.generateBookExpectedList(requestBody.query, bookLength);
       const bookJsonListExpected = BookDummyData.createMockBookJsonList(bookLength);
-      globalThis.prismaClient.book.findMany.mockResolvedValue(
-        BookDummyData.createMockBookList(bookLength)
-      );
+      globalThis.prismaClient.book.findMany.mockResolvedValue(BookDummyData.createMockBookList(bookLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -107,13 +105,9 @@ describe('get all books', () => {
     });
 
     test('get all books success when get data from cache data', (done) => {
-      RedisClient.Instance.Client.lRange.mockResolvedValue(
-        BookDummyData.createMockBookJsonList(bookLength)
-      );
+      RedisClient.Instance.Client.lRange.mockResolvedValue(BookDummyData.createMockBookJsonList(bookLength));
       const bookListExpected = BookDummyData.generateBookExpectedList(requestBody.query, bookLength);
-      globalThis.prismaClient.book.findMany.mockResolvedValue(
-        BookDummyData.createMockBookList(bookLength)
-      );
+      globalThis.prismaClient.book.findMany.mockResolvedValue(BookDummyData.createMockBookList(bookLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -144,9 +138,7 @@ describe('get all books', () => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const bookListExpected = BookDummyData.generateBookExpectedList(requestBody.query, bookLength);
-      globalThis.prismaClient.book.findMany.mockResolvedValue(
-        BookDummyData.createMockBookList(bookLength)
-      );
+      globalThis.prismaClient.book.findMany.mockResolvedValue(BookDummyData.createMockBookList(bookLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -303,9 +295,7 @@ describe('get all books', () => {
     });
 
     test('get all books failed with output validate error', (done) => {
-      RedisClient.Instance.Client.lRange.mockResolvedValue(
-        BookDummyData.createMockBookJsonList(bookLength)
-      );
+      RedisClient.Instance.Client.lRange.mockResolvedValue(BookDummyData.createMockBookJsonList(bookLength));
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
@@ -389,9 +379,7 @@ describe('get all books', () => {
 
     test('get all books failed with rPush method got server error', (done) => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
-      globalThis.prismaClient.book.findMany.mockResolvedValue(
-        BookDummyData.createMockBookList(bookLength)
-      );
+      globalThis.prismaClient.book.findMany.mockResolvedValue(BookDummyData.createMockBookList(bookLength));
       RedisClient.Instance.Client.rPush.mockRejectedValue(ServerError);
       const bookJsonListExpected = BookDummyData.createMockBookJsonList(bookLength);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
