@@ -1,13 +1,23 @@
 const Service = require('#services/prisma');
 const { GraphQLError } = require('graphql');
 const { compare } = require('bcrypt');
+const {
+  UpdateFavoriteBooksEvent,
+  UpdateReadLateBooksEvent,
+  UpdateUsedReadBooksEvent,
+} = require('#services/redis-client/events/events');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
 const { signClientResetPasswordToken, autoGeneratePassword, checkArrayHaveValues, calcPages } = require('#utils');
 const { graphqlNotFoundErrorOption, graphqlNotPermissionErrorOption } = require('../common-schema');
 const { READER } = require('#messages');
-const { BLOCK, PRISMA_ERROR_CODE } = require('#constants');
+const { BLOCK, PRISMA_ERROR_CODE, REDIS_KEYS } = require('#constants');
 
 class ClientService extends Service {
+  constructor(prismaClient, redisClient) {
+    super(prismaClient, redisClient);
+    this.subscribers();
+  }
+
   signUp(firstName, lastName, email, password, sex) {
     const resetToken = signClientResetPasswordToken(email);
     return this.PrismaInstance.reader.create({
@@ -22,21 +32,41 @@ class ClientService extends Service {
     });
   }
 
+  updateCacheClientInformation(clientId) {
+    return this.getClientDetail(clientId, {
+      first_name: true,
+      last_name: true,
+      email: true,
+      password: true,
+      sex: true,
+      phone: true,
+      avatar: true,
+    }).then(async (client) => {
+      await this.RedisClient.Client.json.merge(`${REDIS_KEYS.CLIENT}:${clientId}`, '$', client);
+      return client;
+    });
+  }
+
   update(client) {
     const { clientId, firstName, lastName, avatar, email, sex, phone } = client;
-    return this.PrismaInstance.reader.update({
-      where: {
-        reader_id: clientId,
-      },
-      data: {
-        first_name: firstName,
-        last_name: lastName,
-        avatar,
-        email,
-        sex,
-        phone,
-      },
-    });
+    return this.PrismaInstance.reader
+      .update({
+        where: {
+          reader_id: clientId,
+        },
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          avatar,
+          email,
+          sex,
+          phone,
+        },
+      })
+      .then(async (client) => {
+        await this.updateCacheClientInformation(clientId);
+        return client;
+      });
   }
 
   forgetPassword(email) {
@@ -131,12 +161,17 @@ class ClientService extends Service {
     });
   }
 
-  detail(clientId, select) {
-    return this.PrismaInstance.reader.findUniqueOrThrow({
-      where: {
-        reader_id: clientId,
-      },
-      select,
+  async detail(clientId, select) {
+    if ((await this.RedisClient.Client.exists(`${REDIS_KEYS.CLIENT}:${clientId}`)) > 0) {
+      const [client] = await this.RedisClient.Client.json.get(`${REDIS_KEYS.CLIENT}:${clientId}`, { path: '$' });
+      return client;
+    }
+
+    return this.getClientDetail(clientId, select).then(async (client) => {
+      await this.RedisClient.Client.del(`${REDIS_KEYS.CLIENT}:${clientId}`).then(() => {
+        return this.RedisClient.Client.json.set(`${REDIS_KEYS.CLIENT}:${clientId}`, '$', client);
+      });
+      return client;
     });
   }
 
@@ -250,6 +285,29 @@ class ClientService extends Service {
       data: {
         blocked: state,
       },
+    });
+  }
+
+  subscribers() {
+    this.RedisClient.subscribe(UpdateFavoriteBooksEvent.eventName, (msg) => {
+      const messageJson = UpdateFavoriteBooksEvent.fromJson(msg);
+      const payload = messageJson.payload;
+      const senderId = messageJson.senderId;
+      this.RedisClient.Client.json.set(`${REDIS_KEYS.CLIENT}:${senderId}`, '$.favorite_books', payload);
+    });
+
+    this.RedisClient.subscribe(UpdateReadLateBooksEvent.eventName, (msg) => {
+      const messageJson = UpdateReadLateBooksEvent.fromJson(msg);
+      const payload = messageJson.payload;
+      const senderId = messageJson.senderId;
+      this.RedisClient.Client.json.set(`${REDIS_KEYS.CLIENT}:${senderId}`, '$.read_late', payload);
+    });
+
+    this.RedisClient.subscribe(UpdateUsedReadBooksEvent.eventName, (msg) => {
+      const messageJson = UpdateUsedReadBooksEvent.fromJson(msg);
+      const payload = messageJson.payload;
+      const senderId = messageJson.senderId;
+      this.RedisClient.Client.json.set(`${REDIS_KEYS.CLIENT}:${senderId}`, '$.used_read', payload);
     });
   }
 }

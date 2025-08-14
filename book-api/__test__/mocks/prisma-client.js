@@ -27,14 +27,17 @@ module.exports = jest.mock('#services/prisma-client', () => ({
   favorite_books: {
     create: jest.fn().mockResolvedValue(),
     deleteMany: jest.fn().mockResolvedValue(),
+    findMany: jest.fn().mockResolvedValue(),
   },
   read_late: {
     create: jest.fn().mockResolvedValue(),
     deleteMany: jest.fn().mockResolvedValue(),
+    findMany: jest.fn().mockResolvedValue(),
   },
   used_read: {
     create: jest.fn().mockResolvedValue(),
     deleteMany: jest.fn().mockResolvedValue(),
+    findMany: jest.fn().mockResolvedValue(),
   },
   author: {
     create: jest.fn().mockResolvedValue(),

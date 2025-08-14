@@ -1,7 +1,7 @@
 const { createClient } = require('redis');
 const Logger = require('#services/logger');
 // eslint-disable-next-line no-unused-vars
-const Event = require('./event');
+const Event = require('./events/event');
 const logger = new Logger('RedisClient');
 
 /**
@@ -36,7 +36,9 @@ class RedisClient {
    * @param {Event} - The event object.
    */
   publish(event) {
-    this.redisClient.publish(event.eventName, event.payload).catch((error) => Logger('Redis Pub', error.message));
+    this.redisClient
+      .publish(event.eventName, event.plainToObject)
+      .catch((error) => Logger.log('Redis Pub', error.message));
   }
 
   /**
@@ -44,8 +46,10 @@ class RedisClient {
    * @param {string} - The event name.
    * @param {function} - The subscribe callback.
    */
-  subscribe(eventName, fn) {
-    this.redisClient.subscribe(eventName, fn).catch((error) => Logger('Redis Sub', error.message));
+  async subscribe(eventName, fn) {
+    const subscriber = this.redisClient.duplicate();
+    await subscriber.connect();
+    subscriber.subscribe(eventName, fn).catch((error) => Logger.log('Redis Sub', error.message));
   }
 
   /**

@@ -51,9 +51,7 @@ describe('filter authors', () => {
     test('filter authors success', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData.user).then((responseSign) => {
@@ -79,9 +77,7 @@ describe('filter authors', () => {
     test('filter authors success', (done) => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
 
       const requestBodyWithAuthorIds = {
         ...requestBody,
@@ -227,9 +223,7 @@ describe('filter authors', () => {
     });
 
     test('filter authors failed with output validate error', (done) => {
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 

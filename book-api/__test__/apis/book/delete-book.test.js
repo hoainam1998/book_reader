@@ -10,12 +10,7 @@ const { HTTP_CODE, METHOD, PATH, PUBLIC_PATH, REDIS_KEYS } = require('#constants
 const { USER, COMMON, BOOK } = require('#messages');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const commonTest = require('#test/apis/common/common');
-const {
-  authenticationToken,
-  sessionData,
-  signedTestCookie,
-  destroySession,
-} = require('#test/resources/auth');
+const { authenticationToken, sessionData, signedTestCookie, destroySession } = require('#test/resources/auth');
 const deleteBookId = Date.now().toString();
 const deleteBookUrl = `${BookRoutePath.delete.abs}/${deleteBookId}`;
 const mockBook = BookDummyData.MockData;

@@ -52,8 +52,9 @@ class CategoryService extends Service {
 
         if (!used) {
           const jsonCategories = categories.map((category) => JSON.stringify(category));
-          await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES)
-            .then(() => this.RedisClient.Client.rPush(REDIS_KEYS.CATEGORIES, jsonCategories));
+          await this.RedisClient.Client.del(REDIS_KEYS.CATEGORIES).then(() =>
+            this.RedisClient.Client.rPush(REDIS_KEYS.CATEGORIES, jsonCategories)
+          );
         }
 
         return categories;

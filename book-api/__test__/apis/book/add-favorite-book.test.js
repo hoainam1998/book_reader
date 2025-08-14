@@ -1,5 +1,7 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError, PrismaForeignConflict, PrismaDuplicateError } = require('#test/mocks/prisma-error');
+const RedisClient = require('#services/redis-client/redis');
+const { UpdateFavoriteBooksEvent } = require('#services/redis-client/events/events');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
@@ -13,6 +15,7 @@ const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/i
 const addFavoriteBook = BookRoutePath.addFavoriteBook.abs;
 const mockRequestBook = BookDummyData.MockRequestData;
 const mockBook = BookDummyData.MockData;
+const mockClient = ClientDummyData.MockData;
 const sessionData = ClientDummyData.session.client;
 const apiKey = ClientDummyData.apiKey;
 
@@ -49,6 +52,9 @@ describe('add favorite book', () => {
 
   describe(createDescribeTest(METHOD.POST, addFavoriteBook), () => {
     test('add favorite book success', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+      globalThis.prismaClient.favorite_books.findMany.mockResolvedValue(mockClient.favorite_books);
+
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
           .post(addFavoriteBook)
@@ -65,6 +71,34 @@ describe('add favorite book', () => {
                 book_id: requestBody.bookId,
               },
             });
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateFavoriteBooksEvent.createEvent(mockClient.favorite_books, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: BOOK.ADD_FAVORITE_BOOK_SUCCESS,
             });
@@ -74,6 +108,8 @@ describe('add favorite book', () => {
     });
 
     test('add favorite book failed with authentication token unset', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -83,7 +119,9 @@ describe('add favorite book', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
+            expect(globalThis.prismaClient.favorite_books.findMany).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.favorite_books.create).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.USER_UNAUTHORIZED,
               errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -94,6 +132,8 @@ describe('add favorite book', () => {
     });
 
     test('add favorite book failed with session expired', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       destroySession().then((responseSign) => {
         globalThis.api
@@ -104,7 +144,9 @@ describe('add favorite book', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
+            expect(globalThis.prismaClient.favorite_books.findMany).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.favorite_books.create).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
               errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -115,6 +157,8 @@ describe('add favorite book', () => {
     });
 
     test('add favorite book failed with request body are empty', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -125,7 +169,9 @@ describe('add favorite book', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(globalThis.prismaClient.favorite_books.findMany).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.favorite_books.create).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(BOOK.ADD_FAVORITE_BOOK_FAIL),
               errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -136,6 +182,7 @@ describe('add favorite book', () => {
     });
 
     test('add favorite book failed with undefine request body field', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       // bookIds is undefine filed
       const undefineField = 'bookIds';
       const badRequestBody = { ...requestBody, [undefineField]: [Date.now.toString()] };
@@ -150,7 +197,9 @@ describe('add favorite book', () => {
           .expect('Content-Type', /application\/json/)
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
+            expect(globalThis.prismaClient.favorite_books.findMany).not.toHaveBeenCalled();
             expect(globalThis.prismaClient.favorite_books.create).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(BOOK.ADD_FAVORITE_BOOK_FAIL),
               errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -195,6 +244,7 @@ describe('add favorite book', () => {
       },
     ])('add favorite book failed with $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.favorite_books.create.mockRejectedValue(cause);
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
 
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
@@ -213,13 +263,73 @@ describe('add favorite book', () => {
                 book_id: requestBody.bookId,
               },
             });
+            expect(globalThis.prismaClient.favorite_books.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
             done();
           });
       });
     });
 
+    test('add favorite book failed with findMany method got server error', (done) => {
+      globalThis.prismaClient.favorite_books.create.mockResolvedValue();
+      globalThis.prismaClient.favorite_books.findMany.mockRejectedValue(ServerError);
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(addFavoriteBook)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.favorite_books.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.favorite_books.create).toHaveBeenCalledWith({
+              data: {
+                reader_id: sessionData.clientId,
+                book_id: requestBody.bookId,
+              },
+            });
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+            expect(publish).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
+            });
+            done();
+          });
+      });
+    });
+
     test('add favorite book failed with output error', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+      globalThis.prismaClient.favorite_books.findMany.mockResolvedValue(mockClient.favorite_books);
       globalThis.prismaClient.favorite_books.create.mockResolvedValue(mockBook);
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
@@ -240,6 +350,34 @@ describe('add favorite book', () => {
                 book_id: requestBody.bookId,
               },
             });
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.favorite_books.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateFavoriteBooksEvent.createEvent(mockClient.favorite_books, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });

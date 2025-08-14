@@ -57,9 +57,7 @@ describe('author menu', () => {
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
       const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
       const authorJsonListExpected = AuthorDummyData.createMockAuthorJsonList(authorLength);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
@@ -94,13 +92,9 @@ describe('author menu', () => {
     });
 
     test('author menu success when get data from cache data', (done) => {
-      RedisClient.Instance.Client.lRange.mockResolvedValue(
-        AuthorDummyData.createMockAuthorJsonList(authorLength)
-      );
+      RedisClient.Instance.Client.lRange.mockResolvedValue(AuthorDummyData.createMockAuthorJsonList(authorLength));
       const authorListExpected = AuthorDummyData.generateAuthorExpectedList(requestBody.query, authorLength);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
 
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
@@ -257,9 +251,7 @@ describe('author menu', () => {
     });
 
     test('author menu failed with output validate error', (done) => {
-      RedisClient.Instance.Client.lRange.mockResolvedValue(
-        AuthorDummyData.createMockAuthorJsonList(authorLength)
-      );
+      RedisClient.Instance.Client.lRange.mockResolvedValue(AuthorDummyData.createMockAuthorJsonList(authorLength));
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
@@ -298,7 +290,6 @@ describe('author menu', () => {
           .expect('Content-Type', /application\/json/)
           .send(requestBody)
           .then((response) => {
-
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledTimes(1);
             expect(RedisClient.Instance.Client.lRange).toHaveBeenCalledWith(REDIS_KEYS.AUTHORS, 0, -1);
             expect(RedisClient.Instance.Client.del).not.toHaveBeenCalled();
@@ -351,9 +342,7 @@ describe('author menu', () => {
 
     test('author menu failed with rPush method got server error', (done) => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
       RedisClient.Instance.Client.rPush.mockRejectedValue(ServerError);
       const authorJsonListExpected = AuthorDummyData.createMockAuthorJsonList(authorLength);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
@@ -394,9 +383,7 @@ describe('author menu', () => {
 
     test('author menu failed with del method got server error', (done) => {
       RedisClient.Instance.Client.lRange.mockResolvedValue([]);
-      globalThis.prismaClient.author.findMany.mockResolvedValue(
-        AuthorDummyData.createMockAuthorList(authorLength)
-      );
+      globalThis.prismaClient.author.findMany.mockResolvedValue(AuthorDummyData.createMockAuthorList(authorLength));
       RedisClient.Instance.Client.del.mockRejectedValue(ServerError);
       const parseToPrismaSelect = jest.spyOn(PrismaField.prototype, 'parseToPrismaSelect');
 

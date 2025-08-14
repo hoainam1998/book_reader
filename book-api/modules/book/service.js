@@ -1,6 +1,11 @@
 const { GraphQLError } = require('graphql');
 const { saveFile, deleteFile, checkArrayHaveValues, calcPages } = require('#utils');
 const { PrismaClientKnownRequestError } = require('@prisma/client/runtime/library');
+const {
+  UpdateFavoriteBooksEvent,
+  UpdateReadLateBooksEvent,
+  UpdateUsedReadBooksEvent,
+} = require('#services/redis-client/events/events');
 const Service = require('#services/prisma');
 const { BOOK } = require('#messages');
 const { PUBLIC_PATH, PRISMA_ERROR_CODE, REDIS_KEYS } = require('#constants');
@@ -312,13 +317,51 @@ class BookService extends Service {
       });
   }
 
-  addFavoriteBook(readerId, bookId) {
-    return this.PrismaInstance.favorite_books.create({
-      data: {
-        book_id: bookId,
+  getFavoriteBooks(readerId) {
+    return this.PrismaInstance.favorite_books.findMany({
+      where: {
         reader_id: readerId,
       },
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
+  }
+
+  updateCacheFavoriteBooks(readerId) {
+    return this.getFavoriteBooks(readerId).then((favoriteBooks) => {
+      return this.RedisClient.publish(UpdateFavoriteBooksEvent.createEvent(favoriteBooks, readerId));
+    });
+  }
+
+  addFavoriteBook(readerId, bookId) {
+    return this.PrismaInstance.favorite_books
+      .create({
+        data: {
+          book_id: bookId,
+          reader_id: readerId,
+        },
+      })
+      .then(async (books) => {
+        await this.updateCacheFavoriteBooks(readerId);
+        return books;
+      });
   }
 
   deleteFavoriteBook(readerId, bookId) {
@@ -335,22 +378,62 @@ class BookService extends Service {
           ],
         },
       })
-      .then((result) => {
+      .then(async (result) => {
         if (result.count === 0) {
           throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
+        await this.updateCacheFavoriteBooks(readerId);
         return result;
       });
   }
 
-  addReadLateBook(readerId, bookId, createAt) {
-    return this.PrismaInstance.read_late.create({
-      data: {
-        book_id: bookId,
+  getReadLateBooks(readerId) {
+    return this.PrismaInstance.read_late.findMany({
+      where: {
         reader_id: readerId,
-        added_at: createAt,
+      },
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        added_at: true,
       },
     });
+  }
+
+  updateCacheReadLateBooks(readerId) {
+    return this.getReadLateBooks(readerId).then((readLateBooks) => {
+      return this.RedisClient.publish(UpdateReadLateBooksEvent.createEvent(readLateBooks, readerId));
+    });
+  }
+
+  addReadLateBook(readerId, bookId, createAt) {
+    return this.PrismaInstance.read_late
+      .create({
+        data: {
+          book_id: bookId,
+          reader_id: readerId,
+          added_at: createAt,
+        },
+      })
+      .then(async (book) => {
+        await this.updateCacheReadLateBooks(readerId);
+        return book;
+      });
   }
 
   deleteReadLateBook(readerId, bookId) {
@@ -367,22 +450,62 @@ class BookService extends Service {
           ],
         },
       })
-      .then((result) => {
+      .then(async (result) => {
         if (result.count === 0) {
           throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
+        await this.updateCacheReadLateBooks(readerId);
         return result;
       });
   }
 
-  addUsedReadBook(readerId, bookId, createAt) {
-    return this.PrismaInstance.used_read.create({
-      data: {
-        book_id: bookId,
+  getUsedReadBooks(readerId) {
+    return this.PrismaInstance.used_read.findMany({
+      where: {
         reader_id: readerId,
-        added_at: createAt,
+      },
+      select: {
+        book: {
+          select: {
+            book_id: true,
+            name: true,
+            avatar: true,
+            book_author: {
+              select: {
+                author: {
+                  select: {
+                    name: true,
+                    author_id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        added_at: true,
       },
     });
+  }
+
+  updateCacheUsedReadBooks(readerId) {
+    return this.getUsedReadBooks(readerId).then((usedBooks) => {
+      return this.RedisClient.publish(UpdateUsedReadBooksEvent.createEvent(usedBooks, readerId));
+    });
+  }
+
+  addUsedReadBook(readerId, bookId, createAt) {
+    return this.PrismaInstance.used_read
+      .create({
+        data: {
+          book_id: bookId,
+          reader_id: readerId,
+          added_at: createAt,
+        },
+      })
+      .then(async (book) => {
+        await this.updateCacheUsedReadBooks(readerId);
+        return book;
+      });
   }
 
   deleteUsedReadBook(readerId, bookId) {
@@ -399,10 +522,11 @@ class BookService extends Service {
           ],
         },
       })
-      .then((result) => {
+      .then(async (result) => {
         if (result.count === 0) {
           throw new PrismaClientKnownRequestError(BOOK.BOOK_NOT_FOUND, { code: PRISMA_ERROR_CODE.RECORD_NOT_FOUND });
         }
+        await this.updateCacheUsedReadBooks(readerId);
         return result;
       });
   }
