@@ -1,5 +1,7 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaNotFoundError, PrismaForeignConflict, PrismaDuplicateError } = require('#test/mocks/prisma-error');
+const RedisClient = require('#services/redis-client/redis');
+const { UpdateReadLateBooksEvent } = require('#services/redis-client/events/events');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
@@ -13,6 +15,7 @@ const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/i
 const addReadLateBook = BookRoutePath.addReadLateBook.abs;
 const mockRequestBook = BookDummyData.MockRequestData;
 const mockBook = BookDummyData.MockData;
+const mockClient = ClientDummyData.MockData;
 const sessionData = ClientDummyData.session.client;
 const apiKey = ClientDummyData.apiKey;
 
@@ -49,6 +52,9 @@ describe('add read late book', () => {
 
   describe(createDescribeTest(METHOD.POST, addReadLateBook), () => {
     test('add read late book success', (done) => {
+      globalThis.prismaClient.read_late.findMany.mockResolvedValue(mockClient.read_late);
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
           .post(addReadLateBook)
@@ -66,6 +72,35 @@ describe('add read late book', () => {
                 added_at: expect.stringMatching(/^(\d){13}$/g),
               },
             });
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateReadLateBooksEvent.createEvent(mockClient.read_late, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: BOOK.ADD_READ_LATE_BOOK_SUCCESS,
             });
@@ -75,6 +110,8 @@ describe('add read late book', () => {
     });
 
     test('add read late book failed with authentication token unset', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -85,6 +122,8 @@ describe('add read late book', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.read_late.create).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.read_late.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.USER_UNAUTHORIZED,
               errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -95,6 +134,8 @@ describe('add read late book', () => {
     });
 
     test('add read late book failed with session expired', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       destroySession().then((responseSign) => {
         globalThis.api
@@ -106,6 +147,8 @@ describe('add read late book', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.read_late.create).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.read_late.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
               errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -116,6 +159,8 @@ describe('add read late book', () => {
     });
 
     test('add read late book failed with request body are empty', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -127,6 +172,8 @@ describe('add read late book', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.read_late.create).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.read_late.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(BOOK.ADD_READ_LATE_BOOK_FAIL),
               errors: [COMMON.REQUEST_DATA_EMPTY],
@@ -137,6 +184,7 @@ describe('add read late book', () => {
     });
 
     test('add read late book failed with undefine request body field', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       // bookIds is undefine filed
       const undefineField = 'bookIds';
       const badRequestBody = { ...requestBody, [undefineField]: [Date.now.toString()] };
@@ -152,6 +200,8 @@ describe('add read late book', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.read_late.create).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.read_late.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(BOOK.ADD_READ_LATE_BOOK_FAIL),
               errors: expect.arrayContaining([expect.stringContaining(COMMON.FIELD_NOT_EXPECT.format(undefineField))]),
@@ -171,7 +221,7 @@ describe('add read late book', () => {
         status: HTTP_CODE.NOT_FOUND,
       },
       {
-        describe: 'book do not exist',
+        describe: 'book do not exist error',
         cause: new PrismaForeignConflict('book_id'),
         expected: {
           message: BOOK.BOOK_DO_NOT_EXIST,
@@ -179,7 +229,7 @@ describe('add read late book', () => {
         status: HTTP_CODE.BAD_REQUEST,
       },
       {
-        describe: 'read late book already exist',
+        describe: 'read late book already exist error',
         cause: PrismaDuplicateError,
         expected: {
           message: BOOK.ADD_READ_LATE_BOOK_DUPLICATE,
@@ -194,8 +244,9 @@ describe('add read late book', () => {
         },
         status: HTTP_CODE.SERVER_ERROR,
       },
-    ])('add read late book failed with $describe', ({ cause, expected, status }, done) => {
+    ])('add read late book failed with create method got $describe', ({ cause, expected, status }, done) => {
       globalThis.prismaClient.read_late.create.mockRejectedValue(cause);
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
 
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
@@ -215,13 +266,75 @@ describe('add read late book', () => {
                 added_at: expect.stringMatching(/^(\d){13}$/g),
               },
             });
+            expect(globalThis.prismaClient.read_late.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
             done();
           });
       });
     });
 
+    test('add read late book failed with findMany method got server error', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+      globalThis.prismaClient.read_late.create.mockResolvedValue(mockBook);
+      globalThis.prismaClient.read_late.findMany.mockRejectedValue(ServerError);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .post(addReadLateBook)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .send(requestBody)
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.read_late.create).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.read_late.create).toHaveBeenCalledWith({
+              data: {
+                reader_id: sessionData.clientId,
+                book_id: requestBody.bookId,
+                added_at: expect.stringMatching(/^(\d){13}$/g),
+              },
+            });
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
+            });
+            done();
+          });
+      });
+    });
+
     test('add read late book failed with output error', (done) => {
+      globalThis.prismaClient.read_late.findMany.mockResolvedValue(mockClient.read_late);
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       globalThis.prismaClient.read_late.create.mockResolvedValue(mockBook);
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
@@ -243,6 +356,35 @@ describe('add read late book', () => {
                 added_at: expect.stringMatching(/^(\d){13}$/g),
               },
             });
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.read_late.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateReadLateBooksEvent.createEvent(mockClient.read_late, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
             });

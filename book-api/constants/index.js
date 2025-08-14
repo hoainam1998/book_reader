@@ -73,6 +73,7 @@ module.exports = deepFreeze({
     CATEGORIES: 'categories',
     AUTHORS: 'authors',
     BOOKS: 'books',
+    CLIENT: 'client',
   },
   PUBLIC_PATH: `${process.cwd()}/public`,
 });

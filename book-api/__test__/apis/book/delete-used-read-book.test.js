@@ -1,5 +1,7 @@
 const { ServerError } = require('#test/mocks/other-errors');
 const { PrismaForeignConflict } = require('#test/mocks/prisma-error');
+const RedisClient = require('#services/redis-client/redis');
+const { UpdateUsedReadBooksEvent } = require('#services/redis-client/events/events');
 const ErrorCode = require('#services/error-code');
 const BookDummyData = require('#test/resources/dummy-data/book');
 const ClientDummyData = require('#test/resources/dummy-data/client');
@@ -12,6 +14,7 @@ const commonTest = require('#test/apis/common/common');
 const { createDescribeTest, getInputValidateMessage } = require('#test/helpers/index');
 const mockRequestBook = BookDummyData.MockRequestData;
 const sessionData = ClientDummyData.session.client;
+const mockClient = ClientDummyData.MockData;
 const apiKey = ClientDummyData.apiKey;
 const bookId = mockRequestBook.book_id;
 const deleteUsedReadBook = `${BookRoutePath.deleteUsedReadBook.abs}/${bookId}`;
@@ -49,7 +52,9 @@ describe('delete used read book', () => {
 
   describe(createDescribeTest(METHOD.POST, deleteUsedReadBook), () => {
     test('delete used read book success', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       globalThis.prismaClient.used_read.deleteMany.mockResolvedValue({ count: 1 });
+      globalThis.prismaClient.used_read.findMany.mockResolvedValue(mockClient.used_read);
 
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -72,6 +77,35 @@ describe('delete used read book', () => {
                 ],
               },
             });
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateUsedReadBooksEvent.createEvent(mockClient.used_read, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: BOOK.DELETE_USED_READ_BOOK_SUCCESS,
             });
@@ -81,6 +115,8 @@ describe('delete used read book', () => {
     });
 
     test('delete used read book failed with authentication token unset', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -90,6 +126,8 @@ describe('delete used read book', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.used_read.deleteMany).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.used_read.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.USER_UNAUTHORIZED,
               errorCode: ErrorCode.HAVE_NOT_LOGIN,
@@ -100,6 +138,8 @@ describe('delete used read book', () => {
     });
 
     test('delete used read book failed with session expired', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+
       expect.hasAssertions();
       destroySession().then((responseSign) => {
         globalThis.api
@@ -111,6 +151,8 @@ describe('delete used read book', () => {
           .expect(HTTP_CODE.UNAUTHORIZED)
           .then((response) => {
             expect(globalThis.prismaClient.used_read.deleteMany).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.used_read.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: USER.WORKING_SESSION_EXPIRE,
               errorCode: ErrorCode.WORKING_SESSION_ENDED,
@@ -121,7 +163,9 @@ describe('delete used read book', () => {
     });
 
     test('delete used read book failed with invalid request param', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       const deleteUsedReadBookWithInvalidRequestParam = `${BookRoutePath.deleteUsedReadBook.abs}/unknown`;
+
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
         globalThis.api
@@ -133,6 +177,8 @@ describe('delete used read book', () => {
           .expect(HTTP_CODE.BAD_REQUEST)
           .then((response) => {
             expect(globalThis.prismaClient.used_read.deleteMany).not.toHaveBeenCalled();
+            expect(globalThis.prismaClient.used_read.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: getInputValidateMessage(BOOK.DELETE_USED_READ_BOOK_FAIL),
               errors: expect.arrayContaining([expect.any(String)]),
@@ -160,6 +206,7 @@ describe('delete used read book', () => {
         status: HTTP_CODE.SERVER_ERROR,
       },
     ])('delete used read book failed with $describe', ({ cause, expected, status }, done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       globalThis.prismaClient.used_read.deleteMany.mockRejectedValue(cause);
 
       expect.hasAssertions();
@@ -184,6 +231,8 @@ describe('delete used read book', () => {
                 ],
               },
             });
+            expect(globalThis.prismaClient.used_read.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual(expected);
             done();
           });
@@ -192,6 +241,7 @@ describe('delete used read book', () => {
 
     test('delete used read book failed with book not found', (done) => {
       globalThis.prismaClient.used_read.deleteMany.mockResolvedValue({ count: 0 });
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
 
       expect.hasAssertions();
       signedTestCookie(sessionData, 'client').then((responseSign) => {
@@ -215,6 +265,8 @@ describe('delete used read book', () => {
                 ],
               },
             });
+            expect(globalThis.prismaClient.used_read.findMany).not.toHaveBeenCalled();
+            expect(publish).not.toHaveBeenCalled();
             expect(response.body).toEqual({
               message: BOOK.BOOK_NOT_FOUND,
             });
@@ -224,7 +276,9 @@ describe('delete used read book', () => {
     });
 
     test('delete used read book failed with output error', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
       globalThis.prismaClient.used_read.deleteMany.mockResolvedValue({ count: 1 });
+      globalThis.prismaClient.used_read.findMany.mockResolvedValue(mockClient.used_read);
       jest.spyOn(OutputValidate, 'prepare').mockImplementation(() => OutputValidate.parse({}));
 
       expect.hasAssertions();
@@ -249,8 +303,99 @@ describe('delete used read book', () => {
                 ],
               },
             });
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).toHaveBeenCalledTimes(1);
+            const event = UpdateUsedReadBooksEvent.createEvent(mockClient.used_read, sessionData.clientId);
+            expect(publish).toHaveBeenCalledWith(event.eventName, event.plainToObject);
             expect(response.body).toEqual({
               message: COMMON.OUTPUT_VALIDATE_FAIL,
+            });
+            done();
+          });
+      });
+    });
+
+    test('delete used read book failed with findMany method got server error', (done) => {
+      const publish = jest.spyOn(RedisClient.Instance.redisClient, 'publish').mockResolvedValue();
+      globalThis.prismaClient.used_read.deleteMany.mockResolvedValue({ count: 1 });
+      globalThis.prismaClient.used_read.findMany.mockRejectedValue(ServerError);
+
+      expect.hasAssertions();
+      signedTestCookie(sessionData, 'client').then((responseSign) => {
+        globalThis.api
+          .delete(deleteUsedReadBook)
+          .set('authorization', apiKey)
+          .set('Cookie', [responseSign.header['set-cookie']])
+          .expect('Content-Type', /application\/json/)
+          .expect(HTTP_CODE.SERVER_ERROR)
+          .then((response) => {
+            expect(globalThis.prismaClient.used_read.deleteMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.used_read.deleteMany).toHaveBeenCalledWith({
+              where: {
+                AND: [
+                  {
+                    book_id: bookId,
+                  },
+                  {
+                    reader_id: sessionData.clientId,
+                  },
+                ],
+              },
+            });
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledTimes(1);
+            expect(globalThis.prismaClient.used_read.findMany).toHaveBeenCalledWith({
+              where: {
+                reader_id: sessionData.clientId,
+              },
+              select: {
+                book: {
+                  select: {
+                    book_id: true,
+                    name: true,
+                    avatar: true,
+                    book_author: {
+                      select: {
+                        author: {
+                          select: {
+                            name: true,
+                            author_id: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                added_at: true,
+              },
+            });
+            expect(publish).not.toHaveBeenCalled();
+            expect(response.body).toEqual({
+              message: COMMON.INTERNAL_ERROR_MESSAGE,
             });
             done();
           });
