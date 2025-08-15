@@ -46,6 +46,7 @@ export type NavLinkPropsType = {
   id?: string;
   children?: NavLinkPropsType[];
   loader?: (item: NavLinkPropsType) => void;
+  setResultFor?: (item: NavLinkPropsType) => void;
 };
 
 export type BookPropsType = {

@@ -7,7 +7,7 @@ import './style.scss';
 
 function Header(): JSX.Element {
   const navigate = useNavigate();
-  const { onPageChange, setCondition, setResultFor, shouldCallOnPageChange } = useClientPaginationContext();
+  const { onPageChange, setCondition, shouldCallOnPageChange } = useClientPaginationContext();
 
   const search = useCallback((keyword: string): void => {
     if (onPageChange) {
@@ -16,7 +16,6 @@ function Header(): JSX.Element {
         onPageChange(1, { keyword });
       }
       setCondition({ keyword });
-      setResultFor(keyword || 'All');
       navigate(allUrl);
     }
   }, [onPageChange]);

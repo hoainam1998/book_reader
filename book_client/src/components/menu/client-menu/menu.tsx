@@ -1,4 +1,13 @@
-import { Fragment, JSX, ReactElement, useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  Fragment,
+  JSX,
+  memo,
+  ReactElement,
+  useCallback,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { AxiosResponse } from 'axios';
 import { HaveLoadedFnType, NavLinkPropsType } from 'interfaces';
@@ -39,7 +48,8 @@ type MenuItemApi = {
 const menuItemMapping = (
   menuItems: MenuItemApi[],
   parentPath: string,
-  loader: (item: NavLinkPropsType) => void,
+  loader: NavLinkPropsType['loader'],
+  setResultFor: NavLinkPropsType['setResultFor'],
 ): NavLinkPropsType[] => {
   const idField = {
     [path.CATEGORIES]: 'categoryId',
@@ -53,6 +63,7 @@ const menuItemMapping = (
       id: menuItem[idField[parentPath as keyof typeof idField]],
       path: `${parentPath}/${menuItem[idField[parentPath as keyof typeof idField]]}`,
       loader,
+      setResultFor,
     };
 
     return item;
@@ -61,23 +72,30 @@ const menuItemMapping = (
 
 const createItemMenu = (item: NavLinkPropsType): ReactElement => {
   const isDisableLink = ([path.AUTHORS, path.CATEGORIES] as string[]).includes(item.path);
+
   return (
-    <li className="menu-item" key={id()}>
-      <NavLink to={item.path} className={
-        ({ isActive }) => isActive
-          ? clsx('active', isDisableLink && 'link-disabled')
-          : clsx(isDisableLink && 'link-disabled')
-        }
+    <li className='menu-item' key={id()}>
+      <NavLink
+        to={item.path}
+        className={({ isActive }) => {
+          if (isActive && item.setResultFor) {
+            item.setResultFor(item);
+          }
+
+          return isActive
+            ? clsx('active', isDisableLink && 'link-disabled')
+            : clsx(isDisableLink && 'link-disabled');
+        }}
         onClick={(event) => {
           event.preventDefault();
-          item.loader && item.loader!(item);
+          item.loader && item.loader(item);
         }}>
-        {
-          ([path.AUTHORS, path.CATEGORIES, path.ALL] as string[]).includes(item.path)
-          ? <img src={require(`images/${item.image}`)} height="35" width="35" />
-          : <img src={item.image} height="35" width="35" />
-        }
-        <span className="name line-clamp">{item.label}</span>
+        {([path.AUTHORS, path.CATEGORIES, path.ALL] as string[]).includes(item.path) ? (
+          <img src={require(`images/${item.image}`)} height='35' width='35' />
+        ) : (
+          <img src={item.image} height='35' width='35' />
+        )}
+        <span className='name line-clamp'>{item.label}</span>
       </NavLink>
     </li>
   );
@@ -107,20 +125,22 @@ const flatItemsMenu = (
 type MenuItemsListPropsType = {
   items: AxiosResponse[];
   loader: () => (item: NavLinkPropsType) => void;
+  setResultFor: NavLinkPropsType['setResultFor'];
 };
 
-const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element => {
+const MenuItemsList = memo(({ items, loader, setResultFor }: MenuItemsListPropsType): JSX.Element => {
   const menuItems = useMemo<NavLinkPropsType[]>(() => {
     const allMenuItem = itemsMenu[0];
     const categoryMenu = itemsMenu[1];
     const authorMenu = itemsMenu[2];
     allMenuItem.loader = loader();
+    allMenuItem.setResultFor = setResultFor;
     const menu = items.map((result) => {
       if (result.config.url?.includes('category')) {
-        categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader());
+        categoryMenu.children = menuItemMapping(result.data, path.CATEGORIES, loader(), setResultFor);
         return categoryMenu;
       } else {
-        authorMenu.children = menuItemMapping(result.data, path.AUTHORS, loader());
+        authorMenu.children = menuItemMapping(result.data, path.AUTHORS, loader(), setResultFor);
         return authorMenu;
       }
     });
@@ -133,7 +153,7 @@ const MenuItemsList = ({ items, loader }: MenuItemsListPropsType): JSX.Element =
       {flatItemsMenu(menuItems)}
     </ul>
   );
-};
+});
 
 function Menu(): JSX.Element {
   const navigate = useNavigate();
@@ -174,13 +194,22 @@ function Menu(): JSX.Element {
       .catch((error) => showToast('Logout!', error.response.data.message));
   }, []);
 
-  const setResultTitle = useCallback((item: NavLinkPropsType): void => {
-    if (item.path.includes(path.AUTHORS)) {
-      setResultFor(<Link to={`${path.HOME}/${path.AUTHOR}/${item.id}`}>{item.label}</Link>);
-    } else {
-      setResultFor(item.label);
-    }
-  }, [setResultFor]);
+  const setResultTitle = useCallback(
+    (item: NavLinkPropsType): void => {
+      const handle = () => {
+        if (item.path === path.ALL) {
+          const keyword = new URL(window.location.href).searchParams.get('keyword') || 'All';
+          setResultFor(keyword);
+        } else if (item.path.includes(path.AUTHORS)) {
+          setResultFor(<Link to={`${path.HOME}/${path.AUTHOR}/${item.id}`}>{item.label}</Link>);
+        } else {
+          setResultFor(item.label);
+        }
+      };
+      setTimeout(handle, 100);
+    },
+    [setResultFor]
+  );
 
   const loader = useCallback((): (item: NavLinkPropsType) => void => {
     return (item: NavLinkPropsType): void => {
@@ -193,7 +222,6 @@ function Menu(): JSX.Element {
         onPageChange && onPageChange(1, { id: item.id });
       }
       clearOldKeyword && clearOldKeyword();
-      setResultTitle(item);
       resetPage && resetPage();
     };
   }, [onPageChange, clearOldKeyword, resetPage]);
@@ -210,10 +238,10 @@ function Menu(): JSX.Element {
 
   return (
     <section className="client-menu-wrapper">
-      <MenuItemsList items={menuItemsApi} loader={loader} />
+      <MenuItemsList items={menuItemsApi} loader={loader} setResultFor={setResultTitle} />
       <div className="user-login-box">
         <div className="user-login-quick-info">
-          <img src={userAvatar} height={50} width={50} alt='user avatar' />
+          <img src={userAvatar || require('images/reader.png')} height={50} width={50} alt='user avatar' />
           <h5 className="line-clamp">{userName}</h5>
         </div>
         <hr className="separate-line" />

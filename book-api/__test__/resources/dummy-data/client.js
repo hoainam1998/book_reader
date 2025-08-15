@@ -15,9 +15,9 @@ const createBooks = (amount) => {
       name: `book ${index}`,
       book_id: Date.now().toString(),
       avatar: `avatar ${index}`,
-      createAt: Date.now().toString(),
       authors: [],
     },
+    added_at: Date.now().toString(),
   }));
 };
 
@@ -68,9 +68,9 @@ class ClientDummyData extends DummyDataApi {
         name: expect.any(String),
         apiKey: expect.any(String),
         passwordMustChange: expect.any(Boolean),
-        favoriteBooks: expect.any(Array),
-        readLate: expect.any(Array),
-        usedRead: expect.any(Array),
+        favoriteBooks: expect.toBeRelateBooks(),
+        readLate: expect.toBeRelateBooks(),
+        usedRead: expect.toBeRelateBooks(),
       }
     );
   }

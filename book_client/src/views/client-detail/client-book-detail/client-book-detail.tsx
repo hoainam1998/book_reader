@@ -143,7 +143,7 @@ function ClientBookDetail(): JSX.Element {
         </div>
         <div className="client-book-story-info">
           <iframe src={`${process.env.BASE_URL}/${book.introduce.html}`}
-            title="W3Schools Free Online Web Tutorials" />
+            title="Book introduce" />
         </div>
       </section>
     );

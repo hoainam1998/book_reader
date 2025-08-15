@@ -38,6 +38,8 @@
       &-author-name {
         font-size: 13px;
         color: $black-color;
+        text-decoration: underline;
+        cursor: pointer;
       }
 
       &:last-child {

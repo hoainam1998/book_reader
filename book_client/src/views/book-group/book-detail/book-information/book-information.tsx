@@ -116,7 +116,7 @@ function BookInformation(): JSX.Element {
   const validateName = useCallback(
     (message: string) =>
       (currentValue: string): ErrorFieldInfo => ({
-        error: id ? false : bookNames.includes(currentValue),
+        error: bookNames.includes(currentValue),
         message
       }),
     [bookNames]
@@ -126,7 +126,7 @@ function BookInformation(): JSX.Element {
     name: {
       required,
       maxLength: maxLength(3),
-      validateName: validateName('validate name')
+      validateName: validateName('This book name was exist!'),
     },
     pdf: { required },
     publishedDay: { required },
@@ -249,7 +249,7 @@ function BookInformation(): JSX.Element {
         getAuthors()
           .then((res) => setAuthorsList(res.data))
           .catch(() => setAuthorsList([]));
-        getAllBooks()
+        getAllBooks(id ? [id] : [])
           .then((res) => setBookNames(res.data.map(({ name }: { name: string }) => name)));
         getAllCategories()
           .then((res) => setCategories(res.data))
