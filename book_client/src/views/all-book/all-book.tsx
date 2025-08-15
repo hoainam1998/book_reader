@@ -31,6 +31,11 @@ function AllBooks(): JSX.Element {
           setPage(result.data.page);
           setPages(result.data.pages);
           setBooks(result.data.list);
+        })
+        .catch(() => {
+          setPage(1);
+          setPages(1);
+          setBooks([]);
         });
   };
 

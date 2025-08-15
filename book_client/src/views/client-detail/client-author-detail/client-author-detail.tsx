@@ -6,7 +6,6 @@ import path from 'router/paths';
 import constants from 'read-only-variables';
 import { HaveLoadedFnType } from 'interfaces';
 import { getAuthorDetail } from './fetcher';
-import { formatDate } from 'utils';
 import './style.scss';
 
 type AuthorDetailType = {
@@ -41,7 +40,7 @@ function ClientAuthorDetail(): JSX.Element {
     event.preventDefault();
     setCondition({ id });
     navigate(allBookLink);
-  }, [allBookLink, onPageChange]);
+  }, [author, allBookLink, onPageChange]);
 
   if (author) {
     return (
@@ -59,11 +58,11 @@ function ClientAuthorDetail(): JSX.Element {
               </li>
               <li className="book-info-property">
                 <span className="property-label">Birth:</span>
-                <span>{formatDate(author.yearOfBirth)}</span>
+                <span>{author.yearOfBirth}</span>
               </li>
               <li className="book-info-property">
                 <span className="property-label">Dead:</span>
-                <span>{formatDate(author.yearOfDead)}</span>
+                <span>{author.yearOfDead}</span>
               </li>
               <li className="book-info-property">
                 <span className="author-book-link" onClick={navigateToAuthors}>All book</span>
@@ -73,7 +72,7 @@ function ClientAuthorDetail(): JSX.Element {
         </div>
         <div className="client-book-story-info">
           <iframe src={`${process.env.BASE_URL}/${author.storyFile.html}`}
-            title="W3Schools Free Online Web Tutorials"></iframe>
+            title="Author story"></iframe>
         </div>
       </section>
     );

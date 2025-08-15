@@ -6,7 +6,7 @@ const getAllCategories = (): Promise<AxiosResponse> => {
   return CategoryService.post('all', {
     query: {
       name: true,
-      categoryId: true
+      categoryId: true,
     },
   });
 };
@@ -62,11 +62,12 @@ const getBookDetail = (bookId: string, includeIntroduceFieldFlag?: boolean): Pro
   });
 };
 
-const getAllBooks = (): Promise<AxiosResponse> => {
+const getAllBooks = (bookIds?: string[]): Promise<AxiosResponse> => {
   return BookService.post('all', {
     query: {
       name: true,
     },
+    excludeIds: bookIds,
   });
 };
 
@@ -144,8 +145,10 @@ const bookPagination = ({ request }: LoaderFunctionArgs): Promise<AxiosResponse>
         name: true,
         avatar: true,
       },
-      introduce: true,
-      avatar: true
+      introduce: {
+        html: true,
+      },
+      avatar: true,
     },
     pageSize,
     pageNumber,

@@ -17,7 +17,9 @@ function HorizontalBook({ name, avatar, createAt, authors, deleteBook }: Horizon
             (<li className="horizontal-book-authors-item">
               <Link
                 className="horizontal-book-authors-item-author-name"
-                to={`${path.HOME}/${path.AUTHORS}/${authorId}`}>{name}</Link>
+                to={`${path.HOME}/${path.AUTHORS}/${authorId}`}>
+                  {name}
+                </Link>
             </li>)
           } />
         </ul>

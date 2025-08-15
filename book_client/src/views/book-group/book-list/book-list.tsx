@@ -27,7 +27,9 @@ type BookType = {
     avatar: string;
     name: string;
   };
-  introduce: string;
+  introduce: {
+    html: string;
+  };
 };
 
 const fields: Field[] = [
@@ -180,7 +182,10 @@ function BookList(): JSX.Element {
           <Slot<BookType>
             name="introduce"
             render={(slotProp) => (
-              <Button variant="success" disabled={!slotProp.introduce} onClick={() => openFile(slotProp.introduce)}>
+              <Button
+                variant="success"
+                disabled={!slotProp.introduce}
+                onClick={() => openFile(slotProp.introduce.html)}>
                 Preview
               </Button>
             )}/>

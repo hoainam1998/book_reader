@@ -59,13 +59,14 @@
     }
 
     .personal-operator-btn {
+      flex-wrap: wrap;
       display: flex;
       justify-content: space-between;
       gap: 5px;
     }
 
     .flex-basic-50 {
-      flex-basis: 50%;
+      flex-basis: 48.5%;
     }
   }
 }
