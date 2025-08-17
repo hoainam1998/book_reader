@@ -8,6 +8,7 @@
     "format:write": "prettier --write .",
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
+    "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "dev": "nodemon -L --exec babel-node index.js",
     "docker-dev": "docker compose -f ../docker-compose.dev.yaml --env-file ../.env up -d",
     "test": "jest --watchAll",

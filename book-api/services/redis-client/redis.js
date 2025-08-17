@@ -17,7 +17,13 @@ class RedisClient {
    * @constructor
    */
   constructor() {
-    this.redisClient = createClient({ legacyMode: true });
+    this.redisClient = createClient({
+      legacyMode: true,
+      socket: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_SERVER_PORT,
+      },
+    });
     this.connect();
   }
 

@@ -17,6 +17,17 @@ services:
       timeout: 5s
       retries: 5
 
+  redis-stack:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    ports:
+      - ${REDIS_SERVER_PORT}:${REDIS_SERVER_PORT}
+      - 8001:8001
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      timeout: 5s
+      retries: 3
+
   phpmyadmin:
     image: phpmyadmin
     container_name: pma_c
@@ -33,20 +44,23 @@ services:
   api:
     build: ./book-api
     container_name: api_c
-    environment:
-      LOCALHOST: db_c
+    env_file: ./.env
     volumes:
       - .//book-api:/api
+      - /api/node_modules
+      - /api/public
     ports:
      - ${API_PORT}:${API_PORT}
     depends_on:
       db:
         condition: service_healthy
+      redis-stack:
+        condition: service_healthy
 
   client:
-    env_file: ./book-api/.env
     build: ./book_client
     container_name: client_c
+    command: npm run client
     volumes:
       - .//book_client:/app
     environment:
@@ -55,5 +69,20 @@ services:
       WATCHPACK_POLLING: true
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
+    depends_on:
+      - api
+
+  admin:
+    build: ./book_client
+    container_name: admin_c
+    command: npm run admin
+    volumes:
+      - .//book_client:/app
+    environment:
+      BASE_URL: 'http://localhost:${API_PORT}'
+      WDS_SOCKET_PORT: ${ADMIN_PORT}
+      WATCHPACK_POLLING: true
+    ports:
+      - ${ADMIN_PORT}:${ADMIN_PORT}
     depends_on:
       - api
