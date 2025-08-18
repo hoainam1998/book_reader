@@ -17,7 +17,7 @@ const requestBody = {
   phone: mockUser.phone,
 };
 
-describe('create user', () => {
+describe('signup admin', () => {
   commonTest(
     'signup user internal api common test',
     [
@@ -33,7 +33,7 @@ describe('create user', () => {
   );
 
   describe(createDescribeTest(METHOD.POST, signUpUrl), () => {
-    test('sign up admin user will be success', (done) => {
+    test('signup admin user will be success', (done) => {
       globalThis.prismaClient.user.count.mockResolvedValue(0);
 
       expect.hasAssertions();
@@ -62,7 +62,7 @@ describe('create user', () => {
         });
     });
 
-    test('sign up admin user failed when has admin user', (done) => {
+    test('signup admin user failed when has admin user', (done) => {
       globalThis.prismaClient.user.count.mockResolvedValue(1);
 
       expect.hasAssertions();
@@ -82,7 +82,7 @@ describe('create user', () => {
         });
     });
 
-    test('sign up admin user failed with bad request', (done) => {
+    test('signup admin user failed with bad request', (done) => {
       // missing email field.
       // avatar, image are unexpected fields.
       const badRequestBody = { ...requestBody, avatar: 'avatar', image: 'image' };
@@ -106,7 +106,7 @@ describe('create user', () => {
         });
     });
 
-    test('sign up admin user failed with output validate error', (done) => {
+    test('signup admin user failed with output validate error', (done) => {
       globalThis.prismaClient.user.count.mockResolvedValue(0);
       globalThis.prismaClient.user.create.mockResolvedValue();
       jest.spyOn(GraphqlResponse, 'parse').mockReturnValue({
@@ -140,7 +140,7 @@ describe('create user', () => {
         });
     });
 
-    test('sign up admin user failed with invalid gender', (done) => {
+    test('signup admin user failed with invalid gender', (done) => {
       const requestBodyInvalidGender = {
         ...requestBody,
         sex: 2,
@@ -166,7 +166,7 @@ describe('create user', () => {
       });
     });
 
-    test('sign up admin user failed with create method got server error', (done) => {
+    test('signup admin user failed with create method got server error', (done) => {
       globalThis.prismaClient.user.create.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
@@ -195,7 +195,7 @@ describe('create user', () => {
         });
     });
 
-    test('sign up admin user failed with count method got server error', (done) => {
+    test('signup admin user failed with count method got server error', (done) => {
       globalThis.prismaClient.user.count.mockRejectedValue(ServerError);
 
       expect.hasAssertions();
