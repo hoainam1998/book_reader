@@ -43,6 +43,7 @@ const {
   UserDelete,
   AllUser,
   UserForgetPassword,
+  AdminUserSignup,
 } = require('#dto/user/user-in');
 const Login = require('#dto/common/login-validator');
 const MessageSerializerResponse = require('#dto/common/message-serializer-response');
@@ -111,6 +112,43 @@ class UserRouter extends Router {
     this.post(UserRoutePath.forgetPasswordProcess, allowInternalCall, this._forgetPasswordProcess);
     this.post(UserRoutePath.forgetPassword, this._forgetPassword);
     this.post(UserRoutePath.all, authentication, this._getAllUsers);
+    this.post(UserRoutePath.signup, this._signUp);
+    this.get(UserRoutePath.canSignup, this._canSignup);
+  }
+
+  @validateResultExecute(HTTP_CODE.OK)
+  _canSignup(req, res, next, self) {
+    return self.Service.isEmptyUsers();
+  }
+
+  @validation(AdminUserSignup, { error_message: USER.SIGNUP_FAIL })
+  @validateResultExecute(HTTP_CODE.CREATED)
+  @serializer(MessageSerializerResponse)
+  async _signUp(req, res, next, self) {
+    const query = `mutation Signup($user: AdminSignup!) {
+      user {
+        signup (user: $user) {
+          message
+        }
+      }
+    }`;
+
+    const variables = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      email: req.body.email,
+      sex: +req.body.sex,
+      phone: req.body.phone,
+    };
+
+    const isEmpty = await self.Service.isEmptyUsers();
+    if (isEmpty) {
+      return getGeneratorFunctionData(self.execute(query, { user: variables }));
+    }
+    return {
+      status: HTTP_CODE.UNAUTHORIZED,
+      json: messageCreator(USER.ALREADY_HAS_ADMIN_USER, ErrorCode.ALREADY_HAVE_ADMIN),
+    };
   }
 
   @validation(UserUpdate, { error_message: USER.ADD_USER_FAIL, groups: ['create'] })

@@ -29,6 +29,19 @@ class UserService extends Service {
     });
   }
 
+  signup(user) {
+    return this.PrismaInstance.user.create({
+      isSignup: true,
+      data: {
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email,
+        sex: user.sex,
+        phone: user.phone,
+      },
+    });
+  }
+
   pagination(pageSize, pageNumber, keyword, yourId, yourRole, select) {
     select = { ...select, power: true };
     const offset = (pageNumber - 1) * pageSize;

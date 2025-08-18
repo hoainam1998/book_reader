@@ -1,8 +1,8 @@
 const multer = require('multer');
 const path = require('path');
-const { HTTP_CODE } = require('#constants');
+const { HTTP_CODE, PUBLIC_PATH } = require('#constants');
 const { COMMON } = require('#messages');
-const { messageCreator, isEmptyFile } = require('#utils');
+const { messageCreator, isEmptyFile, createFolder } = require('#utils');
 const Logger = require('#services/logger');
 
 const storage = multer.diskStorage({
@@ -11,8 +11,9 @@ const storage = multer.diskStorage({
     const extName = path.extname(file.originalname);
     cb(null, `${fileName}${extName}`);
   },
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../public/pdf'));
+  destination: async (req, file, cb) => {
+    await createFolder(`${PUBLIC_PATH}/pdf`);
+    cb(null, `${PUBLIC_PATH}/pdf`);
   },
 });
 

@@ -61,6 +61,9 @@ module.exports = deepFreeze({
     CAN_NOT_CREATE_SUPER_ADMIN: 'Can not create super admin user!',
     YOUR_POWER_INVALID: 'Your power invalid!',
     YOUR_GENDER_INVALID: 'Your gender invalid!',
+    SIGNUP_SUCCESS: 'An admin user signup was success!',
+    SIGNUP_FAIL: 'An admin user signup was failed!',
+    ALREADY_HAS_ADMIN_USER: 'Already has an admin user!',
   },
   BOOK: {
     CREATE_BOOK_FAIL: 'Create book was failed!',
