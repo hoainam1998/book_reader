@@ -8,7 +8,13 @@ class MessageSerializerResponse extends GraphqlResponse {
   @Expose({ toClassOnly: true })
   @Type(() => MessageResponse)
   get response() {
-    return this.data ? getGraphqlFinalData(this.data) : { message: this.message };
+    if (this.data) {
+      return getGraphqlFinalData(this.data);
+    } else if (this.message) {
+      return { message: this.message };
+    } else {
+      return this;
+    }
   }
 }
 

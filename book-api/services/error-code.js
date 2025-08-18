@@ -68,6 +68,12 @@ class ErrorCode {
    * @static
    */
   static ONLY_ALLOW_ONE_DEVICE = 'ONLY_ALLOW_ONE_DEVICE';
+
+  /**
+   * Already have admin user.
+   * @static
+   */
+  static ALREADY_HAVE_ADMIN = 'ALREADY_HAVE_ADMIN';
 }
 
 module.exports = ErrorCode;

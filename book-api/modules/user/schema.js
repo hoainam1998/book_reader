@@ -319,6 +319,23 @@ const query = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
   name: 'UserMutation',
   fields: {
+    signup: {
+      type: ResponseType,
+      args: {
+        user: {
+          type: new GraphQLNonNull(
+            new GraphQLInputObjectType({
+              name: 'AdminSignup',
+              fields: REQUIREMENT_USER_INFORMATION_INPUT,
+            })
+          ),
+        },
+      },
+      resolve: async (service, { user }) => {
+        await service.signup(user);
+        return messageCreator(USER.SIGNUP_SUCCESS);
+      },
+    },
     add: {
       type: new GraphQLObjectType({
         name: 'UserCreated',

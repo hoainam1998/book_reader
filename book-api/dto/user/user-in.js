@@ -139,6 +139,32 @@ const UserDetail = (validators, className) => {
   );
 };
 
+const AdminUserSignup = (validators, className) => {
+  return classCreator(
+    class extends Validator {
+      @validators(IsString('firstName must be string!'))
+      firstName;
+
+      @validators(IsString('lastName must be string!'))
+      lastName;
+
+      @validators(IsEmail('Invalid email!'))
+      email;
+
+      @validators(IsNumeric('sex must be a numeric!'), IsRangeContain(validSex, 'sex must in [0, 1]!'))
+      sex;
+
+      @validators(
+        Length(10, 'phone number must contain 10 character!'),
+        IsString('phone number must be a string!'),
+        IsNumeric('phone number must be numeric!')
+      )
+      phone;
+    },
+    className
+  );
+};
+
 const UserUpdate = (validators, className) => {
   return classCreator(
     class extends Validator {
@@ -239,4 +265,5 @@ module.exports = {
   AllUser: Validation(AllUser),
   AdminResetPassword: Validation(AdminResetPassword),
   UserForgetPassword: Validation(UserForgetPassword),
+  AdminUserSignup: Validation(AdminUserSignup),
 };

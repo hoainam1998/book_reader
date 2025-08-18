@@ -23,6 +23,12 @@ module.exports = (prisma) => {
         }
       }
 
+      if (args.isSignup) {
+        args.data.power = POWER_NUMERIC.SUPER_ADMIN;
+        args.data.mfa_enable = false;
+        delete args.isSignup;
+      }
+
       const firstLoginPassword = autoGeneratePassword();
       const userId = Date.now().toString();
       const password = await passwordHashing(firstLoginPassword);

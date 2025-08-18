@@ -31,6 +31,10 @@ class SharedService {
     return this._prismaClient;
   }
 
+  isEmptyUsers() {
+    return this.PrismaClient.user.count().then((count) => count === 0);
+  }
+
   updateUserSessionId(sessionId, userId) {
     return this.PrismaClient.user
       .update({

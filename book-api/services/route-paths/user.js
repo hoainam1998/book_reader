@@ -107,6 +107,16 @@ class UserRoutePath {
    * Relative: /update-power *Absolute: user/update-power
    */
   static updatePower = createRoutePath({ url: 'update-power' }, [process.env.ORIGIN_CORS]);
+
+  /**
+   * Relative: /signup *Absolute: user/signup
+   */
+  static signup = createRoutePath({ url: 'signup' }, [process.env.ORIGIN_CORS]);
+
+  /**
+   * Relative: /can-signup *Absolute: user/can-signup
+   */
+  static canSignup = createRoutePath({ url: 'can-signup' }, [process.env.ORIGIN_CORS]);
 }
 
 module.exports = UserRoutePath;
