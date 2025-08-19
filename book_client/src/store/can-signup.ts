@@ -7,11 +7,12 @@ class CanSignupStore extends Store<boolean> {
   }
 
   get CanSignup() {
-    return CanSignupStorage.getItem();
+    return this.CurrentStore;
   }
 
   set CanSignup(value) {
     CanSignupStorage.setItem(value);
+    this.CurrentStore = value;
     this.emitChange();
   }
 }
