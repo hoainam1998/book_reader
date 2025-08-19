@@ -9,6 +9,7 @@ const {
   verifyResetPasswordToken,
   getGeneratorFunctionData,
   getResetPasswordLink,
+  getGraphqlFinalData,
 } = require('#utils');
 const EmailService = require('#services/email');
 const ErrorCode = require('#services/error-code');
@@ -128,7 +129,8 @@ class UserRouter extends Router {
     const query = `mutation Signup($user: AdminSignup!) {
       user {
         signup (user: $user) {
-          message
+          password,
+          resetPasswordToken,
         }
       }
     }`;
@@ -143,7 +145,15 @@ class UserRouter extends Router {
 
     const isEmpty = await self.Service.isEmptyUsers();
     if (isEmpty) {
-      return getGeneratorFunctionData(self.execute(query, { user: variables }));
+      return getGeneratorFunctionData(self.execute(query, { user: variables }))
+        .then((response) => {
+          if (response.errors) {
+            return response;
+          }
+          const { password, resetPasswordToken } = getGraphqlFinalData(response);
+          const link = getResetPasswordLink(resetPasswordToken);
+          return EmailService.sendPassword(req.body.email, link, password).then(() => messageCreator(USER.USER_ADDED));
+        });
     }
     return {
       status: HTTP_CODE.UNAUTHORIZED,

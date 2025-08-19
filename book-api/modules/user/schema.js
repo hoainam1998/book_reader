@@ -137,6 +137,18 @@ const USER_INFORMATION = new GraphQLObjectType({
   },
 });
 
+const USER_CREATED = new GraphQLObjectType({
+  name: 'UserCreated',
+  fields: {
+    password: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    resetPasswordToken: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
+});
+
 const query = new GraphQLObjectType({
   name: 'UserQuery',
   fields: {
@@ -320,7 +332,7 @@ const mutation = new GraphQLObjectType({
   name: 'UserMutation',
   fields: {
     signup: {
-      type: ResponseType,
+      type: USER_CREATED,
       args: {
         user: {
           type: new GraphQLNonNull(
@@ -332,22 +344,11 @@ const mutation = new GraphQLObjectType({
         },
       },
       resolve: async (service, { user }) => {
-        await service.signup(user);
-        return messageCreator(USER.SIGNUP_SUCCESS);
+        return convertDtoToZodObject(UserCreated, await service.signup(user));
       },
     },
     add: {
-      type: new GraphQLObjectType({
-        name: 'UserCreated',
-        fields: {
-          password: {
-            type: new GraphQLNonNull(GraphQLString),
-          },
-          resetPasswordToken: {
-            type: new GraphQLNonNull(GraphQLString),
-          },
-        },
-      }),
+      type: USER_CREATED,
       args: {
         user: {
           type: new GraphQLNonNull(USER_INFORMATION_CREATE_INPUT),
