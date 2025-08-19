@@ -145,15 +145,14 @@ class UserRouter extends Router {
 
     const isEmpty = await self.Service.isEmptyUsers();
     if (isEmpty) {
-      return getGeneratorFunctionData(self.execute(query, { user: variables }))
-        .then((response) => {
-          if (response.errors) {
-            return response;
-          }
-          const { password, resetPasswordToken } = getGraphqlFinalData(response);
-          const link = getResetPasswordLink(resetPasswordToken);
-          return EmailService.sendPassword(req.body.email, link, password).then(() => messageCreator(USER.USER_ADDED));
-        });
+      return getGeneratorFunctionData(self.execute(query, { user: variables })).then((response) => {
+        if (response.errors) {
+          return response;
+        }
+        const { password, resetPasswordToken } = getGraphqlFinalData(response);
+        const link = getResetPasswordLink(resetPasswordToken);
+        return EmailService.sendPassword(req.body.email, link, password).then(() => messageCreator(USER.USER_ADDED));
+      });
     }
     return {
       status: HTTP_CODE.UNAUTHORIZED,

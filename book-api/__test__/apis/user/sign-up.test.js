@@ -5,7 +5,14 @@ const GraphqlResponse = require('#dto/common/graphql-response');
 const UserRoutePath = require('#services/route-paths/user');
 const { HTTP_CODE, METHOD } = require('#constants');
 const { USER, COMMON } = require('#messages');
-const { mockUser, sessionData, randomPassword, resetPasswordToken, getResetPasswordLink, signedTestCookie } = require('#test/resources/auth');
+const {
+  mockUser,
+  sessionData,
+  randomPassword,
+  resetPasswordToken,
+  getResetPasswordLink,
+  signedTestCookie,
+} = require('#test/resources/auth');
 const commonTest = require('#test/apis/common/common');
 const { getInputValidateMessage, createDescribeTest } = require('#test/helpers/index');
 const signUpUrl = UserRoutePath.signup.abs;
