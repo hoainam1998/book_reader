@@ -13,11 +13,13 @@ import BookList, { bookPagination } from 'views/book-group/book-list/book-list';
 import AuthorDetail, { loadAuthorDetail } from 'views/author-group/author-detail/author-detail';
 import ReaderList, { clientPagination } from 'views/reader/reader';
 import AuthorList, { authorPagination } from 'views/author-group/author-list/author-list';
+import Signup from 'views/login-group/signup/admin/signup';
 import ApiError from 'components/error/api-error/api-error';
 import VerifyOtp from 'views/login-group/verify-otp/verify-otp';
 import ForgetPassword from 'views/login-group/forget-password/forget-password';
 import LoginRequire from 'guard/login-require';
 import AdminRequire from 'guard/admin-require';
+import CanSignup from 'guard/can-signup';
 import { NavigationRouteMatchType, RoutePropsUnion } from './interfaces';
 import path from './paths';
 
@@ -39,6 +41,10 @@ const adminRoutes: RoutePropsUnion[] = [
     path: path.RESET_PASSWORD,
     element: <AdminResetPassword />,
     loader: getResetPasswordToken,
+  },
+  {
+    path: path.SIGN_UP,
+    element: <CanSignup><Signup /></CanSignup>,
   },
   {
     path: path.OTP,

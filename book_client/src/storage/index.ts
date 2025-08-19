@@ -53,4 +53,5 @@ export const DisableStepStorage = new SessionStorage<number | false>('disable-st
 export const BookInfoStorage = new SessionStorage<BookInfoType>('book-info');
 export const UserStorage = new LocalStorage<UserLogin>('user');
 export const ApiKeyStorage = new LocalStorage<string>('api-key');
+export const CanSignupStorage = new LocalStorage<boolean>('can-signup');
 export { Storage };
