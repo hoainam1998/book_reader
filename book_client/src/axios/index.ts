@@ -6,7 +6,7 @@ import auth from 'store/auth';
 import router from '../router';
 
 /**
- * Force login.
+ * Force logout.
  */
 const forceLogout = (): void => {
   auth.logout();

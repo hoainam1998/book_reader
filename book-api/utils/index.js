@@ -59,7 +59,7 @@ const messageCreator = (message, errorCode) => convertDtoToZodObject(MessageResp
 /**
  * Check array is empty or not.
  *
- * @param {*} obj - The object checking.
+ * @param {*[]} array - An array checking.
  * @returns {boolean} - The checking result.
  */
 const checkArrayHaveValues = (array) => Array.isArray(array) && array.length > 0;

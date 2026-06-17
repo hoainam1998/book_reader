@@ -35,6 +35,7 @@ const verifyClientResetPasswordToken = (resetPasswordToken) =>
  *
  * @param {string} userId - The userId.
  * @param {string} email - An email register.
+ * @param {number} power - The user number.
  * @return {string} - The login token.
  */
 const signLoginToken = (userId, email, power) =>
