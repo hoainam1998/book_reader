@@ -13,10 +13,12 @@ const breakPoint = require('../src/static/js/break-point.js');
 // if it exist, then app is running by docker.
 const getEnv = (env) => {
   return {
-    'process.env': JSON.stringify({...dev, ...env}),
-    ...process.env.BASE_URL ? {
-    'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL)
-    } : {}
+    'process.env': JSON.stringify({ ...dev, ...env }),
+    ...(process.env.BASE_URL
+      ? {
+          'process.env.BASE_URL': JSON.stringify(process.env.BASE_URL)
+        }
+      : {})
   };
 };
 
@@ -43,21 +45,21 @@ module.exports = (envArgs) => ({
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     alias: {
-      'utils': getResolvePath('../src/utils'),
-      'components': getResolvePath('../src/components'),
-      'images': getResolvePath('../src/static/images'),
-      'views': getResolvePath('../src/views'),
-      'interfaces': getResolvePath('../src/interfaces/index.ts'),
-      'hooks': getResolvePath('../src/hooks'),
-      'services': getResolvePath('../src/services'),
-      'storage': getResolvePath('../src/storage'),
-      'store': getResolvePath('../src/store'),
-      'router': getResolvePath('../src/router'),
-      'contexts': getResolvePath('../src/contexts'),
+      utils: getResolvePath('../src/utils'),
+      components: getResolvePath('../src/components'),
+      images: getResolvePath('../src/static/images'),
+      views: getResolvePath('../src/views'),
+      interfaces: getResolvePath('../src/interfaces/index.ts'),
+      hooks: getResolvePath('../src/hooks'),
+      services: getResolvePath('../src/services'),
+      storage: getResolvePath('../src/storage'),
+      store: getResolvePath('../src/store'),
+      router: getResolvePath('../src/router'),
+      contexts: getResolvePath('../src/contexts'),
       'read-only-variables': getResolvePath('../src/read-only-variables/index.ts'),
-      'enums': getResolvePath('../src/enums/index.ts'),
-      'decorators': getResolvePath('../src/decorators/index.ts'),
-      'guard': getResolvePath('../src/guard'),
+      enums: getResolvePath('../src/enums/index.ts'),
+      decorators: getResolvePath('../src/decorators/index.ts'),
+      guard: getResolvePath('../src/guard')
     }
   },
   module: {
@@ -88,7 +90,7 @@ module.exports = (envArgs) => ({
           {
             loader: 'css-loader',
             options: {
-              sourceMap: true,
+              sourceMap: true
             }
           },
           {
@@ -101,13 +103,13 @@ module.exports = (envArgs) => ({
               @import "src/static/scss/_responsive.scss";`,
               sassOptions: {
                 functions: {
-                  'getResponsiveBreakpoint($key)': function(key) {
+                  'getResponsiveBreakpoint($key)': function (key) {
                     const point = key.getValue();
                     return new sass.types.String(`${breakPoint[point] || 0}px`);
                   }
                 }
               }
-            },
+            }
           }
         ]
       },
@@ -115,7 +117,7 @@ module.exports = (envArgs) => ({
         test: /\.svg/,
         type: 'asset/inline',
         generator: {
-          dataUrl: content => {
+          dataUrl: (content) => {
             content = content.toString();
             return svgToMiniDataURI(content);
           }

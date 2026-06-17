@@ -12,7 +12,7 @@ const mockUser = {
   user_id: Date.now().toString(),
   first_name: 'nguyen',
   last_name: 'nam',
-  email: 'namdang201999@gmail.com',
+  email: 'myemail@gmail.com',
   avatar: 'avatar',
   mfa_enable: true,
   password: 'namtran9',
@@ -21,7 +21,7 @@ const mockUser = {
   phone: '0987654321',
   sex: SEX.MALE,
   role: POWER.ADMIN,
-  reset_password_token: signingResetPasswordToken('namdang201999@gmail.com'),
+  reset_password_token: signingResetPasswordToken('myemail@gmail.com'),
 };
 
 const authenticationToken = signLoginToken(mockUser.user_id, mockUser.email, mockUser.power);
