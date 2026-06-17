@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix .",
     "db:deploy": "npx prisma migrate deploy && npx prisma generate",
     "dev": "nodemon -L --exec babel-node index.js",
-    "docker-dev": "docker compose -f ../docker-compose.dev.yaml --env-file ../.env up -d",
+    "docker-dev": "docker compose -f ../docker-compose.yaml --env-file ../.env --project-name redis run -d -p 6379:6379 -p 8001:8001",
     "test": "jest --watchAll",
     "test-coverage": "jest --watchAll --coverage",
     "test:silent": "jest --watchAll --silent",
